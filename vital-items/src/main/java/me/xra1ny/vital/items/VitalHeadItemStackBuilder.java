@@ -74,6 +74,13 @@ public class VitalHeadItemStackBuilder extends VitalItemStackBuilder {
     }
 
     @Override
+    public VitalItemStackBuilder enchanted(boolean enchanted) {
+        super.enchanted(enchanted);
+
+        return this;
+    }
+
+    @Override
     public VitalHeadItemStackBuilder amount(int amount) {
         super.amount(amount);
 

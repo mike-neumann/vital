@@ -145,6 +145,20 @@ public class VitalItemStackBuilder {
     }
 
     /**
+     * Adds an enchantment if true.
+     *
+     * @param enchanted If this item should be enchanted.
+     * @return This builder instance.
+     */
+    public VitalItemStackBuilder enchanted(boolean enchanted) {
+        if(enchanted) {
+            enchantment(Enchantment.LUCK, 1);
+        }
+
+        return this;
+    }
+
+    /**
      * Define the amount for this {@link ItemStack}.
      *
      * @param amount The amount.
