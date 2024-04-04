@@ -1,6 +1,6 @@
 package me.xra1ny.vital.minigames;
 
-import me.xra1ny.vital.core.VitalComponent;
+import me.xra1ny.vital.VitalComponent;
 import org.bukkit.event.Listener;
 
 /**

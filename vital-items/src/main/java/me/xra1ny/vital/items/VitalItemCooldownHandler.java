@@ -2,7 +2,6 @@ package me.xra1ny.vital.items;
 
 import lombok.NonNull;
 import me.xra1ny.essentia.inject.annotation.Component;
-import me.xra1ny.vital.core.VitalCore;
 import me.xra1ny.vital.tasks.VitalRepeatableTask;
 import me.xra1ny.vital.tasks.annotation.VitalRepeatableTaskInfo;
 import org.bukkit.entity.Player;
@@ -18,18 +17,18 @@ import java.util.Map;
  */
 @Component
 @VitalRepeatableTaskInfo(value = 50)
-public final class VitalItemStackCooldownHandler extends VitalRepeatableTask {
-    private final VitalCore<?> vitalCore;
+public class VitalItemCooldownHandler extends VitalRepeatableTask.Spigot {
+    private final VitalItemManager itemManager;
 
     /**
      * Creates a new VitalItemStackCooldownHandler.
      *
-     * @param javaPlugin            The JavaPlugin instance.
+     * @param javaPlugin The JavaPlugin instance.
      */
-    public VitalItemStackCooldownHandler(@NonNull JavaPlugin javaPlugin, VitalCore<?> vitalCore) {
+    public VitalItemCooldownHandler(@NonNull JavaPlugin javaPlugin, VitalItemManager itemManager) {
         super(javaPlugin);
 
-        this.vitalCore = vitalCore;
+        this.itemManager = itemManager;
     }
 
     /**
@@ -54,22 +53,22 @@ public final class VitalItemStackCooldownHandler extends VitalRepeatableTask {
      */
     @Override
     public void onTick() {
-        for (VitalItemStack vitalItemStack : vitalCore.getComponentsByType(VitalItemStack.class)) {
+        for (VitalItem vitalItem : itemManager.getItems()) {
             // Reduce Cooldown
-            for (Map.Entry<Player, Integer> entry : vitalItemStack.getPlayerCooldownMap().entrySet()) {
+            for (Map.Entry<Player, Integer> entry : vitalItem.getPlayerCooldownMap().entrySet()) {
                 if (entry.getValue() <= 0) {
                     continue;
                 }
 
-                vitalItemStack.getPlayerCooldownMap().put(entry.getKey(), entry.getValue() - 50);
+                vitalItem.getPlayerCooldownMap().put(entry.getKey(), entry.getValue() - 50);
 
-                if(vitalItemStack.equals(entry.getKey().getInventory().getItemInMainHand())) {
-                    vitalItemStack.onCooldownTick(entry.getKey());
+                if (vitalItem.equals(entry.getKey().getInventory().getItemInMainHand())) {
+                    vitalItem.onCooldownTick(entry.getKey());
                 }
 
-                if (vitalItemStack.getCooldown(entry.getKey()) <= 0) {
+                if (vitalItem.getCooldown(entry.getKey()) <= 0) {
                     // cooldown has expired, call on expired.
-                    vitalItemStack.onCooldownExpire(entry.getKey());
+                    vitalItem.onCooldownExpire(entry.getKey());
                 }
             }
         }
@@ -103,4 +102,3 @@ public final class VitalItemStackCooldownHandler extends VitalRepeatableTask {
         return VitalRepeatableTaskInfo.class;
     }
 }
-

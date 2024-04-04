@@ -22,7 +22,7 @@ import java.util.function.Supplier;
  *
  * @author xRa1ny
  */
-public final class VitalGlobalScoreboard extends VitalScoreboard {
+public class VitalGlobalScoreboard extends VitalScoreboard {
     /**
      * The scoreboard content of this global scoreboard.
      */

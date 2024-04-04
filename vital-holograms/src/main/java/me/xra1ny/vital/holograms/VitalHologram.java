@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import me.xra1ny.vital.core.VitalComponent;
+import me.xra1ny.vital.VitalComponent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
@@ -24,7 +24,7 @@ import static net.kyori.adventure.text.Component.text;
  *
  * @author xRa1ny
  */
-public final class VitalHologram implements VitalComponent {
+public class VitalHologram implements VitalComponent {
 
     /**
      * The name of this hologram.

@@ -1,9 +1,10 @@
-package me.xra1ny.vital.core;
+package me.xra1ny.vital;
 
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import me.xra1ny.essentia.inject.DIFactory;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -41,7 +42,7 @@ public abstract class VitalComponentListManager<T extends VitalComponent> implem
      * @return true if a VitalComponent is registered with the specified UUID, false otherwise.
      */
     public final boolean isVitalComponentRegisteredByUuid(@NonNull UUID vitalComponentUniqueId) {
-        return getVitalComponentByUuid(vitalComponentUniqueId).isPresent();
+        return Optional.ofNullable(getVitalComponentByUniqueId(vitalComponentUniqueId)).isPresent();
     }
 
     /**
@@ -51,7 +52,7 @@ public abstract class VitalComponentListManager<T extends VitalComponent> implem
      * @return true if a VitalComponent is registered with the specified name, false otherwise.
      */
     public final boolean isVitalComponentRegisteredByName(@NonNull String vitalComponentName) {
-        return getVitalComponentByName(vitalComponentName).isPresent();
+        return Optional.ofNullable(getVitalComponentByName(vitalComponentName)).isPresent();
     }
 
     /**
@@ -61,7 +62,7 @@ public abstract class VitalComponentListManager<T extends VitalComponent> implem
      * @return true if a VitalComponent is registered with the specified class, false otherwise.
      */
     public final boolean isVitalComponentRegisteredByClass(@NonNull Class<? extends VitalComponent> vitalComponentClass) {
-        return getVitalComponentByClass(vitalComponentClass).isPresent();
+        return Optional.ofNullable(getVitalComponentByClass(vitalComponentClass)).isPresent();
     }
 
     /**
@@ -77,25 +78,29 @@ public abstract class VitalComponentListManager<T extends VitalComponent> implem
     /**
      * Gets the VitalComponent by the specified uniqueId.
      *
-     * @param uuid The uniqueId of the VitalComponent.
-     * @return An Optional with the value of the fetched VitalComponent, an empty Optional otherwise.
+     * @param uniqueId The uniqueId of the VitalComponent.
+     * @return THe fetched component; or null.
      */
-    public final Optional<T> getVitalComponentByUuid(@NonNull UUID uuid) {
+    @Nullable
+    public final T getVitalComponentByUniqueId(@NonNull UUID uniqueId) {
         return vitalComponents.stream()
-                .filter(vitalComponent -> uuid.equals(vitalComponent.getUuid()))
-                .findFirst();
+                .filter(vitalComponent -> uniqueId.equals(vitalComponent.getUniqueId()))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
      * Gets the VitalComponent by the specified name.
      *
      * @param name The name of the VitalComponent.
-     * @return An Optional with the value of the fetched VitalComponent, an empty Optional otherwise.
+     * @return The fetched component; or null.
      */
-    public final Optional<T> getVitalComponentByName(@NonNull String name) {
+    @Nullable
+    public final T getVitalComponentByName(@NonNull String name) {
         return vitalComponents.stream()
                 .filter(vitalComponent -> name.equals(vitalComponent.getName()))
-                .findFirst();
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -103,23 +108,26 @@ public abstract class VitalComponentListManager<T extends VitalComponent> implem
      *
      * @param vitalComponentClass The class of the VitalComponent.
      * @param <X>                 The {@link VitalComponent} type to grab from this manager instance.
-     * @return An Optional with the value of the fetched VitalComponent, an empty Optional otherwise.
+     * @return The fetched component; or null.
      */
-    public final <X extends VitalComponent> Optional<X> getVitalComponentByClass(@NonNull Class<X> vitalComponentClass) {
+    @Nullable
+    public final <X extends VitalComponent> X getVitalComponentByClass(@NonNull Class<X> vitalComponentClass) {
         return vitalComponents.stream()
                 .filter(vitalComponent -> vitalComponentClass.equals(vitalComponent.getClass()))
                 .map(vitalComponentClass::cast)
-                .findFirst();
+                .findFirst()
+                .orElse(null);
     }
 
     /**
      * Gets a random VitalComponent, matching the given {@link Predicate} registered on this manager instance.
      *
-     * @return An {@link Optional} holding either the value of the random {@link VitalComponent}; or empty.
+     * @return The fetched component; or null.
      */
-    public final Optional<T> getRandomVitalComponent(@NonNull Predicate<T> predicate) {
+    @Nullable
+    public final T getRandomVitalComponent(@NonNull Predicate<T> predicate) {
         if (vitalComponents.isEmpty()) {
-            return Optional.empty();
+            return null;
         }
 
         final List<T> filteredVitalComponentList = getVitalComponents().stream()
@@ -127,15 +135,16 @@ public abstract class VitalComponentListManager<T extends VitalComponent> implem
                 .toList();
         final int randomIndex = new Random().nextInt(filteredVitalComponentList.size());
 
-        return Optional.of(filteredVitalComponentList.get(randomIndex));
+        return filteredVitalComponentList.get(randomIndex);
     }
 
     /**
      * Gets a random VitalComponent registered on this manager instance.
      *
-     * @return An {@link Optional} holding either the value of the random {@link VitalComponent}; or empty.
+     * @return The fetched component; or null.
      */
-    public final Optional<T> getRandomVitalComponent() {
+    @Nullable
+    public final T getRandomVitalComponent() {
         return getRandomVitalComponent(t -> true);
     }
 
@@ -198,7 +207,7 @@ public abstract class VitalComponentListManager<T extends VitalComponent> implem
      * @param vitalComponentClass The class of the {@link VitalComponent} to unregister.
      */
     public final void unregisterVitalComponentByClass(@NonNull Class<? extends T> vitalComponentClass) {
-        final Optional<? extends T> optionalInstance = getVitalComponentByClass(vitalComponentClass);
+        final Optional<? extends T> optionalInstance = Optional.ofNullable(getVitalComponentByClass(vitalComponentClass));
 
         optionalInstance.ifPresent(this::unregisterVitalComponent);
     }

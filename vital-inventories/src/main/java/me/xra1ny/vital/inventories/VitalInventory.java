@@ -2,7 +2,7 @@ package me.xra1ny.vital.inventories;
 
 import lombok.Getter;
 import lombok.NonNull;
-import me.xra1ny.vital.core.AnnotatedVitalComponent;
+import me.xra1ny.vital.AnnotatedVitalComponent;
 import me.xra1ny.vital.inventories.annotation.VitalInventoryInfo;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -44,23 +44,7 @@ public class VitalInventory implements InventoryHolder, AnnotatedVitalComponent<
     @NonNull
     private final Inventory inventory;
 
-    public VitalInventory() {
-        final VitalInventoryInfo info = getRequiredAnnotation();
-
-        final ItemStack backgroundItemStack = new ItemStack(info.background());
-        final ItemMeta backgroundItemMeta = backgroundItemStack.getItemMeta();
-
-        if (backgroundItemMeta != null) {
-            backgroundItemMeta.displayName(null);
-            backgroundItemStack.setItemMeta(backgroundItemMeta);
-        }
-
-        background = backgroundItemStack;
-        size = info.size();
-        inventory = Bukkit.createInventory(this, size, MiniMessage.miniMessage().deserialize(info.value()));
-    }
-
-    public VitalInventory(@NonNull Inventory previousInventory) {
+    public VitalInventory(@Nullable Inventory previousInventory) {
         final VitalInventoryInfo info = getRequiredAnnotation();
 
         final ItemStack backgroundItemStack = new ItemStack(info.background());

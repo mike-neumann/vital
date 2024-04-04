@@ -1,7 +1,7 @@
 package me.xra1ny.vital.minigames;
 
 import lombok.NonNull;
-import me.xra1ny.vital.core.AnnotatedVitalComponent;
+import me.xra1ny.vital.AnnotatedVitalComponent;
 import me.xra1ny.vital.tasks.VitalCountdownTask;
 import me.xra1ny.vital.tasks.VitalRepeatableTask;
 import me.xra1ny.vital.tasks.annotation.VitalCountdownTaskInfo;
@@ -13,7 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author xRa1ny
  */
 public abstract class VitalCountdownMinigameState extends VitalMinigameState implements AnnotatedVitalComponent<VitalCountdownTaskInfo> {
-    private VitalCountdownTask vitalCountdownTask;
+    private VitalCountdownTask.Spigot vitalCountdownTask;
 
     /**
      * Constructor for VitalCountdownMinigameState with the default interval from the annotation.
@@ -45,18 +45,18 @@ public abstract class VitalCountdownMinigameState extends VitalMinigameState imp
      * @return The {@link JavaPlugin} instance attached to this {@link VitalCountdownMinigameState}.
      */
     public JavaPlugin getJavaPlugin() {
-        return vitalCountdownTask.getJavaPlugin();
+        return vitalCountdownTask.getPlugin();
     }
 
     /**
      * Sets up the countdown task using a VitalRepeatableTask.
      *
-     * @param javaPlugin The JavaPlugin instance.
+     * @param plugin The JavaPlugin instance.
      * @param countdown  The countdown.
      * @param interval   The countdown update interval.
      */
-    private void run(@NonNull JavaPlugin javaPlugin, int interval, int countdown) {
-        vitalCountdownTask = new VitalCountdownTask(javaPlugin, interval, countdown) {
+    private void run(@NonNull JavaPlugin plugin, int interval, int countdown) {
+        vitalCountdownTask = new VitalCountdownTask.Spigot(plugin, interval, countdown) {
             @Override
             public void onStart() {
                 VitalCountdownMinigameState.this.onCountdownStart();

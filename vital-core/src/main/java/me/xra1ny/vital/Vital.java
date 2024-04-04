@@ -1,12 +1,14 @@
-package me.xra1ny.vital.core;
+package me.xra1ny.vital;
 
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import me.xra1ny.essentia.inject.DIContainer;
+import me.xra1ny.essentia.inject.EssentiaInject;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.reflections.Reflections;
 
 import java.util.*;
@@ -14,12 +16,14 @@ import java.util.*;
 /**
  * The main instance of the Vital-Framework.
  *
- * @param <T> The JavaPlugin type.
+ * @param <Plugin> The Plugin type.
  * @author xRa1ny
  */
 @SuppressWarnings("unused")
 @Log
-public abstract class VitalCore<T extends JavaPlugin> implements VitalComponent, DIContainer {
+public class Vital<Plugin> implements DIContainer {
+    private static Vital<?> instance;
+
     /**
      * Holds a list of all classes registered on this classpath for later use of dependency injection.
      *
@@ -28,60 +32,49 @@ public abstract class VitalCore<T extends JavaPlugin> implements VitalComponent,
     @Getter
     @NonNull
     private static final Set<Class<? extends VitalComponent>> scannedClassSet = new Reflections().getSubTypesOf(VitalComponent.class);
-    private static VitalCore<?> instance;
+
     @Getter
     @NonNull
     private final Map<Class<?>, Object> componentClassObjectMap = new HashMap<>();
+
     /**
-     * The JavaPlugin instance associated with this {@link VitalCore}.
+     * The plugin instance associated with this {@link Vital}.
      */
     @Getter
     @NonNull
-    private final T javaPlugin;
+    private final Plugin plugin;
 
     /**
-     * Constructs a new {@link VitalCore} instance.
+     * Constructs a new {@link Vital} instance.
      *
-     * @param javaPlugin The {@link JavaPlugin} instance to associate with {@link VitalCore}.
+     * @param plugin The {@link JavaPlugin} instance to associate with {@link Vital}.
      */
-    public VitalCore(@NonNull T javaPlugin) {
-        this.javaPlugin = javaPlugin;
-        registerComponent(this);
-        registerComponent(javaPlugin);
+    public Vital(@NonNull Plugin plugin) {
+        this.plugin = plugin;
     }
 
     /**
-     * Singleton access-point for all {@link VitalCore} instances.
+     * Singleton access-point for all {@link Vital} instances.
      *
      * @param type Your plugin's main class.
      * @param <T>  The type of your plugin's main class.
-     * @return The {@link VitalCore} instance.
-     * @throws ClassCastException If the provided type and {@link VitalCore} plugin instance don't match.
+     * @return The {@link Vital} instance.
+     * @throws ClassCastException If the provided type and {@link Vital} plugin instance don't match.
      */
     @SuppressWarnings("unchecked")
-    public static <T extends JavaPlugin> VitalCore<T> getVitalCoreInstance(@NonNull Class<T> type) {
-        return (VitalCore<T>) instance;
+    public static <T extends JavaPlugin> Vital<T> getVitalCoreInstance(@NonNull Class<T> type) {
+        return (Vital<T>) instance;
     }
 
     /**
-     * Singleton access-point for {@link VitalCore} instance.
+     * Singleton access-point for {@link Vital} instance.
      * This method will return a generically inaccurate Object.
-     * For more accurate {@link VitalCore} types use {@link VitalCore#getVitalCoreInstance(Class)}
+     * For more accurate {@link Vital} types use {@link Vital#getVitalCoreInstance(Class)}
      *
-     * @return The {@link VitalCore} instance.
+     * @return The {@link Vital} instance.
      */
-    public static VitalCore<?> getVitalCoreInstance() {
+    public static Vital<?> getVitalCoreInstance() {
         return instance;
-    }
-
-    @Override
-    public final void onRegistered() {
-        instance = this;
-    }
-
-    @Override
-    public void onUnregistered() {
-
     }
 
     @Override
@@ -117,31 +110,30 @@ public abstract class VitalCore<T extends JavaPlugin> implements VitalComponent,
     @SneakyThrows // TODO
     public final void enable() {
         log.info("Enabling VitalCore<%s>"
-                .formatted(getJavaPlugin()));
+                .formatted(plugin));
 
-        onEnable();
+        instance = this;
+        registerComponent(instance);
+        registerComponent(plugin);
+
+        log.info("all registered: " + componentClassObjectMap);
+
+        // register both plugin package and Vital's package for dependency injection using essentia-inject.
+        EssentiaInject.run(this, plugin.getClass().getPackageName(), getClass().getPackageName());
 
         log.info("VitalCore<%s> enabled!"
-                .formatted(getJavaPlugin()));
+                .formatted(plugin));
         log.info("Hello from Vital!");
     }
 
-    /**
-     * Called when this VitalCore is enabled
-     */
-    public abstract void onEnable();
-
-    /**
-     * Called when this VitalCore is disabled.
-     */
-    public abstract void onDisable();
-
-    public Optional<VitalComponent> getComponent(@NotNull UUID uniqueId) {
+    @Nullable
+    public VitalComponent getComponent(@NotNull UUID uniqueId) {
         return getComponents().stream()
                 .filter(VitalComponent.class::isInstance)
                 .map(VitalComponent.class::cast)
-                .filter(component -> component.getUuid().equals(uniqueId))
-                .findFirst();
+                .filter(component -> component.getUniqueId().equals(uniqueId))
+                .findFirst()
+                .orElse(null);
     }
 
     /**

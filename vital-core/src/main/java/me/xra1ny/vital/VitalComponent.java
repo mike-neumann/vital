@@ -1,4 +1,4 @@
-package me.xra1ny.vital.core;
+package me.xra1ny.vital;
 
 import lombok.NonNull;
 
@@ -18,7 +18,7 @@ public interface VitalComponent {
      * @return The {@link UUID} representing this component.
      */
     @NonNull
-    default UUID getUuid() {
+    default UUID getUniqueId() {
         return UUID.randomUUID();
     }
 

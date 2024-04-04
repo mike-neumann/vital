@@ -1,4 +1,6 @@
-package me.xra1ny.vital.core.annotation;
+package me.xra1ny.vital.annotation;
+
+import me.xra1ny.vital.VitalPluginEnvironment;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -50,4 +52,11 @@ public @interface VitalPluginInfo {
      */
 
     String authors() default "";
+
+    /**
+     * Defines this vital plugin instance environment for automatic plugin yml generation.
+     *
+     * @return The environment used for this vital plugin instance.
+     */
+    VitalPluginEnvironment environment();
 }

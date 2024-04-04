@@ -3,24 +3,25 @@ package me.xra1ny.vital.commands;
 import lombok.Getter;
 import lombok.NonNull;
 import me.xra1ny.essentia.inject.annotation.AfterInit;
+import me.xra1ny.vital.AnnotatedVitalComponent;
 import me.xra1ny.vital.commands.annotation.VitalCommandArg;
 import me.xra1ny.vital.commands.annotation.VitalCommandArgHandler;
 import me.xra1ny.vital.commands.annotation.VitalCommandInfo;
-import me.xra1ny.vital.core.AnnotatedVitalComponent;
+import me.xra1ny.vital.commands.crossplatform.PluginCommand;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -28,8 +29,11 @@ import java.util.stream.Stream;
  * Provides functionality for command execution, tab completion, and argument handling.
  *
  * @author xRa1ny
+ * @param <CommandSender> The command sender type of this command.
  */
-public abstract class VitalCommand implements AnnotatedVitalComponent<VitalCommandInfo>, CommandExecutor, TabExecutor {
+public abstract class VitalCommand<CommandSender> implements AnnotatedVitalComponent<VitalCommandInfo> {
+    private final Class<CommandSender> commandSenderClass;
+
     /**
      * The name of the command.
      */
@@ -60,142 +64,24 @@ public abstract class VitalCommand implements AnnotatedVitalComponent<VitalComma
     /**
      * Constructor for VitalCommand.
      */
-    public VitalCommand() {
+    private VitalCommand(@NonNull Class<CommandSender> commandSenderClass) {
         final VitalCommandInfo vitalCommandInfo = getRequiredAnnotation();
 
+        this.commandSenderClass = commandSenderClass;
         name = vitalCommandInfo.value();
         permission = vitalCommandInfo.permission();
         requiresPlayer = vitalCommandInfo.requiresPlayer();
         vitalCommandArgs = vitalCommandInfo.args();
     }
 
-    /**
-     * Grabs the `@VitalCommandInfo` Annotation associated with this Command, if any.
-     *
-     * @param type The Type of your implementing `VitalCommand` Child Class.
-     * @return An Optional holding either the Annotation Info you provided, or empty.
-     */
-    public static Optional<VitalCommandInfo> getVitalCommandInfo(@NonNull Class<? extends VitalCommand> type) {
-        return Optional.ofNullable(type.getDeclaredAnnotation(VitalCommandInfo.class));
-    }
-
-    /**
-     * Grabs the Name of this Command, specified in its respective `@VitalCommandInfo` Annotation on the underlying Child Class, if any.
-     *
-     * @param type The Type of your implementing `VitalCommand` Child Class.
-     * @return An Optional holding either the Name of this Command, or empty.
-     */
-    public static Optional<String> getName(@NonNull Class<? extends VitalCommand> type) {
-        final Optional<VitalCommandInfo> optionalVitalCommandInfo = getVitalCommandInfo(type);
-
-        return optionalVitalCommandInfo.map(VitalCommandInfo::value);
-    }
-
-    /**
-     * Grabs the Description of this Command, specified in its respective `@VitalCommandInfo` Annotation on the underlying Child Class, if any.
-     *
-     * @param type The Type of your implementing `VitalCommand` Child Class.
-     * @return An Optional holding either the Description of this Command, or empty.
-     */
-    public static Optional<String> getDescription(@NonNull Class<? extends VitalCommand> type) {
-        final Optional<VitalCommandInfo> optionalVitalCommandInfo = getVitalCommandInfo(type);
-
-        return optionalVitalCommandInfo.map(VitalCommandInfo::description);
-    }
-
-    /**
-     * Grabs the aliases of this Command, specified in its respective `@VitalCommandInfo` Annotation on the underlying Child Class, if any.
-     *
-     * @param type The Type of your implementing `VitalCommand` Child Class.
-     * @return An Optional holding either the aliases of this Command, or empty.
-     */
-    public static Optional<String[]> getAliases(@NonNull Class<? extends VitalCommand> type) {
-        final Optional<VitalCommandInfo> optionalVitalCommandInfo = getVitalCommandInfo(type);
-
-        return optionalVitalCommandInfo.map(VitalCommandInfo::aliases);
-    }
-
-    /**
-     * Grabs the Usage of this Command, specified in its respective `@VitalCommandInfo` Annotation on the underlying Child Class, if any.
-     *
-     * @param type The Type of your implementing `VitalCommand` Child Class.
-     * @return An Optional holding either the Usage of this Command, or empty.
-     */
-    public static Optional<String> getUsage(@NonNull Class<? extends VitalCommand> type) {
-        final Optional<VitalCommandInfo> optionalVitalCommandInfo = getVitalCommandInfo(type);
-
-        return optionalVitalCommandInfo.map(VitalCommandInfo::usage);
-    }
-
-    /**
-     * Grabs the Permission of this Command, specified in its respective `@VitalCommandInfo` Annotation on the underlying Child Class, if any.
-     *
-     * @param type The Type of your implementing `VitalCommand` Child Class.
-     * @return An Optional holding either the Permission of this Command, or empty.
-     */
-    public static Optional<String> getPermission(@NonNull Class<? extends VitalCommand> type) {
-        final Optional<VitalCommandInfo> optionalVitalCommandInfo = getVitalCommandInfo(type);
-
-        return optionalVitalCommandInfo.map(VitalCommandInfo::permission);
-    }
-
-    /**
-     * Grabs if this Command requires a Player, specified in its respective `@VitalCommandInfo` Annotation on the underlying Child Class, if any.
-     *
-     * @param type The Type of your implementing `VitalCommand` Child Class.
-     * @return An Optional holding either if this Command requires a Player, or empty.
-     */
-    public static Optional<Boolean> getRequiresPlayer(@NonNull Class<? extends VitalCommand> type) {
-        final Optional<VitalCommandInfo> optionalVitalCommandInfo = getVitalCommandInfo(type);
-
-        return optionalVitalCommandInfo.map(VitalCommandInfo::requiresPlayer);
-    }
-
-    /**
-     * Grabs the VitalArgs of this Command, specified in its respective `@VitalCommandInfo` Annotation on the underlying Child Class, if any.
-     *
-     * @param type The Type of your implementing `VitalCommand` Child Class.
-     * @return An Optional holding either the VitalArgs of this Command, or empty.
-     */
-    public static Optional<VitalCommandArg[]> getVitalArgs(@NonNull Class<? extends VitalCommand> type) {
-        final Optional<VitalCommandInfo> optionalVitalCommandInfo = getVitalCommandInfo(type);
-
-        return optionalVitalCommandInfo.map(VitalCommandInfo::args);
-    }
-
-    /**
-     * Grabs the Args of this Command, specified in its respective `@VitalCommandInfo` Annotation on the underlying Child Class, if any.
-     *
-     * @param type The Type of your implementing `VitalCommand` Child Class.
-     * @return An Optional holding either the Args of this Command, or empty.
-     */
-    public static Optional<String[]> getArgs(@NonNull Class<? extends VitalCommand> type) {
-        final Optional<VitalCommandInfo> optionalVitalCommandInfo = getVitalCommandInfo(type);
-
-        return optionalVitalCommandInfo.map(VitalCommandInfo::args)
-                .map(vitalCommandArgs -> {
-                    final List<String> args = new ArrayList<>();
-
-                    for (VitalCommandArg vitalCommandArg : vitalCommandArgs) {
-                        args.add(vitalCommandArg.value());
-                    }
-
-                    return args.toArray(String[]::new);
-                });
-    }
-
-    @AfterInit
-    public final void afterInit(JavaPlugin javaPlugin) {
-        javaPlugin.getCommand(name).setExecutor(this);
-    }
-
     @Override
-    public final void onRegistered() {
+    public void onRegistered() {
 
     }
 
     @Override
-    public final void onUnregistered() {
+    public void onUnregistered() {
+
     }
 
     @Override
@@ -203,23 +89,14 @@ public abstract class VitalCommand implements AnnotatedVitalComponent<VitalComma
         return VitalCommandInfo.class;
     }
 
-    /**
-     * called when this command is executed with only the base command (/commandname)
-     *
-     * @param sender the sender
-     * @return the status of this command execution
-     */
-    @NonNull
-    protected VitalCommandReturnState executeBaseCommand(@NonNull CommandSender sender) {
-        return VitalCommandReturnState.INVALID_ARGS;
-    }
+    public abstract boolean isPlayer(@NonNull CommandSender commandSender);
+    public abstract boolean hasPermission(@NonNull CommandSender commandSender, @NonNull String permission);
 
-    @Override
-    public final boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
+    public final boolean execute(@NonNull CommandSender sender, @NonNull String[] args) {
         // Check if the command requires a player sender.
         if (requiresPlayer) {
             // Check if the sender is not a Player.
-            if (!(sender instanceof Player)) {
+            if (!isPlayer(sender)) {
                 // Execute the onCommandRequiresPlayer method and return true.
                 onCommandRequiresPlayer(sender);
 
@@ -228,7 +105,7 @@ public abstract class VitalCommand implements AnnotatedVitalComponent<VitalComma
         }
 
         // Check if a permission is required and if the sender has it.
-        if (!permission.isBlank() && !sender.hasPermission(permission)) {
+        if (!permission.isBlank() && !hasPermission(sender, permission)) {
             // Execute the onCommandRequiresPermission method and return true.
             onCommandRequiresPermission(sender);
 
@@ -319,7 +196,14 @@ public abstract class VitalCommand implements AnnotatedVitalComponent<VitalComma
 
             // If the commandReturnState is still null, execute the base command.
             if (commandReturnState == null) {
-                commandReturnState = executeBaseCommand(sender);
+                // when executing the ACTUAL BASE COMMAND, call its method here...
+                if(args.length == 0) {
+                    commandReturnState = executeBaseCommand(sender);
+
+                }else {
+                    // if not, we are accessing an invalid command node.
+                    commandReturnState = VitalCommandReturnState.INVALID_ARGS;
+                }
             }
 
             // Handle the command return state.
@@ -340,8 +224,19 @@ public abstract class VitalCommand implements AnnotatedVitalComponent<VitalComma
         return true;
     }
 
+    /**
+     * called when this command is executed with only the base command (/commandname)
+     *
+     * @param sender the sender
+     * @return the status of this command execution
+     */
     @NonNull
-    private VitalCommandReturnState executeCommandArgHandlerMethod(@NonNull CommandSender sender, @NonNull VitalCommandArg commandArg, @NonNull String @NonNull [] values) throws InvocationTargetException, IllegalAccessException {
+    public VitalCommandReturnState executeBaseCommand(@NonNull CommandSender sender) {
+        return VitalCommandReturnState.INVALID_ARGS;
+    }
+
+    @NonNull
+    public VitalCommandReturnState executeCommandArgHandlerMethod(@NonNull CommandSender sender, @NonNull VitalCommandArg commandArg, @NonNull String @NonNull [] values) throws InvocationTargetException, IllegalAccessException {
         // Initialize a variable to hold the handler method.
         Method commandArgHandlerMethod = null;
 
@@ -376,7 +271,7 @@ public abstract class VitalCommand implements AnnotatedVitalComponent<VitalComma
 
         for (Parameter parameter : commandArgHandlerMethod.getParameters()) {
             // If the parameters managed type is of instance of `CommandSender`, inject either `CommandSender` or `Player`
-            if (CommandSender.class.isAssignableFrom(parameter.getType())) {
+            if (commandSenderClass.isAssignableFrom(parameter.getType())) {
                 injectedParameters.add(sender);
             } else if (VitalCommandArg.class.isAssignableFrom(parameter.getType())) {
                 // inject `VitalCommandArg`
@@ -401,12 +296,12 @@ public abstract class VitalCommand implements AnnotatedVitalComponent<VitalComma
      * @return A {@link List} of strings to show to the player as tab-completion suggestions.
      */
     @NonNull
-    public List<String> onCommandTabComplete(@NonNull CommandSender sender, @NonNull String args) {
+    protected List<String> onCommandTabComplete(@NonNull CommandSender sender, @NonNull String args) {
         return List.of();
     }
 
     @NonNull
-    public final List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, @NonNull String @NonNull [] args) {
+    public final List<String> handleTabComplete(@NonNull CommandSender sender, @NonNull String @NonNull [] args) {
         // Initialize a list to store tab-completed suggestions.
         final List<String> tabCompleted = new ArrayList<>();
 
@@ -538,5 +433,73 @@ public abstract class VitalCommand implements AnnotatedVitalComponent<VitalComma
      */
     protected void onCommandRequiresPlayer(@NonNull CommandSender sender) {
 
+    }
+
+    public static class Spigot extends VitalCommand<org.bukkit.command.CommandSender> implements PluginCommand.Spigot {
+        public Spigot() {
+            super(org.bukkit.command.CommandSender.class);
+        }
+
+        @AfterInit
+        public final void afterInit(JavaPlugin plugin) {
+            plugin.getCommand(getName()).setExecutor(this);
+        }
+
+        @Override
+        public boolean onCommand(@NotNull org.bukkit.command.CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+            return execute(sender, args);
+        }
+
+        @Override
+        public @Nullable List<String> onTabComplete(org.bukkit.command.@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+            return handleTabComplete(sender, args);
+        }
+
+        @Override
+        public boolean isPlayer(@NonNull org.bukkit.command.CommandSender sender) {
+            return sender instanceof Player;
+        }
+
+        @Override
+        public boolean hasPermission(@NonNull org.bukkit.command.CommandSender sender, @NonNull String permission) {
+            return sender.hasPermission(permission);
+        }
+    }
+
+    public static class Bungeecord extends VitalCommand<net.md_5.bungee.api.CommandSender> {
+        private final PluginCommand.Bungeecord command;
+
+        public Bungeecord() {
+            super(net.md_5.bungee.api.CommandSender.class);
+
+            // wrap a custom bungeecord command class, since in bungeecord, command classes MUST BE EXTENDED FROM.
+            // this is not possible since the VitalCommand object MUST BE A class, and classes CANNOT HAVE MULTIPE EXTEND STATEMENTS...
+            this.command = new PluginCommand.Bungeecord(getName()) {
+                @Override
+                public void execute(net.md_5.bungee.api.CommandSender sender, String[] args) {
+                    Bungeecord.this.execute(sender, args);
+                }
+
+                @Override
+                public Iterable<String> onTabComplete(net.md_5.bungee.api.CommandSender sender, String[] args) {
+                    return Bungeecord.this.handleTabComplete(sender, args);
+                }
+            };
+        }
+
+        @AfterInit
+        public final void afterInit(Plugin plugin) {
+            plugin.getProxy().getPluginManager().registerCommand(plugin, command);
+        }
+
+        @Override
+        public boolean isPlayer(@NonNull net.md_5.bungee.api.CommandSender sender) {
+            return sender instanceof ProxiedPlayer;
+        }
+
+        @Override
+        public boolean hasPermission(@NonNull net.md_5.bungee.api.CommandSender sender, @NonNull String permission) {
+            return sender.hasPermission(permission);
+        }
     }
 }

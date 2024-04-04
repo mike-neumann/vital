@@ -1,4 +1,4 @@
-package me.xra1ny.vital.core;
+package me.xra1ny.vital;
 
 import me.xra1ny.essentia.inject.annotation.Component;
 import org.jetbrains.annotations.NotNull;

@@ -1,4 +1,4 @@
-package me.xra1ny.vital.core;
+package me.xra1ny.vital;
 
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.NotNull;

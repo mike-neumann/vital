@@ -9,58 +9,70 @@ import eu.cloudnetservice.modules.bridge.player.ServicePlayer;
 import eu.cloudnetservice.modules.bridge.player.executor.PlayerExecutor;
 import lombok.NonNull;
 import me.xra1ny.vital.cloudnet4.driver.CloudNet4Driver;
-import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
-public interface CloudNet4Bridge {
+/**
+ * Utility class for easier interaction with the cloudnet v4 bridge module.
+ *
+ * @author xRa1ny
+ */
+public class CloudNet4Bridge {
+    private CloudNet4Bridge() {
+        // may not be instantiated.
+    }
+
     @NonNull
-    static ServiceRegistry getServiceRegistry() {
+    public static ServiceRegistry getServiceRegistry() {
         return InjectionLayer.ext().instance(ServiceRegistry.class);
     }
 
     @NonNull
-    static PlayerManager getPlayerManager() {
+    public static PlayerManager getPlayerManager() {
         return getServiceRegistry().firstProvider(PlayerManager.class);
     }
 
     @NonNull
-    static PlayerExecutor getPlayerExecutor(@NonNull Player player) {
-        return getPlayerManager().playerExecutor(player.getUniqueId());
+    public static PlayerExecutor getPlayerExecutor(@NonNull UUID uniqueId) {
+        return getPlayerManager().playerExecutor(uniqueId);
     }
 
-    static boolean isProxy(@NonNull ServiceInfoSnapshot serviceInfoSnapshot) {
+    public static boolean isProxy(@NonNull ServiceInfoSnapshot serviceInfoSnapshot) {
         return switch(serviceInfoSnapshot.configuration().processConfig().environment()) {
             case "JAVA_PROXY", "PE_PROXY", "BUNGEECORD", "VELOCITY", "WATERDOG_PE" -> true;
             default -> false;
         };
     }
 
-    @NonNull
-    static Optional<ServiceInfoSnapshot> getCloudServerByPlayer(@NonNull Player player) {
+
+    @Nullable
+    public static ServiceInfoSnapshot getCloudServerByPlayerUniqueId(@NonNull UUID uniqueId) {
         return CloudNet4Driver.getCloudServers(server -> server.readPropertyOrDefault(BridgeDocProperties.PLAYERS, List.of()).stream()
                         .map(ServicePlayer::uniqueId)
-                        .anyMatch(player.getUniqueId()::equals))
+                        .anyMatch(uniqueId::equals))
                 .stream()
-                .findFirst();
+                .findFirst()
+                .orElse(null);
     }
 
-    @NonNull
-    static Optional<ServiceInfoSnapshot> getNonProxyCloudServerByPlayer(@NonNull Player player) {
+    @Nullable
+    public static ServiceInfoSnapshot getNonProxyCloudServerByPlayerUniqueId(@NonNull UUID uniqueId) {
         return CloudNet4Driver.getCloudServers(server -> server.readPropertyOrDefault(BridgeDocProperties.PLAYERS, List.of()).stream()
                         .map(ServicePlayer::uniqueId)
-                        .anyMatch(player.getUniqueId()::equals) &&
+                        .anyMatch(uniqueId::equals) &&
                         !isProxy(server))
                 .stream()
-                .findFirst();
+                .findFirst()
+                .orElse(null);
     }
 
-    static void connect(@NonNull Player player, @NonNull String serverName) {
-        getPlayerExecutor(player).connect(serverName);
+    public static void connect(@NonNull UUID uniqueId, @NonNull String serverName) {
+        getPlayerExecutor(uniqueId).connect(serverName);
     }
 
-    static int getPlayerCount(@NonNull String taskName) {
+    public static int getPlayerCount(@NonNull String taskName) {
         return CloudNet4Driver.getCloudServers(taskName).stream()
                 .map(server -> server.readPropertyOrDefault(BridgeDocProperties.PLAYERS, List.of()).size())
                 .reduce(0, Integer::sum);

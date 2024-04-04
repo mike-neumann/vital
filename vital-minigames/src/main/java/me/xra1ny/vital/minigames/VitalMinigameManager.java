@@ -5,10 +5,13 @@ import lombok.NonNull;
 import lombok.extern.java.Log;
 import me.xra1ny.essentia.inject.DIFactory;
 import me.xra1ny.essentia.inject.annotation.Component;
-import me.xra1ny.vital.core.VitalComponent;
-import me.xra1ny.vital.core.VitalCore;
+import me.xra1ny.vital.Vital;
+import me.xra1ny.vital.VitalComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Optional;
 
 /**
  * Manages the current state of a minigame using the Vital framework.
@@ -18,10 +21,12 @@ import org.bukkit.event.HandlerList;
  */
 @Log
 @Component
-public final class VitalMinigameManager implements VitalComponent {
+public class VitalMinigameManager implements VitalComponent {
     private static VitalMinigameManager instance;
 
-    private final VitalCore<?> vitalCore;
+    private final Vital<?> vital;
+
+    private final JavaPlugin plugin;
 
     /**
      * The currently active minigame state.
@@ -29,18 +34,9 @@ public final class VitalMinigameManager implements VitalComponent {
     @Getter
     private VitalMinigameState vitalMinigameState;
 
-    public VitalMinigameManager(VitalCore<?> vitalCore) {
-        this.vitalCore = vitalCore;
-    }
-
-    @Override
-    public void onRegistered() {
-        instance = this;
-    }
-
-    @Override
-    public void onUnregistered() {
-
+    public VitalMinigameManager(Vital<?> vital, JavaPlugin plugin) {
+        this.vital = vital;
+        this.plugin = plugin;
     }
 
     /**
@@ -66,7 +62,7 @@ public final class VitalMinigameManager implements VitalComponent {
      * @apiNote this method attempts to construct a dependency injected instance using Vital's DI utils {@link DIFactory}
      */
     public static void setVitalMinigameState(@NonNull Class<? extends VitalMinigameState> vitalMinigameStateClass) {
-        final VitalMinigameState vitalMinigameState = instance.vitalCore.getComponentByType(vitalMinigameStateClass)
+        final VitalMinigameState vitalMinigameState = Optional.ofNullable(instance.vital.getComponentByType(vitalMinigameStateClass))
                 .orElseThrow(() -> new RuntimeException("attempted setting unregistered minigame state %s"
                         .formatted(vitalMinigameStateClass.getSimpleName())));
 
@@ -92,7 +88,17 @@ public final class VitalMinigameManager implements VitalComponent {
         }
 
         instance.vitalMinigameState = vitalMinigameState;
-        Bukkit.getPluginManager().registerEvents(vitalMinigameState, instance.vitalCore.getJavaPlugin());
+        Bukkit.getPluginManager().registerEvents(vitalMinigameState, instance.plugin);
         vitalMinigameState.onEnable();
+    }
+
+    @Override
+    public void onRegistered() {
+        instance = this;
+    }
+
+    @Override
+    public void onUnregistered() {
+
     }
 }

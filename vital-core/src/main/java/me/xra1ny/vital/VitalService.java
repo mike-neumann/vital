@@ -1,4 +1,4 @@
-package me.xra1ny.vital.core;
+package me.xra1ny.vital;
 
 /**
  * Services are used to execute "complex" application logic dispatched from any view or "frontend" part of the application.

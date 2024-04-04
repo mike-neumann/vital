@@ -14,81 +14,81 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public class VitalHeadItemStackBuilder extends VitalItemStackBuilder {
+public class VitalHeadItemBuilder extends VitalItemBuilder {
     private OfflinePlayer owningPlayer;
 
     @Override
-    public VitalHeadItemStackBuilder name(@Nullable String name) {
+    public VitalHeadItemBuilder name(@Nullable String name) {
         super.name(name);
 
         return this;
     }
 
     @Override
-    public VitalHeadItemStackBuilder type(Material type) {
+    public VitalHeadItemBuilder type(Material type) {
         super.type(type);
 
         return this;
     }
 
     @Override
-    public VitalHeadItemStackBuilder lore(@NonNull List<String> lore) {
+    public VitalHeadItemBuilder lore(@NonNull List<String> lore) {
         super.lore(lore);
 
         return this;
     }
 
     @Override
-    public VitalHeadItemStackBuilder lore(@NonNull String lore) {
+    public VitalHeadItemBuilder lore(@NonNull String lore) {
         super.lore(lore);
 
         return this;
     }
 
     @Override
-    public VitalHeadItemStackBuilder itemFlags(@NonNull List<ItemFlag> itemFlagList) {
+    public VitalHeadItemBuilder itemFlags(@NonNull List<ItemFlag> itemFlagList) {
         super.itemFlags(itemFlagList);
 
         return this;
     }
 
     @Override
-    public VitalHeadItemStackBuilder itemFlag(@NonNull ItemFlag itemFlag) {
+    public VitalHeadItemBuilder itemFlag(@NonNull ItemFlag itemFlag) {
         super.itemFlag(itemFlag);
 
         return this;
     }
 
     @Override
-    public VitalHeadItemStackBuilder enchantments(@NonNull Map<Enchantment, Integer> enchantmentLevelMap) {
+    public VitalHeadItemBuilder enchantments(@NonNull Map<Enchantment, Integer> enchantmentLevelMap) {
         super.enchantments(enchantmentLevelMap);
 
         return this;
     }
 
     @Override
-    public VitalHeadItemStackBuilder enchantment(@NonNull Enchantment enchantment, int enchantmentLevel) {
+    public VitalHeadItemBuilder enchantment(@NonNull Enchantment enchantment, int enchantmentLevel) {
         super.enchantment(enchantment, enchantmentLevel);
 
         return this;
     }
 
     @Override
-    public VitalItemStackBuilder enchanted(boolean enchanted) {
+    public VitalItemBuilder enchanted(boolean enchanted) {
         super.enchanted(enchanted);
 
         return this;
     }
 
     @Override
-    public VitalHeadItemStackBuilder amount(int amount) {
+    public VitalHeadItemBuilder amount(int amount) {
         super.amount(amount);
 
         return this;
     }
 
     @Override
-    public VitalHeadItemStackBuilder unbreakable(boolean unbreakable) {
+    public VitalHeadItemBuilder unbreakable(boolean unbreakable) {
         super.unbreakable(unbreakable);
 
         return this;
@@ -96,14 +96,14 @@ public class VitalHeadItemStackBuilder extends VitalItemStackBuilder {
 
 
     @Override
-    public <Z> VitalHeadItemStackBuilder namespacedKey(@NonNull String key, @NonNull PersistentDataType<?, Z> persistentDataType, @NonNull Z value) {
+    public <Z> VitalHeadItemBuilder namespacedKey(@NonNull String key, @NonNull PersistentDataType<?, Z> persistentDataType, @NonNull Z value) {
         super.namespacedKey(key, persistentDataType, value);
 
         return this;
     }
 
     @Override
-    public <Z> VitalHeadItemStackBuilder namespacedKey(@NonNull NamespacedKey namespacedKey, @NonNull PersistentDataType<?, Z> persistentDataType, @NonNull Z value) {
+    public <Z> VitalHeadItemBuilder namespacedKey(@NonNull NamespacedKey namespacedKey, @NonNull PersistentDataType<?, Z> persistentDataType, @NonNull Z value) {
         super.namespacedKey(namespacedKey, persistentDataType, value);
 
         return this;
@@ -120,7 +120,7 @@ public class VitalHeadItemStackBuilder extends VitalItemStackBuilder {
         return itemStack;
     }
 
-    public VitalHeadItemStackBuilder owningPlayer(@Nullable OfflinePlayer owningPlayer) {
+    public VitalHeadItemBuilder owningPlayer(@Nullable OfflinePlayer owningPlayer) {
         this.owningPlayer = owningPlayer;
 
         return this;

@@ -1,4 +1,4 @@
-package me.xra1ny.vital.core.processor;
+package me.xra1ny.vital.processor;
 
 /**
  * Generic Interface responsible for holding the contents for automatic `plugin.yml` creation between multiple Annotation Processor modules.

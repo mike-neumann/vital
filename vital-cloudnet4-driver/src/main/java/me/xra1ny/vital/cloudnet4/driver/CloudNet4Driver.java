@@ -8,66 +8,72 @@ import eu.cloudnetservice.driver.service.ServiceConfiguration;
 import eu.cloudnetservice.driver.service.ServiceInfoSnapshot;
 import eu.cloudnetservice.driver.service.ServiceTask;
 import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public interface CloudNet4Driver {
+/**
+ * Utility class to interact with the cloudnet v4 driver module more easily.
+ *
+ * @author xRa1ny
+ */
+public class CloudNet4Driver {
     @NonNull
-    static CloudServiceProvider getCloudServiceProvider() {
+    public static CloudServiceProvider getCloudServiceProvider() {
         return InjectionLayer.ext().instance(CloudServiceProvider.class);
     }
 
     @NonNull
-    static ServiceTaskProvider getServiceTaskProvider() {
+    public static ServiceTaskProvider getServiceTaskProvider() {
         return InjectionLayer.ext().instance(ServiceTaskProvider.class);
     }
 
     @NonNull
-    static CloudServiceFactory getCloudServiceFactory() {
+    public static CloudServiceFactory getCloudServiceFactory() {
         return InjectionLayer.ext().instance(CloudServiceFactory.class);
     }
 
     @NonNull
-    static List<ServiceInfoSnapshot> getCloudServers(@NonNull Predicate<ServiceInfoSnapshot> predicate) {
+    public static List<ServiceInfoSnapshot> getCloudServers(@NonNull Predicate<ServiceInfoSnapshot> predicate) {
         return getCloudServiceProvider().runningServices().stream()
                 .filter(predicate)
                 .toList();
     }
 
     @NonNull
-    static List<ServiceInfoSnapshot> getCloudServers() {
+    public static List<ServiceInfoSnapshot> getCloudServers() {
         return getCloudServers(t -> true);
     }
 
     @NonNull
-    static List<ServiceInfoSnapshot> getCloudServers(@NonNull String taskName) {
+    public static List<ServiceInfoSnapshot> getCloudServers(@NonNull String taskName) {
         return getCloudServiceProvider().servicesByTask(taskName).stream()
                 .toList();
     }
 
     /**
-     * Gets the cloud server by the given name; or an empty optional instance.
+     * Gets the cloud server by the given name; or null;
      *
      * @param serverName The name of the server, e.g: Lobby-1
-     * @return An Optional holding either the value of the fetched cloud server; or empty if not found.
+     * @return The fetched cloud server; or null.
      */
-    @NonNull
-    static Optional<ServiceInfoSnapshot> getCloudServer(@NonNull String serverName) {
-        return Optional.ofNullable(getCloudServiceProvider().serviceByName(serverName));
+    @Nullable
+    public static ServiceInfoSnapshot getCloudServer(@NonNull String serverName) {
+        return getCloudServiceProvider().serviceByName(serverName);
     }
 
     /**
      * Gets the task of the given server task name.
      *
      * @param taskName The task name.
-     * @return An Optional holding either the server task; or empty.
+     * @return The fetched cloud server; or null.
      */
-    @NonNull
-    static Optional<ServiceTask> getServerTask(@NonNull String taskName) {
-        return Optional.ofNullable(getServiceTaskProvider().serviceTask(taskName));
+    @Nullable
+    public static ServiceTask getServerTask(@NonNull String taskName) {
+        return getServiceTaskProvider().serviceTask(taskName);
     }
 
     /**
@@ -77,8 +83,8 @@ public interface CloudNet4Driver {
      * @param taskName The name of the task to pull the configuration from.
      * @throws NoSuchElementException When the server task could not be located.
      */
-    static void startCloudServer(@NonNull String taskName) throws NoSuchElementException {
-        final ServiceTask serviceTask = getServerTask(taskName)
+    public static void startCloudServer(@NonNull String taskName) throws NoSuchElementException {
+        final ServiceTask serviceTask = Optional.ofNullable(getServerTask(taskName))
                 .orElseThrow();
 
         getCloudServiceFactory().createCloudService(ServiceConfiguration.builder(serviceTask)
@@ -90,8 +96,8 @@ public interface CloudNet4Driver {
      *
      * @param serverName The server name.
      */
-    static void stopCloudServer(@NonNull String serverName) {
-        final ServiceInfoSnapshot serviceInfoSnapshot = getCloudServer(serverName)
+    public static void stopCloudServer(@NonNull String serverName) {
+        final ServiceInfoSnapshot serviceInfoSnapshot = Optional.ofNullable(getCloudServer(serverName))
                 .orElseThrow();
 
         serviceInfoSnapshot.provider().delete();

@@ -2,10 +2,16 @@ package me.xra1ny.vital.inventories;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
+import me.xra1ny.vital.inventories.annotation.VitalPagedInventoryInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Used to easily create an interactive paged Inventory Menu.
@@ -20,20 +26,50 @@ public abstract class VitalPagedInventory extends VitalInventory {
     @Getter
     private long page = 0;
 
-    /**
-     * Constructs a new paged inventory.
-     */
-    public VitalPagedInventory() {
-        super();
-    }
+    @Getter
+    @Setter
+    private int fromSlot = 0;
+
+    @Getter
+    @Setter
+    private int toSlot = 0;
+
+    @Getter
+    @Setter
+    private int maxPage = 1;
 
     /**
      * Constructs a new paged inventory with the specified previous inventory to open after clicking out of inventory menu bounds.
      *
      * @param previousInventory The previous {@link Inventory} to open after clicking out of inventory bounds.
      */
-    public VitalPagedInventory(@NonNull Inventory previousInventory) {
+    public VitalPagedInventory(@Nullable Inventory previousInventory) {
         super(previousInventory);
+
+        final Optional<VitalPagedInventoryInfo> optionalVitalPagedInventoryInfo = Optional.ofNullable(getClass().getAnnotation(VitalPagedInventoryInfo.class));
+
+        optionalVitalPagedInventoryInfo.ifPresent(vitalPagedInventoryInfo -> {
+            fromSlot = vitalPagedInventoryInfo.fromSlot();
+            toSlot = vitalPagedInventoryInfo.toSlot();
+        });
+    }
+
+    /**
+     * Gets the amount of items required to fill a page from {@link VitalPagedInventory#fromSlot} to {@link VitalPagedInventory#toSlot}.
+     *
+     * @return The amount.
+     */
+    public int getPageContent() {
+        return (toSlot + 1/* since content is INCLUSIVE to the SLOT itself */) - fromSlot;
+    }
+
+    /**
+     * Updates the maxPage indicator with the given total content amount.
+     *
+     * @param totalContent The total amount of content available for paging.
+     */
+    public void updateMaxPage(int totalContent) {
+        maxPage = (int) Math.ceil((double) totalContent / getPageContent());
     }
 
     /**
@@ -54,7 +90,11 @@ public abstract class VitalPagedInventory extends VitalInventory {
      */
     public final void setPage(long page, @NonNull Player player) {
         if (page <= 0) {
-            return;
+            page = 1;
+        }
+
+        if(page >= maxPage) {
+            page = maxPage;
         }
 
         this.page = page;
@@ -76,5 +116,21 @@ public abstract class VitalPagedInventory extends VitalInventory {
         }
 
         super.update();
+    }
+
+    protected <T> List<T> sliceForPage(@NonNull List<T> list) {
+        final int startIndex = (int) (getPageContent() * (page - 1));
+
+        if(startIndex >= list.size() || startIndex < 0) {
+            return List.of();
+        }
+
+        final int endIndex = startIndex + getPageContent();
+
+        if(endIndex >= list.size()) {
+            return list.subList(startIndex, list.size());
+        }
+
+        return list.subList(startIndex, endIndex);
     }
 }

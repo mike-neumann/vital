@@ -1,6 +1,6 @@
 package me.xra1ny.vital.scoreboards;
 
-import me.xra1ny.vital.core.VitalComponent;
+import me.xra1ny.vital.VitalComponent;
 
 /**
  * An abstract base class for representing scoreboards in the Vital plugin framework.
@@ -21,4 +21,3 @@ abstract class VitalScoreboard implements VitalComponent {
 
     }
 }
-

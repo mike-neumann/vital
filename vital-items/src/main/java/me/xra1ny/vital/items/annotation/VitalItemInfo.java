@@ -1,7 +1,7 @@
 package me.xra1ny.vital.items.annotation;
 
 import lombok.NonNull;
-import me.xra1ny.vital.items.VitalItemStack;
+import me.xra1ny.vital.items.VitalItem;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 
@@ -11,13 +11,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to provide information about a {@link VitalItemStack} that can be interacted with in the game.
+ * Annotation to provide information about a {@link VitalItem} that can be interacted with in the game.
  *
  * @author xRa1ny
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface VitalItemStackInfo {
+public @interface VitalItemInfo {
     /**
      * Defines the name of the custom item stack.
      *

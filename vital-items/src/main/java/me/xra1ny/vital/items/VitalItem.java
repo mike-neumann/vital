@@ -2,8 +2,10 @@ package me.xra1ny.vital.items;
 
 import lombok.Getter;
 import lombok.NonNull;
-import me.xra1ny.vital.core.AnnotatedVitalComponent;
-import me.xra1ny.vital.items.annotation.VitalItemStackInfo;
+import me.xra1ny.essentia.inject.annotation.AfterInit;
+import me.xra1ny.vital.AnnotatedVitalComponent;
+import me.xra1ny.vital.Vital;
+import me.xra1ny.vital.items.annotation.VitalItemInfo;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -25,7 +27,7 @@ import java.util.UUID;
  * @author xRa1ny
  */
 @SuppressWarnings("unused")
-public abstract class VitalItemStack extends ItemStack implements AnnotatedVitalComponent<VitalItemStackInfo> {
+public abstract class VitalItem extends ItemStack implements AnnotatedVitalComponent<VitalItemInfo> {
     /**
      * The initial cooldown of this VitalItemStack.
      */
@@ -42,11 +44,11 @@ public abstract class VitalItemStack extends ItemStack implements AnnotatedVital
     /**
      * Creates a new VitalItemStack based on annotation-defined properties.
      *
-     * @see VitalItemStackInfo
+     * @see VitalItemInfo
      */
-    public VitalItemStack() {
-        final VitalItemStackInfo info = getRequiredAnnotation();
-        final ItemStack itemStack = new VitalItemStackBuilder()
+    public VitalItem() {
+        final VitalItemInfo info = getRequiredAnnotation();
+        final ItemStack itemStack = new VitalItemBuilder()
                 .type(info.type())
                 .name(info.name())
                 .amount(info.amount())
@@ -67,6 +69,12 @@ public abstract class VitalItemStack extends ItemStack implements AnnotatedVital
         this.initialCooldown = info.cooldown();
     }
 
+    @AfterInit
+    public void afterInit(Vital<?> vital, VitalItemManager itemManager) {
+        vital.unregisterComponent(this);
+        itemManager.registerVitalComponent(this);
+    }
+
     @Override
     public void onRegistered() {
 
@@ -83,7 +91,7 @@ public abstract class VitalItemStack extends ItemStack implements AnnotatedVital
      * @param itemStack The base ItemStack.
      * @param enchanted Whether to add enchantments.
      */
-    public VitalItemStack(@NonNull ItemStack itemStack, boolean enchanted) {
+    public VitalItem(@NonNull ItemStack itemStack, boolean enchanted) {
         final ItemMeta meta = itemStack.getItemMeta();
 
         if (enchanted) {
@@ -96,8 +104,8 @@ public abstract class VitalItemStack extends ItemStack implements AnnotatedVital
     }
 
     @Override
-    public Class<VitalItemStackInfo> requiredAnnotationType() {
-        return VitalItemStackInfo.class;
+    public Class<VitalItemInfo> requiredAnnotationType() {
+        return VitalItemInfo.class;
     }
 
     /**
@@ -214,4 +222,3 @@ public abstract class VitalItemStack extends ItemStack implements AnnotatedVital
         return playerCooldownMap.getOrDefault(player, 0);
     }
 }
-

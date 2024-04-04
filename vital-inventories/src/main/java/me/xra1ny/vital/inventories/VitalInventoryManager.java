@@ -3,19 +3,21 @@ package me.xra1ny.vital.inventories;
 import lombok.NonNull;
 import lombok.extern.java.Log;
 import me.xra1ny.essentia.inject.annotation.Component;
-import me.xra1ny.vital.core.VitalComponent;
-import me.xra1ny.vital.core.VitalCore;
+import me.xra1ny.vital.Vital;
+import me.xra1ny.vital.VitalComponent;
 import org.bukkit.entity.Player;
+
+import java.util.Optional;
 
 @Log
 @Component
 public class VitalInventoryManager implements VitalComponent {
     private static VitalInventoryManager instance;
 
-    private final VitalCore<?> vitalCore;
+    private final Vital<?> vital;
 
-    public VitalInventoryManager(VitalCore<?> vitalCore) {
-        this.vitalCore = vitalCore;
+    public VitalInventoryManager(Vital<?> vital) {
+        this.vital = vital;
     }
 
     @Override
@@ -35,7 +37,7 @@ public class VitalInventoryManager implements VitalComponent {
      * @param vitalInventoryClass The class of the {@link VitalInventory} to open for the given {@link Player}.
      */
     public static void openVitalInventory(@NonNull Player player, @NonNull Class<? extends VitalInventory> vitalInventoryClass) {
-        final VitalInventory vitalInventory = instance.vitalCore.getComponentByType(vitalInventoryClass)
+        final VitalInventory vitalInventory = Optional.ofNullable(instance.vital.getComponentByType(vitalInventoryClass))
                 .orElseThrow(() -> new RuntimeException("attempted opening unregistered inventory %s"
                         .formatted(vitalInventoryClass.getSimpleName())));
 

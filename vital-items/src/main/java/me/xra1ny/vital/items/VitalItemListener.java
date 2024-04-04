@@ -2,7 +2,7 @@ package me.xra1ny.vital.items;
 
 import lombok.NonNull;
 import me.xra1ny.essentia.inject.annotation.Component;
-import me.xra1ny.vital.core.VitalListener;
+import me.xra1ny.vital.VitalListener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -13,19 +13,19 @@ import org.bukkit.event.player.PlayerInteractEvent;
  * @author xRa1ny
  */
 @Component
-public final class VitalItemStackListener extends VitalListener {
+public class VitalItemListener implements VitalListener.Spigot {
     /**
      * The management system for custom item stacks.
      */
-    private final VitalItemStackManager vitalItemStackManager;
+    private final VitalItemManager vitalItemManager;
 
     /**
      * Constructs a new instance of the VitalItemStackListener.
      *
-     * @param vitalItemStackManager The management system for custom item stacks.
+     * @param vitalItemManager The management system for custom item stacks.
      */
-    public VitalItemStackListener(@NonNull VitalItemStackManager vitalItemStackManager) {
-        this.vitalItemStackManager = vitalItemStackManager;
+    public VitalItemListener(@NonNull VitalItemManager vitalItemManager) {
+        this.vitalItemManager = vitalItemManager;
     }
 
     /**
@@ -41,11 +41,10 @@ public final class VitalItemStackListener extends VitalListener {
         }
 
         // Find the custom item stack that matches the player's interaction item.
-        vitalItemStackManager.getComponentList()
+        vitalItemManager.getItems()
                 .stream()
                 .filter(i -> i.equals(e.getItem()))
                 .findFirst()
                 .ifPresent(itemStack -> itemStack.handleInteraction(e));
     }
 }
-

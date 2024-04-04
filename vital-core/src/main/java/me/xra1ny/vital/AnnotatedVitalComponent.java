@@ -1,4 +1,4 @@
-package me.xra1ny.vital.core;
+package me.xra1ny.vital;
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;

@@ -2,9 +2,8 @@ package me.xra1ny.vital.players;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
-import me.xra1ny.vital.core.VitalComponent;
-import org.bukkit.entity.Player;
+import me.xra1ny.vital.VitalComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
 
@@ -13,7 +12,7 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
-public class VitalPlayer implements VitalComponent {
+public abstract class VitalPlayer<Player> implements VitalComponent {
     /**
      * The Minecraft player associated with this VitalPlayer.
      */
@@ -22,18 +21,11 @@ public class VitalPlayer implements VitalComponent {
     private final Player player;
 
     /**
-     * the timeout of this user (unregisters this user when equal to the configured timeout in manager object)
-     */
-    @Getter
-    @Setter
-    private int timeout;
-
-    /**
      * Creates a new instance of VitalPlayer for the given Minecraft player.
      *
      * @param player The Minecraft player to associate with this VitalPlayer.
      */
-    public VitalPlayer(@NonNull Player player) {
+    private VitalPlayer(@NonNull Player player) {
         this.player = player;
     }
 
@@ -44,9 +36,7 @@ public class VitalPlayer implements VitalComponent {
      */
     @Override
     @NonNull
-    public UUID getUuid() {
-        return player.getUniqueId();
-    }
+    public abstract UUID getUniqueId();
 
     /**
      * Gets the name of the associated Minecraft player.
@@ -55,9 +45,7 @@ public class VitalPlayer implements VitalComponent {
      */
     @Override
     @NonNull
-    public String getName() {
-        return player.getName();
-    }
+    public abstract String getName();
 
     /**
      * Called when this VitalComponent is registered.
@@ -74,5 +62,36 @@ public class VitalPlayer implements VitalComponent {
     public void onUnregistered() {
 
     }
-}
 
+    public static class Spigot extends VitalPlayer<org.bukkit.entity.Player> {
+        public Spigot(@NonNull org.bukkit.entity.Player player) {
+            super(player);
+        }
+
+        @Override
+        public @NonNull UUID getUniqueId() {
+            return getPlayer().getUniqueId();
+        }
+
+        @Override
+        public @NonNull String getName() {
+            return getPlayer().getName();
+        }
+    }
+
+    public static class Bungeecord extends VitalPlayer<ProxiedPlayer> {
+        public Bungeecord(@NonNull ProxiedPlayer proxiedPlayer) {
+            super(proxiedPlayer);
+        }
+
+        @Override
+        public @NonNull UUID getUniqueId() {
+            return getPlayer().getUniqueId();
+        }
+
+        @Override
+        public @NonNull String getName() {
+            return getPlayer().getName();
+        }
+    }
+}
