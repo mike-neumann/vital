@@ -1,6 +1,5 @@
 package me.xra1ny.vital.items;
 
-import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -25,26 +24,13 @@ import java.util.Map.Entry;
  * @author xRa1ny
  */
 public class VitalItemBuilder {
-    @Getter
-    @NonNull
     private final List<String> lore = new ArrayList<>();
-    @Getter
-    @NonNull
     private final List<ItemFlag> itemFlagList = new ArrayList<>();
-    @Getter
-    @NonNull
     private final Map<Enchantment, Integer> enchantmentLevelMap = new HashMap<>();
-    @Getter
-    @NonNull
     private final Map<NamespacedKey, Map.Entry<PersistentDataType<?, ?>, ?>> namespacedKeyMap = new HashMap<>();
-    @Getter
     private String name;
-    @Getter
-    @NonNull
     private Material type = Material.COBBLESTONE;
-    @Getter
     private int amount = 1;
-    @Getter
     private boolean unbreakable;
 
     /**
@@ -151,7 +137,7 @@ public class VitalItemBuilder {
      * @return This builder instance.
      */
     public VitalItemBuilder enchanted(boolean enchanted) {
-        if(enchanted) {
+        if (enchanted) {
             enchantment(Enchantment.LUCK, 1);
         }
 

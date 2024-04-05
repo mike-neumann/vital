@@ -14,6 +14,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Builder utility class designed for convenient creation of head item stacks.
+ *
+ * @author xRa1ny
+ */
 public class VitalHeadItemBuilder extends VitalItemBuilder {
     private OfflinePlayer owningPlayer;
 
