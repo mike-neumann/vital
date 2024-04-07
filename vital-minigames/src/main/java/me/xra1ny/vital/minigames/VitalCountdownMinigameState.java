@@ -12,7 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  *
  * @author xRa1ny
  */
-public abstract class VitalCountdownMinigameState extends VitalMinigameState implements AnnotatedVitalComponent<VitalCountdownTaskInfo> {
+public abstract class VitalCountdownMinigameState implements VitalMinigameState, AnnotatedVitalComponent<VitalCountdownTaskInfo> {
     private VitalCountdownTask.Spigot vitalCountdownTask;
 
     /**
