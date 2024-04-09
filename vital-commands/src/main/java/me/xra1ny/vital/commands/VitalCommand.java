@@ -15,7 +15,6 @@ import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -446,22 +445,22 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
         }
 
         @Override
-        public boolean onCommand(@NotNull org.bukkit.command.CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        public final boolean onCommand(@NotNull org.bukkit.command.CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
             return execute(sender, args);
         }
 
         @Override
-        public @Nullable List<String> onTabComplete(org.bukkit.command.@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        public final List<String> onTabComplete(org.bukkit.command.@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
             return handleTabComplete(sender, args);
         }
 
         @Override
-        public boolean isPlayer(@NonNull org.bukkit.command.CommandSender sender) {
+        public final boolean isPlayer(@NonNull org.bukkit.command.CommandSender sender) {
             return sender instanceof Player;
         }
 
         @Override
-        public boolean hasPermission(@NonNull org.bukkit.command.CommandSender sender, @NonNull String permission) {
+        public final boolean hasPermission(@NonNull org.bukkit.command.CommandSender sender, @NonNull String permission) {
             return sender.hasPermission(permission);
         }
     }
@@ -493,12 +492,12 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
         }
 
         @Override
-        public boolean isPlayer(@NonNull net.md_5.bungee.api.CommandSender sender) {
+        public final boolean isPlayer(@NonNull net.md_5.bungee.api.CommandSender sender) {
             return sender instanceof ProxiedPlayer;
         }
 
         @Override
-        public boolean hasPermission(@NonNull net.md_5.bungee.api.CommandSender sender, @NonNull String permission) {
+        public final boolean hasPermission(@NonNull net.md_5.bungee.api.CommandSender sender, @NonNull String permission) {
             return sender.hasPermission(permission);
         }
     }
