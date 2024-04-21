@@ -116,8 +116,6 @@ public class Vital<Plugin> implements DIContainer {
         registerComponent(instance);
         registerComponent(plugin);
 
-        log.info("all registered: " + componentClassObjectMap);
-
         // register both plugin package and Vital's package for dependency injection using essentia-inject.
         EssentiaInject.run(this, plugin.getClass().getPackageName(), getClass().getPackageName());
 

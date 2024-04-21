@@ -2,11 +2,14 @@ package me.xra1ny.vital.players;
 
 import lombok.NonNull;
 import lombok.extern.java.Log;
+import me.xra1ny.vital.VitalComponent;
 import me.xra1ny.vital.VitalComponentListManager;
 import me.xra1ny.vital.VitalListener;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -20,11 +23,21 @@ import java.util.UUID;
  * @author xRa1ny
  */
 @Log
-public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, PlayerManager extends VitalComponentListManager<VPlayer>> {
+public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, PlayerManager extends VitalComponentListManager<VPlayer>> implements VitalComponent {
     private final PlayerManager vital;
 
     protected VitalPlayerListener(PlayerManager vital) {
         this.vital = vital;
+    }
+
+    @Override
+    public void onRegistered() {
+
+    }
+
+    @Override
+    public void onUnregistered() {
+
     }
 
     /**
@@ -91,6 +104,14 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, P
         }
 
         @Override
+        public void onRegistered() {
+            // disconnect any connected player...
+            for(org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
+                player.kick();
+            }
+        }
+
+        @Override
         protected Class<org.bukkit.entity.Player> playerType() {
             return org.bukkit.entity.Player.class;
         }
@@ -110,6 +131,14 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, P
     public static abstract class Bungeecord<VPlayer extends VitalPlayer, PlayerManager extends VitalComponentListManager<VPlayer>> extends VitalPlayerListener<ProxiedPlayer, VPlayer, PlayerManager> implements VitalListener.Bungeecord {
         protected Bungeecord(PlayerManager vital) {
             super(vital);
+        }
+
+        @Override
+        public void onRegistered() {
+            // disconnect any connected player...
+            for(ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
+                player.disconnect();
+            }
         }
 
         @net.md_5.bungee.event.EventHandler
