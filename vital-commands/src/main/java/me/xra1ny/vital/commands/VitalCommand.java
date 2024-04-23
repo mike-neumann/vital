@@ -8,6 +8,7 @@ import me.xra1ny.vital.commands.annotation.VitalCommandArg;
 import me.xra1ny.vital.commands.annotation.VitalCommandArgHandler;
 import me.xra1ny.vital.commands.annotation.VitalCommandInfo;
 import me.xra1ny.vital.commands.crossplatform.PluginCommand;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
@@ -90,6 +91,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
 
     public abstract boolean isPlayer(@NonNull CommandSender commandSender);
     public abstract boolean hasPermission(@NonNull CommandSender commandSender, @NonNull String permission);
+    public abstract List<String> getAllPlayerNames();
 
     public final boolean execute(@NonNull CommandSender sender, @NonNull String[] args) {
         // Check if the command requires a player sender.
@@ -347,14 +349,14 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
                 // Check if the final argument is equal to "PLAYER".
                 if (finalArg.equalsIgnoreCase(VitalCommandArg.PLAYER)) {
                     // Loop through online players.
-                    for (Player player : Bukkit.getOnlinePlayers()) {
+                    for (String playerName : getAllPlayerNames()) {
                         // Check if the player name is already in the tabCompleted list.
-                        if (tabCompleted.contains(player.getName())) {
+                        if (tabCompleted.contains(playerName)) {
                             continue; // Skip this iteration if the condition is met.
                         }
 
                         // Add the player name to the tabCompleted list.
-                        tabCompleted.add(player.getName());
+                        tabCompleted.add(playerName);
                     }
                 } else if (finalArg.startsWith(VitalCommandArg.NUMBER)) {
                     // Add "0" to the tabCompleted list.
@@ -463,6 +465,13 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
         public final boolean hasPermission(@NonNull org.bukkit.command.CommandSender sender, @NonNull String permission) {
             return sender.hasPermission(permission);
         }
+
+        @Override
+        public List<String> getAllPlayerNames() {
+            return Bukkit.getOnlinePlayers().stream()
+                    .map(Player::getName)
+                    .toList();
+        }
     }
 
     public static class Bungeecord extends VitalCommand<net.md_5.bungee.api.CommandSender> {
@@ -499,6 +508,13 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
         @Override
         public final boolean hasPermission(@NonNull net.md_5.bungee.api.CommandSender sender, @NonNull String permission) {
             return sender.hasPermission(permission);
+        }
+
+        @Override
+        public List<String> getAllPlayerNames() {
+            return ProxyServer.getInstance().getPlayers().stream()
+                    .map(ProxiedPlayer::getName)
+                    .toList();
         }
     }
 }
