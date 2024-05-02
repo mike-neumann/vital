@@ -1,5 +1,6 @@
 package me.xra1ny.vital.players;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.java.Log;
 import me.xra1ny.vital.VitalComponent;
@@ -23,11 +24,12 @@ import java.util.UUID;
  * @author xRa1ny
  */
 @Log
-public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, PlayerManager extends VitalComponentListManager<VPlayer>> implements VitalComponent {
-    private final PlayerManager vital;
+public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer<?>, PlayerManager extends VitalComponentListManager<VPlayer>> implements VitalComponent {
+    @Getter
+    private final PlayerManager playerManager;
 
-    protected VitalPlayerListener(PlayerManager vital) {
-        this.vital = vital;
+    protected VitalPlayerListener(PlayerManager playerManager) {
+        this.playerManager = playerManager;
     }
 
     @Override
@@ -44,11 +46,11 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, P
      * Handles the event when a player joins the server.
      *
      * @param uniqueId The uniqueId of the player.
-     * @param player The player joining itself.
+     * @param player   The player joining itself.
      */
     public void handlePlayerJoin(@NonNull UUID uniqueId, @NonNull Player player) {
         // Retrieve the VitalPlayer associated with the joining player, if it exists.
-        final Optional<VPlayer> optionalVitalPlayer = Optional.ofNullable(vital.getVitalComponentByUniqueId(uniqueId));
+        final Optional<VPlayer> optionalVitalPlayer = Optional.ofNullable(playerManager.getVitalComponentByUniqueId(uniqueId));
 
         if (optionalVitalPlayer.isEmpty()) {
             // Create a new VitalPlayer for the joining player.
@@ -56,7 +58,7 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, P
                 final VPlayer vitalPlayer = vitalPlayerType().getDeclaredConstructor(playerType()).newInstance(player);
 
                 // Register the VitalPlayer with VitalUserManagement.
-                vital.registerVitalComponent(vitalPlayer);
+                playerManager.registerVitalComponent(vitalPlayer);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException("error while creating vital player instance %s for %s"
@@ -72,7 +74,7 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, P
      */
     public void handlePlayerQuit(@NonNull UUID uniqueId) {
         // Retrieve the VitalPlayer associated with the leaving player.
-        final Optional<VPlayer> optionalVitalPlayer = Optional.ofNullable(vital.getVitalComponentByUniqueId(uniqueId));
+        final Optional<VPlayer> optionalVitalPlayer = Optional.ofNullable(playerManager.getVitalComponentByUniqueId(uniqueId));
 
         if (optionalVitalPlayer.isEmpty()) {
             return;
@@ -81,7 +83,7 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, P
         final VPlayer vitalPlayer = optionalVitalPlayer.get();
 
         // Unregister the VitalPlayer from VitalUserManagement.
-        vital.unregisterVitalComponent(vitalPlayer);
+        playerManager.unregisterVitalComponent(vitalPlayer);
     }
 
     /**
@@ -98,7 +100,7 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, P
      */
     protected abstract Class<Player> playerType();
 
-    public abstract static class Spigot<VPlayer extends VitalPlayer, PlayerManager extends VitalComponentListManager<VPlayer>> extends VitalPlayerListener<org.bukkit.entity.Player, VPlayer, PlayerManager> implements VitalListener.Spigot {
+    public abstract static class Spigot<VPlayer extends VitalPlayer.Spigot, PlayerManager extends VitalComponentListManager<VPlayer>> extends VitalPlayerListener<org.bukkit.entity.Player, VPlayer, PlayerManager> implements VitalListener.Spigot {
         protected Spigot(PlayerManager vital) {
             super(vital);
         }
@@ -106,7 +108,7 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, P
         @Override
         public void onRegistered() {
             // disconnect any connected player...
-            for(org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
+            for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
                 player.kick();
             }
         }
@@ -121,14 +123,13 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, P
             handlePlayerJoin(e.getPlayer().getUniqueId(), e.getPlayer());
         }
 
-
         @EventHandler
         public final void onPlayerQuit(@NonNull PlayerQuitEvent e) {
             handlePlayerQuit(e.getPlayer().getUniqueId());
         }
     }
 
-    public static abstract class Bungeecord<VPlayer extends VitalPlayer, PlayerManager extends VitalComponentListManager<VPlayer>> extends VitalPlayerListener<ProxiedPlayer, VPlayer, PlayerManager> implements VitalListener.Bungeecord {
+    public static abstract class Bungeecord<VPlayer extends VitalPlayer.Bungeecord, PlayerManager extends VitalComponentListManager<VPlayer>> extends VitalPlayerListener<ProxiedPlayer, VPlayer, PlayerManager> implements VitalListener.Bungeecord {
         protected Bungeecord(PlayerManager vital) {
             super(vital);
         }
@@ -136,17 +137,19 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer, P
         @Override
         public void onRegistered() {
             // disconnect any connected player...
-            for(ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
+            for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
                 player.disconnect();
             }
         }
 
-        @net.md_5.bungee.event.EventHandler
+        // should always be executed first.
+        @net.md_5.bungee.event.EventHandler(priority = net.md_5.bungee.event.EventPriority.LOWEST)
         public void onPostLogin(PostLoginEvent e) {
             handlePlayerJoin(e.getPlayer().getUniqueId(), e.getPlayer());
         }
 
-        @net.md_5.bungee.event.EventHandler
+        // should always be executed last.
+        @net.md_5.bungee.event.EventHandler(priority = net.md_5.bungee.event.EventPriority.HIGHEST)
         public void onPlayerDisconnect(PlayerDisconnectEvent e) {
             handlePlayerQuit(e.getPlayer().getUniqueId());
         }

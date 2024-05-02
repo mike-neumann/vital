@@ -4,6 +4,9 @@ import me.xra1ny.essentia.inject.annotation.Component;
 import me.xra1ny.vital.VitalSubModule;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Defines the vital-holograms submodule.
+ */
 @Component
 public class VitalHologramsSubModule extends VitalSubModule {
     @Override

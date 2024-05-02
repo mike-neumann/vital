@@ -8,4 +8,5 @@ When _**NOT**_ using IntelliJ, you can also run `./gradlew clean publishToMavenL
 build and install to local m2.
 
 Vital requires the following dependencies:
+
 - essentia-inject :: me.xra1ny.essentia:essentia-inject >> github project

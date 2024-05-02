@@ -23,7 +23,8 @@ public class VitalItemCooldownHandler extends VitalRepeatableTask.Spigot {
     /**
      * Creates a new VitalItemStackCooldownHandler.
      *
-     * @param javaPlugin The JavaPlugin instance.
+     * @param javaPlugin  The JavaPlugin instance.
+     * @param itemManager Vital's item manager.
      */
     public VitalItemCooldownHandler(@NonNull JavaPlugin javaPlugin, VitalItemManager itemManager) {
         super(javaPlugin);

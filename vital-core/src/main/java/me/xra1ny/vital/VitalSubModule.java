@@ -3,6 +3,9 @@ package me.xra1ny.vital;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Defines the vital-core submodule.
+ */
 @Log
 public abstract class VitalSubModule implements VitalComponent {
     @Override

@@ -26,20 +26,18 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
-@SuppressWarnings("unused")
 public abstract class VitalItem extends ItemStack implements AnnotatedVitalComponent<VitalItemInfo> {
-    /**
-     * The initial cooldown of this VitalItemStack.
-     */
-    @Getter
-    private int initialCooldown = 0;
-
     /**
      * The map of all currently active cooldowns for each player.
      */
     @Getter
     @NonNull
     private final Map<Player, Integer> playerCooldownMap = new HashMap<>();
+    /**
+     * The initial cooldown of this VitalItemStack.
+     */
+    @Getter
+    private int initialCooldown = 0;
 
     /**
      * Creates a new VitalItemStack based on annotation-defined properties.
@@ -69,22 +67,6 @@ public abstract class VitalItem extends ItemStack implements AnnotatedVitalCompo
         this.initialCooldown = info.cooldown();
     }
 
-    @AfterInit
-    public void afterInit(Vital<?> vital, VitalItemManager itemManager) {
-        vital.unregisterComponent(this);
-        itemManager.registerVitalComponent(this);
-    }
-
-    @Override
-    public void onRegistered() {
-
-    }
-
-    @Override
-    public void onUnregistered() {
-
-    }
-
     /**
      * Creates a new VitalItemStack based on an existing ItemStack.
      *
@@ -101,6 +83,28 @@ public abstract class VitalItem extends ItemStack implements AnnotatedVitalCompo
         setType(itemStack.getType());
         setAmount(itemStack.getAmount());
         setItemMeta(meta);
+    }
+
+    /**
+     * Registers this item.
+     *
+     * @param vital       Vital.
+     * @param itemManager Vital's item manager.
+     */
+    @AfterInit
+    public void afterInit(Vital<?> vital, VitalItemManager itemManager) {
+        vital.unregisterComponent(this);
+        itemManager.registerVitalComponent(this);
+    }
+
+    @Override
+    public void onRegistered() {
+
+    }
+
+    @Override
+    public void onUnregistered() {
+
     }
 
     @Override
@@ -182,7 +186,7 @@ public abstract class VitalItem extends ItemStack implements AnnotatedVitalCompo
     @Override
     public final String toString() {
         return super.toString().replace("%s x %d"
-                        .formatted(getType(), getAmount()), getType() + " x 1");
+                .formatted(getType(), getAmount()), getType() + " x 1");
     }
 
     @SuppressWarnings("DataFlowIssue")
@@ -218,6 +222,12 @@ public abstract class VitalItem extends ItemStack implements AnnotatedVitalCompo
         return !getItemMeta().getEnchants().isEmpty();
     }
 
+    /**
+     * Gets the current cooldown of the given player.
+     *
+     * @param player The player.
+     * @return The current cooldown.
+     */
     public int getCooldown(@NonNull Player player) {
         return playerCooldownMap.getOrDefault(player, 0);
     }

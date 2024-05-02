@@ -28,8 +28,8 @@ import java.util.stream.Stream;
  * Abstract base class for custom Minecraft commands using the Vital framework.
  * Provides functionality for command execution, tab completion, and argument handling.
  *
- * @author xRa1ny
  * @param <CommandSender> The command sender type of this command.
+ * @author xRa1ny
  */
 public abstract class VitalCommand<CommandSender> implements AnnotatedVitalComponent<VitalCommandInfo> {
     private final Class<CommandSender> commandSenderClass;
@@ -89,10 +89,37 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
         return VitalCommandInfo.class;
     }
 
+    /**
+     * If this generic sender is of type player.
+     *
+     * @param commandSender The sender.
+     * @return True if the sender is a player; false otherwise.
+     */
     public abstract boolean isPlayer(@NonNull CommandSender commandSender);
+
+    /**
+     * Checks if the given sender has the required permissions to run this c command.
+     *
+     * @param commandSender The sender.
+     * @param permission    The permission to check for.
+     * @return True if the sender is permitted; false otherwise.
+     */
     public abstract boolean hasPermission(@NonNull CommandSender commandSender, @NonNull String permission);
+
+    /**
+     * Gets all player names that are currently connected.
+     *
+     * @return A list of all player names currently connected.
+     */
     public abstract List<String> getAllPlayerNames();
 
+    /**
+     * Execute this command with any set specifications.
+     *
+     * @param sender Who sent the command.
+     * @param args   Any args used during command execution.
+     * @return Command success state.
+     */
     public final boolean execute(@NonNull CommandSender sender, @NonNull String[] args) {
         // Check if the command requires a player sender.
         if (requiresPlayer) {
@@ -198,10 +225,10 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
             // If the commandReturnState is still null, execute the base command.
             if (commandReturnState == null) {
                 // when executing the ACTUAL BASE COMMAND, call its method here...
-                if(args.length == 0) {
+                if (args.length == 0) {
                     commandReturnState = executeBaseCommand(sender);
 
-                }else {
+                } else {
                     // if not, we are accessing an invalid command node.
                     commandReturnState = VitalCommandReturnState.INVALID_ARGS;
                 }
@@ -232,12 +259,12 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      * @return the status of this command execution
      */
     @NonNull
-    public VitalCommandReturnState executeBaseCommand(@NonNull CommandSender sender) {
+    protected VitalCommandReturnState executeBaseCommand(@NonNull CommandSender sender) {
         return VitalCommandReturnState.INVALID_ARGS;
     }
 
     @NonNull
-    public VitalCommandReturnState executeCommandArgHandlerMethod(@NonNull CommandSender sender, @NonNull VitalCommandArg commandArg, @NonNull String @NonNull [] values) throws InvocationTargetException, IllegalAccessException {
+    private VitalCommandReturnState executeCommandArgHandlerMethod(@NonNull CommandSender sender, @NonNull VitalCommandArg commandArg, @NonNull String @NonNull [] values) throws InvocationTargetException, IllegalAccessException {
         // Initialize a variable to hold the handler method.
         Method commandArgHandlerMethod = null;
 
@@ -301,8 +328,15 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
         return List.of();
     }
 
+    /**
+     * Handles the tab complete action on any command sender.
+     *
+     * @param sender The sender.
+     * @param args   Any args used during tab completion.
+     * @return A list of all supported tab completions.
+     */
     @NonNull
-    public final List<String> handleTabComplete(@NonNull CommandSender sender, @NonNull String @NonNull [] args) {
+    protected final List<String> handleTabComplete(@NonNull CommandSender sender, @NonNull String @NonNull [] args) {
         // Initialize a list to store tab-completed suggestions.
         final List<String> tabCompleted = new ArrayList<>();
 
@@ -436,11 +470,22 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
 
     }
 
+    /**
+     * The spigot implementation for vital commands.
+     */
     public static class Spigot extends VitalCommand<org.bukkit.command.CommandSender> implements PluginCommand.Spigot {
+        /**
+         * Constructs a new spigot vital command with the given info annotation provided by the implementing subclass.
+         */
         public Spigot() {
             super(org.bukkit.command.CommandSender.class);
         }
 
+        /**
+         * Registers this command.
+         *
+         * @param plugin The spigot plugin impl.
+         */
         @AfterInit
         public final void afterInit(JavaPlugin plugin) {
             plugin.getCommand(getName()).setExecutor(this);
@@ -474,9 +519,15 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
         }
     }
 
+    /**
+     * The bungeecord implementation for vital commands.
+     */
     public static class Bungeecord extends VitalCommand<net.md_5.bungee.api.CommandSender> {
         private final PluginCommand.Bungeecord command;
 
+        /**
+         * Constructs a new bungeecord vital command with the given info annotation provided by the implementing subclass.
+         */
         public Bungeecord() {
             super(net.md_5.bungee.api.CommandSender.class);
 
@@ -495,6 +546,11 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
             };
         }
 
+        /**
+         * Registers this command.
+         *
+         * @param plugin The bungeecord plugin impl.
+         */
         @AfterInit
         public final void afterInit(Plugin plugin) {
             plugin.getProxy().getPluginManager().registerCommand(plugin, command);

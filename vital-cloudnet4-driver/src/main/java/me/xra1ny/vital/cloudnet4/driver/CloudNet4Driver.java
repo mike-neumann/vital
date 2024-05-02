@@ -21,21 +21,42 @@ import java.util.function.Predicate;
  * @author xRa1ny
  */
 public class CloudNet4Driver {
+    /**
+     * Gets the cloudnet service provider
+     *
+     * @return The cloudnet service provider.
+     */
     @NonNull
     public static CloudServiceProvider getCloudServiceProvider() {
         return InjectionLayer.ext().instance(CloudServiceProvider.class);
     }
 
+    /**
+     * Gets the service task provider.
+     *
+     * @return The service task provider.
+     */
     @NonNull
     public static ServiceTaskProvider getServiceTaskProvider() {
         return InjectionLayer.ext().instance(ServiceTaskProvider.class);
     }
 
+    /**
+     * Gets the cloudnet service factory.
+     *
+     * @return The cloudnet service factory.
+     */
     @NonNull
     public static CloudServiceFactory getCloudServiceFactory() {
         return InjectionLayer.ext().instance(CloudServiceFactory.class);
     }
 
+    /**
+     * Gets all cloudnet services by the given predicate.
+     *
+     * @param predicate The predicate for filtering.
+     * @return A list of all cloudnet services.
+     */
     @NonNull
     public static List<ServiceInfoSnapshot> getCloudServers(@NonNull Predicate<ServiceInfoSnapshot> predicate) {
         return getCloudServiceProvider().runningServices().stream()
@@ -43,11 +64,22 @@ public class CloudNet4Driver {
                 .toList();
     }
 
+    /**
+     * Gets all cloudnet services.
+     *
+     * @return A list of all cloudnet services.
+     */
     @NonNull
     public static List<ServiceInfoSnapshot> getCloudServers() {
         return getCloudServers(t -> true);
     }
 
+    /**
+     * Gets all cloudnet services by the given task name.
+     *
+     * @param taskName The cloudnet service task name to filter for.
+     * @return A list of all cloudnet services by the given task name.
+     */
     @NonNull
     public static List<ServiceInfoSnapshot> getCloudServers(@NonNull String taskName) {
         return getCloudServiceProvider().servicesByTask(taskName).stream()

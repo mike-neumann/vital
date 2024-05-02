@@ -69,12 +69,11 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
         vitalRepeatableTask = createVitalRepeatableTask(plugin);
     }
 
-    protected abstract VitalRepeatableTask<Plugin,Runnable,Task> createVitalRepeatableTask(@NonNull Plugin plugin);
+    protected abstract VitalRepeatableTask<Plugin, Runnable, Task> createVitalRepeatableTask(@NonNull Plugin plugin);
 
     /**
      * Starts the countdown.
      */
-    @SuppressWarnings("unused")
     public final void start() {
         vitalRepeatableTask.start();
     }
@@ -148,7 +147,15 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
 
     }
 
+    /**
+     * The spigot implementation for any vital countdown task.
+     */
     public static class Spigot extends VitalCountdownTask<JavaPlugin, BukkitRunnable, BukkitTask> {
+        /**
+         * Constructs a new spigot impl for vital countdown task.
+         *
+         * @param javaPlugin The spigot plugin impl.
+         */
         public Spigot(@NonNull JavaPlugin javaPlugin) {
             super(javaPlugin);
         }
@@ -187,7 +194,15 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
         }
     }
 
+    /**
+     * The bungeecord implementation for any vital countdown task.
+     */
     public static class Bungeecord extends VitalCountdownTask<net.md_5.bungee.api.plugin.Plugin, java.lang.Runnable, ScheduledTask> {
+        /**
+         * Constructs a new bungeecord impl for vital countdown task.
+         *
+         * @param plugin The bungeecord plugin impl.
+         */
         public Bungeecord(@NonNull net.md_5.bungee.api.plugin.Plugin plugin) {
             super(plugin);
         }

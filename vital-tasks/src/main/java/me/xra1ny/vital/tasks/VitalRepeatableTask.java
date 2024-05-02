@@ -66,8 +66,8 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
     /**
      * Creates a new instance of VitalRepeatableTask with the specified JavaPlugin and interval.
      *
-     * @param plugin The JavaPlugin instance associated with this task.
-     * @param interval   The interval at which this task should execute, in milliseconds.
+     * @param plugin   The JavaPlugin instance associated with this task.
+     * @param interval The interval at which this task should execute, in milliseconds.
      */
     public VitalRepeatableTask(@NonNull Plugin plugin, int interval) {
         this.plugin = plugin;
@@ -155,11 +155,25 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
 
     }
 
+    /**
+     * The spigot implementation for vital repeatable task.
+     */
     public static class Spigot extends VitalRepeatableTask<JavaPlugin, BukkitRunnable, BukkitTask> {
+        /**
+         * Constructs a new spigot impl. for vital repeatable task.
+         *
+         * @param javaPlugin The spigot plugin impl.
+         */
         public Spigot(@NonNull JavaPlugin javaPlugin) {
             super(javaPlugin);
         }
 
+        /**
+         * Constructs a new spigot impl. for vital repeatable task with the given interval.
+         *
+         * @param javaPlugin The spigot plugin impl.
+         * @param interval
+         */
         public Spigot(@NonNull JavaPlugin javaPlugin, int interval) {
             super(javaPlugin, interval);
         }
@@ -194,11 +208,25 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
         }
     }
 
+    /**
+     * The bungeecord implementation for vital repeatable task.
+     */
     public static class Bungeecord extends VitalRepeatableTask<net.md_5.bungee.api.plugin.Plugin, java.lang.Runnable, ScheduledTask> {
+        /**
+         * Constructs a new bungeecord impl. for vital repeatable task.
+         *
+         * @param plugin The bungeecord plugin impl.
+         */
         public Bungeecord(net.md_5.bungee.api.plugin.@NonNull Plugin plugin) {
             super(plugin);
         }
 
+        /**
+         * Constructs a new bungeecord impl. for vital repeatable task with the given interval.
+         *
+         * @param plugin   The bungeecord plugin impl.
+         * @param interval The interval.
+         */
         public Bungeecord(net.md_5.bungee.api.plugin.@NonNull Plugin plugin, int interval) {
             super(plugin, interval);
         }

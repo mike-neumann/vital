@@ -93,7 +93,7 @@ public abstract class VitalPagedInventory extends VitalInventory {
             page = 1;
         }
 
-        if(page >= maxPage) {
+        if (page >= maxPage) {
             page = maxPage;
         }
 
@@ -121,13 +121,13 @@ public abstract class VitalPagedInventory extends VitalInventory {
     protected <T> List<T> sliceForPage(@NonNull List<T> list) {
         final int startIndex = (int) (getPageContent() * (page - 1));
 
-        if(startIndex >= list.size() || startIndex < 0) {
+        if (startIndex >= list.size() || startIndex < 0) {
             return List.of();
         }
 
         final int endIndex = startIndex + getPageContent();
 
-        if(endIndex >= list.size()) {
+        if (endIndex >= list.size()) {
             return list.subList(startIndex, list.size());
         }
 

@@ -23,11 +23,6 @@ import java.util.Optional;
 public class VitalItemManager extends VitalComponentListManager<VitalItem> {
     private static VitalItemManager instance;
 
-    @Override
-    public void onRegistered() {
-        instance = this;
-    }
-
     /**
      * Attempts to set the specified {@link VitalItem} by its class.
      *
@@ -65,8 +60,8 @@ public class VitalItemManager extends VitalComponentListManager<VitalItem> {
      */
     public static void setItem(@NonNull Inventory inventory, int slot, @NonNull Class<? extends VitalItem> itemStackClass) {
         final VitalItem vitalItem = Optional.ofNullable(instance.getVitalComponentByClass(itemStackClass))
-                        .orElseThrow(() -> new RuntimeException("attempted setting unregistered itemstack %s"
-                                .formatted(itemStackClass.getSimpleName())));
+                .orElseThrow(() -> new RuntimeException("attempted setting unregistered itemstack %s"
+                        .formatted(itemStackClass.getSimpleName())));
 
         inventory.setItem(slot, vitalItem);
     }
@@ -82,6 +77,16 @@ public class VitalItemManager extends VitalComponentListManager<VitalItem> {
         setItem(player.getInventory(), slot, itemStackClass);
     }
 
+    @Override
+    public void onRegistered() {
+        instance = this;
+    }
+
+    /**
+     * Gets all registered items.
+     *
+     * @return A list of all registered items.
+     */
     public List<VitalItem> getItems() {
         return instance.getVitalComponents(VitalItem.class);
     }

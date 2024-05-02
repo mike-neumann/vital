@@ -15,14 +15,30 @@ public class VitalListener {
 
     }
 
+    /**
+     * The spigot implementation for vital listeners.
+     */
     public interface Spigot extends org.bukkit.event.Listener {
+        /**
+         * Registers this listener.
+         *
+         * @param plugin The spigot plugin impl.
+         */
         @AfterInit
         default void afterInit(JavaPlugin plugin) {
             Bukkit.getPluginManager().registerEvents(this, plugin);
         }
     }
 
+    /**
+     * The bungeecord implementation for vital listeners.
+     */
     public interface Bungeecord extends net.md_5.bungee.api.plugin.Listener {
+        /**
+         * Registers this listener.
+         *
+         * @param plugin The bungeecord impl.
+         */
         @AfterInit
         default void afterInit(Plugin plugin) {
             plugin.getProxy().getPluginManager().registerListener(plugin, this);

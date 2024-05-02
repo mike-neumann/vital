@@ -84,7 +84,7 @@ public class VitalItemBuilder {
     /**
      * Define the item flags for this {@link ItemStack}.
      *
-     * @param itemFlagList The {@link List} of all {@link ItemFlag} instances..
+     * @param itemFlagList The {@link List} of all {@link ItemFlag} instances.
      * @return This builder instance.
      */
     public VitalItemBuilder itemFlags(@NonNull List<ItemFlag> itemFlagList) {
@@ -256,7 +256,10 @@ public class VitalItemBuilder {
             if (!namespacedKeyMap.isEmpty()) {
                 for (Map.Entry<NamespacedKey, Map.Entry<PersistentDataType<?, ?>, ?>> entry : namespacedKeyMap.entrySet()) {
                     final NamespacedKey namespacedKey = entry.getKey();
+
+                    // noinspection unchecked
                     final PersistentDataType<?, Z> persistentDataType = (PersistentDataType<?, Z>) entry.getValue().getKey();
+                    // noinspection unchecked
                     final Z value = (Z) entry.getValue().getValue();
 
                     if (!persistentDataType.getComplexType().equals(value.getClass())) {

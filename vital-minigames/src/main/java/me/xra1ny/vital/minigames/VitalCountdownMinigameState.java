@@ -20,7 +20,6 @@ public abstract class VitalCountdownMinigameState implements VitalMinigameState,
      *
      * @param javaPlugin The JavaPlugin instance.
      */
-    @SuppressWarnings("unused")
     public VitalCountdownMinigameState(@NonNull JavaPlugin javaPlugin) {
         final VitalCountdownTaskInfo vitalCountdownTaskInfo = getRequiredAnnotation();
 
@@ -34,7 +33,6 @@ public abstract class VitalCountdownMinigameState implements VitalMinigameState,
      * @param interval   The countdown update interval.
      * @param countdown  The initial countdown value.
      */
-    @SuppressWarnings("unused")
     public VitalCountdownMinigameState(@NonNull JavaPlugin javaPlugin, int interval, int countdown) {
         run(javaPlugin, interval, countdown);
     }
@@ -51,9 +49,9 @@ public abstract class VitalCountdownMinigameState implements VitalMinigameState,
     /**
      * Sets up the countdown task using a VitalRepeatableTask.
      *
-     * @param plugin The JavaPlugin instance.
-     * @param countdown  The countdown.
-     * @param interval   The countdown update interval.
+     * @param plugin    The JavaPlugin instance.
+     * @param countdown The countdown.
+     * @param interval  The countdown update interval.
      */
     private void run(@NonNull JavaPlugin plugin, int interval, int countdown) {
         vitalCountdownTask = new VitalCountdownTask.Spigot(plugin, interval, countdown) {
@@ -166,14 +164,29 @@ public abstract class VitalCountdownMinigameState implements VitalMinigameState,
         return VitalCountdownTaskInfo.class;
     }
 
+    /**
+     * Gets the initial countdown of this minigame state.
+     *
+     * @return The initial countdown.
+     */
     public int getInitialCountdown() {
         return vitalCountdownTask.getInitialCountdown();
     }
 
+    /**
+     * Gets the countdown of this minigame state.
+     *
+     * @return The current countdown.
+     */
     public int getCountdown() {
         return vitalCountdownTask.getCountdown();
     }
 
+    /**
+     * Sets the current countdown of this minigame state.
+     *
+     * @param countdown The countdown.
+     */
     public void setCountdown(int countdown) {
         vitalCountdownTask.setCountdown(countdown);
     }

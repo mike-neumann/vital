@@ -9,6 +9,9 @@ import org.bukkit.entity.Player;
 
 import java.util.Optional;
 
+/**
+ * The main vital inventory manager for registering inventories.
+ */
 @Log
 @Component
 public class VitalInventoryManager implements VitalComponent {
@@ -18,16 +21,6 @@ public class VitalInventoryManager implements VitalComponent {
 
     public VitalInventoryManager(Vital<?> vital) {
         this.vital = vital;
-    }
-
-    @Override
-    public void onRegistered() {
-        instance = this;
-    }
-
-    @Override
-    public void onUnregistered() {
-
     }
 
     /**
@@ -42,5 +35,15 @@ public class VitalInventoryManager implements VitalComponent {
                         .formatted(vitalInventoryClass.getSimpleName())));
 
         player.openInventory(vitalInventory.getInventory());
+    }
+
+    @Override
+    public void onRegistered() {
+        instance = this;
+    }
+
+    @Override
+    public void onUnregistered() {
+
     }
 }

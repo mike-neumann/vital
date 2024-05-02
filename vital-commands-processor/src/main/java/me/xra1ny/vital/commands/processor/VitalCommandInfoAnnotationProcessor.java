@@ -64,7 +64,7 @@ public class VitalCommandInfoAnnotationProcessor extends AbstractProcessor {
      * Generates the plugin yml if non-existent, or adds to the content, the necessary command name information for automatic command registration.
      *
      * @param vitalCommandInfoList The list of {@link VitalCommandInfo} annotations.
-     * @param pluginEnvironment The environment this plugin uses.
+     * @param pluginEnvironment    The environment this plugin uses.
      */
     private void generatePluginYmlCommands(@NonNull List<VitalCommandInfo> vitalCommandInfoList, VitalPluginEnvironment pluginEnvironment) {
         try {

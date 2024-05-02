@@ -37,7 +37,7 @@ public class VitalInventoryListener implements VitalListener.Spigot {
             vitalInventory.onUpdate(player);
             vitalInventory.update();
 
-            if(vitalInventory instanceof VitalPagedInventory vitalPagedInventory) {
+            if (vitalInventory instanceof VitalPagedInventory vitalPagedInventory) {
                 vitalPagedInventory.setPage(1, player);
             }
         }

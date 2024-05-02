@@ -12,8 +12,8 @@ import java.util.UUID;
 /**
  * Wrapper class to store player data to a config file.
  *
- * @author xRa1ny
  * @param <Player> The player type of this config player.
+ * @author xRa1ny
  */
 public abstract class ConfigPlayer<Player> {
     @Property(String.class)
@@ -25,6 +25,9 @@ public abstract class ConfigPlayer<Player> {
     @Nullable
     public abstract Player toPlayer();
 
+    /**
+     * The spigot implementation for config player.
+     */
     public static class Spigot extends ConfigPlayer<org.bukkit.entity.Player> {
         @Property(ConfigLocation.class)
         public ConfigLocation location;
@@ -55,6 +58,9 @@ public abstract class ConfigPlayer<Player> {
         }
     }
 
+    /**
+     * The bungeecord implementation for config player.
+     */
     public static class Bungeecord extends ConfigPlayer<ProxiedPlayer> {
         @NonNull
         public static ConfigPlayer.Bungeecord of(@NonNull ProxiedPlayer player) {

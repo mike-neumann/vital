@@ -60,7 +60,8 @@ public class VitalGlobalScoreboard extends VitalScoreboard {
      *
      * @param lines The lines to set.
      */
-    public void setLines(@NonNull Supplier<String>... lines) {
+    @SafeVarargs
+    public final void setLines(@NonNull Supplier<String>... lines) {
         this.lines = List.of(lines);
     }
 
@@ -98,6 +99,9 @@ public class VitalGlobalScoreboard extends VitalScoreboard {
         for (int i = 0; i < lines.size(); i++) {
             final Supplier<String> lineSupplier = lines.get(i);
             final String line = lineSupplier.get();
+
+            assert objective != null;
+
             final Score score = objective.getScore(LegacyComponentSerializer.legacySection()
                     .serialize(MiniMessage.miniMessage()
                             .deserialize(line)) + "\u00A7".repeat(i));
@@ -125,13 +129,13 @@ public class VitalGlobalScoreboard extends VitalScoreboard {
      *
      * @param player The player to remove.
      */
-    @SuppressWarnings("DataFlowIssue")
     public void removePlayer(@NonNull Player player) {
         if (!playerList.contains(player)) {
             return;
         }
 
         playerList.remove(player);
+        //noinspection DataFlowIssue
         player.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 
         update();

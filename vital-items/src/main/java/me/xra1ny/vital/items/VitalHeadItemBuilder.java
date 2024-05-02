@@ -125,6 +125,12 @@ public class VitalHeadItemBuilder extends VitalItemBuilder {
         return itemStack;
     }
 
+    /**
+     * Sets the owning player of this head builder configuration.
+     *
+     * @param owningPlayer The owning player.
+     * @return This builder config.
+     */
     public VitalHeadItemBuilder owningPlayer(@Nullable OfflinePlayer owningPlayer) {
         this.owningPlayer = owningPlayer;
 

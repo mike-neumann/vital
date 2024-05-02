@@ -19,11 +19,8 @@ import java.util.*;
  * @param <Plugin> The Plugin type.
  * @author xRa1ny
  */
-@SuppressWarnings("unused")
 @Log
 public class Vital<Plugin> implements DIContainer {
-    private static Vital<?> instance;
-
     /**
      * Holds a list of all classes registered on this classpath for later use of dependency injection.
      *
@@ -32,7 +29,7 @@ public class Vital<Plugin> implements DIContainer {
     @Getter
     @NonNull
     private static final Set<Class<? extends VitalComponent>> scannedClassSet = new Reflections().getSubTypesOf(VitalComponent.class);
-
+    private static Vital<?> instance;
     @Getter
     @NonNull
     private final Map<Class<?>, Object> componentClassObjectMap = new HashMap<>();
@@ -124,8 +121,14 @@ public class Vital<Plugin> implements DIContainer {
         log.info("Hello from Vital!");
     }
 
+    /**
+     * Gets the vital component by its uniqueId.
+     *
+     * @param uniqueId The components uniqueId.
+     * @return The vital command; or null.
+     */
     @Nullable
-    public VitalComponent getComponent(@NotNull UUID uniqueId) {
+    public VitalComponent getComponentByUniqueId(@NotNull UUID uniqueId) {
         return getComponents().stream()
                 .filter(VitalComponent.class::isInstance)
                 .map(VitalComponent.class::cast)

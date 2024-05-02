@@ -63,7 +63,15 @@ public abstract class VitalPlayer<Player> implements VitalComponent {
 
     }
 
+    /**
+     * The spigot implementation for vital player.
+     */
     public static class Spigot extends VitalPlayer<org.bukkit.entity.Player> {
+        /**
+         * Constructs a new spigot impl for vital player.
+         *
+         * @param player The spigot player impl.
+         */
         public Spigot(@NonNull org.bukkit.entity.Player player) {
             super(player);
         }
@@ -79,7 +87,15 @@ public abstract class VitalPlayer<Player> implements VitalComponent {
         }
     }
 
+    /**
+     * The bungeecord implementation for vital player.
+     */
     public static class Bungeecord extends VitalPlayer<ProxiedPlayer> {
+        /**
+         * Constructs a new bungeecord impl. for vital player.
+         *
+         * @param proxiedPlayer The bungeecord player impl.
+         */
         public Bungeecord(@NonNull ProxiedPlayer proxiedPlayer) {
             super(proxiedPlayer);
         }

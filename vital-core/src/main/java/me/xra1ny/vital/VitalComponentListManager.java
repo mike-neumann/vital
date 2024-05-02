@@ -122,6 +122,7 @@ public abstract class VitalComponentListManager<T extends VitalComponent> implem
     /**
      * Gets a random VitalComponent, matching the given {@link Predicate} registered on this manager instance.
      *
+     * @param predicate The predicate for filtering.
      * @return The fetched component; or null.
      */
     @Nullable

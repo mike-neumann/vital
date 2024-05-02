@@ -34,6 +34,12 @@ public class VitalMinigameManager implements VitalComponent {
     @Getter
     private VitalMinigameState vitalMinigameState;
 
+    /**
+     * Constructs a new vital minigame manager for managing active minigame states.
+     *
+     * @param vital  Vital
+     * @param plugin The associated java plugin.
+     */
     public VitalMinigameManager(Vital<?> vital, JavaPlugin plugin) {
         this.vital = vital;
         this.plugin = plugin;
@@ -46,7 +52,6 @@ public class VitalMinigameManager implements VitalComponent {
      * @param <T>                     The type of minigame state.
      * @return True if the current state is of the specified class, otherwise false.
      */
-    @SuppressWarnings("unused")
     public static <T extends VitalMinigameState> boolean isVitalMinigameState(@NonNull Class<T> vitalMinigameStateClass) {
         if (instance.vitalMinigameState == null) {
             return false;
@@ -75,7 +80,6 @@ public class VitalMinigameManager implements VitalComponent {
      *
      * @param vitalMinigameState The new minigame state to set.
      */
-    @SuppressWarnings("unused")
     public static void setVitalMinigameState(@NonNull VitalMinigameState vitalMinigameState) {
         if (instance.vitalMinigameState != null) {
             if (instance.vitalMinigameState instanceof VitalCountdownMinigameState vitalCountdownMinigameState) {
