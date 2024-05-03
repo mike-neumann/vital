@@ -765,7 +765,7 @@ public interface VitalUtils<Player> {
         @Override
         public void sendTitle(@NonNull ProxiedPlayer player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
             player.sendTitle(ProxyServer.getInstance().createTitle()
-                    .title(TextComponent.fromLegacy(title == null ? "" : LegacyComponentSerializer.legacyAmpersand().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers))))
+                    .title(TextComponent.fromLegacy(title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers))))
                     .subTitle(TextComponent.fromLegacy(subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers))))
                     .fadeIn(fadeIn)
                     .stay(stay)
@@ -776,7 +776,7 @@ public interface VitalUtils<Player> {
         @Override
         public void sendTitle(@NonNull ProxiedPlayer player, @Nullable String title, @Nullable String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
             player.sendTitle(ProxyServer.getInstance().createTitle()
-                    .title(TextComponent.fromLegacy(title == null ? "" : LegacyComponentSerializer.legacyAmpersand().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers))))
+                    .title(TextComponent.fromLegacy(title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers))))
                     .subTitle(TextComponent.fromLegacy(subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers))))
             );
         }

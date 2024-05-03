@@ -30,6 +30,7 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
 
         initialCountdown = vitalCountdownTaskInfo.value();
         countdown = initialCountdown;
+        interval = vitalCountdownTaskInfo.interval();
 
         run(plugin);
     }
