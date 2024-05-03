@@ -104,6 +104,8 @@ public abstract class VitalPagedInventory extends VitalInventory {
 
     @Override
     public void update() {
+        updateWithoutItems();
+
         for (Player player : Bukkit.getOnlinePlayers()) {
             final InventoryHolder inventoryHolder = player.getOpenInventory().getTopInventory().getHolder();
 
@@ -115,7 +117,7 @@ public abstract class VitalPagedInventory extends VitalInventory {
             onPageChange(page, player);
         }
 
-        super.update();
+        updateItems();
     }
 
     protected <T> List<T> sliceForPage(@NonNull List<T> list) {

@@ -106,7 +106,7 @@ public class VitalInventory implements InventoryHolder, AnnotatedVitalComponent<
 
     }
 
-    private void updateItems() {
+    public void updateItems() {
         getInventory().clear();
 
         for (int i = 0; i < size; i++) {
@@ -117,12 +117,12 @@ public class VitalInventory implements InventoryHolder, AnnotatedVitalComponent<
     }
 
     /**
-     * Updates this inventory removing all items and resetting them for all players that have this inventory open.
+     * This method will call any onUpdate method used to inject or update inventory information without modifying any items in inventory itself.
      *
      * @see VitalInventory#onUpdate(Player)
      * @see VitalInventory#onUpdate()
      */
-    public void update() {
+    public void updateWithoutItems() {
         // first call developer onUpdate
         onUpdate();
 
@@ -136,8 +136,16 @@ public class VitalInventory implements InventoryHolder, AnnotatedVitalComponent<
             // update the inventory for the looping player.
             onUpdate(player);
         }
+    }
 
-        // finally set all items accordingly
+    /**
+     * Updates this inventory removing all items and resetting them for all players that have this inventory open.
+     *
+     * @see VitalInventory#onUpdate(Player)
+     * @see VitalInventory#onUpdate()
+     */
+    public void update() {
+        updateWithoutItems();
         updateItems();
     }
 

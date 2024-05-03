@@ -16,6 +16,7 @@ import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -126,7 +127,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
             // Check if the sender is not a Player.
             if (!isPlayer(sender)) {
                 // Execute the onCommandRequiresPlayer method and return true.
-                onCommandRequiresPlayer(sender);
+                onCommandRequiresPlayer(sender, String.join(" ", args), null);
 
                 return true;
             }
@@ -135,7 +136,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
         // Check if a permission is required and if the sender has it.
         if (!permission.isBlank() && !hasPermission(sender, permission)) {
             // Execute the onCommandRequiresPermission method and return true.
-            onCommandRequiresPermission(sender);
+            onCommandRequiresPermission(sender, String.join(" ", args), null);
 
             return true;
         }
@@ -234,12 +235,14 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
                 }
             }
 
+            final String joinedArgs = String.join(" ", args);
+
             // Handle the command return state.
             switch (commandReturnState) {
-                case ERROR -> onCommandError(sender);
-                case INTERNAL_ERROR -> onCommandInternalError(sender);
-                case INVALID_ARGS -> onCommandInvalidArgs(sender);
-                case NO_PERMISSION -> onCommandRequiresPermission(sender);
+                case ERROR -> onCommandError(sender, joinedArgs, finalCommandArg);
+                case INTERNAL_ERROR -> onCommandInternalError(sender, joinedArgs, finalCommandArg);
+                case INVALID_ARGS -> onCommandInvalidArgs(sender, joinedArgs);
+                case NO_PERMISSION -> onCommandRequiresPermission(sender, joinedArgs, finalCommandArg);
             }
 
             return true;
@@ -430,7 +433,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      *
      * @param sender The CommandSender
      */
-    protected void onCommandInvalidArgs(@NonNull CommandSender sender) {
+    protected void onCommandInvalidArgs(@NonNull CommandSender sender, @NonNull String args) {
 
     }
 
@@ -439,7 +442,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      *
      * @param sender The CommandSender
      */
-    protected void onCommandInternalError(@NonNull CommandSender sender) {
+    protected void onCommandInternalError(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
     }
 
@@ -448,7 +451,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      *
      * @param sender The CommandSender
      */
-    protected void onCommandError(@NonNull CommandSender sender) {
+    protected void onCommandError(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
     }
 
@@ -457,7 +460,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      *
      * @param sender The CommandSender
      */
-    protected void onCommandRequiresPermission(@NonNull CommandSender sender) {
+    protected void onCommandRequiresPermission(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
     }
 
@@ -466,7 +469,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      *
      * @param sender The CommandSender
      */
-    protected void onCommandRequiresPlayer(@NonNull CommandSender sender) {
+    protected void onCommandRequiresPlayer(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
     }
 
