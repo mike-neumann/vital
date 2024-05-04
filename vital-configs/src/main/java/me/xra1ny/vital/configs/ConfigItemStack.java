@@ -42,7 +42,13 @@ public class ConfigItemStack {
         final ConfigItemStack configItemStack = new ConfigItemStack();
 
         configItemStack.type = itemStack.getType();
-        configItemStack.displayName = LegacyComponentSerializer.legacyAmpersand().serialize(itemMeta.displayName());
+
+        if (itemMeta.displayName() != null) {
+            configItemStack.displayName = LegacyComponentSerializer.legacyAmpersand().serialize(itemMeta.displayName());
+        } else {
+            configItemStack.displayName = itemStack.getType().name();
+        }
+
         configItemStack.lore = !itemMeta.hasLore() ? List.of() :
                 itemMeta.lore().stream()
                         .map(LegacyComponentSerializer.legacyAmpersand()::serialize)
