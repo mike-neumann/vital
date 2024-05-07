@@ -123,4 +123,14 @@ public class CloudNet4Bridge {
                 .map(server -> server.readPropertyOrDefault(BridgeDocProperties.PLAYERS, List.of()).size())
                 .reduce(0, Integer::sum);
     }
+
+    /**
+     * Runs the command as the given player
+     *
+     * @param uuid The player uuid.
+     * @param command The command to run.
+     */
+    public static void runCommand(@NonNull UUID uuid, @NonNull String command) {
+        getPlayerExecutor(uuid).spoofCommandExecution(command);
+    }
 }
