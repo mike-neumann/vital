@@ -528,12 +528,14 @@ public interface VitalUtils<Player> {
 
         @Override
         public void sendMessage(org.bukkit.entity.@NonNull Player player, @NonNull String message, @Nullable TagResolver... tagResolvers) {
-            player.sendMessage(MiniMessage.miniMessage().deserialize(message, tagResolvers == null ? new TagResolver[0] : tagResolvers));
+            // must be used since, both version (paper and spigot) support the bungeeapi implementations...
+            player.spigot().sendMessage(BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message, tagResolvers == null ? new TagResolver[0] : tagResolvers)));
         }
 
         @Override
         public void broadcastMessage(@NonNull String message, @NonNull Predicate<org.bukkit.entity.Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
-            broadcastAction(playerPredicate, player -> player.sendRichMessage(message, tagResolvers));
+            // must be used since, both version (paper and spigot) support the bungeeapi implementations...
+            broadcastAction(playerPredicate, player -> player.spigot().sendMessage(BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message, tagResolvers))));
         }
 
         @Override
