@@ -23,8 +23,8 @@ allprojects {
     }
 
     dependencies {
-        compileOnly("org.projectlombok:lombok:1.18.28")
-        annotationProcessor("org.projectlombok:lombok:1.18.28")
+        compileOnly("org.projectlombok:lombok:1.18.32")
+        annotationProcessor("org.projectlombok:lombok:1.18.32")
         implementation("org.reflections:reflections:0.10.2")
         compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
         compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
