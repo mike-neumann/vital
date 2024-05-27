@@ -93,6 +93,7 @@ public class VitalCommandInfoAnnotationProcessor extends AbstractProcessor {
 
                 if (vitalCommandAliases.length > 0) {
                     VitalPluginInfoHolder.PLUGIN_INFO.append("    aliases: ");
+                    VitalPluginInfoHolder.PLUGIN_INFO.append("\n");
 
                     for (String alias : vitalCommandAliases) {
                         VitalPluginInfoHolder.PLUGIN_INFO.append("      - ").append(alias);
