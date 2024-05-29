@@ -304,3 +304,19 @@ Now that we have some states, we may set them using Vital's built in feature to 
 `VitalMinigameManager.setVitalMinigameState(WaitingState::class.java)`  
 `VitalMinigameManager.setVitalMinigameState(StartingState::clas.java)`  
 This way we can set the current state of our minigame!
+
+---
+
+## Vital Core Processor
+This submodule will automatically generate your `plugin.yml` with every data required for the plugin to work.  
+NO MORE plugin.yml TROUBLE!!!   
+To Set this up, implement `vital-core-processor` as an annotation processor using your favourite build tool, like gradle or maven  
+Then add this annotation to your plugins main class:
+`@VitalPluginInfo(...)`  
+This annotation will supply vital with enough meta information to automatically build the `plugin.yml` file...
+
+---
+
+## Vital Commands Processor
+This submodule is responsible to work with `vital-core-processor` to automatically handle the `plugin.yml` registration of `@VitalCommandInfo` annotated classes.  
+Implement this submodule as an annotation processor using your favourite build tool like, gradle or maven to automatically register commands within your automatically generated `plugin.yml` file!
