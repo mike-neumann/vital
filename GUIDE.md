@@ -279,3 +279,28 @@ Please refer to the [essentia](https://github.com/xRa1ny/essentia/blob/master/GU
 
 ## Vital Utils
 When using Vital, you can utilize the vital-utils submodule for various utilities that make life more enjoyable
+
+## Vital Minigames
+With the Vital Minigames submodule, you can manage different states within a Vital made Plugin!  
+This means that every minigame MUST have different game states e.g. `Waiting`, `Voting`, `Starting`, `Ingame`, `Playing`, `Ending`, etc.  
+Using this convention, minigames are more organized and structured.  
+
+A game state is structured as follows:
+```
+@Component // it is advised to make minigame states a COMPONENT
+class WaitingState : VitalMinigameState {
+    // we can now implement any methods from VitalMinigameState to handle a minigame state status in our current minigame plugin.
+    // NOTE: minigame states are ALWAYS listeners, so you can directly implement your @EventHandler here!!!
+}
+
+// is required for minigame states that have countdowns!
+@VitalCountdownTaskInfo(3, interval = 1000)
+@Component // again...
+class StartingSate extends VitalCountdownMinigameState {
+    // minigame states may sometimes require a countdown of some sort, vital has got you covered with a class that covers that functionality, IT WORKS THE SAME WAY AS A 'VitalCountdownTask' and must be configured the same way!
+}
+```
+Now that we have some states, we may set them using Vital's built in feature to set states across a minigame:  
+`VitalMinigameManager.setVitalMinigameState(WaitingState::class.java)`  
+`VitalMinigameManager.setVitalMinigameState(StartingState::clas.java)`  
+This way we can set the current state of our minigame!
