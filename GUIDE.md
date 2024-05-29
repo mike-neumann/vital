@@ -269,7 +269,7 @@ Then you can add players to a scoreboard via perPlayerScoreboard.addPlayer(PLAYE
 
 ## Vital Configs
 The vital-configs module predefines some spigot / bukkit types available to save in a config.  
-When defining configs via `essentia` ((guide)[LINK]) you MUST save these types instead of the ones bukkit provides, since bukkit types are NORMALLY not compatible with config serializers since they dont follow any standards.
+When defining configs via [essentia](https://github.com/xRa1ny/essentia/blob/master/GUIDE.md) you MUST save these types instead of the ones bukkit provides, since bukkit types are NORMALLY not compatible with config serializers since they dont follow any standards.
 1. Location -> ConfigLocation
 2. Player -> ConfigPlayer
 3. ItemStack -> ConfigItemStack
