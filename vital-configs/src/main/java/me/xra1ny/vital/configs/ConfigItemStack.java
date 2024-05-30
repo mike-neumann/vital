@@ -18,24 +18,45 @@ import java.util.Map;
  * @author xRa1ny
  */
 public class ConfigItemStack {
+    /**
+     * the type of this item
+     */
     @Property(Material.class)
     public Material type;
 
+    /**
+     * the display name of this item
+     */
     @Property(String.class)
     public String displayName;
 
+    /**
+     * all lore attached to this item's item meta
+     */
     @Property(String.class)
     public List<String> lore;
 
+    /**
+     * all enchantments this item has
+     */
     @Property({
             String.class,
             Integer.class
     })
     public Map<String, Integer> enchantments;
 
+    /**
+     * all item flags this item holds
+     */
     @Property(ItemFlag.class)
     public List<ItemFlag> itemFlags;
 
+    /**
+     * converts a bukkit item stack into a config serializable one
+     *
+     * @param itemStack the bukkit item
+     * @return the config item instance
+     */
     @NonNull
     public static ConfigItemStack of(@NonNull ItemStack itemStack) {
         final ItemMeta itemMeta = itemStack.getItemMeta();
@@ -62,6 +83,11 @@ public class ConfigItemStack {
         return configItemStack;
     }
 
+    /**
+     * converts this config item back into a bukkit one
+     *
+     * @return the bukkit item instance
+     */
     @NonNull
     public ItemStack toItemStack() {
         final ItemStack itemStack = new ItemStack(type);

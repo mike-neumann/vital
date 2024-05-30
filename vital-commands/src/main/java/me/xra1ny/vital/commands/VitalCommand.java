@@ -432,6 +432,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      * Called when this VitalCommand has been executed using invalid Arguments
      *
      * @param sender The CommandSender
+     * @param args The args used during command execution
      */
     protected void onCommandInvalidArgs(@NonNull CommandSender sender, @NonNull String args) {
 
@@ -441,6 +442,8 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      * Called when this VitalCommand has been executed and an internal Error has occurred
      *
      * @param sender The CommandSender
+     * @param args The raw args used during command execution
+     * @param arg The actual command arg object being used during command execution
      */
     protected void onCommandInternalError(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
@@ -450,6 +453,8 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      * Called when this VitalCommand has been executed and an Error has occurred
      *
      * @param sender The CommandSender
+     * @param args The raw args used during command execution
+     * @param arg The actual arg object being used during command execution
      */
     protected void onCommandError(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
@@ -459,6 +464,8 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      * Called when this VitalCommand has been executed without needed Permissions
      *
      * @param sender The CommandSender
+     * @param args The raw args being used during command execution
+     * @param arg The actual arg being used during command execution
      */
     protected void onCommandRequiresPermission(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
@@ -468,6 +475,8 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      * Called when this VitalCommand has been executed as a non Player Object while requiring a Player to be executed
      *
      * @param sender The CommandSender
+     * @param args The raw args used during command execution
+     * @param arg The actual arg object used during command execution
      */
     protected void onCommandRequiresPlayer(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
