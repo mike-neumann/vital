@@ -1,6 +1,6 @@
 package me.xra1ny.vital.minigames;
 
-import me.xra1ny.vital.core.VitalComponent;
+import me.xra1ny.vital.VitalComponent;
 import org.bukkit.event.Listener;
 
 /**
@@ -10,28 +10,28 @@ import org.bukkit.event.Listener;
  *
  * @author xRa1ny
  */
-public abstract class VitalMinigameState implements VitalComponent, Listener {
+public interface VitalMinigameState extends VitalComponent, Listener {
     @Override
-    public void onRegistered() {
+    default void onRegistered() {
 
     }
 
     @Override
-    public void onUnregistered() {
+    default void onUnregistered() {
 
     }
 
     /**
      * Called when this state is enabled.
      */
-    public void onEnable() {
+    default void onEnable() {
 
     }
 
     /**
      * Called when this state is disabled.
      */
-    public void onDisable() {
+    default void onDisable() {
 
     }
 }

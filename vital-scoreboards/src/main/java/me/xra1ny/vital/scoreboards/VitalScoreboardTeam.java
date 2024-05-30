@@ -20,7 +20,7 @@ import static net.kyori.adventure.text.Component.text;
  *
  * @author xRa1ny
  */
-public final class VitalScoreboardTeam {
+public class VitalScoreboardTeam {
     /**
      * The name of this scoreboard team.
      */
@@ -164,4 +164,3 @@ public final class VitalScoreboardTeam {
         update();
     }
 }
-

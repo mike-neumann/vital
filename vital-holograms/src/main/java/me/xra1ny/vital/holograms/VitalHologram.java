@@ -4,7 +4,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import me.xra1ny.vital.core.VitalComponent;
+import me.xra1ny.vital.VitalComponent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
@@ -24,7 +26,7 @@ import static net.kyori.adventure.text.Component.text;
  *
  * @author xRa1ny
  */
-public final class VitalHologram implements VitalComponent {
+public class VitalHologram implements VitalComponent {
 
     /**
      * The name of this hologram.
@@ -130,7 +132,7 @@ public final class VitalHologram implements VitalComponent {
         final int initialBaseLineSize = baseLines.size();
 
         for (int i = lines.size() - 1; i > -1; i--) {
-            final String line = lines.get(i);
+            final String line = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(lines.get(i)));
             final Location lineLocation = location.clone().add(0, lines.size(), 0);
             final ArmorStand armorStand;
 

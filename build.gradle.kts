@@ -5,7 +5,6 @@ plugins {
 
 dependencies {
     compileOnly(project(":vital-core"))
-    compileOnly("me.xra1ny.essentia:essentia-configure:1.0")
     implementation(project(":vital-core-processor"))
     implementation(project(":vital-commands-processor"))
 }
@@ -24,16 +23,14 @@ allprojects {
     }
 
     dependencies {
-        compileOnly("org.projectlombok:lombok:1.18.28")
-        annotationProcessor("org.projectlombok:lombok:1.18.28")
+        compileOnly("org.projectlombok:lombok:1.18.32")
+        annotationProcessor("org.projectlombok:lombok:1.18.32")
         implementation("org.reflections:reflections:0.10.2")
         compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
+        compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
 
         // needed for dependency injection.
         implementation("me.xra1ny.essentia:essentia-inject:1.0")
-
-        // needed for exception handler methods.
-        implementation("me.xra1ny.essentia:essentia-except:1.0")
     }
 
     java {
@@ -55,10 +52,10 @@ allprojects {
 
     tasks.javadoc {
         (options as StandardJavadocDocletOptions)
-                .tags(
-                        "apiNote:a:API Note:",
-                        "implSpec:a:Implementation Requirements:",
-                        "implNote:a:Implementation Note:"
-                )
+            .tags(
+                "apiNote:a:API Note:",
+                "implSpec:a:Implementation Requirements:",
+                "implNote:a:Implementation Note:"
+            )
     }
 }

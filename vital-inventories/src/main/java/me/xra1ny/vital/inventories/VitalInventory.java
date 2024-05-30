@@ -2,7 +2,7 @@ package me.xra1ny.vital.inventories;
 
 import lombok.Getter;
 import lombok.NonNull;
-import me.xra1ny.vital.core.AnnotatedVitalComponent;
+import me.xra1ny.vital.AnnotatedVitalComponent;
 import me.xra1ny.vital.inventories.annotation.VitalInventoryInfo;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -23,44 +23,23 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class VitalInventory implements InventoryHolder, AnnotatedVitalComponent<VitalInventoryInfo> {
-    @NonNull
-    private Map<Integer, ItemStack> slotItemMap = new HashMap<>();
-
     @Getter
     @NonNull
     private final Map<Map.Entry<Player, Integer>, Consumer<InventoryClickEvent>> slotActionMap = new HashMap<>();
-
+    @Range(from = 0, to = 54)
+    private final int size;
+    @Getter
+    @NonNull
+    private final Inventory inventory;
+    @NonNull
+    private Map<Integer, ItemStack> slotItemMap = new HashMap<>();
     @Nullable
     private ItemStack background;
-
     @Getter
     @Nullable
     private Inventory previousInventory;
 
-    @Range(from = 0, to = 54)
-    private final int size;
-
-    @Getter
-    @NonNull
-    private final Inventory inventory;
-
-    public VitalInventory() {
-        final VitalInventoryInfo info = getRequiredAnnotation();
-
-        final ItemStack backgroundItemStack = new ItemStack(info.background());
-        final ItemMeta backgroundItemMeta = backgroundItemStack.getItemMeta();
-
-        if (backgroundItemMeta != null) {
-            backgroundItemMeta.displayName(null);
-            backgroundItemStack.setItemMeta(backgroundItemMeta);
-        }
-
-        background = backgroundItemStack;
-        size = info.size();
-        inventory = Bukkit.createInventory(this, size, MiniMessage.miniMessage().deserialize(info.value()));
-    }
-
-    public VitalInventory(@NonNull Inventory previousInventory) {
+    public VitalInventory(@Nullable Inventory previousInventory) {
         final VitalInventoryInfo info = getRequiredAnnotation();
 
         final ItemStack backgroundItemStack = new ItemStack(info.background());
@@ -84,10 +63,10 @@ public class VitalInventory implements InventoryHolder, AnnotatedVitalComponent<
     /**
      * Sets the given item to the specified slot while also binding an action to the given item and player in this inventory.
      *
-     * @param slot The slot the item may occupy
+     * @param slot      The slot the item may occupy
      * @param itemStack The item itself.
-     * @param player The player object for the click handler.
-     * @param event The click handler itself.
+     * @param player    The player object for the click handler.
+     * @param event     The click handler itself.
      */
     protected void setItem(@Range(from = 0, to = 54) int slot, @NonNull ItemStack itemStack, @NonNull Player player, @NonNull Consumer<InventoryClickEvent> event) {
         setItem(slot, itemStack);
@@ -127,10 +106,10 @@ public class VitalInventory implements InventoryHolder, AnnotatedVitalComponent<
 
     }
 
-    private void updateItems() {
+    public void updateItems() {
         getInventory().clear();
 
-        for(int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             getInventory().setItem(i, background);
         }
 
@@ -138,12 +117,12 @@ public class VitalInventory implements InventoryHolder, AnnotatedVitalComponent<
     }
 
     /**
-     * Updates this inventory removing all items and resetting them for all players that have this inventory open.
+     * This method will call any onUpdate method used to inject or update inventory information without modifying any items in inventory itself.
      *
      * @see VitalInventory#onUpdate(Player)
      * @see VitalInventory#onUpdate()
      */
-    public void update() {
+    public void updateWithoutItems() {
         // first call developer onUpdate
         onUpdate();
 
@@ -157,8 +136,16 @@ public class VitalInventory implements InventoryHolder, AnnotatedVitalComponent<
             // update the inventory for the looping player.
             onUpdate(player);
         }
+    }
 
-        // finally set all items accordingly
+    /**
+     * Updates this inventory removing all items and resetting them for all players that have this inventory open.
+     *
+     * @see VitalInventory#onUpdate(Player)
+     * @see VitalInventory#onUpdate()
+     */
+    public void update() {
+        updateWithoutItems();
         updateItems();
     }
 

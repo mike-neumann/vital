@@ -49,7 +49,7 @@ public class ConfigLocation {
     public Location toLocation() {
         World world = Bukkit.getWorld(this.world);
 
-        if(world == null) {
+        if (world == null) {
             // load world if null
             world = new WorldCreator(this.world)
                     .createWorld();

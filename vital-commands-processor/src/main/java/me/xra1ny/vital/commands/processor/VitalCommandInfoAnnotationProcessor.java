@@ -1,9 +1,10 @@
 package me.xra1ny.vital.commands.processor;
 
 import lombok.NonNull;
+import me.xra1ny.vital.VitalPluginEnvironment;
 import me.xra1ny.vital.commands.annotation.VitalCommandInfo;
-import me.xra1ny.vital.core.processor.VitalPluginInfoAnnotationProcessor;
-import me.xra1ny.vital.core.processor.VitalPluginInfoHolder;
+import me.xra1ny.vital.processor.VitalPluginInfoAnnotationProcessor;
+import me.xra1ny.vital.processor.VitalPluginInfoHolder;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -12,7 +13,6 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
@@ -53,7 +53,7 @@ public class VitalCommandInfoAnnotationProcessor extends AbstractProcessor {
         }
 
         // finally generate the `plugin.yml` commands.
-        generatePluginYmlCommands(vitalCommandInfoList);
+        generatePluginYmlCommands(vitalCommandInfoList, vitalPluginInfoAnnotationProcessor.getPluginEnvironment());
 
         ran = true;
 
@@ -61,14 +61,15 @@ public class VitalCommandInfoAnnotationProcessor extends AbstractProcessor {
     }
 
     /**
-     * Generates the plugin.yml if non-existent, or adds to the content, the necessary command name information for automatic command registration.
+     * Generates the plugin yml if non-existent, or adds to the content, the necessary command name information for automatic command registration.
      *
      * @param vitalCommandInfoList The list of {@link VitalCommandInfo} annotations.
+     * @param pluginEnvironment    The environment this plugin uses.
      */
-    private void generatePluginYmlCommands(@NonNull List<VitalCommandInfo> vitalCommandInfoList) {
+    private void generatePluginYmlCommands(@NonNull List<VitalCommandInfo> vitalCommandInfoList, VitalPluginEnvironment pluginEnvironment) {
         try {
             // Create the new `plugin.yml` file resource as the basic processor left it uncreated.
-            final FileObject pluginYmlFileObject = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "plugin.yml");
+            final FileObject pluginYmlFileObject = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", pluginEnvironment.getYmlFileName());
 
             // append all necessary meta-information for all commands to the content builder.
             VitalPluginInfoHolder.PLUGIN_INFO.append("commands:");
@@ -92,6 +93,7 @@ public class VitalCommandInfoAnnotationProcessor extends AbstractProcessor {
 
                 if (vitalCommandAliases.length > 0) {
                     VitalPluginInfoHolder.PLUGIN_INFO.append("    aliases: ");
+                    VitalPluginInfoHolder.PLUGIN_INFO.append("\n");
 
                     for (String alias : vitalCommandAliases) {
                         VitalPluginInfoHolder.PLUGIN_INFO.append("      - ").append(alias);
@@ -104,9 +106,8 @@ public class VitalCommandInfoAnnotationProcessor extends AbstractProcessor {
                 writer.write(VitalPluginInfoHolder.PLUGIN_INFO.toString());
             }
         } catch (IOException e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Error while generating plugin.yml commands");
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "If this error persists, please open an issue on Vital's GitHub page!");
             e.printStackTrace();
+            throw new RuntimeException("Error while generating plugin yml commands\nIf this error persists, please open an issue on Vital's GitHub page!");
         }
     }
 }

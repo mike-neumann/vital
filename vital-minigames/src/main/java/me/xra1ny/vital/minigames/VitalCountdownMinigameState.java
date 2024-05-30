@@ -1,7 +1,7 @@
 package me.xra1ny.vital.minigames;
 
 import lombok.NonNull;
-import me.xra1ny.vital.core.AnnotatedVitalComponent;
+import me.xra1ny.vital.AnnotatedVitalComponent;
 import me.xra1ny.vital.tasks.VitalCountdownTask;
 import me.xra1ny.vital.tasks.VitalRepeatableTask;
 import me.xra1ny.vital.tasks.annotation.VitalCountdownTaskInfo;
@@ -12,15 +12,14 @@ import org.bukkit.plugin.java.JavaPlugin;
  *
  * @author xRa1ny
  */
-public abstract class VitalCountdownMinigameState extends VitalMinigameState implements AnnotatedVitalComponent<VitalCountdownTaskInfo> {
-    private VitalCountdownTask vitalCountdownTask;
+public abstract class VitalCountdownMinigameState implements VitalMinigameState, AnnotatedVitalComponent<VitalCountdownTaskInfo> {
+    private VitalCountdownTask.Spigot vitalCountdownTask;
 
     /**
      * Constructor for VitalCountdownMinigameState with the default interval from the annotation.
      *
      * @param javaPlugin The JavaPlugin instance.
      */
-    @SuppressWarnings("unused")
     public VitalCountdownMinigameState(@NonNull JavaPlugin javaPlugin) {
         final VitalCountdownTaskInfo vitalCountdownTaskInfo = getRequiredAnnotation();
 
@@ -34,7 +33,6 @@ public abstract class VitalCountdownMinigameState extends VitalMinigameState imp
      * @param interval   The countdown update interval.
      * @param countdown  The initial countdown value.
      */
-    @SuppressWarnings("unused")
     public VitalCountdownMinigameState(@NonNull JavaPlugin javaPlugin, int interval, int countdown) {
         run(javaPlugin, interval, countdown);
     }
@@ -45,18 +43,18 @@ public abstract class VitalCountdownMinigameState extends VitalMinigameState imp
      * @return The {@link JavaPlugin} instance attached to this {@link VitalCountdownMinigameState}.
      */
     public JavaPlugin getJavaPlugin() {
-        return vitalCountdownTask.getJavaPlugin();
+        return vitalCountdownTask.getPlugin();
     }
 
     /**
      * Sets up the countdown task using a VitalRepeatableTask.
      *
-     * @param javaPlugin The JavaPlugin instance.
-     * @param countdown  The countdown.
-     * @param interval   The countdown update interval.
+     * @param plugin    The JavaPlugin instance.
+     * @param countdown The countdown.
+     * @param interval  The countdown update interval.
      */
-    private void run(@NonNull JavaPlugin javaPlugin, int interval, int countdown) {
-        vitalCountdownTask = new VitalCountdownTask(javaPlugin, interval, countdown) {
+    private void run(@NonNull JavaPlugin plugin, int interval, int countdown) {
+        vitalCountdownTask = new VitalCountdownTask.Spigot(plugin, interval, countdown) {
             @Override
             public void onStart() {
                 VitalCountdownMinigameState.this.onCountdownStart();
@@ -166,14 +164,29 @@ public abstract class VitalCountdownMinigameState extends VitalMinigameState imp
         return VitalCountdownTaskInfo.class;
     }
 
+    /**
+     * Gets the initial countdown of this minigame state.
+     *
+     * @return The initial countdown.
+     */
     public int getInitialCountdown() {
         return vitalCountdownTask.getInitialCountdown();
     }
 
+    /**
+     * Gets the countdown of this minigame state.
+     *
+     * @return The current countdown.
+     */
     public int getCountdown() {
         return vitalCountdownTask.getCountdown();
     }
 
+    /**
+     * Sets the current countdown of this minigame state.
+     *
+     * @param countdown The countdown.
+     */
     public void setCountdown(int countdown) {
         vitalCountdownTask.setCountdown(countdown);
     }

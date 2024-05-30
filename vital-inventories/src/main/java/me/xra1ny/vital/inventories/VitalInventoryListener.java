@@ -2,7 +2,7 @@ package me.xra1ny.vital.inventories;
 
 import lombok.NonNull;
 import me.xra1ny.essentia.inject.annotation.Component;
-import me.xra1ny.vital.core.VitalListener;
+import me.xra1ny.vital.VitalListener;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -20,7 +20,7 @@ import java.util.Optional;
  * @author xRa1ny
  */
 @Component
-public final class VitalInventoryListener extends VitalListener {
+public class VitalInventoryListener implements VitalListener.Spigot {
     /**
      * Handles the event when a player opens an inventory.
      *
@@ -37,7 +37,7 @@ public final class VitalInventoryListener extends VitalListener {
             vitalInventory.onUpdate(player);
             vitalInventory.update();
 
-            if(vitalInventory instanceof VitalPagedInventory vitalPagedInventory) {
+            if (vitalInventory instanceof VitalPagedInventory vitalPagedInventory) {
                 vitalPagedInventory.setPage(1, player);
             }
         }
