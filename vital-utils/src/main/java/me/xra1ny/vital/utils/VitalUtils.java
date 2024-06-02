@@ -507,7 +507,7 @@ public interface VitalUtils<Player> {
          * @param material The {@link Material} type.
          * @return true if the type can be placed in midair; false otherwise.
          */
-        static boolean canBePlacedInMidAir(@NonNull Material material) {
+        public boolean canBePlacedInMidAir(@NonNull Material material) {
             return !material.hasGravity() &&
                     !isVegetation(material) &&
                     (material != Material.REDSTONE &&
@@ -527,7 +527,7 @@ public interface VitalUtils<Player> {
          * @param material The {@link Material} type.
          * @return true if the given type is vegetation; false otherwise.
          */
-        static boolean isVegetation(@NonNull Material material) {
+        public boolean isVegetation(@NonNull Material material) {
             return material.name().contains("SAPLING") ||
                     material.name().contains("FLOWER") ||
                     material.name().contains("WHEAT") ||
