@@ -26,6 +26,8 @@ allprojects {
         compileOnly("org.projectlombok:lombok:1.18.32")
         annotationProcessor("org.projectlombok:lombok:1.18.32")
         implementation("org.reflections:reflections:0.10.2")
+        implementation("org.slf4j:slf4j-api:2.0.13")
+        implementation("ch.qos.logback:logback-classic:1.5.6")
         compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
         compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
 

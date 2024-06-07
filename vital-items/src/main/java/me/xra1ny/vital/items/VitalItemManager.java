@@ -19,7 +19,7 @@ import java.util.Optional;
  * @author xRa1ny
  */
 @Log
-@Component
+@Component(dependsOn = VitalItemsSubModule.class)
 public class VitalItemManager extends VitalComponentListManager<VitalItem> {
     private static VitalItemManager instance;
 

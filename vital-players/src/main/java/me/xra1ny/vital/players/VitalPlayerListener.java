@@ -3,6 +3,7 @@ package me.xra1ny.vital.players;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import me.xra1ny.vital.VitalComponent;
 import me.xra1ny.vital.VitalComponentListManager;
 import me.xra1ny.vital.VitalListener;
@@ -14,6 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -23,7 +25,7 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
-@Log
+@Slf4j
 public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer<?>, PlayerManager extends VitalComponentListManager<VPlayer>> implements VitalComponent {
     @Getter
     private final PlayerManager playerManager;

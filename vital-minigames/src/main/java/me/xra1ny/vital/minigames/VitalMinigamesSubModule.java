@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  * Defines the vital-minigames submodule.
  */
 @Component
-public class VitalMinigameSubModule extends VitalSubModule {
+public class VitalMinigamesSubModule extends VitalSubModule {
     @Override
     @NotNull
     public String getName() {

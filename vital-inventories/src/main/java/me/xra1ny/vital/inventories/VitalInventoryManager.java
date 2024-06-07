@@ -13,7 +13,7 @@ import java.util.Optional;
  * The main vital inventory manager for registering inventories.
  */
 @Log
-@Component
+@Component(dependsOn = VitalInventoriesSubModule.class)
 public class VitalInventoryManager implements VitalComponent {
     private static VitalInventoryManager instance;
 

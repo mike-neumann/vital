@@ -1,3 +1,6 @@
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
+}
 rootProject.name = "vital"
 
 include("vital-core")
@@ -16,3 +19,4 @@ include("vital-statistics")
 include("vital-configs")
 include("vital-cloudnet4-driver")
 include("vital-cloudnet4-bridge")
+include("vital-logs")

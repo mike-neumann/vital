@@ -20,7 +20,7 @@ import java.util.Optional;
  * @apiNote This class may be extended from, to add more specific mini-game manager logic or function, depending on the mini-game you are trying to implement.
  */
 @Log
-@Component
+@Component(dependsOn = VitalMinigamesSubModule.class)
 public class VitalMinigameManager implements VitalComponent {
     private static VitalMinigameManager instance;
 
