@@ -169,8 +169,6 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
             final VitalCommandArg executingArg = getExecutingArg(String.join(" ", args));
             VitalCommandReturnState commandReturnState;
 
-            log.info(vitalCommandArgs.toString());
-
             try {
                 if (executingArg == null) {
                     commandReturnState = executeBaseCommand(sender);
@@ -238,8 +236,6 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
 
         // Iterate through the methods of the current class.
         for (Method method : getClass().getDeclaredMethods()) {
-            log.info("method: {}", method.getName());
-
             // Retrieve the `@VitalCommandArgHandler` annotation for the method.
             final VitalCommandArgHandler commandArgHandler = method.getDeclaredAnnotation(VitalCommandArgHandler.class);
 
