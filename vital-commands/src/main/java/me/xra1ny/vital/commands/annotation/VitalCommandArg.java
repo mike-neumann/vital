@@ -33,6 +33,11 @@ public @interface VitalCommandArg {
     String NUMBER = "%NUMBER%";
 
     /**
+     * Pattern used by {@link VitalCommandArg} implementations that will be replaced by all available minecraft materials during tab-completion, automatically.
+     */
+    String MATERIAL = "%MATERIAL%";
+
+    /**
      * Placeholder value for the command argument.
      * Examples include "%PLAYER%", "%BOOLEAN%", and "%NUMBER%".
      *

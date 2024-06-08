@@ -12,6 +12,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -208,7 +209,11 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
             // Check if finalCommandArg is not null.
             if (finalCommandArg != null) {
                 // Execute the corresponding commandArg handler method and get the return state.
-                commandReturnState = executeCommandArgHandlerMethod(sender, finalCommandArg, values.toArray(new String[0]));
+                try {
+                    commandReturnState = executeCommandArgHandlerMethod(sender, finalCommandArg, values.toArray(new String[0]));
+                } catch (Exception e) {
+                    commandReturnState = VitalCommandReturnState.ERROR;
+                }
             } else {
                 // Loop through the specified command arguments for this command.
                 for (VitalCommandArg commandArg : vitalCommandArgs) {
@@ -383,8 +388,11 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
                     break; // Exit the loop.
                 }
 
-                // Check if the final argument is equal to "PLAYER".
-                if (finalArg.equalsIgnoreCase(VitalCommandArg.PLAYER)) {
+                if (finalArg.equalsIgnoreCase(VitalCommandArg.MATERIAL)) {
+                    for(Material material : Material.values()) {
+                        tabCompleted.add(material.name());
+                    }
+                } else if (finalArg.equalsIgnoreCase(VitalCommandArg.PLAYER)) {
                     // Loop through online players.
                     for (String playerName : getAllPlayerNames()) {
                         // Check if the player name is already in the tabCompleted list.
