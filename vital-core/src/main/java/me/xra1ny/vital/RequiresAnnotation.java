@@ -10,7 +10,7 @@ import java.util.Optional;
  * @param <T> The type of annotation associated with the component.
  * @author xRa1ny
  */
-public interface AnnotatedVitalComponent<T extends Annotation> extends VitalComponent {
+public interface RequiresAnnotation<T extends Annotation> {
     /**
      * Retrieves the required annotation associated with the component.
      *

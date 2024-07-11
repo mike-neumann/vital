@@ -1,6 +1,8 @@
 plugins {
     java
     `maven-publish`
+    id("org.springframework.boot") version "3.2.4"
+    id("io.spring.dependency-management") version "1.1.4"
 }
 
 dependencies {
@@ -15,6 +17,8 @@ allprojects {
 
     apply<JavaPlugin>()
     apply<MavenPublishPlugin>()
+    apply(plugin = "org.springframework.boot")
+    apply(plugin = "io.spring.dependency-management")
 
     repositories {
         mavenLocal()
@@ -29,8 +33,10 @@ allprojects {
         compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
         compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
 
-        // needed for dependency injection.
-        implementation("me.xra1ny.essentia:essentia-inject:1.0")
+        implementation("me.xra1ny.essentia:essentia-except:1.0")
+        implementation("org.springframework:spring-context:6.1.10")
+        implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
+        implementation("org.springframework.boot:spring-boot-starter")
     }
 
     java {

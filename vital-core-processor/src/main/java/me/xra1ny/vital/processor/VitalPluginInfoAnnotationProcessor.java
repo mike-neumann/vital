@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import me.xra1ny.vital.VitalPluginEnvironment;
 import me.xra1ny.vital.annotation.VitalPluginInfo;
+import org.apache.commons.io.IOUtils;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -16,9 +17,14 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
+import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -79,6 +85,15 @@ public class VitalPluginInfoAnnotationProcessor extends AbstractProcessor {
         // finally generate the `plugin.yml`.
         generatePluginYml(className, vitalPluginInfo.value(), vitalPluginInfo.apiVersion(), vitalPluginInfo.version(), vitalPluginInfo.environment());
 
+        final List<String> packageNames = new ArrayList<>(List.of(className.split("[.]")));
+
+        packageNames.removeLast();
+
+        // now we have the package name without the class at the end
+        final String packageName = String.join(".", packageNames);
+
+        generatePluginConfigurationClass(packageName);
+
         ran = true;
 
         return true;
@@ -124,6 +139,22 @@ public class VitalPluginInfoAnnotationProcessor extends AbstractProcessor {
                 throw new RuntimeException("Error while generating plugin yml\nIf this error persists, please open an issue on Vital's GitHub page!");
             }
 
+        }
+    }
+
+    public void generatePluginConfigurationClass(@NonNull String packageName) {
+        try {
+            final JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(packageName + ".PluginConfiguration");
+            final InputStream resource = VitalPluginInfoAnnotationProcessor.class.getResourceAsStream("/Main.java");
+
+            try (Writer writer = javaFileObject.openWriter()) {
+                final String template = IOUtils.toString(new InputStreamReader(resource));
+
+                writer.write(template.replace("{packageName}", packageName).replace("{scans}", "\"" + packageName + "\""));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error while generating PluginConfiguration class");
         }
     }
 }

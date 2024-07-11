@@ -1,6 +1,7 @@
 package me.xra1ny.vital.commands.annotation;
 
 import me.xra1ny.vital.commands.VitalCommand;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,6 +16,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Component
 public @interface VitalCommandInfo {
     /**
      * Defines the name of this command, excluding the slash /.

@@ -1,17 +1,24 @@
 package me.xra1ny.vital.tasks;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import me.xra1ny.vital.AnnotatedVitalComponent;
+import me.xra1ny.vital.RequiresAnnotation;
 import me.xra1ny.vital.tasks.annotation.VitalCountdownTaskInfo;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runnable, Task> implements AnnotatedVitalComponent<VitalCountdownTaskInfo> {
+public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runnable, Task> implements RequiresAnnotation<VitalCountdownTaskInfo> {
+    // error can be ignored, implementation will handle this, probably
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Getter
+    @Autowired
+    private Plugin plugin;
+
     @Getter
     private final int initialCountdown;
 
@@ -25,22 +32,24 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
     @Setter
     private int interval;
 
-    public VitalCountdownTask(@NonNull Plugin plugin) {
+    public VitalCountdownTask() {
         final VitalCountdownTaskInfo vitalCountdownTaskInfo = getRequiredAnnotation();
 
         initialCountdown = vitalCountdownTaskInfo.value();
         countdown = initialCountdown;
         interval = vitalCountdownTaskInfo.interval();
-
-        run(plugin);
     }
 
     public VitalCountdownTask(@NonNull Plugin plugin, int interval, int countdown) {
+        this.plugin = plugin;
         initialCountdown = countdown;
         this.countdown = initialCountdown;
         this.interval = interval;
+    }
 
-        run(plugin);
+    @PostConstruct
+    public void init() {
+        run();
     }
 
     @Override
@@ -48,29 +57,14 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
         return VitalCountdownTaskInfo.class;
     }
 
-    @Override
-    public void onRegistered() {
-
-    }
-
-    @Override
-    public void onUnregistered() {
-
-    }
-
-    @NonNull
-    public Plugin getPlugin() {
-        return vitalRepeatableTask.getPlugin();
-    }
-
     /**
      * Sets up the countdown task using a VitalRepeatableTask.
      */
-    private void run(@NonNull Plugin plugin) {
-        vitalRepeatableTask = createVitalRepeatableTask(plugin);
+    private void run() {
+        vitalRepeatableTask = createVitalRepeatableTask();
     }
 
-    protected abstract VitalRepeatableTask<Plugin, Runnable, Task> createVitalRepeatableTask(@NonNull Plugin plugin);
+    protected abstract VitalRepeatableTask<Plugin, Runnable, Task> createVitalRepeatableTask();
 
     /**
      * Starts the countdown.
@@ -152,22 +146,13 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
      * The spigot implementation for any vital countdown task.
      */
     public static class Spigot extends VitalCountdownTask<JavaPlugin, BukkitRunnable, BukkitTask> {
-        /**
-         * Constructs a new spigot impl for vital countdown task.
-         *
-         * @param javaPlugin The spigot plugin impl.
-         */
-        public Spigot(@NonNull JavaPlugin javaPlugin) {
-            super(javaPlugin);
-        }
-
         public Spigot(@NonNull JavaPlugin javaPlugin, int interval, int countdown) {
             super(javaPlugin, interval, countdown);
         }
 
         @Override
-        protected VitalRepeatableTask<JavaPlugin, BukkitRunnable, BukkitTask> createVitalRepeatableTask(@NonNull JavaPlugin plugin) {
-            return new VitalRepeatableTask.Spigot(plugin, getInterval()) {
+        protected VitalRepeatableTask<JavaPlugin, BukkitRunnable, BukkitTask> createVitalRepeatableTask() {
+            return new VitalRepeatableTask.Spigot(getPlugin(), getInterval()) {
                 @Override
                 public void onStart() {
                     VitalCountdownTask.Spigot.this.onStart();
@@ -199,22 +184,13 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
      * The bungeecord implementation for any vital countdown task.
      */
     public static class Bungeecord extends VitalCountdownTask<net.md_5.bungee.api.plugin.Plugin, java.lang.Runnable, ScheduledTask> {
-        /**
-         * Constructs a new bungeecord impl for vital countdown task.
-         *
-         * @param plugin The bungeecord plugin impl.
-         */
-        public Bungeecord(@NonNull net.md_5.bungee.api.plugin.Plugin plugin) {
-            super(plugin);
-        }
-
         public Bungeecord(@NonNull net.md_5.bungee.api.plugin.Plugin plugin, int interval, int countdown) {
             super(plugin, interval, countdown);
         }
 
         @Override
-        protected VitalRepeatableTask<net.md_5.bungee.api.plugin.Plugin, java.lang.Runnable, ScheduledTask> createVitalRepeatableTask(@NotNull net.md_5.bungee.api.plugin.Plugin plugin) {
-            return new VitalRepeatableTask.Bungeecord(plugin, getInterval()) {
+        protected VitalRepeatableTask<net.md_5.bungee.api.plugin.Plugin, java.lang.Runnable, ScheduledTask> createVitalRepeatableTask() {
+            return new VitalRepeatableTask.Bungeecord(getPlugin(), getInterval()) {
                 @Override
                 public void onStart() {
                     VitalCountdownTask.Bungeecord.this.onStart();

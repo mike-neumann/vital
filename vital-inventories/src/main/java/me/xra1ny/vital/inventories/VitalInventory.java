@@ -2,7 +2,7 @@ package me.xra1ny.vital.inventories;
 
 import lombok.Getter;
 import lombok.NonNull;
-import me.xra1ny.vital.AnnotatedVitalComponent;
+import me.xra1ny.vital.RequiresAnnotation;
 import me.xra1ny.vital.inventories.annotation.VitalInventoryInfo;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class VitalInventory implements InventoryHolder, AnnotatedVitalComponent<VitalInventoryInfo> {
+public class VitalInventory implements InventoryHolder, RequiresAnnotation<VitalInventoryInfo> {
     @Getter
     @NonNull
     private final Map<Map.Entry<Player, Integer>, Consumer<InventoryClickEvent>> slotActionMap = new HashMap<>();
@@ -32,12 +32,12 @@ public class VitalInventory implements InventoryHolder, AnnotatedVitalComponent<
     @NonNull
     private final Inventory inventory;
     @NonNull
-    private Map<Integer, ItemStack> slotItemMap = new HashMap<>();
+    private final Map<Integer, ItemStack> slotItemMap = new HashMap<>();
     @Nullable
-    private ItemStack background;
+    private final ItemStack background;
     @Getter
     @Nullable
-    private Inventory previousInventory;
+    private final Inventory previousInventory;
 
     public VitalInventory(@Nullable Inventory previousInventory) {
         final VitalInventoryInfo info = getRequiredAnnotation();
@@ -152,16 +152,6 @@ public class VitalInventory implements InventoryHolder, AnnotatedVitalComponent<
     @Override
     public Class<VitalInventoryInfo> requiredAnnotationType() {
         return VitalInventoryInfo.class;
-    }
-
-    @Override
-    public void onRegistered() {
-
-    }
-
-    @Override
-    public void onUnregistered() {
-
     }
 
     /**

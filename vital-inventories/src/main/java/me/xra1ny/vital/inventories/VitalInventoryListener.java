@@ -1,7 +1,6 @@
 package me.xra1ny.vital.inventories;
 
 import lombok.NonNull;
-import me.xra1ny.essentia.inject.annotation.Component;
 import me.xra1ny.vital.VitalListener;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,6 +10,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
@@ -20,7 +20,7 @@ import java.util.Optional;
  * @author xRa1ny
  */
 @Component
-public class VitalInventoryListener implements VitalListener.Spigot {
+public class VitalInventoryListener extends VitalListener.Spigot {
     /**
      * Handles the event when a player opens an inventory.
      *

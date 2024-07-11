@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 
 /**
- * Defines different plugin environments needed for automatic plugin ".yml" creation with command processing.
+ * Defines different plugin environments needed for automatic plugin ".yml" creation
  */
 public enum VitalPluginEnvironment {
     /**

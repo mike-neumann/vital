@@ -3,15 +3,12 @@ package me.xra1ny.vital.minigames;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.java.Log;
-import me.xra1ny.essentia.inject.DIFactory;
-import me.xra1ny.essentia.inject.annotation.Component;
 import me.xra1ny.vital.Vital;
 import me.xra1ny.vital.VitalComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  * Manages the current state of a minigame using the Vital framework.
@@ -23,9 +20,6 @@ import java.util.Optional;
 @Component
 public class VitalMinigameManager implements VitalComponent {
     private static VitalMinigameManager instance;
-
-    private final Vital<?> vital;
-
     private final JavaPlugin plugin;
 
     /**
@@ -34,14 +28,7 @@ public class VitalMinigameManager implements VitalComponent {
     @Getter
     private VitalMinigameState vitalMinigameState;
 
-    /**
-     * Constructs a new vital minigame manager for managing active minigame states.
-     *
-     * @param vital  Vital
-     * @param plugin The associated java plugin.
-     */
-    public VitalMinigameManager(Vital<?> vital, JavaPlugin plugin) {
-        this.vital = vital;
+    public VitalMinigameManager(JavaPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -64,12 +51,10 @@ public class VitalMinigameManager implements VitalComponent {
      * Sets the current minigame state by Class.
      *
      * @param vitalMinigameStateClass The Class of the minigame state to set to (must be registered).
-     * @apiNote this method attempts to construct a dependency injected instance using Vital's DI utils {@link DIFactory}
+     * @apiNote this method attempts to construct a dependency injected instance
      */
     public static void setVitalMinigameState(@NonNull Class<? extends VitalMinigameState> vitalMinigameStateClass) {
-        final VitalMinigameState vitalMinigameState = Optional.ofNullable(instance.vital.getComponentByType(vitalMinigameStateClass))
-                .orElseThrow(() -> new RuntimeException("attempted setting unregistered minigame state %s"
-                        .formatted(vitalMinigameStateClass.getSimpleName())));
+        final VitalMinigameState vitalMinigameState = Vital.getContext().getBean(vitalMinigameStateClass);
 
         setVitalMinigameState(vitalMinigameState);
     }

@@ -1,12 +1,13 @@
 package me.xra1ny.vital.items;
 
+import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
 import lombok.extern.java.Log;
-import me.xra1ny.essentia.inject.annotation.Component;
-import me.xra1ny.vital.VitalComponentListManager;
+import me.xra1ny.vital.VitalComponentManager;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -20,8 +21,13 @@ import java.util.Optional;
  */
 @Log
 @Component
-public class VitalItemManager extends VitalComponentListManager<VitalItem> {
+public class VitalItemManager extends VitalComponentManager<VitalItem> {
     private static VitalItemManager instance;
+
+    @PostConstruct
+    public void init() {
+        instance = this;
+    }
 
     /**
      * Attempts to set the specified {@link VitalItem} by its class.
@@ -32,7 +38,7 @@ public class VitalItemManager extends VitalComponentListManager<VitalItem> {
      */
     @NonNull
     public static Map<Integer, ItemStack> addItem(@NonNull Inventory inventory, @NonNull Class<? extends VitalItem> itemStackClass) {
-        final VitalItem vitalItem = Optional.ofNullable(instance.getVitalComponentByClass(itemStackClass))
+        final VitalItem vitalItem = Optional.ofNullable(instance.getComponentByClass(itemStackClass))
                 .orElseThrow(() -> new RuntimeException("attempted adding unregistered itemstack %s"
                         .formatted(itemStackClass.getSimpleName())));
 
@@ -59,7 +65,7 @@ public class VitalItemManager extends VitalComponentListManager<VitalItem> {
      * @param itemStackClass The class of te {@link VitalItem} (must be registered).
      */
     public static void setItem(@NonNull Inventory inventory, int slot, @NonNull Class<? extends VitalItem> itemStackClass) {
-        final VitalItem vitalItem = Optional.ofNullable(instance.getVitalComponentByClass(itemStackClass))
+        final VitalItem vitalItem = Optional.ofNullable(instance.getComponentByClass(itemStackClass))
                 .orElseThrow(() -> new RuntimeException("attempted setting unregistered itemstack %s"
                         .formatted(itemStackClass.getSimpleName())));
 
@@ -77,17 +83,12 @@ public class VitalItemManager extends VitalComponentListManager<VitalItem> {
         setItem(player.getInventory(), slot, itemStackClass);
     }
 
-    @Override
-    public void onRegistered() {
-        instance = this;
-    }
-
     /**
      * Gets all registered items.
      *
      * @return A list of all registered items.
      */
     public List<VitalItem> getItems() {
-        return instance.getVitalComponents(VitalItem.class);
+        return instance.getComponents(VitalItem.class);
     }
 }

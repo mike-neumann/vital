@@ -75,254 +75,6 @@ public interface VitalUtils<Player> {
     }
 
     /**
-     * Checks if the given {@link Material} type is valid for placement in midair.
-     *
-     * @param material The {@link Material} type.
-     * @return true if the type can be placed in midair; false otherwise.
-     */
-    static boolean canBePlacedInMidAir(@NonNull Material material) {
-        return !material.hasGravity() &&
-                !isVegetation(material) &&
-                (material != Material.REDSTONE &&
-                        material != Material.REDSTONE_TORCH &&
-                        material != Material.REPEATER &&
-                        material != Material.COMPARATOR &&
-                        material != Material.LEVER &&
-                        material != Material.TRIPWIRE &&
-                        !material.name().contains("BUTTON") &&
-                        !material.name().contains("PRESSURE_PLATE") &&
-                        !material.name().contains("RAIL"));
-    }
-
-    /**
-     * Checks if the given {@link Material} type is vegetation or not.
-     *
-     * @param material The {@link Material} type.
-     * @return true if the given type is vegetation; false otherwise.
-     */
-    static boolean isVegetation(@NonNull Material material) {
-        return material.name().contains("SAPLING") ||
-                material.name().contains("FLOWER") ||
-                material.name().contains("WHEAT") ||
-                material.name().contains("SEEDS") ||
-                material.name().contains("CROP") ||
-                material.name().contains("KELP") ||
-                material.name().contains("BUSH") ||
-                material.name().contains("MUSHROOM") ||
-                material.name().contains("CHORUS") ||
-                material.name().contains("FERN") ||
-                material.name().contains("POTTED") ||
-                material.name().contains("ROSE") ||
-                material.name().contains("POPPY") ||
-                material == Material.MELON_STEM ||
-                material == Material.PUMPKIN_STEM ||
-                material == Material.BAMBOO ||
-                material == Material.SUGAR_CANE ||
-                material == Material.SEA_PICKLE ||
-                material == Material.NETHER_WART ||
-                material == Material.LILY_PAD ||
-                material == Material.VINE ||
-                material == Material.GLOW_LICHEN ||
-                material == Material.SCULK_VEIN ||
-                material == Material.CACTUS ||
-                material == Material.LILAC ||
-                material == Material.PEONY ||
-                material == Material.TALL_GRASS ||
-                material == Material.TALL_SEAGRASS ||
-                material == Material.MANGROVE_PROPAGULE;
-    }
-
-    /**
-     * Checks if the given {@link Material} type is a redstone machine like, redstone torch, piston, comparator, etc.
-     *
-     * @param material The {@link Material} type.
-     * @return true if the type is a redstone machine; false otherwise.
-     */
-    static boolean isRedstoneMachine(@NonNull Material material) {
-        return material.getCreativeCategory() == CreativeCategory.REDSTONE && (
-                material == Material.REDSTONE_TORCH ||
-                        material.name().contains("PISTON") ||
-                        material.name().contains("BUTTON") ||
-                        material.name().contains("PRESSURE_PLATE") ||
-                        material.name().contains("DETECTOR") ||
-                        material.name().contains("LAMP") ||
-                        material == Material.COMPARATOR ||
-                        material == Material.REPEATER ||
-                        material == Material.REDSTONE ||
-                        material == Material.REDSTONE_WIRE ||
-                        material == Material.OBSERVER ||
-                        material == Material.DROPPER ||
-                        material == Material.DISPENSER ||
-                        material == Material.HOPPER ||
-                        material == Material.HOPPER_MINECART);
-    }
-
-    /**
-     * Checks if the given location is contained within the mapped location1 and location2 area.
-     *
-     * @param location1 The first location.
-     * @param location2 The second location.
-     * @param location  The location to check if it is contained within the area.
-     * @return true if the location is within the area; false otherwise.
-     */
-    static boolean isInsideLocationArea(@NonNull Location location1, @NonNull Location location2, @NonNull Location location) {
-        final double ourMinX = Math.min(location1.getX(), location2.getX());
-        final double ourMaxX = Math.max(location1.getX(), location2.getX());
-
-        final double ourMinY = Math.min(location1.getY(), location2.getY());
-        final double ourMaxY = Math.max(location1.getY(), location2.getY());
-
-        final double ourMinZ = Math.min(location1.getZ(), location2.getZ());
-        final double ourMaxZ = Math.max(location1.getZ(), location2.getZ());
-
-        final double theirX = location.getX();
-        final double theirY = location.getY();
-        final double theirZ = location.getZ();
-
-        return theirX >= ourMinX && theirX <= ourMaxX &&
-                theirY >= ourMinY && theirY <= ourMaxY &&
-                theirZ >= ourMinZ && theirZ <= ourMaxZ;
-    }
-
-    /**
-     * Gets a random location within the mapped location1 and location2 area.
-     *
-     * @param location1 The first location.
-     * @param location2 The second location.
-     * @return The randomly calculated area location.
-     */
-    @NonNull
-    static Location getRandomLocationInLocationArea(@NonNull Location location1, @NonNull Location location2) {
-        final double ourMinX = Math.min(location1.getX(), location2.getX());
-        final double ourMaxX = Math.max(location1.getX(), location2.getX());
-
-        final double ourMinY = Math.min(location1.getY(), location2.getY());
-        final double ourMaxY = Math.max(location1.getY(), location2.getY());
-
-        final double ourMinZ = Math.min(location1.getZ(), location2.getZ());
-        final double ourMaxZ = Math.max(location1.getZ(), location2.getZ());
-
-        final double randomX = new Random().nextDouble(ourMinX, ourMaxX);
-        final double randomY = new Random().nextDouble(ourMinY, ourMaxY);
-        final double randomZ = new Random().nextDouble(ourMinZ, ourMaxZ);
-
-        return new Location(location1.getWorld(), randomX, randomY, randomZ);
-    }
-
-    /**
-     * Gets the centered offset block location of the given location.
-     *
-     * @param location The block location.
-     * @param xOffset  The x offset.
-     * @param yOffset  The y offset.
-     * @param zOffset  The z offset.
-     * @return The centered offset location.
-     */
-    @NonNull
-    static Location getCenterBlockLocation(@NonNull Location location, double xOffset, double yOffset, double zOffset) {
-        final Location finalLocation = location.getBlock().getLocation().clone()
-                .add(.5, .5, .5)
-                .add(xOffset, yOffset, zOffset);
-
-        finalLocation.setPitch(location.getPitch());
-        finalLocation.setYaw(location.getYaw());
-        finalLocation.setDirection(location.getDirection());
-
-        return finalLocation;
-    }
-
-    /**
-     * Gets the center location of the targeted location block.
-     *
-     * @param location The location.
-     * @return The centered block location.
-     */
-    @NonNull
-    static Location getCenterBlockLocation(@NonNull Location location) {
-        return getCenterBlockLocation(location, 0, 0, 0);
-    }
-
-    /**
-     * Gets the top location of the targeted location block, while offsetting only the y-axis to be on top of the block.
-     *
-     * @param location The location.
-     * @return The location.
-     */
-    @NonNull
-    static Location getCenterBlockTopLocation(@NonNull Location location) {
-        return getCenterBlockLocation(location, 0, .5, 0);
-    }
-
-    /**
-     * Gets the horizontal centered location of the targeted location block, while offsetting only the x- and z-axis of the block.
-     *
-     * @param location The location.
-     * @return The location.
-     */
-    @NonNull
-    static Location getCenterBlockSideLocation(@NonNull Location location) {
-        return getCenterBlockLocation(location, 0, -.5, 0);
-    }
-
-    /**
-     * Takes the given world and "cleans" all rules for minigame or stale world purposes.
-     *
-     * @param world The world.
-     * @apiNote Calling this method sets the following values:
-     * <ul>
-     *  <li>DO_DAYLIGHT_CYCLE       : false</li>
-     *  <li>DO_FIRE_TICK            : false</li>
-     *  <li>DO_MOB_SPAWNING         : false</li>
-     *  <li>ANNOUNCE_ADVANCEMENTS   : false</li>
-     *  <li>DO_MOB_LOOT             : false</li>
-     *  <li>DO_MOB_SPAWNING         : false</li>
-     *  <li>DO_TRADER_SPAWNING      : false</li>
-     *  <li>DO_VINES_SPREAD         : false</li>
-     *  <li>MOB_GRIEFING            : false</li>
-     *  <li>SHOW_DEATH_MESSAGES     : false</li>
-     *  <li>KEEP_INVENTORY          : true</li>
-     *  <li>DISABLE_RAIDS           : true</li>
-     *  <li>TIME                    : 0</li>
-     *  <li>DIFFICULTY              : PEACEFUL</li>
-     *  <li>DO_WEATHER_CYCLE        : false</li>
-     *  <li>WEATHER_DURATION        : 0</li>
-     * </ul>
-     */
-    static void cleanGameRules(@NonNull World world) {
-        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-        world.setGameRule(GameRule.DO_FIRE_TICK, false);
-        world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
-        world.setGameRule(GameRule.DO_MOB_LOOT, false);
-        world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-        world.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
-        world.setGameRule(GameRule.DO_VINES_SPREAD, false);
-        world.setGameRule(GameRule.MOB_GRIEFING, false);
-        world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
-        world.setGameRule(GameRule.KEEP_INVENTORY, true);
-        world.setGameRule(GameRule.DISABLE_RAIDS, true);
-        world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-
-        world.setTime(0);
-        world.setDifficulty(Difficulty.PEACEFUL);
-        world.setWeatherDuration(0);
-    }
-
-    /**
-     * Takes the given world by name and "cleans" all gamerules for minigame or clean world purposes.
-     *
-     * @param worldName The name of the world to clean.
-     * @see VitalUtils#cleanGameRules(World) for more information about cleansed world rules.
-     */
-    static void cleanGameRules(@NonNull String worldName) {
-        final World world = Optional.ofNullable(Bukkit.getWorld(worldName))
-                .orElseThrow(() -> new RuntimeException("World %s does not exist"
-                        .formatted(worldName)));
-
-        cleanGameRules(world);
-    }
-
-    /**
      * Broadcasts an action to be performed for each player currently connected to this server.
      *
      * @param action          The action to perform for each player.
@@ -519,6 +271,254 @@ public interface VitalUtils<Player> {
      * The spigot implementation for every vital util.
      */
     class Spigot implements VitalUtils<org.bukkit.entity.Player> {
+        /**
+         * Checks if the given {@link Material} type is valid for placement in midair.
+         *
+         * @param material The {@link Material} type.
+         * @return true if the type can be placed in midair; false otherwise.
+         */
+        public boolean canBePlacedInMidAir(@NonNull Material material) {
+            return !material.hasGravity() &&
+                    !isVegetation(material) &&
+                    (material != Material.REDSTONE &&
+                            material != Material.REDSTONE_TORCH &&
+                            material != Material.REPEATER &&
+                            material != Material.COMPARATOR &&
+                            material != Material.LEVER &&
+                            material != Material.TRIPWIRE &&
+                            !material.name().contains("BUTTON") &&
+                            !material.name().contains("PRESSURE_PLATE") &&
+                            !material.name().contains("RAIL"));
+        }
+
+        /**
+         * Checks if the given {@link Material} type is vegetation or not.
+         *
+         * @param material The {@link Material} type.
+         * @return true if the given type is vegetation; false otherwise.
+         */
+        public boolean isVegetation(@NonNull Material material) {
+            return material.name().contains("SAPLING") ||
+                    material.name().contains("FLOWER") ||
+                    material.name().contains("WHEAT") ||
+                    material.name().contains("SEEDS") ||
+                    material.name().contains("CROP") ||
+                    material.name().contains("KELP") ||
+                    material.name().contains("BUSH") ||
+                    material.name().contains("MUSHROOM") ||
+                    material.name().contains("CHORUS") ||
+                    material.name().contains("FERN") ||
+                    material.name().contains("POTTED") ||
+                    material.name().contains("ROSE") ||
+                    material.name().contains("POPPY") ||
+                    material == Material.MELON_STEM ||
+                    material == Material.PUMPKIN_STEM ||
+                    material == Material.BAMBOO ||
+                    material == Material.SUGAR_CANE ||
+                    material == Material.SEA_PICKLE ||
+                    material == Material.NETHER_WART ||
+                    material == Material.LILY_PAD ||
+                    material == Material.VINE ||
+                    material == Material.GLOW_LICHEN ||
+                    material == Material.SCULK_VEIN ||
+                    material == Material.CACTUS ||
+                    material == Material.LILAC ||
+                    material == Material.PEONY ||
+                    material == Material.TALL_GRASS ||
+                    material == Material.TALL_SEAGRASS ||
+                    material == Material.MANGROVE_PROPAGULE;
+        }
+
+        /**
+         * Checks if the given {@link Material} type is a redstone machine like, redstone torch, piston, comparator, etc.
+         *
+         * @param material The {@link Material} type.
+         * @return true if the type is a redstone machine; false otherwise.
+         */
+        public boolean isRedstoneMachine(@NonNull Material material) {
+            return material.getCreativeCategory() == CreativeCategory.REDSTONE && (
+                    material == Material.REDSTONE_TORCH ||
+                            material.name().contains("PISTON") ||
+                            material.name().contains("BUTTON") ||
+                            material.name().contains("PRESSURE_PLATE") ||
+                            material.name().contains("DETECTOR") ||
+                            material.name().contains("LAMP") ||
+                            material == Material.COMPARATOR ||
+                            material == Material.REPEATER ||
+                            material == Material.REDSTONE ||
+                            material == Material.REDSTONE_WIRE ||
+                            material == Material.OBSERVER ||
+                            material == Material.DROPPER ||
+                            material == Material.DISPENSER ||
+                            material == Material.HOPPER ||
+                            material == Material.HOPPER_MINECART);
+        }
+
+        /**
+         * Checks if the given location is contained within the mapped location1 and location2 area.
+         *
+         * @param location1 The first location.
+         * @param location2 The second location.
+         * @param location  The location to check if it is contained within the area.
+         * @return true if the location is within the area; false otherwise.
+         */
+        public boolean isInsideLocationArea(@NonNull Location location1, @NonNull Location location2, @NonNull Location location) {
+            final double ourMinX = Math.min(location1.getX(), location2.getX());
+            final double ourMaxX = Math.max(location1.getX(), location2.getX());
+
+            final double ourMinY = Math.min(location1.getY(), location2.getY());
+            final double ourMaxY = Math.max(location1.getY(), location2.getY());
+
+            final double ourMinZ = Math.min(location1.getZ(), location2.getZ());
+            final double ourMaxZ = Math.max(location1.getZ(), location2.getZ());
+
+            final double theirX = location.getX();
+            final double theirY = location.getY();
+            final double theirZ = location.getZ();
+
+            return theirX >= ourMinX && theirX <= ourMaxX &&
+                    theirY >= ourMinY && theirY <= ourMaxY &&
+                    theirZ >= ourMinZ && theirZ <= ourMaxZ;
+        }
+
+        /**
+         * Gets a random location within the mapped location1 and location2 area.
+         *
+         * @param location1 The first location.
+         * @param location2 The second location.
+         * @return The randomly calculated area location.
+         */
+        @NonNull
+        public static Location getRandomLocationInLocationArea(@NonNull Location location1, @NonNull Location location2) {
+            final double ourMinX = Math.min(location1.getX(), location2.getX());
+            final double ourMaxX = Math.max(location1.getX(), location2.getX());
+
+            final double ourMinY = Math.min(location1.getY(), location2.getY());
+            final double ourMaxY = Math.max(location1.getY(), location2.getY());
+
+            final double ourMinZ = Math.min(location1.getZ(), location2.getZ());
+            final double ourMaxZ = Math.max(location1.getZ(), location2.getZ());
+
+            final double randomX = new Random().nextDouble(ourMinX, ourMaxX);
+            final double randomY = new Random().nextDouble(ourMinY, ourMaxY);
+            final double randomZ = new Random().nextDouble(ourMinZ, ourMaxZ);
+
+            return new Location(location1.getWorld(), randomX, randomY, randomZ);
+        }
+
+        /**
+         * Gets the centered offset block location of the given location.
+         *
+         * @param location The block location.
+         * @param xOffset  The x offset.
+         * @param yOffset  The y offset.
+         * @param zOffset  The z offset.
+         * @return The centered offset location.
+         */
+        @NonNull
+        public Location getCenterBlockLocation(@NonNull Location location, double xOffset, double yOffset, double zOffset) {
+            final Location finalLocation = location.getBlock().getLocation().clone()
+                    .add(.5, .5, .5)
+                    .add(xOffset, yOffset, zOffset);
+
+            finalLocation.setPitch(location.getPitch());
+            finalLocation.setYaw(location.getYaw());
+            finalLocation.setDirection(location.getDirection());
+
+            return finalLocation;
+        }
+
+        /**
+         * Gets the center location of the targeted location block.
+         *
+         * @param location The location.
+         * @return The centered block location.
+         */
+        @NonNull
+        public Location getCenterBlockLocation(@NonNull Location location) {
+            return getCenterBlockLocation(location, 0, 0, 0);
+        }
+
+        /**
+         * Gets the top location of the targeted location block, while offsetting only the y-axis to be on top of the block.
+         *
+         * @param location The location.
+         * @return The location.
+         */
+        @NonNull
+        public Location getCenterBlockTopLocation(@NonNull Location location) {
+            return getCenterBlockLocation(location, 0, .5, 0);
+        }
+
+        /**
+         * Gets the horizontal centered location of the targeted location block, while offsetting only the x- and z-axis of the block.
+         *
+         * @param location The location.
+         * @return The location.
+         */
+        @NonNull
+        public Location getCenterBlockSideLocation(@NonNull Location location) {
+            return getCenterBlockLocation(location, 0, -.5, 0);
+        }
+
+        /**
+         * Takes the given world and "cleans" all rules for minigame or stale world purposes.
+         *
+         * @param world The world.
+         * @apiNote Calling this method sets the following values:
+         * <ul>
+         *  <li>DO_DAYLIGHT_CYCLE       : false</li>
+         *  <li>DO_FIRE_TICK            : false</li>
+         *  <li>DO_MOB_SPAWNING         : false</li>
+         *  <li>ANNOUNCE_ADVANCEMENTS   : false</li>
+         *  <li>DO_MOB_LOOT             : false</li>
+         *  <li>DO_MOB_SPAWNING         : false</li>
+         *  <li>DO_TRADER_SPAWNING      : false</li>
+         *  <li>DO_VINES_SPREAD         : false</li>
+         *  <li>MOB_GRIEFING            : false</li>
+         *  <li>SHOW_DEATH_MESSAGES     : false</li>
+         *  <li>KEEP_INVENTORY          : true</li>
+         *  <li>DISABLE_RAIDS           : true</li>
+         *  <li>TIME                    : 0</li>
+         *  <li>DIFFICULTY              : PEACEFUL</li>
+         *  <li>DO_WEATHER_CYCLE        : false</li>
+         *  <li>WEATHER_DURATION        : 0</li>
+         * </ul>
+         */
+        public void cleanGameRules(@NonNull World world) {
+            world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+            world.setGameRule(GameRule.DO_FIRE_TICK, false);
+            world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+            world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+            world.setGameRule(GameRule.DO_MOB_LOOT, false);
+            world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+            world.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
+            world.setGameRule(GameRule.DO_VINES_SPREAD, false);
+            world.setGameRule(GameRule.MOB_GRIEFING, false);
+            world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
+            world.setGameRule(GameRule.KEEP_INVENTORY, true);
+            world.setGameRule(GameRule.DISABLE_RAIDS, true);
+            world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
+
+            world.setTime(0);
+            world.setDifficulty(Difficulty.PEACEFUL);
+            world.setWeatherDuration(0);
+        }
+
+        /**
+         * Takes the given world by name and "cleans" all gamerules for minigame or clean world purposes.
+         *
+         * @param worldName The name of the world to clean.
+         * @see VitalUtils.Spigot#cleanGameRules(World) for more information about cleansed world rules.
+         */
+        public void cleanGameRules(@NonNull String worldName) {
+            final World world = Optional.ofNullable(Bukkit.getWorld(worldName))
+                    .orElseThrow(() -> new RuntimeException("World %s does not exist"
+                            .formatted(worldName)));
+
+            cleanGameRules(world);
+        }
+
         @Override
         public void broadcastAction(@NonNull Predicate<org.bukkit.entity.Player> playerPredicate, @NonNull Consumer<org.bukkit.entity.Player> action) {
             Bukkit.getOnlinePlayers().stream()

@@ -1,6 +1,7 @@
 package me.xra1ny.vital.annotation;
 
 import me.xra1ny.vital.VitalPluginEnvironment;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,6 +16,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
+@SpringBootApplication
 public @interface VitalPluginInfo {
     /**
      * Defines the name of this plugin.

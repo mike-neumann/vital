@@ -1,10 +1,10 @@
 package me.xra1ny.vital.items;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
-import me.xra1ny.essentia.inject.annotation.AfterInit;
-import me.xra1ny.vital.AnnotatedVitalComponent;
-import me.xra1ny.vital.Vital;
+import me.xra1ny.vital.RequiresAnnotation;
+import me.xra1ny.vital.VitalComponent;
 import me.xra1ny.vital.items.annotation.VitalItemInfo;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -26,13 +26,24 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
-public abstract class VitalItem extends ItemStack implements AnnotatedVitalComponent<VitalItemInfo> {
+public abstract class VitalItem extends ItemStack implements RequiresAnnotation<VitalItemInfo>, VitalComponent {
     /**
      * The map of all currently active cooldowns for each player.
      */
     @Getter
     @NonNull
     private final Map<Player, Integer> playerCooldownMap = new HashMap<>();
+
+    @Override
+    public void onRegistered() {
+
+    }
+
+    @Override
+    public void onUnregistered() {
+
+    }
+
     /**
      * The initial cooldown of this VitalItemStack.
      */
@@ -85,26 +96,9 @@ public abstract class VitalItem extends ItemStack implements AnnotatedVitalCompo
         setItemMeta(meta);
     }
 
-    /**
-     * Registers this item.
-     *
-     * @param vital       Vital.
-     * @param itemManager Vital's item manager.
-     */
-    @AfterInit
-    public void afterInit(Vital<?> vital, VitalItemManager itemManager) {
-        vital.unregisterComponent(this);
-        itemManager.registerVitalComponent(this);
-    }
-
-    @Override
-    public void onRegistered() {
-
-    }
-
-    @Override
-    public void onUnregistered() {
-
+    @PostConstruct
+    public void afterInit(VitalItemManager itemManager) {
+        itemManager.registerComponent(this);
     }
 
     @Override

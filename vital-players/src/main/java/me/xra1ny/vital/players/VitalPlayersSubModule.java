@@ -1,17 +1,12 @@
 package me.xra1ny.vital.players;
 
-import me.xra1ny.essentia.inject.annotation.Component;
 import me.xra1ny.vital.VitalSubModule;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * Defines the vital-players submodule.
  */
-@Component
+@SpringBootApplication(scanBasePackages = "me.xra1ny.vital.players")
 public class VitalPlayersSubModule extends VitalSubModule {
-    @Override
-    @NotNull
-    public String getName() {
-        return "vital-players";
-    }
+
 }

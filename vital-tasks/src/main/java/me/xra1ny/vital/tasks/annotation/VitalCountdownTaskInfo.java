@@ -1,5 +1,7 @@
 package me.xra1ny.vital.tasks.annotation;
 
+import org.springframework.stereotype.Component;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -7,6 +9,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
+@Component
 public @interface VitalCountdownTaskInfo {
     /**
      * Defines the countdown for this annotated countdown task in seconds.
