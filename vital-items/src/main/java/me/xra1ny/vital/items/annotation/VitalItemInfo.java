@@ -4,6 +4,7 @@ import lombok.NonNull;
 import me.xra1ny.vital.items.VitalItem;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,6 +16,7 @@ import java.lang.annotation.Target;
  *
  * @author xRa1ny
  */
+@Component
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface VitalItemInfo {

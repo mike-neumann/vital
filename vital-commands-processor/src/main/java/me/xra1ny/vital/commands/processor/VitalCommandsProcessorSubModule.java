@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Defines the vital-commands-processor submodule.
  */
-@Component
+
 public class VitalCommandsProcessorSubModule extends VitalSubModule {
 
 }

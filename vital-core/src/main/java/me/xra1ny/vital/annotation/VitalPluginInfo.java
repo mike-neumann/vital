@@ -1,7 +1,6 @@
 package me.xra1ny.vital.annotation;
 
 import me.xra1ny.vital.VitalPluginEnvironment;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,14 +15,13 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-@SpringBootApplication
 public @interface VitalPluginInfo {
     /**
      * Defines the name of this plugin.
      *
      * @return The name of this plugin.
      */
-    String value();
+    String name();
 
     /**
      * Defines the description of this plugin.
@@ -61,4 +59,11 @@ public @interface VitalPluginInfo {
      * @return The environment used for this vital plugin instance.
      */
     VitalPluginEnvironment environment();
+
+    /**
+     * Defines the locations where spring should look for configuration files
+     *
+     * @return The locations of any configuration files for spring
+     */
+    String[] springConfigLocations() default "classpath:application.properties";
 }

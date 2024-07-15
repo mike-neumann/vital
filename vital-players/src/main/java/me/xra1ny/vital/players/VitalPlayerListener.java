@@ -1,9 +1,9 @@
 package me.xra1ny.vital.players;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.java.Log;
-import me.xra1ny.vital.VitalComponent;
 import me.xra1ny.vital.VitalComponentManager;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -26,7 +26,7 @@ import java.util.UUID;
  * @author xRa1ny
  */
 @Log
-public abstract class VitalPlayerListener<Plugin, Player, VPlayer extends VitalPlayer<?>, PlayerManager extends VitalComponentManager<VPlayer>> implements VitalComponent {
+public abstract class VitalPlayerListener<Plugin, Player, VPlayer extends VitalPlayer<?>, PlayerManager extends VitalComponentManager<VPlayer>> {
     @Getter
     private final PlayerManager playerManager;
 
@@ -38,16 +38,6 @@ public abstract class VitalPlayerListener<Plugin, Player, VPlayer extends VitalP
 
     protected VitalPlayerListener(PlayerManager playerManager) {
         this.playerManager = playerManager;
-    }
-
-    @Override
-    public void onRegistered() {
-
-    }
-
-    @Override
-    public void onUnregistered() {
-
     }
 
     /**
@@ -113,8 +103,8 @@ public abstract class VitalPlayerListener<Plugin, Player, VPlayer extends VitalP
             super(vital);
         }
 
-        @Override
-        public void onRegistered() {
+        @PostConstruct
+        public void init() {
             // disconnect any connected player...
             for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
                 player.kick();
@@ -144,8 +134,8 @@ public abstract class VitalPlayerListener<Plugin, Player, VPlayer extends VitalP
             super(vital);
         }
 
-        @Override
-        public void onRegistered() {
+        @PostConstruct
+        public void init() {
             // disconnect any connected player...
             for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
                 player.disconnect();

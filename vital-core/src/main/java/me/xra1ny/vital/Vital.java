@@ -2,11 +2,12 @@ package me.xra1ny.vital;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.springframework.boot.WebApplicationType;
+import me.xra1ny.vital.spring.VitalBanner;
+import me.xra1ny.vital.spring.VitalBungeecordConfiguration;
+import me.xra1ny.vital.spring.VitalSpigotConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.ResourceLoader;
 
 /**
  * The main instance of the Vital-Framework.
@@ -23,19 +24,19 @@ public class Vital {
      * @param plugin The plugin instance itself
      */
     @SneakyThrows
-    public static void run(Object plugin) {
-        final SpringApplicationBuilder builder = new SpringApplicationBuilder();
-        final ClassLoader classLoader = plugin.getClass().getClassLoader();
-        final Class<?> pluginConfig = Class.forName(plugin.getClass().getPackageName() + ".PluginConfiguration");
-        final Class<?>[] sources = {pluginConfig, VitalCoreSubModule.class};
-        final ResourceLoader loader = new DefaultResourceLoader(classLoader);
+    public static void run(Class<?> plugin, String pluginName) {
+        Thread.currentThread().setContextClassLoader(plugin.getClassLoader());
 
-        Thread.currentThread().setContextClassLoader(classLoader);
+        final SpringApplicationBuilder builder = new SpringApplicationBuilder();
+        final Class<?> pluginConfiguration = Class.forName(plugin.getPackageName() + ".PluginConfiguration");
+        final Class<?>[] sources = {pluginConfiguration, VitalSpigotConfiguration.class, VitalBungeecordConfiguration.class};
+
         context = builder.sources(sources)
-                // register a single bean called pluginInstance, for any global access directly to the plugin instance Vital is currently running with
-                .initializers(context -> context.getBeanFactory().registerSingleton("pluginInstance", plugin))
-                .web(WebApplicationType.NONE)
-                .resourceLoader(loader)
+                .resourceLoader(new DefaultResourceLoader(plugin.getClassLoader()))
+                .logStartupInfo(false)
+                .banner(new VitalBanner())
+                .properties("plugin.name=" + pluginName)
+                .properties("plugin.main=" + plugin.getName())
                 .run();
     }
 }

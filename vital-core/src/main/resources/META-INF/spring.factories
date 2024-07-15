@@ -1,2 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  me.xra1ny.vital.spring.VitalSpringBungeecordConfig, me.xra1ny.vital.spring.VitalSpringSpigotConfig

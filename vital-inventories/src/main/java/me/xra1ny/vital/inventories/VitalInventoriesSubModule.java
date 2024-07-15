@@ -1,12 +1,12 @@
 package me.xra1ny.vital.inventories;
 
 import me.xra1ny.vital.VitalSubModule;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Component;
 
 /**
  * Defines the vital-inventories submodule.
  */
-@SpringBootApplication(scanBasePackages = "me.xra1ny.vital.inventories")
+@Component
 public class VitalInventoriesSubModule extends VitalSubModule {
 
 }

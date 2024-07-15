@@ -1,24 +1,14 @@
 plugins {
     java
     `maven-publish`
-    id("org.springframework.boot") version "3.2.4"
-    id("io.spring.dependency-management") version "1.1.4"
 }
 
-dependencies {
-    compileOnly(project(":vital-core"))
-    implementation(project(":vital-core-processor"))
-    implementation(project(":vital-commands-processor"))
-}
-
-allprojects {
+subprojects {
     group = "me.xra1ny.vital"
     version = "1.0"
 
     apply<JavaPlugin>()
     apply<MavenPublishPlugin>()
-    apply(plugin = "org.springframework.boot")
-    apply(plugin = "io.spring.dependency-management")
 
     repositories {
         mavenLocal()
@@ -27,16 +17,14 @@ allprojects {
     }
 
     dependencies {
-        compileOnly("org.projectlombok:lombok:1.18.32")
         annotationProcessor("org.projectlombok:lombok:1.18.32")
-        implementation("org.reflections:reflections:0.10.2")
+        compileOnly("org.projectlombok:lombok:1.18.32")
         compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
         compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
+        compileOnly("org.springframework.boot:spring-boot-starter:3.3.1")
 
-        implementation("me.xra1ny.essentia:essentia-except:1.0")
-        implementation("org.springframework:spring-context:6.1.10")
+        implementation("org.reflections:reflections:0.10.2")
         implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
-        implementation("org.springframework.boot:spring-boot-starter")
     }
 
     java {

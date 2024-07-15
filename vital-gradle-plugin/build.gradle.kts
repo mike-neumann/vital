@@ -16,12 +16,8 @@ gradlePlugin {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
+    compileOnly(project(":vital-core"))
 }
 
 kotlin {

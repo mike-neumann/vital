@@ -1,12 +1,12 @@
 package me.xra1ny.vital.configs;
 
 import me.xra1ny.vital.VitalSubModule;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Component;
 
 /**
  * Defines the vital-configs submodule.
  */
-@SpringBootApplication(scanBasePackages = "me.xra1ny.vital.configs")
+@Component
 public class VitalConfigsSubModule extends VitalSubModule {
 
 }

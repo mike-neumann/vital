@@ -1,12 +1,12 @@
 package me.xra1ny.vital.minigames;
 
 import me.xra1ny.vital.VitalSubModule;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Component;
 
 /**
  * Defines the vital-minigames submodule.
  */
-@SpringBootApplication(scanBasePackages = "me.xra1ny.vital.minigames")
+@Component
 public class VitalMinigameSubModule extends VitalSubModule {
 
 }

@@ -1,12 +1,12 @@
 package me.xra1ny.vital.holograms;
 
 import me.xra1ny.vital.VitalSubModule;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Component;
 
 /**
  * Defines the vital-holograms submodule.
  */
-@SpringBootApplication(scanBasePackages = "me.xra1ny.vital.holograms")
+@Component
 public class VitalHologramsSubModule extends VitalSubModule {
 
 }

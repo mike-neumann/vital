@@ -83,7 +83,7 @@ public class VitalPluginInfoAnnotationProcessor extends AbstractProcessor {
         final VitalPluginInfo vitalPluginInfo = classNameVitalPluginInfoEntry.getValue();
 
         // finally generate the `plugin.yml`.
-        generatePluginYml(className, vitalPluginInfo.value(), vitalPluginInfo.apiVersion(), vitalPluginInfo.version(), vitalPluginInfo.environment());
+        generatePluginYml(className, vitalPluginInfo.name(), vitalPluginInfo.apiVersion(), vitalPluginInfo.version(), vitalPluginInfo.environment());
 
         final List<String> packageNames = new ArrayList<>(List.of(className.split("[.]")));
 
@@ -92,7 +92,7 @@ public class VitalPluginInfoAnnotationProcessor extends AbstractProcessor {
         // now we have the package name without the class at the end
         final String packageName = String.join(".", packageNames);
 
-        generatePluginConfigurationClass(packageName);
+        generatePluginConfigurationClass(packageName, vitalPluginInfo.springConfigLocations());
 
         ran = true;
 
@@ -142,7 +142,7 @@ public class VitalPluginInfoAnnotationProcessor extends AbstractProcessor {
         }
     }
 
-    public void generatePluginConfigurationClass(@NonNull String packageName) {
+    public void generatePluginConfigurationClass(@NonNull String packageName, @NonNull String[] springConfigLocations) {
         try {
             final JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(packageName + ".PluginConfiguration");
             final InputStream resource = VitalPluginInfoAnnotationProcessor.class.getResourceAsStream("/Main.java");
@@ -150,7 +150,7 @@ public class VitalPluginInfoAnnotationProcessor extends AbstractProcessor {
             try (Writer writer = javaFileObject.openWriter()) {
                 final String template = IOUtils.toString(new InputStreamReader(resource));
 
-                writer.write(template.replace("{packageName}", packageName).replace("{scans}", "\"" + packageName + "\""));
+                writer.write(template.replace("{packageName}", packageName).replace("{springConfigLocations}", "\"" + String.join(",", springConfigLocations) + "\"").replace("{scans}", "\"" + packageName + "\""));
             }
         } catch (Exception e) {
             e.printStackTrace();

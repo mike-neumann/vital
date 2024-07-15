@@ -13,6 +13,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,11 @@ import java.util.UUID;
  * @author xRa1ny
  */
 public abstract class VitalItem extends ItemStack implements RequiresAnnotation<VitalItemInfo>, VitalComponent {
+    // error can be ignored, since the implementation of this class will always be a component
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    private VitalItemManager itemManager;
+
     /**
      * The map of all currently active cooldowns for each player.
      */
@@ -97,7 +103,7 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
     }
 
     @PostConstruct
-    public void afterInit(VitalItemManager itemManager) {
+    public void init() {
         itemManager.registerComponent(this);
     }
 
