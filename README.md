@@ -13,7 +13,7 @@ development:
 
 - 🏢**vital-core**: Provides essential functionality.
 - 👥**vital-users**: Manage player data and interactions with ease.
-- 📜**vital-configs**: Expand the essentia-configure dependency with Spigot related configuration classes.
+- 📜**vital-configs**: Upgrade you config management with an OOP-driven configuration file system.
 - ⌨️**vital-commands**: Effortlessly create and manage custom commands for your server.
 - 💫**vital-holograms**: Enhance your server with stunning holographic displays.
 - 🍄**vital-items**: Simplify custom item management for your Minecraft server.

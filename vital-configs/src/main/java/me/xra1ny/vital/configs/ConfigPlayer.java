@@ -1,7 +1,7 @@
 package me.xra1ny.vital.configs;
 
 import lombok.NonNull;
-import me.xra1ny.essentia.configs.annotation.Property;
+import me.xra1ny.vital.configs.annotation.Property;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.bukkit.Bukkit;

@@ -35,10 +35,6 @@ class VitalGradlePlugin : Plugin<Project> {
                 }
             }
 
-            if (hasDependency("me.xra1ny.vital:vital-configs")) {
-                target.dependencies.add("implementation", "me.xra1ny.essentia:essentia-configure:1.0")
-            }
-
             target.tasks.named("build") {
                 it.dependsOn(target.tasks.named("shadowJar"))
             }

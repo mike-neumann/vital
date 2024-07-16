@@ -1,7 +1,7 @@
 package me.xra1ny.vital.configs;
 
 import lombok.NonNull;
-import me.xra1ny.essentia.configs.annotation.Property;
+import me.xra1ny.vital.configs.annotation.Property;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.enchantments.EnchantmentWrapper;
