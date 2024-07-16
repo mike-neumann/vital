@@ -34,6 +34,8 @@ import java.util.stream.Stream;
  * @author xRa1ny
  */
 public abstract class VitalCommand<Plugin, CommandSender> implements RequiresAnnotation<VitalCommandInfo> {
+    // error can be ignored, since the implementing class will always be a component / bean
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     @Getter
     private Plugin plugin;

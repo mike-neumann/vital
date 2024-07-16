@@ -14,9 +14,9 @@ import java.lang.annotation.Target;
  * @author xRa1ny
  * @apiNote If combined with the :vital-core-processor and :vital-commands-processor dependency as annotation processor, can automatically define all commands in plugin.yml during compile-time.
  */
+@Component
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Component
 public @interface VitalCommandInfo {
     /**
      * Defines the name of this command, excluding the slash /.
