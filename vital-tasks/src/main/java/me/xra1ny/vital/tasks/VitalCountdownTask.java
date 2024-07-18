@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import me.xra1ny.vital.RequiresAnnotation;
 import me.xra1ny.vital.tasks.annotation.VitalCountdownTaskInfo;
+import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -35,6 +36,15 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
     public VitalCountdownTask() {
         final VitalCountdownTaskInfo vitalCountdownTaskInfo = getRequiredAnnotation();
 
+        initialCountdown = vitalCountdownTaskInfo.value();
+        countdown = initialCountdown;
+        interval = vitalCountdownTaskInfo.interval();
+    }
+
+    public VitalCountdownTask(@NonNull Plugin plugin) {
+        final VitalCountdownTaskInfo vitalCountdownTaskInfo = getRequiredAnnotation();
+
+        this.plugin = plugin;
         initialCountdown = vitalCountdownTaskInfo.value();
         countdown = initialCountdown;
         interval = vitalCountdownTaskInfo.interval();
@@ -150,6 +160,10 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
             super();
         }
 
+        public Spigot(JavaPlugin plugin) {
+            super(plugin);
+        }
+
         public Spigot(@NonNull JavaPlugin javaPlugin, int interval, int countdown) {
             super(javaPlugin, interval, countdown);
         }
@@ -190,6 +204,10 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
     public static class Bungeecord extends VitalCountdownTask<net.md_5.bungee.api.plugin.Plugin, java.lang.Runnable, ScheduledTask> {
         public Bungeecord() {
             super();
+        }
+
+        public Bungeecord(net.md_5.bungee.api.plugin.Plugin plugin) {
+            super(plugin);
         }
 
         public Bungeecord(@NonNull net.md_5.bungee.api.plugin.Plugin plugin, int interval, int countdown) {
