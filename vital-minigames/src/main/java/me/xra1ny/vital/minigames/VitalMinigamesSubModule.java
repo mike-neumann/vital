@@ -7,6 +7,6 @@ import org.springframework.stereotype.Component;
  * Defines the vital-minigames submodule.
  */
 @Component
-public class VitalMinigameSubModule extends VitalSubModule {
+public class VitalMinigamesSubModule extends VitalSubModule {
 
 }
