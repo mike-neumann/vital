@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  * @apiNote This class may be extended from, to add more specific mini-game manager logic or function, depending on the mini-game you are trying to implement.
  */
 @Log
-@Component(dependsOn = VitalMinigamesSubModule.class)
+@Component
 public class VitalMinigameManager implements VitalComponent {
     private static VitalMinigameManager instance;
     private final JavaPlugin plugin;
