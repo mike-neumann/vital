@@ -9,7 +9,7 @@ import java.util.UUID;
  * Defines common methods and lifecycle events for Vital components.
  *
  * @author xRa1ny
- * @apiNote {@link VitalComponent} may be everything within a plugin, a command, a config, a game state, a player, an item, etc.
+ * @apiNote A component may be managed by its respective component manager ({@link VitalComponentManager})
  */
 public interface VitalComponent {
     /**
@@ -33,13 +33,13 @@ public interface VitalComponent {
     }
 
     /**
-     * Called when this {@link VitalComponent} is registered.
+     * Called when this component is registered on a manager
      * Implement this method to perform any required initialization when the component is registered.
      */
     void onRegistered();
 
     /**
-     * Called when this {@link VitalComponent} is unregistered.
+     * Called when this component is unregistered from a manager
      * Implement this method to perform any cleanup or finalization when the component is unregistered.
      */
     void onUnregistered();

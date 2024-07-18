@@ -1,11 +1,12 @@
 package me.xra1ny.vital.items;
 
+import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
-import me.xra1ny.essentia.inject.annotation.Component;
 import me.xra1ny.vital.tasks.VitalRepeatableTask;
 import me.xra1ny.vital.tasks.annotation.VitalRepeatableTaskInfo;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -75,22 +76,9 @@ public class VitalItemCooldownHandler extends VitalRepeatableTask.Spigot {
         }
     }
 
-    /**
-     * Called when this component is registered.
-     * Starts the cooldown handler task.
-     */
-    @Override
-    public void onRegistered() {
+    @PostConstruct
+    public void init() {
         start();
-    }
-
-    /**
-     * Called when this component is unregistered.
-     * Stops the cooldown handler task.
-     */
-    @Override
-    public void onUnregistered() {
-        stop();
     }
 
     /**

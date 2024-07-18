@@ -1,25 +1,16 @@
 package me.xra1ny.vital;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.java.Log;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Defines the vital-core submodule.
  */
 @Log
-public abstract class VitalSubModule implements VitalComponent {
-    @Override
-    @NotNull
-    public abstract String getName();
-
-    @Override
-    public final void onRegistered() {
+public abstract class VitalSubModule {
+    @PostConstruct
+    public final void init() {
         log.info("Using %s"
-                .formatted(getName()));
-    }
-
-    @Override
-    public final void onUnregistered() {
-
+                .formatted(getClass().getSimpleName()));
     }
 }

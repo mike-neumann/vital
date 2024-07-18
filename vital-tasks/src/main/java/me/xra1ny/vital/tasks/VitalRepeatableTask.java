@@ -3,13 +3,14 @@ package me.xra1ny.vital.tasks;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import me.xra1ny.vital.AnnotatedVitalComponent;
+import me.xra1ny.vital.RequiresAnnotation;
 import me.xra1ny.vital.tasks.annotation.VitalRepeatableTaskInfo;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.TimeUnit;
 
@@ -19,10 +20,11 @@ import java.util.concurrent.TimeUnit;
  *
  * @author xRa1ny
  */
-public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Runnable, Task> implements AnnotatedVitalComponent<VitalRepeatableTaskInfo> {
+public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Runnable, Task> implements RequiresAnnotation<VitalRepeatableTaskInfo> {
     @Getter
     @NonNull
-    private final Plugin plugin;
+    @Autowired
+    private Plugin plugin;
 
     /**
      * The interval at which this repeatable task should execute, in milliseconds.
@@ -50,8 +52,16 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
     private boolean allowTick = true;
 
     /**
-     * Creates a new instance of VitalRepeatableTask with the specified JavaPlugin.
-     * Using the Information provided by the VitalRepeatableTaskInfo Annotation
+     * Constructor to use when using springs dependency injection pattern.
+     */
+    public VitalRepeatableTask() {
+        final VitalRepeatableTaskInfo vitalRepeatableTaskInfo = getRequiredAnnotation();
+
+        interval = vitalRepeatableTaskInfo.value();
+    }
+
+    /**
+     * Constructor to use when manually implementing this class
      *
      * @param plugin The JavaPlugin instance associated with this task.
      */
@@ -72,16 +82,6 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
     public VitalRepeatableTask(@NonNull Plugin plugin, int interval) {
         this.plugin = plugin;
         this.interval = interval;
-    }
-
-    @Override
-    public void onRegistered() {
-
-    }
-
-    @Override
-    public void onUnregistered() {
-
     }
 
     @Override
@@ -159,6 +159,10 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
      * The spigot implementation for vital repeatable task.
      */
     public static class Spigot extends VitalRepeatableTask<JavaPlugin, BukkitRunnable, BukkitTask> {
+        public Spigot() {
+            super();
+        }
+
         /**
          * Constructs a new spigot impl. for vital repeatable task.
          *
@@ -212,6 +216,10 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
      * The bungeecord implementation for vital repeatable task.
      */
     public static class Bungeecord extends VitalRepeatableTask<net.md_5.bungee.api.plugin.Plugin, java.lang.Runnable, ScheduledTask> {
+        public Bungeecord() {
+            super();
+        }
+
         /**
          * Constructs a new bungeecord impl. for vital repeatable task.
          *

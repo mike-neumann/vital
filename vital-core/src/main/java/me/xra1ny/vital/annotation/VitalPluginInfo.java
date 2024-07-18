@@ -1,6 +1,7 @@
 package me.xra1ny.vital.annotation;
 
 import me.xra1ny.vital.VitalPluginEnvironment;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,6 +14,7 @@ import java.lang.annotation.Target;
  * @author xRa1ny
  * @apiNote If combined with vital-core-processor dependency as annotation processor, can automatically generate the plugin.yml on compile-time.
  */
+@Component
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface VitalPluginInfo {
@@ -21,7 +23,7 @@ public @interface VitalPluginInfo {
      *
      * @return The name of this plugin.
      */
-    String value();
+    String name();
 
     /**
      * Defines the description of this plugin.
@@ -59,4 +61,11 @@ public @interface VitalPluginInfo {
      * @return The environment used for this vital plugin instance.
      */
     VitalPluginEnvironment environment();
+
+    /**
+     * Defines the locations where spring should look for configuration files
+     *
+     * @return The locations of any configuration files for spring
+     */
+    String[] springConfigLocations() default "classpath:application.properties";
 }

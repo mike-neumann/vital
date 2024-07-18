@@ -3,13 +3,7 @@ plugins {
     `maven-publish`
 }
 
-dependencies {
-    compileOnly(project(":vital-core"))
-    implementation(project(":vital-core-processor"))
-    implementation(project(":vital-commands-processor"))
-}
-
-allprojects {
+subprojects {
     group = "me.xra1ny.vital"
     version = "1.0"
 
@@ -23,16 +17,14 @@ allprojects {
     }
 
     dependencies {
-        compileOnly("org.projectlombok:lombok:1.18.32")
         annotationProcessor("org.projectlombok:lombok:1.18.32")
-        implementation("org.reflections:reflections:0.10.2")
-        implementation("org.slf4j:slf4j-api:2.0.13")
-        implementation("ch.qos.logback:logback-classic:1.5.6")
+        compileOnly("org.projectlombok:lombok:1.18.32")
         compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
         compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
+        compileOnly("org.springframework.boot:spring-boot-starter:3.3.1")
 
-        // needed for dependency injection.
-        implementation("me.xra1ny.essentia:essentia-inject:1.0")
+        implementation("org.reflections:reflections:0.10.2")
+        implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
     }
 
     java {

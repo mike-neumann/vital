@@ -1,184 +1,80 @@
 package me.xra1ny.vital;
 
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.SneakyThrows;
-import lombok.extern.java.Log;
-import me.xra1ny.essentia.inject.DIContainer;
-import me.xra1ny.essentia.inject.EssentiaInject;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.reflections.Reflections;
+import me.xra1ny.vital.spring.VitalBanner;
+import me.xra1ny.vital.spring.VitalBungeecordConfiguration;
+import me.xra1ny.vital.spring.VitalSpigotConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 
-import java.util.*;
+import java.util.Properties;
 
 /**
  * The main instance of the Vital-Framework.
  *
- * @param <Plugin> The Plugin type.
  * @author xRa1ny
  */
-@Log
-public class Vital<Plugin> implements DIContainer {
-    /**
-     * Holds a list of all classes registered on this classpath for later use of dependency injection.
-     *
-     * @apiNote This implementation is used to improve performance across many managers since scanning takes some time.
-     */
+public class Vital {
     @Getter
-    @NonNull
-    private static final Set<Class<? extends VitalComponent>> scannedClassSet = new Reflections().getSubTypesOf(VitalComponent.class);
-    private static Vital<?> instance;
-    @Getter
-    @NonNull
-    private final Map<Class<?>, Object> componentClassObjectMap = new HashMap<>();
+    private static ConfigurableApplicationContext context;
 
     /**
-     * The plugin instance associated with this {@link Vital}.
-     */
-    @Getter
-    @NonNull
-    private final Plugin plugin;
-
-    /**
-     * Constructs a new {@link Vital} instance.
+     * Initializes the Vital-Framework using Spring Boot
      *
-     * @param plugin The {@link JavaPlugin} instance to associate with {@link Vital}.
+     * @param plugin The plugin instance itself
      */
-    public Vital(@NonNull Plugin plugin) {
-        this.plugin = plugin;
+    @SneakyThrows
+    public static void run(Class<?> plugin, String pluginName) {
+        final ClassLoader pluginClassLoader = plugin.getClassLoader();
+        // needed or else spring startup fails
+        Thread.currentThread().setContextClassLoader(pluginClassLoader);
+
+        final ResourceLoader loader = new DefaultResourceLoader(pluginClassLoader);
+        final SpringApplicationBuilder builder = new SpringApplicationBuilder();
+        final Class<?> pluginConfiguration = Class.forName(plugin.getPackageName() + ".PluginConfiguration");
+        final Class<?>[] sources = {pluginConfiguration, VitalSpigotConfiguration.class, VitalBungeecordConfiguration.class};
+
+        System.setProperty("plugin.name", pluginName);
+        System.setProperty("plugin.main", plugin.getName());
+
+        try {
+            final Properties properties = new Properties();
+
+            properties.load(pluginClassLoader.getResourceAsStream("application.properties"));
+
+            properties.forEach((key, value) -> {
+                System.setProperty(key.toString(), value.toString());
+                System.out.println("setting: " + key + "; to: " + value);
+            });
+        } catch (Exception ignored) {}
+
+        context = builder.sources(sources)
+                .initializers(applicationContext -> {
+                    applicationContext.setClassLoader(pluginClassLoader);
+                    applicationContext.setEnvironment(new StandardEnvironment());
+                })
+                .resourceLoader(loader)
+                .banner(new VitalBanner())
+                .logStartupInfo(false)
+                .run();
     }
-
-    /**
-     * Singleton access-point for all {@link Vital} instances.
-     *
-     * @param type Your plugin's main class.
-     * @param <T>  The type of your plugin's main class.
-     * @return The {@link Vital} instance.
-     * @throws ClassCastException If the provided type and {@link Vital} plugin instance don't match.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T extends JavaPlugin> Vital<T> getVitalCoreInstance(@NonNull Class<T> type) {
-        return (Vital<T>) instance;
-    }
-
-    /**
-     * Singleton access-point for {@link Vital} instance.
-     * This method will return a generically inaccurate Object.
-     * For more accurate {@link Vital} types use {@link Vital#getVitalCoreInstance(Class)}
-     *
-     * @return The {@link Vital} instance.
-     */
-    public static Vital<?> getVitalCoreInstance() {
-        return instance;
-    }
-
-    @Override
-    public void unregisterComponentByType(@NonNull Class<?> type) {
-        componentClassObjectMap.remove(type);
-    }
-
-    @Override
-    public void unregisterComponent(@NonNull Object o) {
-        componentClassObjectMap.remove(o.getClass(), o);
-
-        if (o instanceof VitalComponent vitalComponent) {
-            vitalComponent.onUnregistered();
-        }
-    }
-
-    @Override
-    public void registerComponent(@NonNull Object o) {
-        if (isRegistered(o)) {
-            return;
-        }
-
-        componentClassObjectMap.put(o.getClass(), o);
-
-        if (o instanceof VitalComponent vitalComponent) {
-            vitalComponent.onRegistered();
-        }
-    }
-
-    /**
-     * Enables the Vital-Framework, initialising needed systems.
-     */
-    @SneakyThrows // TODO
-    public final void enable() {
-        log.info("Enabling VitalCore<%s>"
-                .formatted(plugin));
-
-        instance = this;
-        registerComponent(instance);
-        registerComponent(plugin);
-
-        // register both plugin package and Vital's package for dependency injection using essentia-inject.
-        EssentiaInject.run(this, plugin.getClass().getPackageName(), getClass().getPackageName());
-
-        log.info("VitalCore<%s> enabled!"
-                .formatted(plugin));
-        log.info("Hello from Vital!");
-    }
-
-    /**
-     * Gets the vital component by its uniqueId.
-     *
-     * @param uniqueId The components uniqueId.
-     * @return The vital command; or null.
-     */
-    @Nullable
-    public VitalComponent getComponentByUniqueId(@NotNull UUID uniqueId) {
-        return getComponents().stream()
-                .filter(VitalComponent.class::isInstance)
-                .map(VitalComponent.class::cast)
-                .filter(component -> component.getUniqueId().equals(uniqueId))
-                .findFirst()
-                .orElse(null);
-    }
-
-    /**
-     * Checks whether the specified submodule is used or not.
-     *
-     * @param subModuleName The submodule's name (e.g. vital, vital-core, vital-commands, etc.)
-     * @return True if the given submodule is used; false otherwise.
-     */
-    public boolean isUsingSubModule(@NonNull String subModuleName) {
-        return getUsedSubModuleNames().stream()
-                .map(String::toLowerCase)
-                .toList()
-                .contains(subModuleName.toLowerCase());
-    }
-
-    /**
-     * Checks whether the specified submodule is used or not.
-     *
-     * @param subModuleType The submodule class.
-     * @return True if the submodule is used; false otherwise.
-     */
-    public boolean isUsingSubModule(@NonNull Class<? extends VitalSubModule> subModuleType) {
-        return isRegistered(subModuleType);
-    }
-
-    /**
-     * Gets a list of all used submodules.
-     *
-     * @return A list of all used submodules.
-     */
-    @NonNull
-    public List<? extends VitalSubModule> getUsedSubModules() {
-        return getComponentsByType(VitalSubModule.class);
-    }
-
-    /**
-     * Gets a list of all submodules by name.
-     *
-     * @return A list of all used submodule names.
-     */
-    @NonNull
-    public List<String> getUsedSubModuleNames() {
-        return getUsedSubModules().stream()
-                .map(VitalSubModule::getName)
-                .toList();
-    }
+//    public static void run(Class<?> plugin, String pluginName) {
+//        Thread.currentThread().setContextClassLoader(plugin.getClassLoader());
+//
+//        final SpringApplicationBuilder builder = new SpringApplicationBuilder();
+//        final Class<?> pluginConfiguration = Class.forName(plugin.getPackageName() + ".PluginConfiguration");
+//        final Class<?>[] sources = {pluginConfiguration, VitalSpigotConfiguration.class, VitalBungeecordConfiguration.class};
+//
+//        context = builder.sources(sources)
+//                .resourceLoader(new DefaultResourceLoader(plugin.getClassLoader()))
+//                .logStartupInfo(false)
+//                .banner(new VitalBanner())
+//                .properties("plugin.name=" + pluginName)
+//                .properties("plugin.main=" + plugin.getName())
+//                .run();
+//    }
 }

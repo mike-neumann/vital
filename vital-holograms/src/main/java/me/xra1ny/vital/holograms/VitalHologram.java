@@ -151,21 +151,13 @@ public class VitalHologram implements VitalComponent {
         }
     }
 
-    /**
-     * Called when this VitalHologram is registered.
-     * Calls the update method to initialize the hologram.
-     */
     @Override
     public void onRegistered() {
-        update();
+
     }
 
-    /**
-     * Called when this VitalHologram is unregistered.
-     * Calls the remove method to clean up the hologram and associated entities.
-     */
     @Override
     public void onUnregistered() {
-        remove();
+
     }
 }

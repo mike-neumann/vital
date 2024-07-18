@@ -1,6 +1,7 @@
 package me.xra1ny.vital.tasks.annotation;
 
 import me.xra1ny.vital.tasks.VitalRepeatableTask;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -14,6 +15,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Component
 public @interface VitalRepeatableTaskInfo {
     /**
      * Defines the interval at which the repeatable task should execute, in milliseconds.

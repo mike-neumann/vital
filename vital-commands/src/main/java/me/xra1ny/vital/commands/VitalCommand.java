@@ -1,35 +1,29 @@
 package me.xra1ny.vital.commands;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
-import me.xra1ny.essentia.inject.annotation.AfterInit;
-import me.xra1ny.vital.AnnotatedVitalComponent;
+import lombok.SneakyThrows;
+import me.xra1ny.vital.RequiresAnnotation;
 import me.xra1ny.vital.commands.annotation.VitalCommandArg;
 import me.xra1ny.vital.commands.annotation.VitalCommandArgHandler;
 import me.xra1ny.vital.commands.annotation.VitalCommandInfo;
 import me.xra1ny.vital.commands.crossplatform.PluginCommand;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -39,40 +33,29 @@ import java.util.stream.Stream;
  * @param <CommandSender> The command sender type of this command.
  * @author xRa1ny
  */
-public abstract class VitalCommand<CommandSender> implements AnnotatedVitalComponent<VitalCommandInfo> {
-    private static final Logger log = LoggerFactory.getLogger(VitalCommand.class);
+public abstract class VitalCommand<Plugin, CommandSender> implements RequiresAnnotation<VitalCommandInfo> {
+    // error can be ignored, since the implementing class will always be a component / bean
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    @Getter
+    private Plugin plugin;
     private final Class<CommandSender> commandSenderClass;
 
-    /**
-     * The name of the command.
-     */
     @Getter
     @NonNull
     private final String name;
 
-    /**
-     * The required permission to execute this command.
-     */
     @Getter
     @NonNull
     private final String permission;
 
-    /**
-     * Flag indicating if this command requires a player sender.
-     */
     @Getter
     private final boolean requiresPlayer;
 
-    /**
-     * Array of VitalCommandArgs describing command arguments.
-     */
     @Getter
     @NonNull
-    private final Map<Pattern, VitalCommandArg> vitalCommandArgs;
+    private final VitalCommandArg[] vitalCommandArgs;
 
-    /**
-     * Constructor for VitalCommand.
-     */
     private VitalCommand(@NonNull Class<CommandSender> commandSenderClass) {
         final VitalCommandInfo vitalCommandInfo = getRequiredAnnotation();
 
@@ -80,32 +63,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
         name = vitalCommandInfo.value();
         permission = vitalCommandInfo.permission();
         requiresPlayer = vitalCommandInfo.requiresPlayer();
-        vitalCommandArgs = Arrays.stream(vitalCommandInfo.args())
-                // map spaces
-                // map to var-args
-                // then map normal args remaining if the first conversion had no effect
-                // map to pattern type
-                .map(arg -> Map.entry(
-                        Pattern.compile(
-                                arg.value().replaceAll(" ", "[ ]")
-                                        .replaceAll("%.+%[*]", "(.+)")
-                                        .replaceAll("%.+%", "(\\\\S+)")
-                        ),
-                        arg
-                ))
-                .collect(Collectors.toSet())
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    @Override
-    public void onRegistered() {
-
-    }
-
-    @Override
-    public void onUnregistered() {
-
+        vitalCommandArgs = vitalCommandInfo.args();
     }
 
     @Override
@@ -142,80 +100,110 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      *
      * @param sender Who sent the command.
      * @param args   Any args used during command execution.
-     * @return Command success state.
      */
-    public final boolean execute(@NonNull CommandSender sender, @NonNull String[] args) {
-        // Check if the command requires a player sender.
+    public final void execute(@NonNull CommandSender sender, @NonNull String[] args) throws Exception {
         if (requiresPlayer) {
-            // Check if the sender is not a Player.
             if (!isPlayer(sender)) {
-                // Execute the onCommandRequiresPlayer method and return true.
                 onCommandRequiresPlayer(sender, String.join(" ", args), null);
 
-                return true;
+                return;
             }
         }
 
-        // Check if a permission is required and if the sender has it.
         if (!permission.isBlank() && !hasPermission(sender, permission)) {
-            // Execute the onCommandRequiresPermission method and return true.
             onCommandRequiresPermission(sender, String.join(" ", args), null);
 
-            return true;
+            return;
         }
 
-        try {
-            // find executing command arg
-            final VitalCommandArg executingArg = getExecutingArg(String.join(" ", args));
-            VitalCommandReturnState commandReturnState;
+        final StringBuilder formattedArgsBuilder = new StringBuilder();
+        final List<String> values = new ArrayList<>();
+        VitalCommandArg finalCommandArg = null;
 
-            try {
-                if (executingArg == null) {
-                    commandReturnState = executeBaseCommand(sender);
-                } else {
-                    // extract user values from command
-                    final List<String> values = new ArrayList<>();
+        for (String arg : args) {
+            // Initialize a boolean flag to check if the argument is recognized.
+            boolean contains = false;
 
-                    for (String commandArg : executingArg.value().split(" ")) {
-                        for (String userArg : args) {
-                            if (!userArg.equalsIgnoreCase(commandArg)) {
-                                // we have a custom arg
-                                values.add(userArg);
-                            }
-                        }
+            // Loop through the command arguments specified for this command.
+            for (VitalCommandArg commandArg : vitalCommandArgs) {
+                // Split the command argument into individual parts.
+                final String[] splitCommandArg = commandArg.value().split(" ");
+                // Initialize a flag to check if the argument is recognized for this commandArg.
+                boolean containsArg = false;
+
+                // Loop through the parts of the command argument.
+                for (String singleCommandArg : splitCommandArg) {
+                    // Check if the argument matches any part of the command argument.
+                    if (singleCommandArg.equalsIgnoreCase(arg)) {
+                        // Set the flag to true and break.
+                        containsArg = true;
+                        break;
                     }
-
-                    commandReturnState = executeCommandArgHandlerMethod(sender, executingArg, values.toArray(String[]::new));
                 }
-            } catch (Exception e) {
-                commandReturnState = VitalCommandReturnState.ERROR;
+
+                // Check if the argument is recognized for this commandArg.
+                if (containsArg) {
+                    // Set the flag to true.
+                    contains = true;
+                    break;
+                }
             }
 
-            final String joinedArgs = String.join(" ", args);
-
-            // Handle the command return state.
-            switch (commandReturnState) {
-                case ERROR -> onCommandError(sender, joinedArgs, executingArg);
-                case INTERNAL_ERROR -> onCommandInternalError(sender, joinedArgs, executingArg);
-                case INVALID_ARGS -> onCommandInvalidArgs(sender, joinedArgs);
-                case NO_PERMISSION -> onCommandRequiresPermission(sender, joinedArgs, executingArg);
+            // Check if the argument is recognized for this command.
+            if (contains) {
+                // Append the argument to the formattedArgsBuilder.
+                formattedArgsBuilder.append(!formattedArgsBuilder.isEmpty() ? " " : "").append(arg);
+                continue;
             }
 
-            return true;
-        } catch (Exception e) {
-            log.info("Exception while executing command", e);
+            // If the argument is not recognized, replace it with a "?" and add it to the values list.
+            formattedArgsBuilder.append(!formattedArgsBuilder.isEmpty() ? " " : "").append("?");
+            values.add(arg);
         }
 
-        return true;
-    }
+        for (VitalCommandArg commandArg : vitalCommandArgs) {
+            // Replace placeholders with "?" and check if it matches the formattedArgsBuilder.
+            if (commandArg.value().replaceAll("%[A-Za-z0-9]*%", "?").equalsIgnoreCase(formattedArgsBuilder.toString())) {
+                // Assign the matched commandArg to finalCommandArg.
+                finalCommandArg = commandArg;
+                break;
+            }
+        }
 
-    @Nullable
-    public final VitalCommandArg getExecutingArg(@NonNull String arg) {
-        return vitalCommandArgs.entrySet().stream()
-                .filter(entry -> entry.getKey().matcher(arg).matches())
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(null);
+        VitalCommandReturnState commandReturnState = null;
+
+        if (finalCommandArg != null) {
+            commandReturnState = executeCommandArgHandlerMethod(sender, finalCommandArg, values.toArray(new String[0]));
+        } else {
+            for (VitalCommandArg commandArg : vitalCommandArgs) {
+                if (!formattedArgsBuilder.toString().startsWith(commandArg.value().replaceAll("%[A-Za-z0-9]*%", "?").replace("*", ""))) {
+                    continue;
+                }
+
+                commandReturnState = executeCommandArgHandlerMethod(sender, commandArg, values.toArray(new String[0]));
+                break;
+            }
+        }
+
+        if (commandReturnState == null) {
+            // when executing the ACTUAL BASE COMMAND, call its method here...
+            if (args.length == 0) {
+                commandReturnState = executeBaseCommand(sender);
+            } else {
+                // if not, we are accessing an invalid command node.
+                commandReturnState = VitalCommandReturnState.INVALID_ARGS;
+            }
+        }
+
+        final String joinedArgs = String.join(" ", args);
+
+        // Handle the command return state.
+        switch (commandReturnState) {
+            case ERROR -> onCommandError(sender, joinedArgs, finalCommandArg);
+            case INTERNAL_ERROR -> onCommandInternalError(sender, joinedArgs, finalCommandArg);
+            case INVALID_ARGS -> onCommandInvalidArgs(sender, joinedArgs);
+            case NO_PERMISSION -> onCommandRequiresPermission(sender, joinedArgs, finalCommandArg);
+        }
     }
 
     /**
@@ -283,18 +271,6 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
     }
 
     /**
-     * Called upon requesting any tab-completion content.
-     *
-     * @param sender The {@link CommandSender} that sent the command.
-     * @param args   The arguments used in chat.
-     * @return A {@link List} of strings to show to the player as tab-completion suggestions.
-     */
-    @NonNull
-    protected List<String> onCommandTabComplete(@NonNull CommandSender sender, @NonNull String args) {
-        return List.of();
-    }
-
-    /**
      * Handles the tab complete action on any command sender.
      *
      * @param sender The sender.
@@ -307,7 +283,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
         final List<String> tabCompleted = new ArrayList<>();
 
         // Loop through the specified command arguments for this command.
-        for (VitalCommandArg arg : vitalCommandArgs.values()) {
+        for (VitalCommandArg arg : vitalCommandArgs) {
             // Split the value of the command argument into individual parts.
             final String[] originalArgs = arg.value().split(" ");
             // Clone the originalArgs to avoid modification.
@@ -346,11 +322,8 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
                     break; // Exit the loop.
                 }
 
-                if (finalArg.equalsIgnoreCase(VitalCommandArg.MATERIAL)) {
-                    for (Material material : Material.values()) {
-                        tabCompleted.add(material.name());
-                    }
-                } else if (finalArg.equalsIgnoreCase(VitalCommandArg.PLAYER)) {
+                // Check if the final argument is equal to "PLAYER".
+                if (finalArg.equalsIgnoreCase(VitalCommandArg.PLAYER)) {
                     // Loop through online players.
                     for (String playerName : getAllPlayerNames()) {
                         // Check if the player name is already in the tabCompleted list.
@@ -395,10 +368,21 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
     }
 
     /**
+     * Called upon requesting any tab-completion content.
+     *
+     * @param sender The {@link CommandSender} that sent the command.
+     * @param args   The arguments used in chat.
+     * @return A {@link List} of strings to show to the player as tab-completion suggestions.
+     */
+    @NonNull
+    protected List<String> onCommandTabComplete(@NonNull CommandSender sender, @NonNull String args) {
+        return List.of();
+    }
+
+    /**
      * Called when this VitalCommand has been executed using invalid Arguments
      *
      * @param sender The CommandSender
-     * @param args   The args used during command execution
      */
     protected void onCommandInvalidArgs(@NonNull CommandSender sender, @NonNull String args) {
 
@@ -408,8 +392,6 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      * Called when this VitalCommand has been executed and an internal Error has occurred
      *
      * @param sender The CommandSender
-     * @param args   The raw args used during command execution
-     * @param arg    The actual command arg object being used during command execution
      */
     protected void onCommandInternalError(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
@@ -419,8 +401,6 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      * Called when this VitalCommand has been executed and an Error has occurred
      *
      * @param sender The CommandSender
-     * @param args   The raw args used during command execution
-     * @param arg    The actual arg object being used during command execution
      */
     protected void onCommandError(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
@@ -430,8 +410,6 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      * Called when this VitalCommand has been executed without needed Permissions
      *
      * @param sender The CommandSender
-     * @param args   The raw args being used during command execution
-     * @param arg    The actual arg being used during command execution
      */
     protected void onCommandRequiresPermission(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
@@ -441,8 +419,6 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
      * Called when this VitalCommand has been executed as a non Player Object while requiring a Player to be executed
      *
      * @param sender The CommandSender
-     * @param args   The raw args used during command execution
-     * @param arg    The actual arg object used during command execution
      */
     protected void onCommandRequiresPlayer(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
@@ -451,7 +427,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
     /**
      * The spigot implementation for vital commands.
      */
-    public static class Spigot extends VitalCommand<org.bukkit.command.CommandSender> implements PluginCommand.Spigot {
+    public static abstract class Spigot extends VitalCommand<JavaPlugin, org.bukkit.command.CommandSender> implements PluginCommand.Spigot {
         /**
          * Constructs a new spigot vital command with the given info annotation provided by the implementing subclass.
          */
@@ -459,19 +435,17 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
             super(org.bukkit.command.CommandSender.class);
         }
 
-        /**
-         * Registers this command.
-         *
-         * @param plugin The spigot plugin impl.
-         */
-        @AfterInit
-        public final void afterInit(JavaPlugin plugin) {
-            plugin.getCommand(getName()).setExecutor(this);
+        @PostConstruct
+        public final void init() {
+            getPlugin().getCommand(getName()).setExecutor(this);
         }
 
+        @SneakyThrows
         @Override
         public final boolean onCommand(@NotNull org.bukkit.command.CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-            return execute(sender, args);
+            execute(sender, args);
+
+            return true;
         }
 
         @Override
@@ -500,7 +474,7 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
     /**
      * The bungeecord implementation for vital commands.
      */
-    public static class Bungeecord extends VitalCommand<net.md_5.bungee.api.CommandSender> {
+    public static abstract class Bungeecord extends VitalCommand<net.md_5.bungee.api.plugin.Plugin, net.md_5.bungee.api.CommandSender> {
         private final PluginCommand.Bungeecord command;
 
         /**
@@ -510,8 +484,9 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
             super(net.md_5.bungee.api.CommandSender.class);
 
             // wrap a custom bungeecord command class, since in bungeecord, command classes MUST BE EXTENDED FROM.
-            // this is not possible since the VitalCommand object MUST BE A class, and classes CANNOT HAVE MULTIPE EXTEND STATEMENTS...
+            // this is not possible since the VitalCommand object MUST BE A class, and classes CANNOT HAVE MULTIPLE EXTEND STATEMENTS...
             this.command = new PluginCommand.Bungeecord(getName()) {
+                @SneakyThrows
                 @Override
                 public void execute(net.md_5.bungee.api.CommandSender sender, String[] args) {
                     Bungeecord.this.execute(sender, args);
@@ -524,14 +499,9 @@ public abstract class VitalCommand<CommandSender> implements AnnotatedVitalCompo
             };
         }
 
-        /**
-         * Registers this command.
-         *
-         * @param plugin The bungeecord plugin impl.
-         */
-        @AfterInit
-        public final void afterInit(Plugin plugin) {
-            plugin.getProxy().getPluginManager().registerCommand(plugin, command);
+        @PostConstruct
+        public final void init() {
+            getPlugin().getProxy().getPluginManager().registerCommand(getPlugin(), command);
         }
 
         @Override

@@ -1,6 +1,7 @@
 package me.xra1ny.vital.commands.annotation;
 
 import me.xra1ny.vital.commands.VitalCommand;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,6 +14,7 @@ import java.lang.annotation.Target;
  * @author xRa1ny
  * @apiNote If combined with the :vital-core-processor and :vital-commands-processor dependency as annotation processor, can automatically define all commands in plugin.yml during compile-time.
  */
+@Component
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface VitalCommandInfo {

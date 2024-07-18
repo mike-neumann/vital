@@ -1,10 +1,10 @@
 package me.xra1ny.vital.items;
 
 import lombok.NonNull;
-import me.xra1ny.essentia.inject.annotation.Component;
 import me.xra1ny.vital.VitalListener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.springframework.stereotype.Component;
 
 /**
  * Listens for player interactions with custom item stacks and handles their interactions accordingly.
@@ -13,7 +13,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
  * @author xRa1ny
  */
 @Component
-public class VitalItemListener implements VitalListener.Spigot {
+public class VitalItemListener extends VitalListener.Spigot {
     /**
      * The management system for custom item stacks.
      */

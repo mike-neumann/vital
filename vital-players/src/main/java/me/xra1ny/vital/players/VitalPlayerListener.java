@@ -1,21 +1,21 @@
 package me.xra1ny.vital.players;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.java.Log;
-import lombok.extern.slf4j.Slf4j;
-import me.xra1ny.vital.VitalComponent;
-import me.xra1ny.vital.VitalComponentListManager;
-import me.xra1ny.vital.VitalListener;
+import me.xra1ny.vital.VitalComponentManager;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.slf4j.LoggerFactory;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -25,23 +25,19 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
-@Slf4j
-public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer<?>, PlayerManager extends VitalComponentListManager<VPlayer>> implements VitalComponent {
+@Log
+public abstract class VitalPlayerListener<Plugin, Player, VPlayer extends VitalPlayer<?>, PlayerManager extends VitalComponentManager<VPlayer>> {
     @Getter
     private final PlayerManager playerManager;
 
+    // can be ignored since subclasses is always a component
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    @Getter
+    private Plugin plugin;
+
     protected VitalPlayerListener(PlayerManager playerManager) {
         this.playerManager = playerManager;
-    }
-
-    @Override
-    public void onRegistered() {
-
-    }
-
-    @Override
-    public void onUnregistered() {
-
     }
 
     /**
@@ -52,7 +48,7 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer<?>
      */
     public void handlePlayerJoin(@NonNull UUID uniqueId, @NonNull Player player) {
         // Retrieve the VitalPlayer associated with the joining player, if it exists.
-        final Optional<VPlayer> optionalVitalPlayer = Optional.ofNullable(playerManager.getVitalComponentByUniqueId(uniqueId));
+        final Optional<VPlayer> optionalVitalPlayer = Optional.ofNullable(playerManager.getComponentByUniqueId(uniqueId));
 
         if (optionalVitalPlayer.isEmpty()) {
             // Create a new VitalPlayer for the joining player.
@@ -60,7 +56,7 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer<?>
                 final VPlayer vitalPlayer = vitalPlayerType().getDeclaredConstructor(playerType()).newInstance(player);
 
                 // Register the VitalPlayer with VitalUserManagement.
-                playerManager.registerVitalComponent(vitalPlayer);
+                playerManager.registerComponent(vitalPlayer);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException("error while creating vital player instance %s for %s"
@@ -76,7 +72,7 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer<?>
      */
     public void handlePlayerQuit(@NonNull UUID uniqueId) {
         // Retrieve the VitalPlayer associated with the leaving player.
-        final Optional<VPlayer> optionalVitalPlayer = Optional.ofNullable(playerManager.getVitalComponentByUniqueId(uniqueId));
+        final Optional<VPlayer> optionalVitalPlayer = Optional.ofNullable(playerManager.getComponentByUniqueId(uniqueId));
 
         if (optionalVitalPlayer.isEmpty()) {
             return;
@@ -85,7 +81,7 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer<?>
         final VPlayer vitalPlayer = optionalVitalPlayer.get();
 
         // Unregister the VitalPlayer from VitalUserManagement.
-        playerManager.unregisterVitalComponent(vitalPlayer);
+        playerManager.unregisterComponent(vitalPlayer);
     }
 
     /**
@@ -102,17 +98,19 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer<?>
      */
     protected abstract Class<Player> playerType();
 
-    public abstract static class Spigot<VPlayer extends VitalPlayer.Spigot, PlayerManager extends VitalComponentListManager<VPlayer>> extends VitalPlayerListener<org.bukkit.entity.Player, VPlayer, PlayerManager> implements VitalListener.Spigot {
+    public abstract static class Spigot<VPlayer extends VitalPlayer.Spigot, PlayerManager extends VitalComponentManager<VPlayer>> extends VitalPlayerListener<JavaPlugin, org.bukkit.entity.Player, VPlayer, PlayerManager> implements Listener {
         protected Spigot(PlayerManager vital) {
             super(vital);
         }
 
-        @Override
-        public void onRegistered() {
+        @PostConstruct
+        public void init() {
             // disconnect any connected player...
             for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
                 player.kick();
             }
+
+            getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
         }
 
         @Override
@@ -131,17 +129,19 @@ public abstract class VitalPlayerListener<Player, VPlayer extends VitalPlayer<?>
         }
     }
 
-    public static abstract class Bungeecord<VPlayer extends VitalPlayer.Bungeecord, PlayerManager extends VitalComponentListManager<VPlayer>> extends VitalPlayerListener<ProxiedPlayer, VPlayer, PlayerManager> implements VitalListener.Bungeecord {
+    public static abstract class Bungeecord<VPlayer extends VitalPlayer.Bungeecord, PlayerManager extends VitalComponentManager<VPlayer>> extends VitalPlayerListener<net.md_5.bungee.api.plugin.Plugin, ProxiedPlayer, VPlayer, PlayerManager> implements net.md_5.bungee.api.plugin.Listener {
         protected Bungeecord(PlayerManager vital) {
             super(vital);
         }
 
-        @Override
-        public void onRegistered() {
+        @PostConstruct
+        public void init() {
             // disconnect any connected player...
             for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
                 player.disconnect();
             }
+
+            getPlugin().getProxy().getPluginManager().registerListener(getPlugin(), this);
         }
 
         // should always be executed first.
