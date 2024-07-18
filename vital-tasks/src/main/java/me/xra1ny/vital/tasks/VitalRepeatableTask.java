@@ -84,6 +84,10 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
         this.interval = interval;
     }
 
+    public VitalRepeatableTask(int interval) {
+        this.interval = interval;
+    }
+
     @Override
     public Class<VitalRepeatableTaskInfo> requiredAnnotationType() {
         return VitalRepeatableTaskInfo.class;
@@ -182,6 +186,10 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
             super(javaPlugin, interval);
         }
 
+        public Spigot(int interval) {
+            super(interval);
+        }
+
         @Override
         protected BukkitRunnable createRunnable() {
             return new BukkitRunnable() {
@@ -237,6 +245,10 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
          */
         public Bungeecord(net.md_5.bungee.api.plugin.@NonNull Plugin plugin, int interval) {
             super(plugin, interval);
+        }
+
+        public Bungeecord(int interval) {
+            super(interval);
         }
 
         @Override

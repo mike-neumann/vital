@@ -57,6 +57,12 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
         this.interval = interval;
     }
 
+    public VitalCountdownTask(int interval, int countdown) {
+        initialCountdown = countdown;
+        this.countdown = initialCountdown;
+        this.interval = interval;
+    }
+
     @PostConstruct
     public void init() {
         run();
@@ -168,6 +174,10 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
             super(javaPlugin, interval, countdown);
         }
 
+        public Spigot(int interval, int countdown) {
+            super(interval, countdown);
+        }
+
         @Override
         protected VitalRepeatableTask<JavaPlugin, BukkitRunnable, BukkitTask> createVitalRepeatableTask() {
             return new VitalRepeatableTask.Spigot(getPlugin(), getInterval()) {
@@ -212,6 +222,10 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
 
         public Bungeecord(@NonNull net.md_5.bungee.api.plugin.Plugin plugin, int interval, int countdown) {
             super(plugin, interval, countdown);
+        }
+
+        public Bungeecord(int interval, int countdown) {
+            super(interval, countdown);
         }
 
         @Override
