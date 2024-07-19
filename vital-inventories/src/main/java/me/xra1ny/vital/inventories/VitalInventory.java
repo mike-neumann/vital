@@ -52,7 +52,7 @@ public class VitalInventory implements InventoryHolder, RequiresAnnotation<Vital
 
         background = backgroundItemStack;
         size = info.size();
-        inventory = Bukkit.createInventory(this, size, MiniMessage.miniMessage().deserialize(info.value()));
+        inventory = Bukkit.createInventory(this, size, MiniMessage.miniMessage().deserialize(info.name()));
         this.previousInventory = previousInventory;
     }
 

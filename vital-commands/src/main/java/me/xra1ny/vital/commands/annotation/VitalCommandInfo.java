@@ -23,7 +23,7 @@ public @interface VitalCommandInfo {
      *
      * @return The name of the command.
      */
-    String value();
+    String name();
 
     /**
      * Defines the description of this command.

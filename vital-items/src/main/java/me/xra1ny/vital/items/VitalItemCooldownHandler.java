@@ -17,7 +17,7 @@ import java.util.Map;
  * @author xRa1ny
  */
 @Component
-@VitalRepeatableTaskInfo(value = 50)
+@VitalRepeatableTaskInfo(interval = 50)
 public class VitalItemCooldownHandler extends VitalRepeatableTask.Spigot {
     private final VitalItemManager itemManager;
 

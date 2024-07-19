@@ -57,7 +57,7 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
     public VitalRepeatableTask() {
         final VitalRepeatableTaskInfo vitalRepeatableTaskInfo = getRequiredAnnotation();
 
-        interval = vitalRepeatableTaskInfo.value();
+        interval = vitalRepeatableTaskInfo.interval();
     }
 
     /**
@@ -70,7 +70,7 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
 
         final VitalRepeatableTaskInfo vitalRepeatableTaskInfo = getRequiredAnnotation();
 
-        interval = vitalRepeatableTaskInfo.value();
+        interval = vitalRepeatableTaskInfo.interval();
     }
 
     /**

@@ -60,7 +60,7 @@ public abstract class VitalCommand<Plugin, CommandSender> implements RequiresAnn
         final VitalCommandInfo vitalCommandInfo = getRequiredAnnotation();
 
         this.commandSenderClass = commandSenderClass;
-        name = vitalCommandInfo.value();
+        name = vitalCommandInfo.name();
         permission = vitalCommandInfo.permission();
         requiresPlayer = vitalCommandInfo.requiresPlayer();
         vitalCommandArgs = vitalCommandInfo.args();

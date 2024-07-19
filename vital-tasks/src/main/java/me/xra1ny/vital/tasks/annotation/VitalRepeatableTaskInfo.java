@@ -13,15 +13,15 @@ import java.lang.annotation.Target;
  *
  * @author xRa1ny
  */
+@Component
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Component
 public @interface VitalRepeatableTaskInfo {
     /**
      * Defines the interval at which the repeatable task should execute, in milliseconds.
      *
      * @return The interval for the repeatable task execution.
      */
-    int value();
+    int interval();
 }
 

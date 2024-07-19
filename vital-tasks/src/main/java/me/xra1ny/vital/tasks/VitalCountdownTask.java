@@ -6,7 +6,6 @@ import lombok.NonNull;
 import lombok.Setter;
 import me.xra1ny.vital.RequiresAnnotation;
 import me.xra1ny.vital.tasks.annotation.VitalCountdownTaskInfo;
-import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -36,7 +35,7 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
     public VitalCountdownTask() {
         final VitalCountdownTaskInfo vitalCountdownTaskInfo = getRequiredAnnotation();
 
-        initialCountdown = vitalCountdownTaskInfo.value();
+        initialCountdown = vitalCountdownTaskInfo.countdown();
         countdown = initialCountdown;
         interval = vitalCountdownTaskInfo.interval();
     }
@@ -45,7 +44,7 @@ public abstract class VitalCountdownTask<Plugin, Runnable extends java.lang.Runn
         final VitalCountdownTaskInfo vitalCountdownTaskInfo = getRequiredAnnotation();
 
         this.plugin = plugin;
-        initialCountdown = vitalCountdownTaskInfo.value();
+        initialCountdown = vitalCountdownTaskInfo.countdown();
         countdown = initialCountdown;
         interval = vitalCountdownTaskInfo.interval();
     }

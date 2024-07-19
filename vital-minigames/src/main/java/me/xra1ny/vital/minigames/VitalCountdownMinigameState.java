@@ -25,7 +25,7 @@ public abstract class VitalCountdownMinigameState implements VitalMinigameState,
     public VitalCountdownMinigameState() {
         final VitalCountdownTaskInfo vitalCountdownTaskInfo = getRequiredAnnotation();
 
-        run(vitalCountdownTaskInfo.interval(), vitalCountdownTaskInfo.value());
+        run(vitalCountdownTaskInfo.interval(), vitalCountdownTaskInfo.countdown());
     }
 
     /**
