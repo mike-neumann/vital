@@ -1,10 +1,10 @@
 package me.xra1ny.vital.configs;
 
+import jakarta.annotation.Nullable;
 import lombok.NonNull;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import me.xra1ny.vital.configs.annotation.VitalConfigInfo;
 import me.xra1ny.vital.configs.processor.FileProcessor;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import java.util.Optional;
 /**
  * @apiNote Must be annotated with {@link VitalConfigInfo}.
  */
-@Log
+@Slf4j
 public abstract class VitalConfig {
     /**
      * Defines the processor for this config.

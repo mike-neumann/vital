@@ -2,9 +2,9 @@ package me.xra1ny.vital.configs;
 
 import lombok.NonNull;
 import me.xra1ny.vital.configs.annotation.Property;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
-import org.bukkit.enchantments.EnchantmentWrapper;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -64,16 +64,13 @@ public class ConfigItemStack {
 
         configItemStack.type = itemStack.getType();
 
-        if (itemMeta.displayName() != null) {
-            configItemStack.displayName = LegacyComponentSerializer.legacyAmpersand().serialize(itemMeta.displayName());
+        if (itemMeta.getDisplayName() != null) {
+            configItemStack.displayName = itemMeta.getDisplayName();
         } else {
             configItemStack.displayName = itemStack.getType().name();
         }
 
-        configItemStack.lore = !itemMeta.hasLore() ? List.of() :
-                itemMeta.lore().stream()
-                        .map(LegacyComponentSerializer.legacyAmpersand()::serialize)
-                        .toList();
+        configItemStack.lore = !itemMeta.hasLore() ? List.of() : itemMeta.getLore();
         configItemStack.enchantments = Map.ofEntries(itemMeta.getEnchants().entrySet().stream()
                 .map(entry -> Map.entry(entry.getKey().getKey().getKey(), entry.getValue()))
                 .toArray(Map.Entry[]::new));
@@ -93,11 +90,9 @@ public class ConfigItemStack {
         final ItemStack itemStack = new ItemStack(type);
         final ItemMeta itemMeta = itemStack.getItemMeta();
 
-        itemMeta.displayName(LegacyComponentSerializer.legacyAmpersand().deserialize(displayName));
-        itemMeta.lore(lore.stream()
-                .map(LegacyComponentSerializer.legacyAmpersand()::deserialize)
-                .toList());
-        enchantments.forEach((key, level) -> itemMeta.addEnchant(new EnchantmentWrapper(key), level, true));
+        itemMeta.setDisplayName(displayName);
+        itemMeta.setLore(lore);
+        enchantments.forEach((key, level) -> itemMeta.addEnchant(Registry.ENCHANTMENT.get(NamespacedKey.minecraft(key)), level, true));
         itemMeta.addItemFlags(itemFlags.toArray(ItemFlag[]::new));
 
         itemStack.setItemMeta(itemMeta);

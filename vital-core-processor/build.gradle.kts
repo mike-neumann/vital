@@ -1,4 +1,4 @@
 dependencies {
-    implementation("commons-io:commons-io:2.16.1")
-    compileOnly(project(":vital-core"))
+    api(project(":vital-core"))
+    api("commons-io:commons-io:2.16.1")
 }

@@ -1,5 +1,6 @@
 plugins {
     java
+    `java-library`
     `maven-publish`
 }
 
@@ -9,6 +10,7 @@ subprojects {
 
     apply<JavaPlugin>()
     apply<MavenPublishPlugin>()
+    apply<JavaLibraryPlugin>()
 
     repositories {
         mavenLocal()
@@ -18,13 +20,13 @@ subprojects {
 
     dependencies {
         annotationProcessor("org.projectlombok:lombok:1.18.32")
-        compileOnly("org.projectlombok:lombok:1.18.32")
-        compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
-        compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
-        compileOnly("org.springframework.boot:spring-boot-starter:3.3.1")
 
-        implementation("org.reflections:reflections:0.10.2")
-        implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
+        compileOnly("org.projectlombok:lombok:1.18.32")
+        compileOnly("org.spigotmc:spigot-api:1.20.6-R0.1-SNAPSHOT")
+        compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
+
+        api("org.springframework.boot:spring-boot-starter:3.3.1")
+        api("jakarta.annotation:jakarta.annotation-api:3.0.0")
     }
 
     java {

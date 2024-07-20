@@ -1,5 +1,4 @@
 dependencies {
-    implementation(project(":vital-core-processor"))
-    implementation(project(":vital-commands"))
-    compileOnly(project(":vital-core"))
+    api(project(":vital-core-processor"))
+    api(project(":vital-commands"))
 }

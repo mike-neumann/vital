@@ -3,7 +3,6 @@ package me.xra1ny.vital.players;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.extern.java.Log;
 import me.xra1ny.vital.VitalComponentManager;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -11,6 +10,7 @@ import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -25,7 +25,6 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
-@Log
 public abstract class VitalPlayerListener<Plugin, Player, VPlayer extends VitalPlayer<?>, PlayerManager extends VitalComponentManager<VPlayer>> {
     @Getter
     private final PlayerManager playerManager;
@@ -107,7 +106,7 @@ public abstract class VitalPlayerListener<Plugin, Player, VPlayer extends VitalP
         public void init() {
             // disconnect any connected player...
             for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
-                player.kick();
+                player.kickPlayer("");
             }
 
             getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
@@ -118,12 +117,14 @@ public abstract class VitalPlayerListener<Plugin, Player, VPlayer extends VitalP
             return org.bukkit.entity.Player.class;
         }
 
-        @EventHandler
+        // should always be executed first.
+        @EventHandler(priority = EventPriority.LOWEST)
         public final void onPlayerJoin(@NonNull PlayerJoinEvent e) {
             handlePlayerJoin(e.getPlayer().getUniqueId(), e.getPlayer());
         }
 
-        @EventHandler
+        // should always be executed last.
+        @EventHandler(priority = EventPriority.HIGHEST)
         public final void onPlayerQuit(@NonNull PlayerQuitEvent e) {
             handlePlayerQuit(e.getPlayer().getUniqueId());
         }

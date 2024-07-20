@@ -2,7 +2,6 @@ package me.xra1ny.vital.configs.processor;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.extern.java.Log;
 import me.xra1ny.vital.configs.VitalConfig;
 
 import java.io.File;
@@ -13,7 +12,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 
-@Log
 public class PropertiesFileProcessor implements FileProcessor {
     @NonNull
     private final File file;

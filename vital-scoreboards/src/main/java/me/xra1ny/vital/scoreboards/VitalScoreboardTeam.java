@@ -12,8 +12,6 @@ import org.bukkit.scoreboard.Team;
 
 import java.util.*;
 
-import static net.kyori.adventure.text.Component.text;
-
 /**
  * Represents a team within a scoreboard in the Vital plugin framework.
  * This class manages team properties, members, and updates.
@@ -93,16 +91,16 @@ public class VitalScoreboardTeam {
      * Updates the properties and members of this scoreboard team.
      */
     public void update() {
-        bukkitTeam.displayName(text(name));
+        bukkitTeam.setDisplayName(name);
         bukkitTeam.setAllowFriendlyFire(friendlyFire);
         bukkitTeam.setCanSeeFriendlyInvisibles(canSeeFriendlyInvisibles);
 
         if (prefix != null) {
-            bukkitTeam.prefix(MiniMessage.miniMessage().deserialize(prefix));
+            bukkitTeam.setPrefix(LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(prefix)));
         }
 
         if (suffix != null) {
-            bukkitTeam.suffix(MiniMessage.miniMessage().deserialize(suffix));
+            bukkitTeam.setSuffix(LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(suffix)));
         }
 
         // Update all options

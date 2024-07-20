@@ -1,12 +1,12 @@
 package me.xra1ny.vital.utils;
 
+import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -16,18 +16,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.CreativeCategory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import static net.kyori.adventure.text.Component.empty;
 
 /**
  * Utility class for operations many developers might find useful.
@@ -342,19 +338,21 @@ public interface VitalUtils<Player> {
 
         @Override
         public void sendTitle(@NonNull org.bukkit.entity.Player player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
-            player.showTitle(Title.title(
-                    title == null ? empty() : MiniMessage.miniMessage().deserialize(title, tagResolvers),
-                    subtitle == null ? empty() : MiniMessage.miniMessage().deserialize(subtitle, tagResolvers),
-                    Title.Times.times(Duration.ofMillis((long) ((fadeIn / 20f) * 1_000)), Duration.ofMillis((long) ((stay / 20f) * 1_000)), Duration.ofMillis((long) ((fadeOut / 20f) * 1_000)))
-            ));
+            player.sendTitle(
+                    title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers)),
+                    subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers)),
+                    fadeIn,
+                    stay,
+                    fadeOut
+            );
         }
 
         @Override
         public void sendTitle(@NonNull org.bukkit.entity.Player player, @Nullable String title, @Nullable String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
-            player.showTitle(Title.title(
-                    title == null ? empty() : MiniMessage.miniMessage().deserialize(title, tagResolvers),
-                    subtitle == null ? empty() : MiniMessage.miniMessage().deserialize(subtitle, tagResolvers)
-            ));
+            player.sendTitle(
+                    title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers)),
+                    subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers))
+            );
         }
 
         @Override
@@ -454,7 +452,9 @@ public interface VitalUtils<Player> {
 
         @Override
         public void sendActionBar(@NonNull org.bukkit.entity.Player player, @NonNull String message, @NonNull TagResolver @NonNull ... tagResolvers) {
-            player.sendActionBar(MiniMessage.miniMessage().deserialize(message, tagResolvers));
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, BungeeComponentSerializer.get().serialize(
+                    MiniMessage.miniMessage().deserialize(message, tagResolvers)
+            ));
         }
 
         @Override
@@ -488,7 +488,7 @@ public interface VitalUtils<Player> {
          * @param location The location to teleport the player to.
          */
         public void teleport(@NonNull org.bukkit.entity.Player player, @NonNull Location location) {
-            teleport(player, location, PotionEffectType.SLOW);
+            teleport(player, location, PotionEffectType.SLOWNESS);
         }
 
         /**
@@ -498,7 +498,7 @@ public interface VitalUtils<Player> {
          * @param to     The entity to teleport to.
          */
         public void teleport(@NonNull org.bukkit.entity.Player player, @NonNull Entity to) {
-            teleport(player, to.getLocation(), PotionEffectType.SLOW);
+            teleport(player, to.getLocation(), PotionEffectType.SLOWNESS);
         }
 
         /**
@@ -702,26 +702,26 @@ public interface VitalUtils<Player> {
 
             final List<Location> circumference = new ArrayList<>();
 
-            for(double y = minY; y <= maxY; y++) {
-                for(double z = minZ; z <= maxZ; z++) {
+            for (double y = minY; y <= maxY; y++) {
+                for (double z = minZ; z <= maxZ; z++) {
                     circumference.add(new Location(location1.getWorld(), minX, y, z));
                 }
             }
 
-            for(double y = minY; y <= maxY; y++) {
-                for(double z = minZ; z <= maxZ; z++) {
+            for (double y = minY; y <= maxY; y++) {
+                for (double z = minZ; z <= maxZ; z++) {
                     circumference.add(new Location(location1.getWorld(), maxX, y, z));
                 }
             }
 
-            for(double y = minY; y <= maxY; y++) {
-                for(double x = minX; x <= maxX; x++) {
+            for (double y = minY; y <= maxY; y++) {
+                for (double x = minX; x <= maxX; x++) {
                     circumference.add(new Location(location1.getWorld(), x, y, minZ));
                 }
             }
 
-            for(double y = minY; y <= maxY; y++) {
-                for(double x = minX; x <= maxX; x++) {
+            for (double y = minY; y <= maxY; y++) {
+                for (double x = minX; x <= maxX; x++) {
                     circumference.add(new Location(location1.getWorld(), x, y, maxZ));
                 }
             }
@@ -740,9 +740,9 @@ public interface VitalUtils<Player> {
 
             final List<Location> volume = new ArrayList<>();
 
-            for(double x = minX; x <= maxX; x++) {
-                for(double y = minY; y <= maxY; y++) {
-                    for(double z = minZ; z <= maxZ; z++) {
+            for (double x = minX; x <= maxX; x++) {
+                for (double y = minY; y <= maxY; y++) {
+                    for (double z = minZ; z <= maxZ; z++) {
                         volume.add(new Location(location1.getWorld(), x, y, z));
                     }
                 }

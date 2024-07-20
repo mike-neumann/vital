@@ -1,12 +1,12 @@
 package me.xra1ny.vital;
 
 import jakarta.annotation.PostConstruct;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Defines the vital-core submodule.
  */
-@Log
+@Slf4j
 public abstract class VitalSubModule {
     @PostConstruct
     public final void init() {

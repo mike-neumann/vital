@@ -3,7 +3,7 @@ package me.xra1ny.vital.configs.processor;
 import lombok.NonNull;
 import me.xra1ny.vital.configs.VitalConfig;
 import me.xra1ny.vital.configs.annotation.Property;
-import org.jetbrains.annotations.Nullable;
+import jakarta.annotation.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;

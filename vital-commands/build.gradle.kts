@@ -1,3 +1,3 @@
 dependencies {
-    compileOnly(project(":vital-core"))
+    api(project(":vital-core"))
 }

@@ -9,7 +9,7 @@ import eu.cloudnetservice.modules.bridge.player.ServicePlayer;
 import eu.cloudnetservice.modules.bridge.player.executor.PlayerExecutor;
 import lombok.NonNull;
 import me.xra1ny.vital.cloudnet4.driver.CloudNet4Driver;
-import org.jetbrains.annotations.Nullable;
+import jakarta.annotation.Nullable;
 
 import java.util.List;
 import java.util.UUID;

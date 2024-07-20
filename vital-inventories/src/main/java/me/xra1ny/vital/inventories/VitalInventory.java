@@ -1,10 +1,12 @@
 package me.xra1ny.vital.inventories;
 
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import me.xra1ny.vital.RequiresAnnotation;
 import me.xra1ny.vital.inventories.annotation.VitalInventoryInfo;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -14,7 +16,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.util.HashMap;
@@ -26,15 +27,19 @@ public class VitalInventory implements InventoryHolder, RequiresAnnotation<Vital
     @Getter
     @NonNull
     private final Map<Map.Entry<Player, Integer>, Consumer<InventoryClickEvent>> slotActionMap = new HashMap<>();
-    @Range(from = 0, to = 54)
+
     private final int size;
+
     @Getter
     @NonNull
     private final Inventory inventory;
+
     @NonNull
     private final Map<Integer, ItemStack> slotItemMap = new HashMap<>();
+
     @Nullable
     private final ItemStack background;
+
     @Getter
     @Nullable
     private final Inventory previousInventory;
@@ -46,13 +51,13 @@ public class VitalInventory implements InventoryHolder, RequiresAnnotation<Vital
         final ItemMeta backgroundItemMeta = backgroundItemStack.getItemMeta();
 
         if (backgroundItemMeta != null) {
-            backgroundItemMeta.displayName(null);
+            backgroundItemMeta.setDisplayName(null);
             backgroundItemStack.setItemMeta(backgroundItemMeta);
         }
 
         background = backgroundItemStack;
         size = info.size();
-        inventory = Bukkit.createInventory(this, size, MiniMessage.miniMessage().deserialize(info.name()));
+        inventory = Bukkit.createInventory(this, size, LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(info.name())));
         this.previousInventory = previousInventory;
     }
 

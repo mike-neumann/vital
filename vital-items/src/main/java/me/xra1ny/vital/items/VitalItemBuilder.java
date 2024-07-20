@@ -1,9 +1,11 @@
 package me.xra1ny.vital.items;
 
+import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -12,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -138,7 +139,7 @@ public class VitalItemBuilder {
      */
     public VitalItemBuilder enchanted(boolean enchanted) {
         if (enchanted) {
-            enchantment(Enchantment.LUCK, 1);
+            enchantment(Enchantment.FORTUNE, 1);
         }
 
         return this;
@@ -219,9 +220,13 @@ public class VitalItemBuilder {
 
             if (name != null) {
                 if (!name.isBlank()) {
-                    meta.displayName(MiniMessage.miniMessage().deserialize("<reset><white><name>",
-                                    Placeholder.parsed("name", name))
-                            .decoration(TextDecoration.ITALIC, false));
+                    meta.setDisplayName(
+                            LegacyComponentSerializer.legacySection().serialize(
+                                    MiniMessage.miniMessage().deserialize("<reset><white><name>",
+                                                    Placeholder.parsed("name", name))
+                                            .decoration(TextDecoration.ITALIC, false)
+                            )
+                    );
                 }
             }
 
@@ -245,9 +250,9 @@ public class VitalItemBuilder {
 
             // Set Lore if set
             if (!lore.isEmpty()) {
-                meta.lore(lore.stream()
-                        .map(l -> MiniMessage.miniMessage().deserialize(l)
-                                .decoration(TextDecoration.ITALIC, false))
+                meta.setLore(lore.stream()
+                        .map(l -> MiniMessage.miniMessage().deserialize(l).decoration(TextDecoration.ITALIC, false))
+                        .map(component -> LegacyComponentSerializer.legacySection().serialize(component))
                         .toList());
             }
 

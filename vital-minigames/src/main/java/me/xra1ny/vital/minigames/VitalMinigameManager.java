@@ -2,9 +2,7 @@ package me.xra1ny.vital.minigames;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.extern.java.Log;
 import me.xra1ny.vital.Vital;
-import me.xra1ny.vital.VitalComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,10 +14,8 @@ import org.springframework.stereotype.Component;
  * @author xRa1ny
  * @apiNote This class may be extended from, to add more specific mini-game manager logic or function, depending on the mini-game you are trying to implement.
  */
-@Log
 @Component
-public class VitalMinigameManager implements VitalComponent {
-    private static VitalMinigameManager instance;
+public class VitalMinigameManager {
     private final JavaPlugin plugin;
 
     /**
@@ -39,12 +35,12 @@ public class VitalMinigameManager implements VitalComponent {
      * @param <T>                     The type of minigame state.
      * @return True if the current state is of the specified class, otherwise false.
      */
-    public static <T extends VitalMinigameState> boolean isVitalMinigameState(@NonNull Class<T> vitalMinigameStateClass) {
-        if (instance.vitalMinigameState == null) {
+    public <T extends VitalMinigameState> boolean isVitalMinigameState(@NonNull Class<T> vitalMinigameStateClass) {
+        if (vitalMinigameState == null) {
             return false;
         }
 
-        return vitalMinigameStateClass.equals(instance.vitalMinigameState.getClass());
+        return vitalMinigameStateClass.equals(vitalMinigameState.getClass());
     }
 
     /**
@@ -53,7 +49,7 @@ public class VitalMinigameManager implements VitalComponent {
      * @param vitalMinigameStateClass The Class of the minigame state to set to (must be registered).
      * @apiNote this method attempts to construct a dependency injected instance
      */
-    public static void setVitalMinigameState(@NonNull Class<? extends VitalMinigameState> vitalMinigameStateClass) {
+    public void setVitalMinigameState(@NonNull Class<? extends VitalMinigameState> vitalMinigameStateClass) {
         final VitalMinigameState vitalMinigameState = Vital.getContext().getBean(vitalMinigameStateClass);
 
         setVitalMinigameState(vitalMinigameState);
@@ -65,29 +61,19 @@ public class VitalMinigameManager implements VitalComponent {
      *
      * @param vitalMinigameState The new minigame state to set.
      */
-    public static void setVitalMinigameState(@NonNull VitalMinigameState vitalMinigameState) {
-        if (instance.vitalMinigameState != null) {
-            if (instance.vitalMinigameState instanceof VitalCountdownMinigameState vitalCountdownMinigameState) {
+    public void setVitalMinigameState(@NonNull VitalMinigameState vitalMinigameState) {
+        if (this.vitalMinigameState != null) {
+            if (this.vitalMinigameState instanceof VitalCountdownMinigameState vitalCountdownMinigameState) {
                 vitalCountdownMinigameState.stopCountdown();
             }
 
             // unregister listener from bukkit.
-            HandlerList.unregisterAll(instance.vitalMinigameState);
-            instance.vitalMinigameState.onDisable();
+            HandlerList.unregisterAll(this.vitalMinigameState);
+            this.vitalMinigameState.onDisable();
         }
 
-        instance.vitalMinigameState = vitalMinigameState;
-        Bukkit.getPluginManager().registerEvents(vitalMinigameState, instance.plugin);
+        this.vitalMinigameState = vitalMinigameState;
+        Bukkit.getPluginManager().registerEvents(vitalMinigameState, plugin);
         vitalMinigameState.onEnable();
-    }
-
-    @Override
-    public void onRegistered() {
-        instance = this;
-    }
-
-    @Override
-    public void onUnregistered() {
-
     }
 }

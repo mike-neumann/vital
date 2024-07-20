@@ -1,9 +1,7 @@
 package me.xra1ny.vital.items;
 
-import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
-import lombok.extern.java.Log;
-import me.xra1ny.vital.VitalComponentManager;
+import me.xra1ny.vital.Vital;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Manages custom item stacks and their associated cooldowns.
@@ -19,16 +16,8 @@ import java.util.Optional;
  *
  * @author xRa1ny
  */
-@Log
 @Component
-public class VitalItemManager extends VitalComponentManager<VitalItem> {
-    private static VitalItemManager instance;
-
-    @PostConstruct
-    public void init() {
-        instance = this;
-    }
-
+public class VitalItemManager {
     /**
      * Attempts to set the specified {@link VitalItem} by its class.
      *
@@ -37,10 +26,8 @@ public class VitalItemManager extends VitalComponentManager<VitalItem> {
      * @return The {@link Map} containing all items that didn't fit.
      */
     @NonNull
-    public static Map<Integer, ItemStack> addItem(@NonNull Inventory inventory, @NonNull Class<? extends VitalItem> itemStackClass) {
-        final VitalItem vitalItem = Optional.ofNullable(instance.getComponentByClass(itemStackClass))
-                .orElseThrow(() -> new RuntimeException("attempted adding unregistered itemstack %s"
-                        .formatted(itemStackClass.getSimpleName())));
+    public Map<Integer, ItemStack> addItem(@NonNull Inventory inventory, @NonNull Class<? extends VitalItem> itemStackClass) {
+        final VitalItem vitalItem = Vital.getContext().getBean(itemStackClass);
 
         return inventory.addItem(vitalItem);
     }
@@ -53,7 +40,7 @@ public class VitalItemManager extends VitalComponentManager<VitalItem> {
      * @return The {@link Map} containing all items that didn't fit.
      */
     @NonNull
-    public static Map<Integer, ItemStack> addItem(@NonNull Player player, @NonNull Class<? extends VitalItem> itemStackClass) {
+    public Map<Integer, ItemStack> addItem(@NonNull Player player, @NonNull Class<? extends VitalItem> itemStackClass) {
         return addItem(player.getInventory(), itemStackClass);
     }
 
@@ -64,10 +51,8 @@ public class VitalItemManager extends VitalComponentManager<VitalItem> {
      * @param slot           The slot.
      * @param itemStackClass The class of te {@link VitalItem} (must be registered).
      */
-    public static void setItem(@NonNull Inventory inventory, int slot, @NonNull Class<? extends VitalItem> itemStackClass) {
-        final VitalItem vitalItem = Optional.ofNullable(instance.getComponentByClass(itemStackClass))
-                .orElseThrow(() -> new RuntimeException("attempted setting unregistered itemstack %s"
-                        .formatted(itemStackClass.getSimpleName())));
+    public void setItem(@NonNull Inventory inventory, int slot, @NonNull Class<? extends VitalItem> itemStackClass) {
+        final VitalItem vitalItem = Vital.getContext().getBean(itemStackClass);
 
         inventory.setItem(slot, vitalItem);
     }
@@ -79,16 +64,14 @@ public class VitalItemManager extends VitalComponentManager<VitalItem> {
      * @param slot           The slot.
      * @param itemStackClass The class of te {@link VitalItem} (must be registered).
      */
-    public static void setItem(@NonNull Player player, int slot, @NonNull Class<? extends VitalItem> itemStackClass) {
+    public void setItem(@NonNull Player player, int slot, @NonNull Class<? extends VitalItem> itemStackClass) {
         setItem(player.getInventory(), slot, itemStackClass);
     }
 
-    /**
-     * Gets all registered items.
-     *
-     * @return A list of all registered items.
-     */
     public List<VitalItem> getItems() {
-        return instance.getComponents(VitalItem.class);
+        return Vital.getContext().getBeansOfType(VitalItem.class)
+                .values()
+                .stream()
+                .toList();
     }
 }

@@ -11,27 +11,27 @@ class VitalGradlePlugin : Plugin<Project> {
         this.target = target
 
         target.afterEvaluate {
-            // apply plugins needed for vital to work
             requirePlugin("com.github.johnrengelman.shadow", "8.1.1")
 
-            // default dependencies
-            target.dependencies.add("implementation", "org.springframework.boot:spring-boot-starter:3.3.1")
-            target.dependencies.add("implementation", "me.xra1ny.vital:vital-core:1.0")
-
-            target.dependencies.add("annotationProcessor", "me.xra1ny.vital:vital-core-processor:1.0")
-            try {
-                // for kotlin support
-                target.dependencies.add("kapt", "me.xra1ny.vital:vital-core-processor:1.0")
-            } catch (ignored: Exception) {
+            // not every module requires the core module
+            if (hasDependency("me.xra1ny.vital:vital-core")) {
+                try {
+                    // attempt to register annotation processor for kotlin
+                    target.dependencies.add("kapt", "me.xra1ny.vital:vital-core-processor:1.0")
+                } catch (ignored: Exception) {
+                    // kapt not found, register default
+                    target.dependencies.add("annotationProcessor", "me.xra1ny.vital:vital-core-processor:1.0")
+                }
             }
 
             // if vital-commands is used, also add processor for module
             if (hasDependency("me.xra1ny.vital:vital-commands")) {
-                target.dependencies.add("annotationProcessor", "me.xra1ny.vital:vital-commands-processor:1.0")
                 try {
-                    // for kotlin support
+                    // attempt to register annotation processor for kotlin
                     target.dependencies.add("kapt", "me.xra1ny.vital:vital-commands-processor:1.0")
                 } catch (ignored: Exception) {
+                    // kapt not found, register default
+                    target.dependencies.add("annotationProcessor", "me.xra1ny.vital:vital-commands-processor:1.0")
                 }
             }
 

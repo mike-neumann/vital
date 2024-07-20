@@ -1,5 +1,6 @@
 package me.xra1ny.vital.holograms;
 
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -11,15 +12,11 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static net.kyori.adventure.text.Component.text;
 
 /**
  * Represents a hologram in the Vital-Framework.
@@ -112,7 +109,7 @@ public class VitalHologram implements VitalComponent {
      */
     public void update() {
         if (base == null) {
-            base = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
+            base = location.getWorld().spawn(location, ArmorStand.class);
         }
 
         base.setVisible(false);
@@ -138,7 +135,7 @@ public class VitalHologram implements VitalComponent {
             final ArmorStand armorStand;
 
             if (i >= initialBaseLineSize) {
-                armorStand = (ArmorStand) location.getWorld().spawnEntity(lineLocation.subtract(0, 2 + (.25 * i), 0), EntityType.ARMOR_STAND);
+                armorStand = location.getWorld().spawn(lineLocation.subtract(0, 2 + (.25 * i), 0), ArmorStand.class);
                 baseLines.add(armorStand);
             } else {
                 armorStand = baseLines.get(i);
@@ -147,7 +144,7 @@ public class VitalHologram implements VitalComponent {
 
             armorStand.setVisible(false);
             armorStand.setMarker(true);
-            armorStand.customName(text(line));
+            armorStand.setCustomName(line);
             armorStand.setCustomNameVisible(true);
         }
     }

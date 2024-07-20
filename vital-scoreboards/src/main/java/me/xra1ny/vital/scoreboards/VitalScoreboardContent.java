@@ -62,11 +62,11 @@ final class VitalScoreboardContent {
                             .serialize(LegacyComponentSerializer.legacySection()
                                     .deserialize(title)),
                     Criteria.DUMMY,
-                    MiniMessage.miniMessage().deserialize(title));
+                    LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)));
         }
 
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        objective.displayName(MiniMessage.miniMessage().deserialize(title));
+        objective.setDisplayName(LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)));
 
         // Reset scores for existing entries
         for (String entry : bukkitScoreboard.getEntries()) {

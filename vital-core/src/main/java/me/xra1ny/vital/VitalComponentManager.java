@@ -1,8 +1,8 @@
 package me.xra1ny.vital;
 
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;

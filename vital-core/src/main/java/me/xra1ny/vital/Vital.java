@@ -50,7 +50,8 @@ public class Vital {
                 System.setProperty(key.toString(), value.toString());
                 System.out.println("setting: " + key + "; to: " + value);
             });
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         context = builder.sources(sources)
                 .initializers(applicationContext -> {
@@ -62,19 +63,4 @@ public class Vital {
                 .logStartupInfo(false)
                 .run();
     }
-//    public static void run(Class<?> plugin, String pluginName) {
-//        Thread.currentThread().setContextClassLoader(plugin.getClassLoader());
-//
-//        final SpringApplicationBuilder builder = new SpringApplicationBuilder();
-//        final Class<?> pluginConfiguration = Class.forName(plugin.getPackageName() + ".PluginConfiguration");
-//        final Class<?>[] sources = {pluginConfiguration, VitalSpigotConfiguration.class, VitalBungeecordConfiguration.class};
-//
-//        context = builder.sources(sources)
-//                .resourceLoader(new DefaultResourceLoader(plugin.getClassLoader()))
-//                .logStartupInfo(false)
-//                .banner(new VitalBanner())
-//                .properties("plugin.name=" + pluginName)
-//                .properties("plugin.main=" + plugin.getName())
-//                .run();
-//    }
 }

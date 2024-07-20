@@ -1,10 +1,8 @@
 package me.xra1ny.vital.items;
 
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
 import me.xra1ny.vital.RequiresAnnotation;
-import me.xra1ny.vital.VitalComponent;
 import me.xra1ny.vital.items.annotation.VitalItemInfo;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -27,7 +25,7 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
-public abstract class VitalItem extends ItemStack implements RequiresAnnotation<VitalItemInfo>, VitalComponent {
+public abstract class VitalItem extends ItemStack implements RequiresAnnotation<VitalItemInfo> {
     // error can be ignored, since the implementation of this class will always be a component
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -39,16 +37,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
     @Getter
     @NonNull
     private final Map<Player, Integer> playerCooldownMap = new HashMap<>();
-
-    @Override
-    public void onRegistered() {
-
-    }
-
-    @Override
-    public void onUnregistered() {
-
-    }
 
     /**
      * The initial cooldown of this VitalItemStack.
@@ -75,7 +63,7 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
         final ItemMeta meta = itemStack.getItemMeta();
 
         if (info.enchanted()) {
-            meta.addEnchant(Enchantment.LUCK, 1, true);
+            meta.addEnchant(Enchantment.FORTUNE, 1, true);
         }
 
         setType(itemStack.getType());
@@ -94,17 +82,12 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
         final ItemMeta meta = itemStack.getItemMeta();
 
         if (enchanted) {
-            meta.addEnchant(Enchantment.LUCK, 1, true);
+            meta.addEnchant(Enchantment.FORTUNE, 1, true);
         }
 
         setType(itemStack.getType());
         setAmount(itemStack.getAmount());
         setItemMeta(meta);
-    }
-
-    @PostConstruct
-    public void init() {
-        itemManager.registerComponent(this);
     }
 
     @Override
@@ -174,7 +157,7 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
 
         final Action action = e.getAction();
 
-        if (action.isLeftClick()) {
+        if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
             onLeftClick(e);
         } else {
             onRightClick(e);

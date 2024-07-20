@@ -2,7 +2,7 @@ package me.xra1ny.vital.processor;
 
 import org.springframework.stereotype.Component;
 import me.xra1ny.vital.VitalSubModule;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Defines the vital-core-processor submodule.
