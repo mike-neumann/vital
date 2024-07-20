@@ -1,9 +1,12 @@
 package me.xra1ny.vital.commands;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import me.xra1ny.vital.RequiresAnnotation;
 import me.xra1ny.vital.commands.annotation.VitalCommandArg;
 import me.xra1ny.vital.commands.annotation.VitalCommandArgHandler;
@@ -12,18 +15,21 @@ import me.xra1ny.vital.commands.crossplatform.PluginCommand;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -33,6 +39,7 @@ import java.util.stream.Stream;
  * @param <CommandSender> The command sender type of this command.
  * @author xRa1ny
  */
+@Slf4j
 public abstract class VitalCommand<Plugin, CommandSender> implements RequiresAnnotation<VitalCommandInfo> {
     // error can be ignored, since the implementing class will always be a component / bean
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -52,9 +59,12 @@ public abstract class VitalCommand<Plugin, CommandSender> implements RequiresAnn
     @Getter
     private final boolean requiresPlayer;
 
+    /**
+     * Array of VitalCommandArgs describing command arguments.
+     */
     @Getter
     @NonNull
-    private final VitalCommandArg[] vitalCommandArgs;
+    private final Map<Pattern, VitalCommandArg> vitalCommandArgs;
 
     private VitalCommand(@NonNull Class<CommandSender> commandSenderClass) {
         final VitalCommandInfo vitalCommandInfo = getRequiredAnnotation();
@@ -63,7 +73,22 @@ public abstract class VitalCommand<Plugin, CommandSender> implements RequiresAnn
         name = vitalCommandInfo.name();
         permission = vitalCommandInfo.permission();
         requiresPlayer = vitalCommandInfo.requiresPlayer();
-        vitalCommandArgs = vitalCommandInfo.args();
+        vitalCommandArgs = Arrays.stream(vitalCommandInfo.args())
+                // map spaces
+                // map to var-args
+                // then map normal args remaining if the first conversion had no effect
+                // map to pattern type
+                .map(arg -> Map.entry(
+                        Pattern.compile(
+                                arg.value().replaceAll(" ", "[ ]")
+                                        .replaceAll("%.+%[*]", "(.+)")
+                                        .replaceAll("%.+%", "(\\\\S+)")
+                        ),
+                        arg
+                ))
+                .collect(Collectors.toSet())
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
@@ -100,110 +125,71 @@ public abstract class VitalCommand<Plugin, CommandSender> implements RequiresAnn
      *
      * @param sender Who sent the command.
      * @param args   Any args used during command execution.
+     * @return Command success state.
      */
-    public final void execute(@NonNull CommandSender sender, @NonNull String[] args) throws Exception {
+    public final boolean execute(@NonNull CommandSender sender, @NonNull String[] args) {
+        // Check if the command requires a player sender.
         if (requiresPlayer) {
+            // Check if the sender is not a Player.
             if (!isPlayer(sender)) {
+                // Execute the onCommandRequiresPlayer method and return true.
                 onCommandRequiresPlayer(sender, String.join(" ", args), null);
 
-                return;
+                return true;
             }
         }
 
+        // Check if a permission is required and if the sender has it.
         if (!permission.isBlank() && !hasPermission(sender, permission)) {
+            // Execute the onCommandRequiresPermission method and return true.
             onCommandRequiresPermission(sender, String.join(" ", args), null);
 
-            return;
+            return true;
         }
 
-        final StringBuilder formattedArgsBuilder = new StringBuilder();
-        final List<String> values = new ArrayList<>();
-        VitalCommandArg finalCommandArg = null;
+        try {
+            // find executing command arg
+            final VitalCommandArg executingArg = getExecutingArg(String.join(" ", args));
+            VitalCommandReturnState commandReturnState;
 
-        for (String arg : args) {
-            // Initialize a boolean flag to check if the argument is recognized.
-            boolean contains = false;
+            try {
+                if (executingArg == null) {
+                    commandReturnState = executeBaseCommand(sender);
+                } else {
+                    // extract user values from command
+                    final List<String> values = new ArrayList<>();
 
-            // Loop through the command arguments specified for this command.
-            for (VitalCommandArg commandArg : vitalCommandArgs) {
-                // Split the command argument into individual parts.
-                final String[] splitCommandArg = commandArg.value().split(" ");
-                // Initialize a flag to check if the argument is recognized for this commandArg.
-                boolean containsArg = false;
-
-                // Loop through the parts of the command argument.
-                for (String singleCommandArg : splitCommandArg) {
-                    // Check if the argument matches any part of the command argument.
-                    if (singleCommandArg.equalsIgnoreCase(arg)) {
-                        // Set the flag to true and break.
-                        containsArg = true;
-                        break;
+                    for (String commandArg : executingArg.value().split(" ")) {
+                        for (String userArg : args) {
+                            if (!userArg.equalsIgnoreCase(commandArg)) {
+                                // we have a custom arg
+                                values.add(userArg);
+                            }
+                        }
                     }
+
+                    commandReturnState = executeCommandArgHandlerMethod(sender, executingArg, values.toArray(String[]::new));
                 }
-
-                // Check if the argument is recognized for this commandArg.
-                if (containsArg) {
-                    // Set the flag to true.
-                    contains = true;
-                    break;
-                }
+            } catch (Exception e) {
+                commandReturnState = VitalCommandReturnState.ERROR;
             }
 
-            // Check if the argument is recognized for this command.
-            if (contains) {
-                // Append the argument to the formattedArgsBuilder.
-                formattedArgsBuilder.append(!formattedArgsBuilder.isEmpty() ? " " : "").append(arg);
-                continue;
+            final String joinedArgs = String.join(" ", args);
+
+            // Handle the command return state.
+            switch (commandReturnState) {
+                case ERROR -> onCommandError(sender, joinedArgs, executingArg);
+                case INTERNAL_ERROR -> onCommandInternalError(sender, joinedArgs, executingArg);
+                case INVALID_ARGS -> onCommandInvalidArgs(sender, joinedArgs);
+                case NO_PERMISSION -> onCommandRequiresPermission(sender, joinedArgs, executingArg);
             }
 
-            // If the argument is not recognized, replace it with a "?" and add it to the values list.
-            formattedArgsBuilder.append(!formattedArgsBuilder.isEmpty() ? " " : "").append("?");
-            values.add(arg);
+            return true;
+        } catch (Exception e) {
+            log.error("Exception while executing command", e);
         }
 
-        for (VitalCommandArg commandArg : vitalCommandArgs) {
-            // Replace placeholders with "?" and check if it matches the formattedArgsBuilder.
-            if (commandArg.value().replaceAll("%[A-Za-z0-9]*%", "?").equalsIgnoreCase(formattedArgsBuilder.toString())) {
-                // Assign the matched commandArg to finalCommandArg.
-                finalCommandArg = commandArg;
-                break;
-            }
-        }
-
-        VitalCommandReturnState commandReturnState = null;
-
-        if (finalCommandArg != null) {
-            commandReturnState = executeCommandArgHandlerMethod(sender, finalCommandArg, values.toArray(new String[0]));
-        } else {
-            for (VitalCommandArg commandArg : vitalCommandArgs) {
-                if (!formattedArgsBuilder.toString().startsWith(commandArg.value().replaceAll("%[A-Za-z0-9]*%", "?").replace("*", ""))) {
-                    continue;
-                }
-
-                commandReturnState = executeCommandArgHandlerMethod(sender, commandArg, values.toArray(new String[0]));
-                break;
-            }
-        }
-
-        if (commandReturnState == null) {
-            // when executing the ACTUAL BASE COMMAND, call its method here...
-            if (args.length == 0) {
-                commandReturnState = executeBaseCommand(sender);
-            } else {
-                // if not, we are accessing an invalid command node.
-                commandReturnState = VitalCommandReturnState.INVALID_ARGS;
-            }
-        }
-
-        final String joinedArgs = String.join(" ", args);
-
-        // Handle the command return state.
-        switch (commandReturnState) {
-            case ERROR -> onCommandError(sender, joinedArgs, finalCommandArg);
-            case INTERNAL_ERROR -> onCommandInternalError(sender, joinedArgs, finalCommandArg);
-            case INVALID_ARGS -> onCommandInvalidArgs(sender, joinedArgs);
-            case NO_PERMISSION -> onCommandRequiresPermission(sender, joinedArgs, finalCommandArg);
-        }
+        return true;
     }
 
     /**
@@ -283,7 +269,7 @@ public abstract class VitalCommand<Plugin, CommandSender> implements RequiresAnn
         final List<String> tabCompleted = new ArrayList<>();
 
         // Loop through the specified command arguments for this command.
-        for (VitalCommandArg arg : vitalCommandArgs) {
+        for (VitalCommandArg arg : vitalCommandArgs.values()) {
             // Split the value of the command argument into individual parts.
             final String[] originalArgs = arg.value().split(" ");
             // Clone the originalArgs to avoid modification.
@@ -322,8 +308,11 @@ public abstract class VitalCommand<Plugin, CommandSender> implements RequiresAnn
                     break; // Exit the loop.
                 }
 
-                // Check if the final argument is equal to "PLAYER".
-                if (finalArg.equalsIgnoreCase(VitalCommandArg.PLAYER)) {
+                if (finalArg.equalsIgnoreCase(VitalCommandArg.MATERIAL)) {
+                    for (Material material : Material.values()) {
+                        tabCompleted.add(material.name());
+                    }
+                } else if (finalArg.equalsIgnoreCase(VitalCommandArg.PLAYER)) {
                     // Loop through online players.
                     for (String playerName : getAllPlayerNames()) {
                         // Check if the player name is already in the tabCompleted list.
@@ -422,6 +411,15 @@ public abstract class VitalCommand<Plugin, CommandSender> implements RequiresAnn
      */
     protected void onCommandRequiresPlayer(@NonNull CommandSender sender, @NonNull String args, @Nullable VitalCommandArg arg) {
 
+    }
+
+    @Nullable
+    public final VitalCommandArg getExecutingArg(@NonNull String arg) {
+        return vitalCommandArgs.entrySet().stream()
+                .filter(entry -> entry.getKey().matcher(arg).matches())
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
     }
 
     /**
