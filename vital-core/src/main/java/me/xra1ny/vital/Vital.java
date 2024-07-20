@@ -46,10 +46,7 @@ public class Vital {
 
             properties.load(pluginClassLoader.getResourceAsStream("application.properties"));
 
-            properties.forEach((key, value) -> {
-                System.setProperty(key.toString(), value.toString());
-                System.out.println("setting: " + key + "; to: " + value);
-            });
+            properties.forEach((key, value) -> System.setProperty(key.toString(), value.toString()));
         } catch (Exception ignored) {
         }
 
