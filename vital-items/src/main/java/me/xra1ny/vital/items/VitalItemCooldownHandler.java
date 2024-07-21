@@ -80,14 +80,4 @@ public class VitalItemCooldownHandler extends VitalRepeatableTask.Spigot {
     public void init() {
         start();
     }
-
-    /**
-     * Specifies the required annotation type for this component.
-     *
-     * @return The annotation type required for this component.
-     */
-    @Override
-    public Class<VitalRepeatableTaskInfo> requiredAnnotationType() {
-        return VitalRepeatableTaskInfo.class;
-    }
 }

@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import me.xra1ny.vital.configs.annotation.VitalConfigInfo;
 import me.xra1ny.vital.configs.processor.FileProcessor;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,11 +19,8 @@ import java.util.Optional;
  * @apiNote Must be annotated with {@link VitalConfigInfo}.
  */
 @Slf4j
+@Component
 public abstract class VitalConfig {
-    /**
-     * Defines the processor for this config.
-     */
-    @NonNull
     private FileProcessor fileProcessor;
 
     public VitalConfig() {

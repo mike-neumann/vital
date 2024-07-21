@@ -6,11 +6,13 @@ import lombok.Setter;
 import me.xra1ny.vital.RequiresAnnotation;
 import me.xra1ny.vital.tasks.annotation.VitalRepeatableTaskInfo;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
@@ -20,39 +22,28 @@ import java.util.concurrent.TimeUnit;
  *
  * @author xRa1ny
  */
-public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Runnable, Task> implements RequiresAnnotation<VitalRepeatableTaskInfo> {
-    @Getter
-    @NonNull
+@Component
+public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements RequiresAnnotation<VitalRepeatableTaskInfo> {
     @Autowired
-    private Plugin plugin;
+    @Getter
+    private P plugin;
 
-    /**
-     * The interval at which this repeatable task should execute, in milliseconds.
-     */
+    @Getter
+    private R runnable;
+
+    @Getter
+    private T task;
+
     @Getter
     @Setter
     private int interval;
-    /**
-     * The runnable associated with this repeatable task, defining its logic.
-     */
-    @Getter
-    @NonNull
-    private Runnable runnable;
-    /**
-     * The task representing this repeatable task.
-     */
-    @Getter
-    private Task task;
-    /**
-     * If true this repeatable tasks tick Method is called.
-     * If false, skips tick Method call.
-     */
+
     @Getter
     @Setter
     private boolean allowTick = true;
 
     /**
-     * Constructor to use when using springs dependency injection pattern.
+     * Constructor for when using dependency injection
      */
     public VitalRepeatableTask() {
         final VitalRepeatableTaskInfo vitalRepeatableTaskInfo = getRequiredAnnotation();
@@ -61,35 +52,25 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
     }
 
     /**
-     * Constructor to use when manually implementing this class
-     *
-     * @param plugin The JavaPlugin instance associated with this task.
+     * Constructor for when not using dependency injection
      */
-    public VitalRepeatableTask(@NonNull Plugin plugin) {
-        this.plugin = plugin;
-
+    public VitalRepeatableTask(@NonNull P plugin) {
         final VitalRepeatableTaskInfo vitalRepeatableTaskInfo = getRequiredAnnotation();
 
+        this.plugin = plugin;
         interval = vitalRepeatableTaskInfo.interval();
     }
 
     /**
-     * Creates a new instance of VitalRepeatableTask with the specified JavaPlugin and interval.
-     *
-     * @param plugin   The JavaPlugin instance associated with this task.
-     * @param interval The interval at which this task should execute, in milliseconds.
+     * Constructor for when not using dependency injection
      */
-    public VitalRepeatableTask(@NonNull Plugin plugin, int interval) {
+    public VitalRepeatableTask(@NonNull P plugin, int interval) {
         this.plugin = plugin;
         this.interval = interval;
     }
 
-    public VitalRepeatableTask(int interval) {
-        this.interval = interval;
-    }
-
     @Override
-    public Class<VitalRepeatableTaskInfo> requiredAnnotationType() {
+    public final Class<VitalRepeatableTaskInfo> requiredAnnotationType() {
         return VitalRepeatableTaskInfo.class;
     }
 
@@ -106,15 +87,13 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
         task = createTask();
     }
 
-    protected abstract Runnable createRunnable();
-
-    protected abstract Task createTask();
-
     /**
-     * Called when this repeatable task starts.
+     * Checks if this repeatable task is currently running.
+     *
+     * @return True if the task is running, false otherwise.
      */
-    public void onStart() {
-
+    public final boolean isRunning() {
+        return runnable != null && task != null;
     }
 
     /**
@@ -132,24 +111,11 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
         runnable = null;
     }
 
-    protected abstract void cancelRunnable();
-
-    protected abstract void cancelTask();
-
     /**
-     * Called when this repeatable task stops.
+     * Called when this repeatable task starts.
      */
-    public void onStop() {
+    public void onStart() {
 
-    }
-
-    /**
-     * Checks if this repeatable task is currently running.
-     *
-     * @return True if the task is running, false otherwise.
-     */
-    public final boolean isRunning() {
-        return runnable != null && task != null;
     }
 
     /**
@@ -160,34 +126,31 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
     }
 
     /**
-     * The spigot implementation for vital repeatable task.
+     * Called when this repeatable task stops.
      */
+    public void onStop() {
+
+    }
+
+    protected abstract R createRunnable();
+
+    protected abstract T createTask();
+
+    protected abstract void cancelRunnable();
+
+    protected abstract void cancelTask();
+
+    @Component
     public static class Spigot extends VitalRepeatableTask<JavaPlugin, BukkitRunnable, BukkitTask> {
         public Spigot() {
-            super();
         }
 
-        /**
-         * Constructs a new spigot impl. for vital repeatable task.
-         *
-         * @param javaPlugin The spigot plugin impl.
-         */
-        public Spigot(@NonNull JavaPlugin javaPlugin) {
-            super(javaPlugin);
+        public Spigot(@NonNull JavaPlugin plugin) {
+            super(plugin);
         }
 
-        /**
-         * Constructs a new spigot impl. for vital repeatable task with the given interval.
-         *
-         * @param javaPlugin The spigot plugin impl.
-         * @param interval
-         */
-        public Spigot(@NonNull JavaPlugin javaPlugin, int interval) {
-            super(javaPlugin, interval);
-        }
-
-        public Spigot(int interval) {
-            super(interval);
+        public Spigot(@NonNull JavaPlugin plugin, int interval) {
+            super(plugin, interval);
         }
 
         @Override
@@ -220,39 +183,21 @@ public abstract class VitalRepeatableTask<Plugin, Runnable extends java.lang.Run
         }
     }
 
-    /**
-     * The bungeecord implementation for vital repeatable task.
-     */
-    public static class Bungeecord extends VitalRepeatableTask<net.md_5.bungee.api.plugin.Plugin, java.lang.Runnable, ScheduledTask> {
+    @Component
+    public static class Bungeecord extends VitalRepeatableTask<Plugin, Runnable, ScheduledTask> {
         public Bungeecord() {
-            super();
         }
 
-        /**
-         * Constructs a new bungeecord impl. for vital repeatable task.
-         *
-         * @param plugin The bungeecord plugin impl.
-         */
-        public Bungeecord(net.md_5.bungee.api.plugin.@NonNull Plugin plugin) {
+        public Bungeecord(@NonNull Plugin plugin) {
             super(plugin);
         }
 
-        /**
-         * Constructs a new bungeecord impl. for vital repeatable task with the given interval.
-         *
-         * @param plugin   The bungeecord plugin impl.
-         * @param interval The interval.
-         */
-        public Bungeecord(net.md_5.bungee.api.plugin.@NonNull Plugin plugin, int interval) {
+        public Bungeecord(@NonNull Plugin plugin, int interval) {
             super(plugin, interval);
         }
 
-        public Bungeecord(int interval) {
-            super(interval);
-        }
-
         @Override
-        protected java.lang.Runnable createRunnable() {
+        protected Runnable createRunnable() {
             return () -> {
                 if (!isAllowTick()) {
                     return;

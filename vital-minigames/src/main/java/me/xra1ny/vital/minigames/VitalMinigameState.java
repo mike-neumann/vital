@@ -2,6 +2,7 @@ package me.xra1ny.vital.minigames;
 
 import me.xra1ny.vital.VitalComponent;
 import org.bukkit.event.Listener;
+import org.springframework.stereotype.Component;
 
 /**
  * Abstract base class for minigame states within the Vital framework.
@@ -10,6 +11,7 @@ import org.bukkit.event.Listener;
  *
  * @author xRa1ny
  */
+@Component
 public interface VitalMinigameState extends VitalComponent, Listener {
     @Override
     default void onRegistered() {

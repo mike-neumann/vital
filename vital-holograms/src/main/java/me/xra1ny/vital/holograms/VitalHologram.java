@@ -4,7 +4,6 @@ import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import lombok.SneakyThrows;
 import me.xra1ny.vital.VitalComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -24,63 +23,29 @@ import java.util.List;
  * @author xRa1ny
  */
 public class VitalHologram implements VitalComponent {
-
-    /**
-     * The name of this hologram.
-     */
     @Getter
     @Setter
-    @NonNull
     private String name;
 
-    /**
-     * The base armor stand of this hologram.
-     */
     @Getter
-    @NonNull
     private ArmorStand base;
 
-    /**
-     * The armor stand lines of this hologram.
-     */
     @Getter
     @Setter
-    @NonNull
     private List<ArmorStand> baseLines = new ArrayList<>();
 
-    /**
-     * The lines of this hologram.
-     */
     @Getter
     @Setter
-    @NonNull
     private List<String> lines = new ArrayList<>();
 
-    /**
-     * The location of this hologram.
-     */
     @Getter
     @Setter
-    @NonNull
     private Location location;
 
-    /**
-     * The item this hologram displays.
-     */
     @Getter
     @Setter
-    @NonNull
     private Material displayType;
 
-    /**
-     * Constructs a new VitalHologram instance.
-     *
-     * @param name        The name of the hologram.
-     * @param location    The location where the hologram should be displayed.
-     * @param displayType The material type to display as an item (nullable).
-     * @param lines       The lines of text to display in the hologram.
-     */
-    @SneakyThrows
     public VitalHologram(@NonNull String name, @NonNull Location location, @Nullable Material displayType, @NonNull String... lines) {
         this.name = name;
         this.lines.addAll(List.of(lines));
@@ -89,9 +54,6 @@ public class VitalHologram implements VitalComponent {
         update();
     }
 
-    /**
-     * Removes this hologram and its associated entities.
-     */
     public void remove() {
         for (Entity entity : base.getPassengers()) {
             entity.remove();
@@ -104,9 +66,6 @@ public class VitalHologram implements VitalComponent {
         base.remove();
     }
 
-    /**
-     * Updates the hologram by recreating its elements.
-     */
     public void update() {
         if (base == null) {
             base = location.getWorld().spawn(location, ArmorStand.class);

@@ -68,7 +68,6 @@ public class VitalPerPlayerScoreboard extends VitalScoreboard {
      *
      * @param player the player
      */
-    @SuppressWarnings("DataFlowIssue")
     public void update(@NonNull Player player) {
         if (!vitalScoreboardContentMap.containsKey(player)) {
             return;
@@ -82,7 +81,6 @@ public class VitalPerPlayerScoreboard extends VitalScoreboard {
         player.getPlayer().setScoreboard(scoreboard.getBukkitScoreboard());
     }
 
-    @SuppressWarnings({"DataFlowIssue"})
     private void updateContent(@NonNull Player player) {
         if (!vitalScoreboardContentMap.containsKey(player)) {
             return;
@@ -125,7 +123,6 @@ public class VitalPerPlayerScoreboard extends VitalScoreboard {
      *
      * @param player the player
      */
-    @SuppressWarnings("DataFlowIssue")
     public void removePlayer(@NonNull Player player) {
         if (!vitalScoreboardContentMap.containsKey(player)) {
             return;

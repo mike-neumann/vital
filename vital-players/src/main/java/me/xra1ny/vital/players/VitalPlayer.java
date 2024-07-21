@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import me.xra1ny.vital.VitalComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
@@ -12,20 +13,19 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
-public abstract class VitalPlayer<Player> implements VitalComponent {
+public abstract class VitalPlayer<T> implements VitalComponent {
     /**
      * The Minecraft player associated with this VitalPlayer.
      */
     @Getter
-    @NonNull
-    private final Player player;
+    private final T player;
 
     /**
      * Creates a new instance of VitalPlayer for the given Minecraft player.
      *
      * @param player The Minecraft player to associate with this VitalPlayer.
      */
-    private VitalPlayer(@NonNull Player player) {
+    private VitalPlayer(@NonNull T player) {
         this.player = player;
     }
 
@@ -63,26 +63,20 @@ public abstract class VitalPlayer<Player> implements VitalComponent {
 
     }
 
-    /**
-     * The spigot implementation for vital player.
-     */
-    public static class Spigot extends VitalPlayer<org.bukkit.entity.Player> {
-        /**
-         * Constructs a new spigot impl for vital player.
-         *
-         * @param player The spigot player impl.
-         */
-        public Spigot(@NonNull org.bukkit.entity.Player player) {
+    public static class Spigot extends VitalPlayer<Player> {
+        public Spigot(@NonNull Player player) {
             super(player);
         }
 
         @Override
-        public @NonNull UUID getUniqueId() {
+        @NonNull
+        public UUID getUniqueId() {
             return getPlayer().getUniqueId();
         }
 
         @Override
-        public @NonNull String getName() {
+        @NonNull
+        public String getName() {
             return getPlayer().getName();
         }
     }
@@ -91,22 +85,19 @@ public abstract class VitalPlayer<Player> implements VitalComponent {
      * The bungeecord implementation for vital player.
      */
     public static class Bungeecord extends VitalPlayer<ProxiedPlayer> {
-        /**
-         * Constructs a new bungeecord impl. for vital player.
-         *
-         * @param proxiedPlayer The bungeecord player impl.
-         */
         public Bungeecord(@NonNull ProxiedPlayer proxiedPlayer) {
             super(proxiedPlayer);
         }
 
         @Override
-        public @NonNull UUID getUniqueId() {
+        @NonNull
+        public UUID getUniqueId() {
             return getPlayer().getUniqueId();
         }
 
         @Override
-        public @NonNull String getName() {
+        @NonNull
+        public String getName() {
             return getPlayer().getName();
         }
     }

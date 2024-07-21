@@ -13,6 +13,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.CreativeCategory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -31,14 +32,9 @@ import java.util.function.Predicate;
  * @author xRa1ny
  * @apiNote This class can be used standalone, detached from any Vital project. It only contains utilities for easier interaction with the SpigotAPI.
  */
-public interface VitalUtils<Player> {
-    static Spigot spigot() {
-        return new Spigot();
-    }
-
-    static Bungeecord bungeecord() {
-        return new Bungeecord();
-    }
+public interface VitalUtils<CS, P extends CS> {
+    Spigot Spigot = new Spigot();
+    Bungeecord Bungeecord = new Bungeecord();
 
     static String chatButton(String color, String hover, String text, String click, ClickEvent.Action action) {
         return "<hover:show_text:'" + hover + "'>" +
@@ -78,25 +74,25 @@ public interface VitalUtils<Player> {
      * @param action          The action to perform for each player.
      * @param playerPredicate The {@link Predicate} specifying the condition in which each action is performed.
      */
-    void broadcastAction(@NonNull Predicate<Player> playerPredicate, @NonNull Consumer<Player> action);
+    void broadcastAction(@NonNull Predicate<P> playerPredicate, @NonNull Consumer<P> action);
 
     /**
      * Broadcasts an action to be performed for each player currently connected to this server.
      *
      * @param action The action to perform for each player.
      */
-    default void broadcastAction(@NonNull Consumer<Player> action) {
+    default void broadcastAction(@NonNull Consumer<P> action) {
         broadcastAction(p -> true, action);
     }
 
     /**
-     * Sends a message to the given player with set tag resolvers for minimessage support.
+     * Sends a message to the given command sender with set tag resolvers for minimessage support.
      *
-     * @param player       The player.
+     * @param sender       The player.
      * @param message      The message.
      * @param tagResolvers The tag resolvers for custom minimessage support.
      */
-    void sendMessage(@NonNull Player player, @NonNull String message, @Nullable TagResolver... tagResolvers);
+    void sendMessage(@NonNull CS sender, @NonNull String message, @Nullable TagResolver... tagResolvers);
 
     /**
      * Broadcasts a message to all players currently connected to the server, matching the given {@link Predicate}.
@@ -105,7 +101,7 @@ public interface VitalUtils<Player> {
      * @param playerPredicate The Predicate specifying the condition in which the message should be broadcast.
      * @param tagResolvers    Any tag resolvers for custom minimessage tag syntax.
      */
-    default void broadcastMessage(@NonNull String message, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastMessage(@NonNull String message, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendMessage(player, message, tagResolvers));
     }
 
@@ -131,7 +127,7 @@ public interface VitalUtils<Player> {
      * @param fadeOut      The fade out times (measured in ticks).
      * @param tagResolvers Any custom tag resolvers for custom minimessage tags.
      */
-    void sendTitle(@NonNull Player player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers);
+    void sendTitle(@NonNull P player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers);
 
     /**
      * Sends a title to the given player in minimessage syntax with the specified tag resolvers for any custom minimessage tags for replacement.
@@ -142,7 +138,7 @@ public interface VitalUtils<Player> {
      * @param subtitle     The subtitle.
      * @param tagResolvers Any custom tag resolvers for minimessage.
      */
-    void sendTitle(@NonNull Player player, @Nullable String title, @Nullable String subtitle, @NonNull TagResolver @NonNull ... tagResolvers);
+    void sendTitle(@NonNull P player, @Nullable String title, @Nullable String subtitle, @NonNull TagResolver @NonNull ... tagResolvers);
 
     /**
      * Broadcasts a title to all players currently connected to this server.
@@ -155,7 +151,7 @@ public interface VitalUtils<Player> {
      * @param playerPredicate The {@link Predicate} specifying the condition in which the title is broadcast.
      * @param tagResolvers    Any tag resolvers for custom minimessage replacement syntax.
      */
-    default void broadcastTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendTitle(player, title, subtitle, fadeIn, stay, fadeOut, tagResolvers));
     }
 
@@ -167,7 +163,7 @@ public interface VitalUtils<Player> {
      * @param playerPredicate The {@link Predicate} specifying the condition in which the title is broadcast.
      * @param tagResolvers    Any tag resolvers for custom minimessage tag syntax.
      */
-    default void broadcastTitle(@Nullable String title, @Nullable String subtitle, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastTitle(@Nullable String title, @Nullable String subtitle, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendTitle(player, title, subtitle, tagResolvers));
     }
 
@@ -206,7 +202,7 @@ public interface VitalUtils<Player> {
      * @param tagResolvers Any custom tag resolvers for custom minimessage tags.
      * @apiNote The title will stay approx. 1h
      */
-    void sendPersistentTitle(@NonNull Player player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers);
+    void sendPersistentTitle(@NonNull P player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers);
 
     /**
      * Broadcasts a persistent (permanent) title to all players in minimessage syntax with the specified predicate and tag resolvers for any custom minimessage tags for replacement.
@@ -218,7 +214,7 @@ public interface VitalUtils<Player> {
      * @param tagResolvers    Any custom tag resolvers for custom minimessage tags.
      * @apiNote The title will stay approx. 1h
      */
-    default void broadcastPersistentTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastPersistentTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendPersistentTitle(player, title, subtitle, fadeIn, tagResolvers));
     }
 
@@ -242,7 +238,7 @@ public interface VitalUtils<Player> {
      * @param message      The message in minimessage syntax.
      * @param tagResolvers Any custom tag resolver for minimessage tag syntax.
      */
-    void sendActionBar(@NonNull Player player, @NonNull String message, @NonNull TagResolver @NonNull ... tagResolvers);
+    void sendActionBar(@NonNull P player, @NonNull String message, @NonNull TagResolver @NonNull ... tagResolvers);
 
     /**
      * Broadcasts an action bar message for all players in minimessage syntax.
@@ -251,7 +247,7 @@ public interface VitalUtils<Player> {
      * @param playerPredicate The predicate every player MUST MATCH WITH.
      * @param tagResolvers    Any custom tag resolvers for minimessage tag syntax.
      */
-    default void broadcastActionBar(@NonNull String message, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastActionBar(@NonNull String message, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendActionBar(player, message, tagResolvers));
     }
 
@@ -265,25 +261,22 @@ public interface VitalUtils<Player> {
         broadcastAction(player -> sendActionBar(player, message, tagResolvers));
     }
 
-    /**
-     * The spigot implementation for every vital util.
-     */
-    class Spigot implements VitalUtils<org.bukkit.entity.Player> {
+    class Spigot implements VitalUtils<org.bukkit.command.CommandSender, Player> {
         @Override
-        public void broadcastAction(@NonNull Predicate<org.bukkit.entity.Player> playerPredicate, @NonNull Consumer<org.bukkit.entity.Player> action) {
+        public void broadcastAction(@NonNull Predicate<Player> playerPredicate, @NonNull Consumer<Player> action) {
             Bukkit.getOnlinePlayers().stream()
                     .filter(playerPredicate)
                     .forEach(action);
         }
 
         @Override
-        public void sendMessage(org.bukkit.entity.@NonNull Player player, @NonNull String message, @Nullable TagResolver... tagResolvers) {
+        public void sendMessage(@NonNull org.bukkit.command.CommandSender sender, @NonNull String message, @Nullable TagResolver... tagResolvers) {
             // must be used since, both version (paper and spigot) support the bungeeapi implementations...
-            player.spigot().sendMessage(BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message, tagResolvers == null ? new TagResolver[0] : tagResolvers)));
+            sender.spigot().sendMessage(BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message, tagResolvers == null ? new TagResolver[0] : tagResolvers)));
         }
 
         @Override
-        public void broadcastMessage(@NonNull String message, @NonNull Predicate<org.bukkit.entity.Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastMessage(@NonNull String message, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
             // must be used since, both version (paper and spigot) support the bungeeapi implementations...
             broadcastAction(playerPredicate, player -> player.spigot().sendMessage(BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message, tagResolvers))));
         }
@@ -301,7 +294,7 @@ public interface VitalUtils<Player> {
          * @param pitch           The pitch of the sound.
          * @param playerPredicate The Predicate specifying the condition in which the sound is broadcast.
          */
-        public void broadcastSound(@NonNull Sound sound, float volume, float pitch, @NonNull Predicate<org.bukkit.entity.Player> playerPredicate) {
+        public void broadcastSound(@NonNull Sound sound, float volume, float pitch, @NonNull Predicate<Player> playerPredicate) {
             broadcastAction(playerPredicate, player -> player.playSound(player, sound, volume, pitch));
         }
 
@@ -322,7 +315,7 @@ public interface VitalUtils<Player> {
          * @param sound           The sound to broadcast.
          * @param playerPredicate The Predicate specifying the condition in which the sound should be broadcast.
          */
-        public void broadcastSound(@NonNull Sound sound, @NonNull Predicate<org.bukkit.entity.Player> playerPredicate) {
+        public void broadcastSound(@NonNull Sound sound, @NonNull Predicate<Player> playerPredicate) {
             broadcastSound(sound, 1f, 1f, playerPredicate);
         }
 
@@ -337,7 +330,7 @@ public interface VitalUtils<Player> {
         }
 
         @Override
-        public void sendTitle(@NonNull org.bukkit.entity.Player player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendTitle(@NonNull Player player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
             player.sendTitle(
                     title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers)),
                     subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers)),
@@ -348,7 +341,7 @@ public interface VitalUtils<Player> {
         }
 
         @Override
-        public void sendTitle(@NonNull org.bukkit.entity.Player player, @Nullable String title, @Nullable String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendTitle(@NonNull Player player, @Nullable String title, @Nullable String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
             player.sendTitle(
                     title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers)),
                     subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers))
@@ -356,12 +349,12 @@ public interface VitalUtils<Player> {
         }
 
         @Override
-        public void broadcastTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull Predicate<org.bukkit.entity.Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
             broadcastAction(player -> sendTitle(player, title, subtitle, fadeIn, stay, fadeOut, tagResolvers));
         }
 
         @Override
-        public void broadcastTitle(@Nullable String title, @Nullable String subtitle, @NonNull Predicate<org.bukkit.entity.Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastTitle(@Nullable String title, @Nullable String subtitle, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
             broadcastAction(player -> sendTitle(player, title, subtitle, tagResolvers));
         }
 
@@ -376,12 +369,12 @@ public interface VitalUtils<Player> {
         }
 
         @Override
-        public void sendPersistentTitle(@NonNull org.bukkit.entity.Player player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendPersistentTitle(@NonNull Player player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers) {
             sendTitle(player, title, subtitle, fadeIn, 72_000 /* 1h */, 0, tagResolvers);
         }
 
         @Override
-        public void broadcastPersistentTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fade, @NonNull Predicate<org.bukkit.entity.Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastPersistentTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fade, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
             broadcastAction(player -> sendPersistentTitle(player, title, subtitle, fade, tagResolvers));
         }
 
@@ -398,7 +391,7 @@ public interface VitalUtils<Player> {
          * @param amplifier        The amplifier.
          * @param playerPredicate  The {@link Predicate} specifying the condition in which the potion effect is broadcast.
          */
-        public void broadcastPotionEffect(@NonNull PotionEffectType potionEffectType, int duration, int amplifier, @NonNull Predicate<org.bukkit.entity.Player> playerPredicate) {
+        public void broadcastPotionEffect(@NonNull PotionEffectType potionEffectType, int duration, int amplifier, @NonNull Predicate<Player> playerPredicate) {
             broadcastAction(playerPredicate, player -> player.addPotionEffect(new PotionEffect(potionEffectType, duration, amplifier)));
         }
 
@@ -419,7 +412,7 @@ public interface VitalUtils<Player> {
          * @param potionEffectType The {@link PotionEffectType}.
          * @param playerPredicate  The {@link Predicate} specifying the condition in which the potion effect is removed.
          */
-        public void broadcastClearPotionEffect(@NonNull PotionEffectType potionEffectType, @NonNull Predicate<org.bukkit.entity.Player> playerPredicate) {
+        public void broadcastClearPotionEffect(@NonNull PotionEffectType potionEffectType, @NonNull Predicate<Player> playerPredicate) {
             broadcastAction(playerPredicate, player -> player.removePotionEffect(potionEffectType));
         }
 
@@ -437,7 +430,7 @@ public interface VitalUtils<Player> {
          *
          * @param playerPredicate The {@link Predicate} specifying the condition in which all potion effects are removed.
          */
-        public void broadcastClearPotionEffects(@NonNull Predicate<org.bukkit.entity.Player> playerPredicate) {
+        public void broadcastClearPotionEffects(@NonNull Predicate<Player> playerPredicate) {
             broadcastAction(playerPredicate, player -> player.getActivePotionEffects().stream()
                     .map(PotionEffect::getType)
                     .forEach(player::removePotionEffect));
@@ -451,14 +444,14 @@ public interface VitalUtils<Player> {
         }
 
         @Override
-        public void sendActionBar(@NonNull org.bukkit.entity.Player player, @NonNull String message, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendActionBar(@NonNull Player player, @NonNull String message, @NonNull TagResolver @NonNull ... tagResolvers) {
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, BungeeComponentSerializer.get().serialize(
                     MiniMessage.miniMessage().deserialize(message, tagResolvers)
             ));
         }
 
         @Override
-        public void broadcastActionBar(@NonNull String message, @NonNull Predicate<org.bukkit.entity.Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastActionBar(@NonNull String message, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
             broadcastAction(playerPredicate, player -> sendActionBar(player, message, tagResolvers));
         }
 
@@ -474,7 +467,7 @@ public interface VitalUtils<Player> {
          * @param location         The location to teleport the player to.
          * @param potionEffectType The potion effect for the teleportation.
          */
-        public void teleport(@NonNull org.bukkit.entity.Player player, @NonNull Location location, @NonNull PotionEffectType potionEffectType) {
+        public void teleport(@NonNull Player player, @NonNull Location location, @NonNull PotionEffectType potionEffectType) {
             player.removePotionEffect(potionEffectType);
             player.addPotionEffect(new PotionEffect(potionEffectType, 2, Integer.MAX_VALUE));
             player.teleport(location);
@@ -487,7 +480,7 @@ public interface VitalUtils<Player> {
          * @param player   The player to teleport.
          * @param location The location to teleport the player to.
          */
-        public void teleport(@NonNull org.bukkit.entity.Player player, @NonNull Location location) {
+        public void teleport(@NonNull Player player, @NonNull Location location) {
             teleport(player, location, PotionEffectType.SLOWNESS);
         }
 
@@ -497,7 +490,7 @@ public interface VitalUtils<Player> {
          * @param player The player to teleport.
          * @param to     The entity to teleport to.
          */
-        public void teleport(@NonNull org.bukkit.entity.Player player, @NonNull Entity to) {
+        public void teleport(@NonNull Player player, @NonNull Entity to) {
             teleport(player, to.getLocation(), PotionEffectType.SLOWNESS);
         }
 
@@ -817,7 +810,7 @@ public interface VitalUtils<Player> {
     /**
      * The bungeecord implementation for every vital util.
      */
-    class Bungeecord implements VitalUtils<ProxiedPlayer> {
+    class Bungeecord implements VitalUtils<net.md_5.bungee.api.CommandSender, ProxiedPlayer> {
         @Override
         public void broadcastAction(@NonNull Predicate<ProxiedPlayer> playerPredicate, @NonNull Consumer<ProxiedPlayer> action) {
             ProxyServer.getInstance().getPlayers().stream()
@@ -826,8 +819,8 @@ public interface VitalUtils<Player> {
         }
 
         @Override
-        public void sendMessage(@NonNull ProxiedPlayer proxiedPlayer, @NonNull String message, @Nullable TagResolver... tagResolvers) {
-            proxiedPlayer.sendMessage(BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message, tagResolvers == null ? new TagResolver[0] : tagResolvers)));
+        public void sendMessage(@NonNull net.md_5.bungee.api.CommandSender sender, @NonNull String message, @Nullable TagResolver... tagResolvers) {
+            sender.sendMessage(BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message, tagResolvers == null ? new TagResolver[0] : tagResolvers)));
         }
 
         @Override

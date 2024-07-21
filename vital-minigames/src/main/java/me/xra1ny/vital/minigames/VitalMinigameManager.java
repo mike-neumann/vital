@@ -18,9 +18,6 @@ import org.springframework.stereotype.Component;
 public class VitalMinigameManager {
     private final JavaPlugin plugin;
 
-    /**
-     * The currently active minigame state.
-     */
     @Getter
     private VitalMinigameState vitalMinigameState;
 
@@ -64,7 +61,7 @@ public class VitalMinigameManager {
     public void setVitalMinigameState(@NonNull VitalMinigameState vitalMinigameState) {
         if (this.vitalMinigameState != null) {
             if (this.vitalMinigameState instanceof VitalCountdownMinigameState vitalCountdownMinigameState) {
-                vitalCountdownMinigameState.stopCountdown();
+                vitalCountdownMinigameState.stop();
             }
 
             // unregister listener from bukkit.

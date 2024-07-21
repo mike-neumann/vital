@@ -18,7 +18,6 @@ public enum VitalPluginEnvironment {
     BUNGEECORD("bungee.yml");
 
     @Getter
-    @NonNull
     private final String ymlFileName;
 
     VitalPluginEnvironment(@NonNull String ymlFileName) {

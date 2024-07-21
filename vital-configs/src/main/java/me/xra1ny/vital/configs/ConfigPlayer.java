@@ -6,16 +6,17 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.bukkit.Bukkit;
 import jakarta.annotation.Nullable;
+import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
 /**
  * Wrapper class to store player data to a config file.
  *
- * @param <Player> The player type of this config player.
+ * @param <T> The player type of this config player.
  * @author xRa1ny
  */
-public abstract class ConfigPlayer<Player> {
+public abstract class ConfigPlayer<T> {
     @Property(String.class)
     public String name;
 
@@ -23,12 +24,9 @@ public abstract class ConfigPlayer<Player> {
     public UUID uuid;
 
     @Nullable
-    public abstract Player toPlayer();
+    public abstract T toPlayer();
 
-    /**
-     * The spigot implementation for config player.
-     */
-    public static class Spigot extends ConfigPlayer<org.bukkit.entity.Player> {
+    public static class Spigot extends ConfigPlayer<Player> {
         @Property(ConfigLocation.class)
         public ConfigLocation location;
 
@@ -39,7 +37,7 @@ public abstract class ConfigPlayer<Player> {
         public double foodLevel;
 
         @NonNull
-        public static ConfigPlayer.Spigot of(@NonNull org.bukkit.entity.Player player) {
+        public static ConfigPlayer.Spigot of(@NonNull Player player) {
             final ConfigPlayer.Spigot configPlayer = new ConfigPlayer.Spigot();
 
             configPlayer.name = player.getName();
@@ -53,14 +51,11 @@ public abstract class ConfigPlayer<Player> {
 
         @Override
         @Nullable
-        public org.bukkit.entity.Player toPlayer() {
+        public Player toPlayer() {
             return Bukkit.getPlayer(uuid);
         }
     }
 
-    /**
-     * The bungeecord implementation for config player.
-     */
     public static class Bungeecord extends ConfigPlayer<ProxiedPlayer> {
         @NonNull
         public static ConfigPlayer.Bungeecord of(@NonNull ProxiedPlayer player) {

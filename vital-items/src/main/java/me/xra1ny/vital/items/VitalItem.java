@@ -27,7 +27,6 @@ import java.util.UUID;
  */
 public abstract class VitalItem extends ItemStack implements RequiresAnnotation<VitalItemInfo> {
     // error can be ignored, since the implementation of this class will always be a component
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private VitalItemManager itemManager;
 
@@ -172,7 +171,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
                 .formatted(getType(), getAmount()), getType() + " x 1");
     }
 
-    @SuppressWarnings("DataFlowIssue")
     @Override
     public final boolean equals(Object obj) {
         if (!(obj instanceof ItemStack item)) {
