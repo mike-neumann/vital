@@ -1,5 +1,4 @@
 plugins {
-    java
     `java-library`
     `maven-publish`
 }
@@ -8,7 +7,6 @@ subprojects {
     group = "me.xra1ny.vital"
     version = "1.0"
 
-    apply<JavaPlugin>()
     apply<MavenPublishPlugin>()
     apply<JavaLibraryPlugin>()
 
@@ -29,10 +27,10 @@ subprojects {
         api("jakarta.annotation:jakarta.annotation-api:3.0.0")
     }
 
-    java {
-        withSourcesJar()
-        withJavadocJar()
-    }
+//    java {
+//        withSourcesJar()
+//        withJavadocJar()
+//    }
 
     publishing {
         publications {
