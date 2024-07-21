@@ -33,11 +33,11 @@ import java.util.function.Predicate;
  * @apiNote This class can be used standalone, detached from any Vital project. It only contains utilities for easier interaction with the SpigotAPI.
  */
 public interface VitalUtils<CS, P extends CS> {
-    default Spigot spigot() {
+    static Spigot spigot() {
         return new Spigot();
     }
 
-    default Bungeecord bungeecord() {
+    static Bungeecord bungeecord() {
         return new Bungeecord();
     }
 
