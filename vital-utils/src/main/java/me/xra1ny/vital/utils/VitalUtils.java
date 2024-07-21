@@ -33,8 +33,13 @@ import java.util.function.Predicate;
  * @apiNote This class can be used standalone, detached from any Vital project. It only contains utilities for easier interaction with the SpigotAPI.
  */
 public interface VitalUtils<CS, P extends CS> {
-    Spigot Spigot = new Spigot();
-    Bungeecord Bungeecord = new Bungeecord();
+    default Spigot spigot() {
+        return new Spigot();
+    }
+
+    default Bungeecord bungeecord() {
+        return new Bungeecord();
+    }
 
     static String chatButton(String color, String hover, String text, String click, ClickEvent.Action action) {
         return "<hover:show_text:'" + hover + "'>" +
