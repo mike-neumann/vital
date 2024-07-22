@@ -26,20 +26,10 @@ import java.util.UUID;
  * @author xRa1ny
  */
 public abstract class VitalItem extends ItemStack implements RequiresAnnotation<VitalItemInfo> {
-    // error can be ignored, since the implementation of this class will always be a component
-    @Autowired
-    private VitalItemManager itemManager;
-
-    /**
-     * The map of all currently active cooldowns for each player.
-     */
     @Getter
     @NonNull
     private final Map<Player, Integer> playerCooldownMap = new HashMap<>();
 
-    /**
-     * The initial cooldown of this VitalItemStack.
-     */
     @Getter
     private int initialCooldown = 0;
 

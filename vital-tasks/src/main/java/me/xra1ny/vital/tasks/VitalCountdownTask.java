@@ -9,15 +9,11 @@ import me.xra1ny.vital.tasks.annotation.VitalCountdownTaskInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, ?>> implements RequiresAnnotation<VitalCountdownTaskInfo> {
     @Getter
     @Autowired
     private P plugin;
-
-    private T vitalRepeatableTask;
 
     @Getter
     private final int initialCountdown;
@@ -29,6 +25,8 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
     @Getter
     @Setter
     private int interval;
+
+    private T vitalRepeatableTask;
 
     /**
      * Constructor for when using dependency injection
@@ -160,8 +158,7 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
 
     protected abstract T createVitalRepeatableTask();
 
-    @Component
-    public static class Spigot extends VitalCountdownTask<JavaPlugin, VitalRepeatableTask.Spigot> {
+    public static abstract class Spigot extends VitalCountdownTask<JavaPlugin, VitalRepeatableTask.Spigot> {
         public Spigot() {
         }
 
@@ -190,8 +187,7 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
         }
     }
 
-    @Component
-    public static class Bungeecord extends VitalCountdownTask<Plugin, VitalRepeatableTask.Bungeecord> {
+    public static abstract class Bungeecord extends VitalCountdownTask<Plugin, VitalRepeatableTask.Bungeecord> {
         public Bungeecord() {
         }
 

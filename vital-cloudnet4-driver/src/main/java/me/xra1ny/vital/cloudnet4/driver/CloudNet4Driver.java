@@ -7,8 +7,8 @@ import eu.cloudnetservice.driver.provider.ServiceTaskProvider;
 import eu.cloudnetservice.driver.service.ServiceConfiguration;
 import eu.cloudnetservice.driver.service.ServiceInfoSnapshot;
 import eu.cloudnetservice.driver.service.ServiceTask;
-import lombok.NonNull;
 import jakarta.annotation.Nullable;
+import lombok.NonNull;
 
 import java.util.List;
 import java.util.NoSuchElementException;

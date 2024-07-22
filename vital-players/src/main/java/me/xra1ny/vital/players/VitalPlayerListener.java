@@ -15,7 +15,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -25,14 +24,13 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
-@Component
 public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM extends VitalComponentManager<VP>> {
-    @Autowired
     @Getter
+    @Autowired
     private PM playerManager;
 
-    @Autowired
     @Getter
+    @Autowired
     private P plugin;
 
     /**
@@ -97,7 +95,6 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM ex
      */
     protected abstract Class<T> playerType();
 
-    @Component
     public static abstract class Spigot<VP extends VitalPlayer.Spigot, PM extends VitalComponentManager<VP>> extends VitalPlayerListener<JavaPlugin, Player, VP, PM> implements org.bukkit.event.Listener {
         @PostConstruct
         public void init() {
@@ -127,7 +124,6 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM ex
         }
     }
 
-    @Component
     public static abstract class Bungeecord<VP extends VitalPlayer.Bungeecord, PM extends VitalComponentManager<VP>> extends VitalPlayerListener<Plugin, ProxiedPlayer, VP, PM> implements net.md_5.bungee.api.plugin.Listener {
         @PostConstruct
         public void init() {

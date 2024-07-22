@@ -20,7 +20,6 @@ import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -41,12 +40,7 @@ import java.util.stream.Stream;
  * @author xRa1ny
  */
 @Slf4j
-@Component
 public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCommandInfo> {
-    @Autowired
-    @Getter
-    private P plugin;
-
     private final Class<CS> commandSenderClass;
 
     @Getter
@@ -57,6 +51,10 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
 
     @Getter
     private final boolean requiresPlayer;
+
+    @Getter
+    @Autowired
+    private P plugin;
 
     @Getter
     private Map<Pattern, VitalCommandArg> vitalCommandArgs;
@@ -421,7 +419,6 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
 
     }
 
-    @Component
     public static abstract class Spigot extends VitalCommand<JavaPlugin, org.bukkit.command.CommandSender> implements PluginCommand.Spigot {
         public Spigot() {
             super(org.bukkit.command.CommandSender.class);
@@ -466,7 +463,6 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         }
     }
 
-    @Component
     public static abstract class Bungeecord extends VitalCommand<Plugin, net.md_5.bungee.api.CommandSender> {
         private PluginCommand.Bungeecord command;
 

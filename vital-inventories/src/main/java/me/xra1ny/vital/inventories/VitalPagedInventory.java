@@ -1,5 +1,6 @@
 package me.xra1ny.vital.inventories;
 
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -8,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import jakarta.annotation.Nullable;
 
 import java.util.List;
 import java.util.Optional;

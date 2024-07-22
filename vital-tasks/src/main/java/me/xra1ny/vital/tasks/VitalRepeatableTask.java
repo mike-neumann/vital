@@ -12,7 +12,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,10 +21,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @author xRa1ny
  */
-@Component
 public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements RequiresAnnotation<VitalRepeatableTaskInfo> {
-    @Autowired
     @Getter
+    @Autowired
     private P plugin;
 
     @Getter
@@ -140,8 +138,7 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
 
     protected abstract void cancelTask();
 
-    @Component
-    public static class Spigot extends VitalRepeatableTask<JavaPlugin, BukkitRunnable, BukkitTask> {
+    public static abstract class Spigot extends VitalRepeatableTask<JavaPlugin, BukkitRunnable, BukkitTask> {
         public Spigot() {
         }
 
@@ -183,8 +180,7 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
         }
     }
 
-    @Component
-    public static class Bungeecord extends VitalRepeatableTask<Plugin, Runnable, ScheduledTask> {
+    public static abstract class Bungeecord extends VitalRepeatableTask<Plugin, Runnable, ScheduledTask> {
         public Bungeecord() {
         }
 

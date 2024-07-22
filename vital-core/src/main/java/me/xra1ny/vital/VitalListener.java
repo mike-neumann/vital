@@ -6,17 +6,15 @@ import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * A listener component for handling events in the Vital-Framework.
  *
  * @author xRa1ny
  */
-@Component
 public abstract class VitalListener<T> {
-    @Autowired
     @Getter
+    @Autowired
     private T plugin;
 
     /**
@@ -33,7 +31,6 @@ public abstract class VitalListener<T> {
         this.plugin = plugin;
     }
 
-    @Component
     public static abstract class Spigot extends VitalListener<JavaPlugin> implements org.bukkit.event.Listener {
         public Spigot() {
         }
@@ -48,7 +45,6 @@ public abstract class VitalListener<T> {
         }
     }
 
-    @Component
     public static abstract class Bungeecord extends VitalListener<Plugin> implements net.md_5.bungee.api.plugin.Listener {
         public Bungeecord() {
         }

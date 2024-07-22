@@ -3,7 +3,6 @@ package me.xra1ny.vital;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -15,7 +14,6 @@ import java.util.function.Predicate;
  * @param <T> The type of Vital components managed by this class.
  * @author xRa1ny
  */
-@Component
 public abstract class VitalComponentManager<T extends VitalComponent> {
     @Getter
     private final List<T> components = new ArrayList<>();

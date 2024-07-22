@@ -7,9 +7,9 @@ import eu.cloudnetservice.modules.bridge.BridgeDocProperties;
 import eu.cloudnetservice.modules.bridge.player.PlayerManager;
 import eu.cloudnetservice.modules.bridge.player.ServicePlayer;
 import eu.cloudnetservice.modules.bridge.player.executor.PlayerExecutor;
+import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import me.xra1ny.vital.cloudnet4.driver.CloudNet4Driver;
-import jakarta.annotation.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -127,7 +127,7 @@ public class CloudNet4Bridge {
     /**
      * Runs the command as the given player
      *
-     * @param uuid The player uuid.
+     * @param uuid    The player uuid.
      * @param command The command to run.
      */
     public static void runCommand(@NonNull UUID uuid, @NonNull String command) {

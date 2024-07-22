@@ -5,7 +5,6 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import me.xra1ny.vital.configs.annotation.VitalConfigInfo;
 import me.xra1ny.vital.configs.processor.FileProcessor;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +18,6 @@ import java.util.Optional;
  * @apiNote Must be annotated with {@link VitalConfigInfo}.
  */
 @Slf4j
-@Component
 public abstract class VitalConfig {
     private FileProcessor fileProcessor;
 
@@ -28,6 +26,19 @@ public abstract class VitalConfig {
                 .orElseThrow(() -> new RuntimeException("config needs to be annotated with @ConfigInfo!"));
 
         load(info.name(), info.processor());
+    }
+
+    public static void injectField(@NonNull Object accessor, @NonNull Field field, @Nullable Object value) {
+        try {
+            // force field to be accessible even if private
+            // this is needed for injection...
+            field.setAccessible(true);
+            field.set(accessor, value);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            throw new RuntimeException("error while injecting field %s with %s"
+                    .formatted(field.getName(), String.valueOf(value)));
+        }
     }
 
     public void save() {
@@ -96,18 +107,5 @@ public abstract class VitalConfig {
 
                     optionalField.ifPresent(field -> injectField(VitalConfig.this, field, value));
                 });
-    }
-
-    public static void injectField(@NonNull Object accessor, @NonNull Field field, @Nullable Object value) {
-        try {
-            // force field to be accessible even if private
-            // this is needed for injection...
-            field.setAccessible(true);
-            field.set(accessor, value);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            throw new RuntimeException("error while injecting field %s with %s"
-                    .formatted(field.getName(), String.valueOf(value)));
-        }
     }
 }

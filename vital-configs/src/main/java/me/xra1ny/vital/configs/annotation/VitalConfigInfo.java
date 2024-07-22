@@ -1,7 +1,7 @@
 package me.xra1ny.vital.configs.annotation;
 
-import me.xra1ny.vital.configs.processor.FileProcessor;
 import me.xra1ny.vital.configs.VitalConfig;
+import me.xra1ny.vital.configs.processor.FileProcessor;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
@@ -14,9 +14,9 @@ import java.lang.annotation.Target;
  *
  * @author xRa1ny
  */
+@Component
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Component
 public @interface VitalConfigInfo {
     /**
      * Defines the file name for the annotated config.
