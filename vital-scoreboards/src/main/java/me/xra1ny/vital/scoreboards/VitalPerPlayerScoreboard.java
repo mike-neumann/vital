@@ -20,7 +20,7 @@ import java.util.function.Function;
  *
  * @author xRa1ny
  */
-public class VitalPerPlayerScoreboard extends VitalScoreboard {
+public class VitalPerPlayerScoreboard implements VitalScoreboard {
     /**
      * the title of this per player scoreboard
      */
