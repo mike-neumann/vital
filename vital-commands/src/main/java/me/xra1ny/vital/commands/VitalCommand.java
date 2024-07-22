@@ -317,7 +317,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
 
             try {
                 if (executingArg == null) {
-                    commandReturnState = OnBaseCommand(sender);
+                    commandReturnState = onBaseCommand(sender);
                 } else {
                     // extract user values from command
                     final List<String> values = new ArrayList<>();
@@ -360,7 +360,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
      * @return the status of this command execution
      */
     @NonNull
-    protected VitalCommandReturnState OnBaseCommand(@NonNull CS sender) {
+    protected VitalCommandReturnState onBaseCommand(@NonNull CS sender) {
         return VitalCommandReturnState.INVALID_ARGS;
     }
 
