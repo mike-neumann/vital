@@ -11,7 +11,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,11 +32,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
     @Getter
     private int initialCooldown = 0;
 
-    /**
-     * Creates a new VitalItemStack based on annotation-defined properties.
-     *
-     * @see VitalItemInfo
-     */
     public VitalItem() {
         final VitalItemInfo info = getRequiredAnnotation();
         final ItemStack itemStack = new VitalItemBuilder()
@@ -49,34 +43,31 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
                 .itemFlags(List.of(info.itemFlags()))
                 .unbreakable(info.unbreakable())
                 .build();
+
         final ItemMeta meta = itemStack.getItemMeta();
 
         if (info.enchanted()) {
-            meta.addEnchant(Enchantment.FORTUNE, 1, true);
+            meta.addEnchant(Enchantment.LUCK, 1, true);
         }
 
+        // TODO: cannot set item meta, "delegate" is null
+        setItemMeta(meta);
         setType(itemStack.getType());
         setAmount(itemStack.getAmount());
-        setItemMeta(meta);
         this.initialCooldown = info.cooldown();
     }
 
-    /**
-     * Creates a new VitalItemStack based on an existing ItemStack.
-     *
-     * @param itemStack The base ItemStack.
-     * @param enchanted Whether to add enchantments.
-     */
     public VitalItem(@NonNull ItemStack itemStack, boolean enchanted) {
         final ItemMeta meta = itemStack.getItemMeta();
 
         if (enchanted) {
-            meta.addEnchant(Enchantment.FORTUNE, 1, true);
+            meta.addEnchant(Enchantment.LUCK, 1, true);
         }
 
+        // TODO: cannot set item meta, "delegate" is null
+        setItemMeta(meta);
         setType(itemStack.getType());
         setAmount(itemStack.getAmount());
-        setItemMeta(meta);
     }
 
     @Override
@@ -190,7 +181,7 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
      * @return true if the item is enchanted, false otherwise.
      */
     public final boolean isEnchanted() {
-        return !getItemMeta().getEnchants().isEmpty();
+        return getItemMeta() == null || !getItemMeta().getEnchants().isEmpty();
     }
 
     /**

@@ -139,7 +139,7 @@ public class VitalItemBuilder {
      */
     public VitalItemBuilder enchanted(boolean enchanted) {
         if (enchanted) {
-            enchantment(Enchantment.FORTUNE, 1);
+            enchantment(Enchantment.LUCK, 1);
         }
 
         return this;

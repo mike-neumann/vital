@@ -486,7 +486,7 @@ public interface VitalUtils<CS, P extends CS> {
          * @param location The location to teleport the player to.
          */
         public void teleport(@NonNull Player player, @NonNull Location location) {
-            teleport(player, location, PotionEffectType.SLOWNESS);
+            teleport(player, location, PotionEffectType.SLOW);
         }
 
         /**
@@ -496,7 +496,7 @@ public interface VitalUtils<CS, P extends CS> {
          * @param to     The entity to teleport to.
          */
         public void teleport(@NonNull Player player, @NonNull Entity to) {
-            teleport(player, to.getLocation(), PotionEffectType.SLOWNESS);
+            teleport(player, to.getLocation(), PotionEffectType.SLOW);
         }
 
         /**

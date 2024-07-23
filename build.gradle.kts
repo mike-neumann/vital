@@ -13,14 +13,17 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven("https://repo.papermc.io/repository/maven-public/")
+        maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+        maven("https://libraries.minecraft.net")
     }
 
     dependencies {
         annotationProcessor("org.projectlombok:lombok:1.18.32")
 
+        compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
+        compileOnly("com.mojang:brigadier:1.2.9")
+
         compileOnly("org.projectlombok:lombok:1.18.32")
-        compileOnly("org.spigotmc:spigot-api:1.20.6-R0.1-SNAPSHOT")
         compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
 
         api("org.springframework.boot:spring-boot-starter:3.3.1")
