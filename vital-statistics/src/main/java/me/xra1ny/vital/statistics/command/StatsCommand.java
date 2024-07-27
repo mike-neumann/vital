@@ -27,13 +27,13 @@ import java.util.Map;
  * Stats command to view vital's current runtime information
  */
 public interface StatsCommand<CS> {
-    void sendMessage(CS sender, String message);
-
     HealthCheckTask getHealthCheckTask();
 
     VitalStatisticsConfig getVitalStatisticsConfig();
 
-    default void executeBaseCommand(CS sender) {
+    void sendMessage(CS sender, String message);
+
+    default void handleOnBaseCommand(CS sender) {
         sendMessage(sender, "Spring version: <yellow>" + SpringVersion.getVersion());
 
         final String serverStatus;
@@ -59,13 +59,19 @@ public interface StatsCommand<CS> {
         }
     }
 
-    default VitalCommandReturnState executeOnHealthTps(CS sender) {
+    default VitalCommandReturnState handleOnHealthTps(CS sender) {
         sendMessage(sender, "TPS: <yellow>" + getHealthCheckTask().getTps());
-        sendMessage(sender, "Reported TPS: <yellow>" + getHealthCheckTask().getLastTps().size());
+        sendMessage(sender, "TPS reports: <yellow>" + getHealthCheckTask().getLastTps().size() + " of " + getVitalStatisticsConfig().getMaxTpsTaskCache());
 
         for (Map.Entry<Long, Integer> entry : getHealthCheckTask().getLastTps().entrySet()) {
-            sendMessage(sender, " - <yellow>" + new SimpleDateFormat("HH:mm:ss").format(new Date(entry.getKey())) + " - " + entry.getValue());
+            sendMessage(sender, " - <yellow>" + new SimpleDateFormat("HH:mm:ss").format(new Date(entry.getKey())) + ", " + entry.getValue() + " TPS");
 
+        }
+
+        sendMessage(sender, "Bad TPS reports: <yellow>" + getHealthCheckTask().getLastUnhealthyTps().size() + " of " + getVitalStatisticsConfig().getMaxTpsTaskCache());
+
+        for (Map.Entry<Long, Integer> entry : getHealthCheckTask().getLastUnhealthyTps().entrySet()) {
+            sendMessage(sender, " - <yellow>" + new SimpleDateFormat("HH:mm:ss").format(new Date(entry.getKey())) + ", " + entry.getValue() + " TPS");
         }
 
         return VitalCommandReturnState.SUCCESS;
@@ -76,6 +82,7 @@ public interface StatsCommand<CS> {
     @VitalCommandInfo(
             name = "health",
             requiresPlayer = false,
+            permission = "vital.command.health",
             args = {
                     @VitalCommandArg("tps")
             }
@@ -98,22 +105,23 @@ public interface StatsCommand<CS> {
         protected @NonNull VitalCommandReturnState onBaseCommand(@NonNull CommandSender sender) {
             VitalUtils.spigot().sendMessage(sender, "MC Version: <yellow>" + Bukkit.getVersion());
             VitalUtils.spigot().sendMessage(sender, "Bukkit Version: <yellow>" + Bukkit.getBukkitVersion());
-            executeBaseCommand(sender);
+            handleOnBaseCommand(sender);
 
             return VitalCommandReturnState.SUCCESS;
         }
 
         @VitalCommandArgHandler("tps")
         public VitalCommandReturnState onTps(CommandSender sender) {
-            return executeOnHealthTps(sender);
+            return handleOnHealthTps(sender);
         }
     }
 
     @Getter
     @RequiresBungeecord
     @VitalCommandInfo(
-            name = "health",
+            name = "proxyhealth",
             requiresPlayer = false,
+            permission = "vital.command.proxyHealth",
             args = {
                     @VitalCommandArg("tps")
             }
@@ -135,14 +143,14 @@ public interface StatsCommand<CS> {
         @Override
         protected @NonNull VitalCommandReturnState onBaseCommand(net.md_5.bungee.api.@NonNull CommandSender sender) {
             VitalUtils.bungeecord().sendMessage(sender, "Bungee version: <yellow>" + ProxyServer.getInstance().getVersion());
-            executeBaseCommand(sender);
+            handleOnBaseCommand(sender);
 
             return VitalCommandReturnState.SUCCESS;
         }
 
         @VitalCommandArgHandler("tps")
         public VitalCommandReturnState onTps(net.md_5.bungee.api.CommandSender sender) {
-            return executeOnHealthTps(sender);
+            return handleOnHealthTps(sender);
         }
     }
 }
