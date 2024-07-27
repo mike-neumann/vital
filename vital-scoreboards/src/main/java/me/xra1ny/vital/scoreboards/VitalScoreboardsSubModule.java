@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 /**
  * Defines the vital-scoreboards submodule.
  */
-@Component
+@Component("vital-scoreboards")
 public class VitalScoreboardsSubModule extends VitalSubModule {
 
 }

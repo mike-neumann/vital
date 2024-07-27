@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 /**
  * Defines the vital-tasks submodule.
  */
-@Component
+@Component("vital-tasks")
 public class VitalTasksSubModule extends VitalSubModule {
 
 }

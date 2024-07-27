@@ -1,3 +1,5 @@
 dependencies {
-    api(project(":vital-core"))
+    api(project(":vital-commands"))
+    api(project(":vital-utils"))
+    api(project(":vital-tasks"))
 }

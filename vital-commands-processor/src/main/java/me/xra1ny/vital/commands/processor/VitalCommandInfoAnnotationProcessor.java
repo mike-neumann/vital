@@ -5,12 +5,11 @@ import me.xra1ny.vital.VitalPluginEnvironment;
 import me.xra1ny.vital.commands.annotation.VitalCommandInfo;
 import me.xra1ny.vital.processor.VitalPluginInfoAnnotationProcessor;
 import me.xra1ny.vital.processor.VitalPluginInfoHolder;
+import org.reflections.Reflections;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
@@ -27,7 +26,6 @@ import java.util.Set;
  * @author xRa1ny
  */
 @SupportedAnnotationTypes("*")
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class VitalCommandInfoAnnotationProcessor extends AbstractProcessor {
     private boolean ran;
 
@@ -49,7 +47,18 @@ public class VitalCommandInfoAnnotationProcessor extends AbstractProcessor {
         for (Element element : roundEnv.getElementsAnnotatedWith(VitalCommandInfo.class)) {
             final VitalCommandInfo vitalCommandInfo = element.getAnnotation(VitalCommandInfo.class);
 
-            vitalCommandInfoList.add(vitalCommandInfo);
+            if (!vitalCommandInfoList.contains(vitalCommandInfo)) {
+                vitalCommandInfoList.add(vitalCommandInfo);
+            }
+        }
+
+        // also scan all vital packages
+        for (Class<?> element : new Reflections("me.xra1ny.vital").getTypesAnnotatedWith(VitalCommandInfo.class, true)) {
+            final VitalCommandInfo vitalCommandInfo = element.getDeclaredAnnotation(VitalCommandInfo.class);
+
+            if (!vitalCommandInfoList.contains(vitalCommandInfo)) {
+                vitalCommandInfoList.add(vitalCommandInfo);
+            }
         }
 
         // finally generate the `plugin.yml` commands.

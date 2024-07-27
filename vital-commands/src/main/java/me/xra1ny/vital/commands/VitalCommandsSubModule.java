@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 /**
  * Defines the vital-commands submodule.
  */
-@Component
+@Component("vital-commands")
 public class VitalCommandsSubModule extends VitalSubModule {
 
 }

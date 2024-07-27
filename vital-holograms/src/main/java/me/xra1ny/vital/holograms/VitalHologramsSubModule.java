@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 /**
  * Defines the vital-holograms submodule.
  */
-@Component
+@Component("vital-holograms")
 public class VitalHologramsSubModule extends VitalSubModule {
 
 }

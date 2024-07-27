@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 /**
  * Defines the vital-core-processor submodule.
  */
-@Component
+@Component("vital-core-processor")
 public class VitalCoreProcessorSubModule extends VitalSubModule {
 
 }

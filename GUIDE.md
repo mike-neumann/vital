@@ -3,288 +3,391 @@
 ## Installation
 
 1. Clone `vital`
-2. Configure JDK21 for project (Eclipse Temurin) and Language Level (SDK default)
-3. Set Gradle Wrapper JDK Version to Project SDK
-4. Reload Gradle and Wait until all background tasks have been completed (may take a while)
-5. `publishToMavenLocal` using Gradle
+2. Configure JDK 21 for project and gradle
+3. Reload gradle and wait until all background tasks have been completed
+4. `publishToMavenLocal` using gradle via run configuration (top right) or terminal `./gradlew publishToMavenLocal`
 
 ## Usage
 
 ## IMPORTANT
 
-*To understand how Vital works, it is recommended to read documentation explaining AOP and how dependency injection
-works within Spring / Spring-Boot*
+*TO UNDERSTAND HOW VITAL WORKS, IT IS RECOMMENDED TO READ DOCUMENTATION EXPLAINING HOW AOP AND DEPENDENCY INJECTION IN
+SPRING WORKS*
 
 ---
 
-## Plugin Project Initialization
+## Plugin project initialization
 
-1. Create new project with Gradle or Maven support
-2. Implement `Vital`s dependencies
-3. Reload Gradle and Wait until all background tasks have been completed (may take a while)
-4. When using both Gradle or Maven, make sure that `Vital`s dependencies are shaded into a FAT-Jar in the end
-   If you do not know how that works, here is an example of how it is done in Gradle: `build.gradle.kts`
+1. Create new project with gradle
+2. Configure plugin scanning in local m2 (settings.gradle.kts):
 
-```
-plugins {
-    id("com.github.johnrengelman.shadow") version ("8.1.1")
-}
-
-tasks.build {
-    dependsOn(tasks.shadowJar)
-}
-```
-
-If you are using Vital's built in "vital-gradle-plugin", you can easily implement that plugin, and it will manage some
-needed dependencies for you, it will also tell you when specific plugins are not found that are required for Vital to
-work!
-
-```
-plugins {
-    id("vital-gradle-plugin") version "1.0"
-    id("com.github.johnrengelman.shadow") version ("8.1.1")
-}
-
-// tasks do not need to be configured for shading, since Vital's plugin does that for us
-```
-
-To allow the plugin to be found, you must configure gradle to scan for plugins in your local m2 repo:  
-This must be configured in `settings.gradle.kts`
-
-```
+```kotlin
 pluginManagement {
     repositories {
-        mavenLocal() // to scan in local m2 repo
-        gradlePluginPortal() // to scan in remote plugin portal (default)
+        // this allows for gradle to scan our LOCAL m2
+        mavenLocal()
+        // this is just the default gradle portal for any NON-LOCAL plugins
+        gradlePluginPortal()
     }
 }
 ```
 
-5. Create main plugin class under package `my.domain.company.project` e.g. `me.xra1ny.plugin` class `TestPlugin` or any
-   other class name for your plugin
-6. The main class should have the following signature `MYCLASS extends JavaPlugin`
-7. The main class should have the following body:
+3. Implement the following plugins:
 
+```kotlin
+plugins {
+    // this allows for some auto configuration regarding dependencies needed for vital to work
+    id("me.xra1ny.vital.vital-gradle-plugin") version "1.0"
+    // this plugin is needed to shade any "implementation" dependency into the output jar when building, so that vital classes can be found at runtime
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+}
 ```
+
+4. Create main plugin class under your desired package `my.domain.company.projectname`
+   e.g. `my.domain.company.projectname.ProjectPlugin`
+5. Initialize vital on plugin startup:  
+   Spigot:
+
+```java
+package my.domain.company.projectname;
+
+@VitalPluginInfo(
+        name = "test-plugin",
+        environment = VitalPluginEnvironment.SPIGOT_PAPER
+)
+public class ProjectPlugin extends JavaPlugin {
+    @Override
+    public void onEnable() {
+        Vital.run(getClass(), getName());
+    }
+}
+```
+
+Bungeecord:
+
+```java
+package my.domain.company.projectname;
+
+@VitalPluginInfo(
+        name = "test-plugin",
+        environment = VitalPluginEnvironment.BUNGEECORD
+)
+public class ProjectPlugin extends JavaPlugin {
+    @Override
+    public void onEnable() {
+        Vital.run(getClass(), getDescription().getName());
+    }
+}
+```
+
+When configured correctly using the `vital-gradle-plugin` you should be able to build your project and directly deploy
+it on a server.
+
+Vital will generate the `plugin.yml` file automatically for you if you included the dependencies correctly.
+
+The `vital-core-processor` dependency is needed for this to work, usually it is automatically applied when you use
+the `vital-gradle-plugin`
+
+From here on, you can utilize all of Spring's functionality and features.
+
+To fetch any Spring component outside a component (like in your main plugin class), you can
+use `Vital#getContext()#getBean(...)` to retrieve components registered by vital and Spring.
+
+So if you want to fetch a Component after you enable Vital, your code could look like this:
+
+```java
+
 @Override
 public void onEnable() {
-    Vital.run(getClass(), getName()); // here we run Vital with the current class of our plugin and the name of our plugin    
-    // "getClass()" and "getName()" are accessible by the superclasses of our class
-}
+    Vital.run(getClass(), getName());
 
-@Override
-public void onDisable() { // this is just the default onDisable() method you override in spigot anyway
-  // any shutdown logic
+    // The "MyComponent" class must be annotated with a valid "@Component" annotation so Spring picks it up
+    MyComponent myComponent = Vital.getContext().getBean(MyComponent.class);
+
+    myComponent.doStuff();
 }
 ```
 
-9. Now Vital is enabled and ready to perform!
-10. Now you can move on to the sections needed for your plugin development!
+6. Vital is now ready to perform!
+7. Now you can move onto the section needed for your plugin!
 
-## Vital Listeners
+## Listeners
 
-When using Vital, you can use Vital's predefined `VitalListener.Spigot` or `VitalListener.Bungeecord` class to implement
-a self registering listener
-Your listener class should have the following structure:
+When using Vital, you can use Vital's predefinded `VitalListener` classes to implement a self registering listener.
 
-```
-@Component // this annotation comes from Spring, this will make sure the listener is automatically registered when enabling Vital!
-public class MyListener extends VitalListener.Spigot {
-    // this is just like we do in regular spigot
+Your listener should look like this:
+
+```java
+package my.domain.company.projectname.listener;
+
+// needed to automatically register this listener
+@Component
+public class MySpigotListener extends VitalListener.Spigot {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
-        // any logic on player join
+        // as you can see, this is exactly the same as when we use normal spigot, just the wrapper changes
     }
 }
 ```
 
-It stays the same with `Bungeecord` but there you will implement `VitalListener.Bungeecord` instead
+And now for Bungeecord:
 
-## Vital Commands
+```java
+package my.domain.company.projectname.listener;
 
-When using Vital, you can use Vital's predefined `VitalCommand.Spigot` or `VitalCommand.Bungeecord` class to implement a
-self registering command
-Your command class should have the following structure:
-
-```
-@Component // this annotation comes from Spring, this will make sure the command is automatically registered when enabling Vital!
-@VitalCommandInfo( // this annotation defines any meta data needed by the command to function properly like: name, arguments, permission, onlyPlayer, etc.
-    value = "name",
-    args = {
-        @VitalCommandArg("arg"), // this is just a normal arg
-        @VitalCommandArg("arg %PLAYER%") // this a player value arg
+// needed to automatically register this listener
+@Component
+public class MyBungeecordListener extends VitalListener.Bungeecord {
+    @EventHandler
+    public void onPlayerJoin(PostLoginEvent e) {
+        // as you can see, this is exactly the same as when we use normal bungeecord, just the wrapper changes
     }
+}
+```
+
+## Commands
+
+When using Vital, you can use Vital's predefined `VitalCommand` classes to implement a self registering command.
+
+Your command should look like this:
+
+```java
+package my.domain.company.projectname.command;
+
+@VitalCommandInfo(
+        name = "testcommand",
+        args = {
+                @VitalCommandArg("arg"), // this is just a normal fixed arg
+                @VitalCommandArg("arg %PLAYER%") // this is a dynamic arg, the player can run "/testcommand arg ANYTHINGHERE"
+        }
 )
-public class MyCommand extends VitalCommand.Spigot {
+public class MySpigotCommand extends VitalCommand.Spigot {
     @Override
-    public VitalCommandReturnState executeBaseCommand(CommandSender sender) {
-        // any command logic when we enter "/name"
+    public VitalCommandReturnState onBaseCommand(CommandSender sender) {
+        // here you can implement any code that should run when the command sender executes command "/testcommand"
+
+        // return value can be any state you need for this command execution, this applies for all methods that return such values.
         return VitalCommandReturnState.SUCCESS;
     }
 
-    // the signature of this method can just be simple, since we do not pass any player made values into it
-    @VitalCommandArgHandler("arg")
-    public VitalCommandReturnState onArg(CommandSender sender) {
-        // any logic when we enter "/name arg"
+    // there are many methods here that start with the "on..." method syntax, these can be overridden to implement custom logic for common command events
+    @Override
+    public void onCommandInvalidArgs(@NonNull CommandSender sender, @NonNull String args) {
+        // here you can implement logic that should run if the command is run with arguments that are not supplied in the @VitalCommandInfo annotation
     }
 
-    // this method signature MUST be sender AND values: Array<String>, since we WANT TO PASS A PLAYER MADE VALUE INTO THE ARGUMENT
-    // every time you want to pass any custom player made values into a command arg, you need to specify a method argument value: Array<String>, this array will contain any values, that are NOT the ones defined in the args = [] section of our command info
-    @VitalCommandArgHandler("arg %PLAYER%")
+    // sometimes it is required for command senders to supply data to an executing command, for example when we want to teleport to a player via "/tp PLAYERNAME"
+    // the player name represent a dynamic argument here which can actually be anything the user provides the command argument with
+    // this method catches all non-fixed arguments in the provided String array (String[])
+    // since we defined in our @VitalCommandInfo, an argument called "arg %PLAYER%" we can expect one value passed in the String array (String[])
+    @VitalCommandArgHandler({"arg %PLAYER%"})
     public VitalCommandReturnState onArgPlayer(CommandSender sender, String[] values) {
-        // any logic when we enter "/name arg Herobrine" or "/name arg Notch" or "/name arg xRa1ny"       
-        // any argument surrounded with % is marked as a player made value and MUST be handled with a method param: values: Array<String>
+        // here the values are ALWAYS = ["someValueTheSenderHasPassedHereCanBeAnything"]
+
+        return VitalCommandReturnState.SUCCESS;
+    }
+
+    // summarized, the values String array (String[]) is always the size of how many %VAR% arguments we provide within @VitalCommandInfo
+
+    // we can also have arg handlers that handle multiple arguments, e.g.
+    @VitalCommandArgHandler({
+            "arg",
+            "arg %PLAYER%"
+    })
+    public VitalCommandReturnState onArgOrArgPlayer(CommandSender sender, String[] values) {
+        // this method would be called when the sender either executes "/testcommand arg" or "/testcommand arg SOMEVALUEHERE"
+        // since we catch 2 different command scenarios we cannot be sure if the values String array (String[]) will be filled here, we'd first have to check if it is so we won't run into any problems
+
         return VitalCommandReturnState.SUCCESS;
     }
 }
 ```
 
-It stays the same with `Bungeecord` but there you will implement `VitalCommand.Bungeecord` instead  
-*Any tab completion will be configured automatically!!!*
+The implementation stays the same with Bungeecord, but instead of extending `VitalCommand.Spigot` you would extend `
+VitalCommand.Bungeecord.
 
-## Vital Items
+## Items
 
-When using Vital, you can use Vital's predefined `VitalItem` class to implement a self registering custom item stack
-that has both left-click and right-click functionality
-Your item class should have be following structure:
+When using Vital, you can use Vital's predefined `VitalItem` class to implement a self registering class based item
+which can have right and left-click actions.
 
-```
-@Component // this makes sure that this item is automatically registered in Vital, the item may be given to a player via Vital's `VitalItemManager` e.g. `VitalItemManager.setItem()` ...
-@VitalItemInfo(name = "Navigator <gray>(Rightclick)", type = Material.NETHER_STAR, cooldown = 1000) // here we define any metadata for out item
-public class NavigatorItem extends VitalItem {
-    @Override
-    public void onRightClick(PlayerInteractEvent e) {
-        // any logic when the player holding this item rights clicks
-    }
+Your item class should look like this:
 
+```java
+package my.domain.company.projectname;
+
+@VitalItemInfo(name = "<yellow>My Item")
+public class MyItem extends VitalItem {
     @Override
     public void onLeftClick(PlayerInteractEvent e) {
-        // any logic when the player holding this item rights clicks
+        // here you can implement any logic that should run when the player left clicks with the item in hand
     }
 
     @Override
-    public void onCooldownTick(Player player) {
-        // any logic when the player holding this item has a cooldown and it counts down
+    public void onRightClick(PlayerInteractEvent e) {
+        // here you can implement any logic that should run when the player left clicks with the item in hand
     }
-
-    // more methods available for overriding to add functionality
 }
 ```
 
-## Vital Players
+Since Bungeecord is a proxy, there is no Bungeecord implementation for this class.
 
-This module is very important for developers who want to store player session data  
-Using Vital you can define a player class that is instantiated when a player joins the server, holding important data a
-developer may store  
-To enable this functionality you will need to setup a player class as follows:
+## Players
 
-```
-public class MyPlayer extends VitalPlayer.Spigot {
-    public MyPlayer(Player player) {
+This module is very important for project that require different information for players across the server, that could
+include "Perks, Levels, Statistics, etc."  
+With this module you are able to easily implement your own custom player management solution for your plugin.
+
+Follow this setup process:
+
+1. You have to create your player class that houses the data each player can carry:
+
+```java
+package my.domain.company.projectname;
+
+public class MySpigotPlayer extends VitalPlayer.Spigot {
+    // here we have a variable this is store on our custom player object
+    @Getter
+    @Setter
+    private int coins;
+
+    public MySpigotPlayer(Player player) {
         super(player);
     }
-
-    public String someVariable = "dwadwa"
-
-    // here we can store any data related to this player instance
 }
 ```
 
-The same goes for `Bungeecord` but with `VitalPlayer.Bungeecord` instead
+2. You have to create a custom player manager, that manages your custom player instances:
 
-Now we will need a player manager that manages all instances of this class, as follows:
+```java
+package my.domain.company.projectname;
 
-```
-@Component // this makes sure that the `MyPlayerManager` is automatically installed and registered within vital (IMPORTANT!!!)
-public class MyPlayerManager extends VitalComponentManager<MyPlayer> {
+@Component
+public class MySpigotPlayerManager extends VitalComponentManager<MySpigotPlayer> {
+
 }
 ```
 
-Now that we have a player class that holds player data, and a manager that holds every available MyPlayer instance, we
-need a system that automatically registers this custom instance every time a player joins the server...  
-Create a class called `MyPlayerListener` as follows:
+3. Then you have to create a custom player listener, which is responsible for automatically managing your custom player
+   instances when players join or leave the server:
 
-```
-@Component // this is IMPORTANT since if this instance is not registered, the custom player instanced WILL NOT BE REGISTERED, and thus will never be available...
-public class MyPlayerListener extends VitalPlayerListener.Spigot<LobbyPlayer, MyPlayerManager> {
-    // this is automatically injected since `MyPlayerManager` is marked as `@Component`, no need to implement anything here
-    public MyPlayerListener(MyPlayerManager myPlayerManager) {
-        super(myPlayerManager)
-    }
+```java
+package my.domain.company.projectname;
 
+@Component
+// here in the generic type declaration (<>) we must define the types for our custom player class and our custom player manager
+public class MySpigotPlayerListener extends VitalPlayerListener.Spigot<MySpigotPlayer, MySpigotPlayerManager> {
+    // and here we sadly still have to implement this method since type erasure erases the types needed for autoconfiguration
     @Override
-    public Class<LobbyPlayer> vitalPlayerType() {
-        return LobbyPlayer.class;
+    public Class<MySpigotPlayer> vitalPlayerType() {
+        return MySpigotPlayer.class;
     }
 }
 ```
 
-The same goes for `Bungeecord` but there we use `VitalPlayerListener.Bungeecord` Instead
+Once that is done, you can utilize your very own custom player management system.
 
-## Vital Tasks
+To fetch players from it, you can use your "MySpigotPlayerManager" component, which can be injected into any other
+component.
 
-This module is important if you want to implement any repeating task or countdown in your plugin  
-Your class should be structured as follows:
+```java
+import java.util.UUID;// since we are annotating this class as @Component, it is automatically instantiated and injected via Spring
 
-```
-@Component // the task should be registered automatically
-@VitalRepeatableTaskInfo(interval = 1000) // marks the metadata of the task, defining its tick interval in millis
-public class MyRepeatingTask extends VitalRepeatableTask.Spigot {
-    // if you want to start the task right after vital is enabled, you can override the onRegistered method from VitalComponent, and then call the start() function to start the task
-    @Override
-    public void onRegistered() {
-        start()
+@Component
+public class MyComponent {
+    private final MySpigotPlayerManager playerManager;
+
+    public MyComponent(MySpigotPlayerManager playerManager) {
+        this.playerManager = playerManager;
     }
+
+    public void doStuff() {
+        playerManager.getComponentByName("somePlayerName");
+        // here we put the actual uuid of the player, this is just an example
+        playerManager.getComponentByUniqueId(UUID.randomUUID());
+    }
+}
+```
+
+The same goes for Bungeecord, but there we have to extend the corresponding Bungeecord classes instead of Spigot.
+
+## Tasks
+
+When using Vital, you can use Vital's predefined `VitalRepeatableTask` and `VitalCountdownTask` classes to create self
+registering tasks for both Spigot and Bungeecord.
+
+Your repeatable task should look like this:
+
+```java
+package my.domain.company.projectname;
+
+// min interval is 5, which corresponds to exactly 1 ingame tick.
+// interval is measured in millis
+@VitalRepeatableTaskInfo(interval = 50)
+public class MyRepeatableTask extends VitalRepeatableTask.Spigot {
+    // there are a couple classes we can override for certain functionality
 
     @Override
     public void onStart() {
-        // any logic when this task starts
-    }
-
-    @Override
-    public void onStop() {
-        // any logic when this task stops
+        // here we define logic for when the task is started using "start()"
     }
 
     @Override
     public void onTick() {
-        // any logic on task tick
+        // here we define logic for every task tick, which in this case would be every 50 millis, or 1 ingame tick
+    }
+
+    @Override
+    public void onStop() {
+        // here we define logic for when the task is stopped using "stop()"
     }
 }
 ```
 
-The same goes for `Bungeecord` but with `VitalRepeatableTask.Bungeecord` instead
+Your countdown task should look like this:
 
-And for countdown tasks:
+```java
+package my.domain.company.projectname;
 
-```
-@Component // should also be registered automatically
-@VitalCountdownTaskInfo(3, interval = 1000) // metadata, value is the countdown in seconds, the interval is measured in millis
-public class MyCountdownTask extends VitalCountdownTask.Bungeecord {
+@VitalCountdownTaskInfo(interval = 50, countdown = 10)
+public class MySpigotCountdownTask extends VitalCountdownTask.Spigot {
+    // here we inherit every other method in VitalRepeatableTask
+    // we also have methods regarding the current lifecycle of the countdown
+
     @Override
-    public void onStart() {}
-    
-    @Override
-    public void onStop() {}
-    ...
+    public void onExpire() {
+        // this method is called when the countdown has finally expired (reached 0)
+    }
 
-    // this structure is the same as in a normal repeatable task, but with methods to controll countdown flow and other actions happening within the countdown itself...
+    @Override
+    public void onReset() {
+        // this method is called when "reset()" is called
+    }
+
+    // other methods that can be looked in up source docs
 }
 ```
 
-The same goes for `Bungeecord` but with `VitalCountdownTask.Bungeecord` instead
+The same implementation is available for Bungeecord through Vital's corresponding `VitalRepeatableTask.Bungeecord`
+and `VitalCountdownTask.Bungeecord` classes.
 
-## Vital Inventories
+## Inventories
 
-When using Vital, you can easily build interactive and paged inventories.  
-Your class should be structured as follows:
+When using Vital, you can use Vital's predefined `VitalInventory` and `VitalPagedInventory` classes for creating and
+managing interactive inventories.
 
-```
-@Component // IMPORTANT!!! IF YOU MARK THIS INVENTORY AS @Component IT IS FORCED AS A _GLOBAL_ INVENTORY. TO HANDLE SINGULAR PLAYER DATA REMOVE THIS ANNOTATION AND HANDLE OPEN INVENTORY MANUALLY!!!
-@VitalInventoryInfo("TITLE", size = 54)
-public class MyGlobalInventory extends VitalInventory {
-    public MyGlobalInventory(@Nullable Inventory previosInventory) {
-      super(previousInventory);
+Your normal non paged inventory class should look like this:
+
+```java
+package my.domain.company.projectname.inventory;
+
+// IMPORTANT, if you mark this class as a Component, you define this inventory as a global inventory, which is available for dependency injection
+// if you want an inventory that carries player specific data like, friend request manager, etc. you must remove this annotation and pass in any dependency needed through the constructor
+@Component
+public class MyInventory extends VitalInventory {
+    public MyInventory(Inventory previousInventory) {
+        // previousInventory can be null if no is available
+        super(previousInventory);
     }
 
     @Override
@@ -296,11 +399,11 @@ public class MyGlobalInventory extends VitalInventory {
     public void onClose(InventoryCloseEvent e) {
         // any inventory close logic for the closing player
     }
-    
+
     // on global inventory update, used to set items which are static, and do not change or are not clickable
     // use this method when you make global inventory which are not clickable
     @Override
-    public void fun onUpdate() {
+    public void onUpdate() {
         setItem(0, ITEM);
         setItem(1, ITEM);
     }
@@ -308,7 +411,7 @@ public class MyGlobalInventory extends VitalInventory {
     // on player inventory click, used to set items which are either player specific, with player data, or items that are clickable
     // NOTE: EVEN IF YOURE BUILDING A GLOBAL INVENTORY, AND NEED ITEMS THAT ARE CLICKABLE, YOU CAN USE THIS METHOD TO SET THOSE ITEMS!!!
     @Override
-    public void fun onUpdate(player: Player) {
+    public void onUpdate(Player player) {
         // not clickable, static item
         setItem(0, ITEM);
 
@@ -320,108 +423,196 @@ public class MyGlobalInventory extends VitalInventory {
 }
 ```
 
-When creating a _GLOBAL_ inventory, you can use Vital's `VitalInventoryManager` to open the Inventory for a player as
-follows:
+When creating a global inventory that instance is available through dependency injection via Spring beans:
 
+```java
+
+@Component
+public class MyComponent {
+    private final MyInventory myInventory;
+
+    public MyComponent(MyInventory myInventory) {
+        this.myInventory = myInventory;
+    }
+
+    public void doStuff(Player player) {
+        player.openInventory(myInventory.getInventory());
+    }
+}
 ```
-VitalInventoryManager.openVitalInventory(player, MyGlobalInventory.class)
+
+When NOT USING @Component, you have to manually create an instance of that inventory, then open it for the player:
+
+```java
+public void doStuff(Player player) {
+    MyInventory myInventory = new MyInventory(null);
+
+    player.openInventory(myInventory.getInventory());
+}
 ```
 
-When NOT creating a _GLOBAL_ inventory, you MUST manually create a new instance of your custom inventory as follows:
+There is also a way to create a paged inventory, which can hold many pages containing certain information (Very useful
+for store pages, item shops, etc)
 
+Your paged inventory should look like this:
+
+```java
+package my.domain.company.projectname.inventory;
+
+// the same goes for paged inventories, if they are marked with @Component, they are considered global inventories, only one instance of them exist
+// to create player specific paged inventories, remove the @Component annotation from it and instantiate an instance of that class yourself when trying to open it for a player
+@Component
+@VitalPagedInventoryInfo()
+public class MyPagedInventory extends VitalPagedInventory {
+    // here we can override specific methods for the lifecycle of this paged inventory
+    // take a look at the class source code documentation or just the source class for more info about methods to override, the names should be self-explanatory 
+
+    // the functions for methods that already exist in normal vital inventories, like mentioned above, they work the same with paged inventories!
+}
 ```
-// creating an instance of our global inventory
-MyGlobalInventory myGlobalInventory = new MyGlobalInventory(ANY ARGS);
 
-// opening that inventory manually...
-player.openInventory(myGlobalInventory.getInventory());
-```
+## Scoreboards
 
-## Vital Scoreboards
+When using Vital, you can use Vital's predefined classes to easily create scoreboards that update information
+dynamically
 
-When using Vital, you can use Vital's predefined classes to easily create custom and dynamic scoreboards  
-Your implementation should be structured as follows:
+vital-scoreboards is seperated into PerPlayer scoreboards and GlobalScoreboard, the names should be self explanatory.  
+Per player scoreboards carry information for each player alone.  
+Global scoreboards are scoreboards with many players, that carry global information, this could be used for global
+statistics in a minigame
 
-```
-// this is how you define a global scoreboard
-VitalGlobalScoreboard globalScoreboard = new VitalGlobalScoreboard(
-    "TITLE",
-    "LINE1",
-    "LiNE2",
-    "LINE3"
+```java
+public VitalPerPlayerScoreboard perPlayerScoreboard = new VitalPerPlayerScoreboard(
+        "TITLE",
+        // since these lines are of functional nature, everytime you update the scoreboard, the functions are called to evaluate a return value
+        // in short, this will always fetch the latest information from whatever call you provide here, strings are immutable, function return values like this are not.
+        player -> "LINE 1",
+        player -> "LINE 2",
+        player -> "LINE 3",
+        player -> "LINE 4"
 );
 
-// this is how you define a per player based scoreboard, these types of scoreboards are where you show player specific data
-VitalPerPlayerScoreboard perPlayerScoreboard = new VitalPerPlayerScoreboard(
-    "TITLE",
-    player -> "LINE1", // you can always call `it.*` to perform actions on the player. The player is a variable called "it"
-    player -> "LINE2",
-    player -> "LINE3"
+public VitalGlobalScoreboard globalScoreboard = new VitalGlobalScoreboard(
+        "TITLE",
+        "LINE 1",
+        "LINE 2",
+        "LINE 3",
+        "LINE 4"
 );
+
+public void doStuff(Player player) {
+    // then you can add players to these scoreboards...
+    perPlayerScoreboard.addPlayer(player);
+    globalScoreboard.addPlayer(player);
+}
 ```
 
-Then you can add players to a scoreboard via perPlayerScoreboard.addPlayer(PLAYERINSTANCE)`
+## Configs
 
-## Vital Configs
+Using Vital, you can easily create complex configuration files, here we dont work with files directly... we work with
+object instead, which is waaay more elegant than calling config keys all of the time....
 
-The vital-configs module predefines some spigot / bukkit types available to save in a config.  
-When defining configs you MUST save these types instead of the ones bukkit provides, since bukkit types are NORMALLY not
-compatible with config serializers since they don't follow any standards.
+Configs are always class based, so you have to extend the predefined Vital class "VitalConfig".
 
-1. Location -> ConfigLocation
-2. Player -> ConfigPlayer
-3. ItemStack -> ConfigItemStack
-   etc.
+Your config should look like this:
 
-## Vital Utils
+```java
+package my.domain.company.projectname.config;
 
-When using Vital, you can utilize the vital-utils submodule for various utilities that make life more enjoyable
+// here we define the file name and the processor we want to use for our file, we can use any file processor implementation for serializing and deserializing our config if you want to use any other file type of your liking.
+@VitalConfigInfo(name = "", processor = YMLFileProcessor.class)
+public class MyConfig extends VitalConfig {
+    // now we can define our config "keys" using the @Property annotation, which defines the managing types of you field, yes there can be multiple, especially when you are working with maps!
+    @Property({
+            String.class
+    })
+    // the field should be public
+    public String myProperty;
 
-## Vital Minigames
-
-With the Vital Minigames submodule, you can manage different states within a Vital made Plugin!  
-This means that every minigame MUST have different game states
-e.g. `Waiting`, `Voting`, `Starting`, `Ingame`, `Playing`, `Ending`, etc.  
-Using this convention, minigames are more organized and structured.
-
-A game state is structured as follows:
-
+    // you can also define complex types, but be aware of that the type should be instantiable with either an empty constructor or with a constructor that defines the properties needed to load that object from config.
+    @Property({
+            MyCustomClass.class
+    })
+    public MyCustomClass myCustomClass;
+}
 ```
-@Component // it is advised to make minigame states a COMPONENT
+
+This is how the complex object type should look like when you need to write it to config:
+
+```java
+public class MyCustomClass {
+    @Property({
+            String.class
+    })
+    public String someProperty;
+
+    public MyCustomClass() {
+        // the empty constructor is valid for serialization
+    }
+
+    // but this constructor is also valid, since it contains all fields annotated with @Property
+    // if we would have multiple @Property fields, we would have to have a corresponding constructor which initializes all @Property annotated fields
+    public MyCustomClass(String someProperty) {
+        this.someProperty = someProperty;
+    }
+}
+```
+
+To save the config you simply call `VitalConfig#save()` where `VitalConfig` is the instance of your config.
+
+## Minigames
+
+When using Vital, you can easily create minigames using Vital's predefined classes.
+
+All minigames should follow the standard of being split up into multiple game states...  
+Every game state serves a different purpose or "part" / "phase" of the minigame.  
+For example, there could be a game state that is active when we are waiting for more players to join the server before
+we can start the actual minigame itself.  
+And then theres the actual ingame state that serves ingame logic, for example there players can die, respawn at their
+base, etc.  
+All of these functions are always kept in their corresponding game state to encapsulate parts of the game as much as
+possible.  
+When following this standard, you can always switch from one game state into another without having to set anything up
+manually.
+
+Heres how that could work in an example:
+
+```java
+package my.domain.company.projectname.state;
+
+// States must always be a component, otherwise we would break the standard!
+@Component
 public class WaitingState extends VitalMinigameState {
-    // we can now implement any methods from VitalMinigameState to handle a minigame state status in our current minigame plugin.
-    // NOTE: minigame states are ALWAYS listeners, so you can directly implement your @EventHandler here!!!
-}
+    // when switching to a game state, the onEnable() method is called on that game state
+    @Override
+    public void onEnable() {
+        // some initialization code
+    }
 
-@Component // again...
-@VitalCountdownTaskInfo(3, interval = 1000) // is required for  minigame states that have countdowns!
-public class StartingSate extends VitalCountdownMinigameState {
-    // minigame states may sometimes require a countdown of some sort, vital has got you covered with a class that covers that functionality, IT WORKS THE SAME WAY AS A 'VitalCountdownTask' and must be configured the same way!
+    // when we switch between game states, we also disable the last game state that we were on before switching to the new one
+    @Override
+    public void onDisable() {
+        // here we can implement any logic that may revert the effects the "onEnable()" method made
+    }
+
+    // all game states are also listeners, so you can always place any event here...
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e) {
+        // do some stuff
+    }
 }
 ```
 
-Now that we have some states, we may set them using Vital's built-in feature to set states across a minigame:  
-`VitalMinigameManager.setVitalMinigameState(WaitingState.class)`  
-`VitalMinigameManager.setVitalMinigameState(StartingState.class)`  
-This way we can set the current state of our minigame!
+Game state can also be a countdown, for example when the game is about to start, there may be a 10s timer.
 
----
+```java
+package my.domain.company.projectname.state;
 
-## Vital Core Processor
-
-This submodule will automatically generate your `plugin.yml` with every data required for the plugin to work.  
-NO MORE plugin.yml TROUBLE!!!   
-To Set this up, implement `vital-core-processor` as an annotation processor using your favourite build tool, like gradle
-or maven  
-Then add this annotation to your plugins main class:
-`@VitalPluginInfo(...)`  
-This annotation will supply vital with enough meta information to automatically build the `plugin.yml` file...
-
----
-
-## Vital Commands Processor
-
-This submodule is responsible to work with `vital-core-processor` to automatically handle the `plugin.yml` registration
-of `@VitalCommandInfo` annotated classes.  
-Implement this submodule as an annotation processor using your favourite build tool like, gradle or maven to
-automatically register commands within your automatically generated `plugin.yml` file!
+// we do not need to add the @Component annotation here, since that is already supplied by @VitalCountdownTaskInfo, doesn't hurt to apply it anyway...
+// when we implement countdown game states, we also HAVE TO apply this annotation to the class, since the underlying implementation is a VitalCountdownTask instance!
+@VitalCountdownTaskInfo(interval = 1_000, countdown = 10)
+public class StartingState extends VitalCountdownMinigameState {
+    // here we can just override any method that can be overridden in the normal VitalCountdownTask
+    // this class also has the "onEnable()" and "onDisable()" methods just like the game state without a countdown
+}
+```

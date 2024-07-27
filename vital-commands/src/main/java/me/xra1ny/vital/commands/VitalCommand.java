@@ -124,7 +124,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         // Iterate through the methods of the current class.
         for (Method method : getClass().getDeclaredMethods()) {
             // Retrieve the `@VitalCommandArgHandler` annotation for the method.
-            final VitalCommandArgHandler commandArgHandler = method.getDeclaredAnnotation(VitalCommandArgHandler.class);
+            final VitalCommandArgHandler commandArgHandler = method.getAnnotation(VitalCommandArgHandler.class);
 
             // Check if the method does not have the annotation or the annotation value does not match the commandArg value.
             if (commandArgHandler == null || !List.of(commandArgHandler.value()).contains(commandArg.value())) {

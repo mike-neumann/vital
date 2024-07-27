@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 /**
  * Defines the vital-items submodule.
  */
-@Component
+@Component("vital-items")
 public class VitalItemsSubModule extends VitalSubModule {
 
 }
