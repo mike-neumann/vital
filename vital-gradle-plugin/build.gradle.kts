@@ -6,9 +6,9 @@ plugins {
 
 gradlePlugin {
     plugins {
-        create("me.xra1ny.vital.vital-gradle-plugin") {
-            id = "me.xra1ny.vital.vital-gradle-plugin"
-            implementationClass = "me.xra1ny.vital.VitalGradlePlugin"
+        create("me.vitalframework.vital-gradle-plugin") {
+            id = "me.vitalframework.vital-gradle-plugin"
+            implementationClass = "me.vitalframework.VitalGradlePlugin"
         }
     }
 }

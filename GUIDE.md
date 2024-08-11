@@ -37,7 +37,7 @@ pluginManagement {
 ```kotlin
 plugins {
     // this allows for some auto configuration regarding dependencies needed for vital to work
-    id("me.xra1ny.vital.vital-gradle-plugin") version "1.0"
+    id("me.vitalframework.vital-gradle-plugin") version "1.0"
     // this plugin is needed to shade any "implementation" dependency into the output jar when building, so that vital classes can be found at runtime
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }

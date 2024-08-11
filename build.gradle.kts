@@ -4,7 +4,7 @@ plugins {
 }
 
 subprojects {
-    group = "me.xra1ny.vital"
+    group = "me.vitalframework"
     version = "1.0"
 
     apply<MavenPublishPlugin>()
