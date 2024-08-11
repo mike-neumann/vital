@@ -9,7 +9,7 @@ import java.util.UUID;
  * Defines common methods and lifecycle events for Vital components.
  *
  * @author xRa1ny
- * @apiNote A component may be managed by its respective component manager ({@link VitalComponentManager})
+ * @apiNote A component may be managed by its respective component manager ({@link VitalRepository})
  */
 public interface VitalComponent {
     /**

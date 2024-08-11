@@ -3,7 +3,7 @@ package me.vitalframework.players;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
-import me.vitalframework.VitalComponentManager;
+import me.vitalframework.VitalRepository;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -24,7 +24,7 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
-public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM extends VitalComponentManager<VP>> {
+public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM extends VitalRepository<VP>> {
     @Getter
     @Autowired
     private PM playerManager;
@@ -95,7 +95,7 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM ex
      */
     protected abstract Class<T> playerType();
 
-    public static abstract class Spigot<VP extends VitalPlayer.Spigot, PM extends VitalComponentManager<VP>> extends VitalPlayerListener<JavaPlugin, Player, VP, PM> implements org.bukkit.event.Listener {
+    public static abstract class Spigot<VP extends VitalPlayer.Spigot, PM extends VitalRepository<VP>> extends VitalPlayerListener<JavaPlugin, Player, VP, PM> implements org.bukkit.event.Listener {
         @PostConstruct
         public void init() {
             // disconnect any connected player...
@@ -124,7 +124,7 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM ex
         }
     }
 
-    public static abstract class Bungeecord<VP extends VitalPlayer.Bungeecord, PM extends VitalComponentManager<VP>> extends VitalPlayerListener<Plugin, ProxiedPlayer, VP, PM> implements net.md_5.bungee.api.plugin.Listener {
+    public static abstract class Bungeecord<VP extends VitalPlayer.Bungeecord, PM extends VitalRepository<VP>> extends VitalPlayerListener<Plugin, ProxiedPlayer, VP, PM> implements net.md_5.bungee.api.plugin.Listener {
         @PostConstruct
         public void init() {
             // disconnect any connected player...

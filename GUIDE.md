@@ -214,7 +214,7 @@ which can have right and left-click actions.
 Your item class should look like this:
 
 ```java
-package my.domain.company.projectname;
+package my.domain.company.projectname.item;
 
 @VitalItemInfo(name = "<yellow>My Item")
 public class MyItem extends VitalItem {
@@ -243,7 +243,7 @@ Follow this setup process:
 1. You have to create your player class that houses the data each player can carry:
 
 ```java
-package my.domain.company.projectname;
+package my.domain.company.projectname.model;
 
 public class MySpigotPlayer extends VitalPlayer.Spigot {
     // here we have a variable this is store on our custom player object
@@ -257,13 +257,13 @@ public class MySpigotPlayer extends VitalPlayer.Spigot {
 }
 ```
 
-2. You have to create a custom player manager, that manages your custom player instances:
+2. You have to create a custom player repository, that manages your custom player instances:
 
 ```java
-package my.domain.company.projectname;
+package my.domain.company.projectname.repository;
 
 @Component
-public class MySpigotPlayerManager extends VitalComponentManager<MySpigotPlayer> {
+public class MySpigotPlayerRepository extends VitalRepository<MySpigotPlayer> {
 
 }
 ```
@@ -272,11 +272,11 @@ public class MySpigotPlayerManager extends VitalComponentManager<MySpigotPlayer>
    instances when players join or leave the server:
 
 ```java
-package my.domain.company.projectname;
+package my.domain.company.projectname.listener;
 
 @Component
-// here in the generic type declaration (<>) we must define the types for our custom player class and our custom player manager
-public class MySpigotPlayerListener extends VitalPlayerListener.Spigot<MySpigotPlayer, MySpigotPlayerManager> {
+// here in the generic type declaration (<>) we must define the types for our custom player class and our custom player repository
+public class MySpigotPlayerListener extends VitalPlayerListener.Spigot<MySpigotPlayer, MySpigotPlayerRepository> {
     // and here we sadly still have to implement this method since type erasure erases the types needed for autoconfiguration
     @Override
     public Class<MySpigotPlayer> vitalPlayerType() {
@@ -287,24 +287,23 @@ public class MySpigotPlayerListener extends VitalPlayerListener.Spigot<MySpigotP
 
 Once that is done, you can utilize your very own custom player management system.
 
-To fetch players from it, you can use your "MySpigotPlayerManager" component, which can be injected into any other
+To fetch players from it, you can use your "MySpigotPlayerRepository" component, which can be injected into any other
 component.
 
 ```java
-import java.util.UUID;// since we are annotating this class as @Component, it is automatically instantiated and injected via Spring
-
+// since we are annotating this class as @Component, it is automatically instantiated and injected via Spring
 @Component
 public class MyComponent {
-    private final MySpigotPlayerManager playerManager;
+    private final MySpigotPlayerRepository playerRepository;
 
-    public MyComponent(MySpigotPlayerManager playerManager) {
-        this.playerManager = playerManager;
+    public MyComponent(MySpigotPlayerRepository playerRepository) {
+        this.playerRepository = playerRepository;
     }
 
     public void doStuff() {
-        playerManager.getComponentByName("somePlayerName");
+        playerRepository.getComponentByName("somePlayerName");
         // here we put the actual uuid of the player, this is just an example
-        playerManager.getComponentByUniqueId(UUID.randomUUID());
+        playerRepository.getComponentByUniqueId(UUID.randomUUID());
     }
 }
 ```
@@ -319,7 +318,7 @@ registering tasks for both Spigot and Bungeecord.
 Your repeatable task should look like this:
 
 ```java
-package my.domain.company.projectname;
+package my.domain.company.projectname.task;
 
 // min interval is 5, which corresponds to exactly 1 ingame tick.
 // interval is measured in millis
@@ -347,7 +346,7 @@ public class MyRepeatableTask extends VitalRepeatableTask.Spigot {
 Your countdown task should look like this:
 
 ```java
-package my.domain.company.projectname;
+package my.domain.company.projectname.task;
 
 @VitalCountdownTaskInfo(interval = 50, countdown = 10)
 public class MySpigotCountdownTask extends VitalCountdownTask.Spigot {
@@ -426,7 +425,6 @@ public class MyInventory extends VitalInventory {
 When creating a global inventory that instance is available through dependency injection via Spring beans:
 
 ```java
-
 @Component
 public class MyComponent {
     private final MyInventory myInventory;

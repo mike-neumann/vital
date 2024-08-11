@@ -14,7 +14,7 @@ import java.util.function.Predicate;
  * @param <T> The type of Vital components managed by this class.
  * @author xRa1ny
  */
-public abstract class VitalComponentManager<T extends VitalComponent> {
+public abstract class VitalRepository<T extends VitalComponent> {
     @Getter
     private final List<T> components = new ArrayList<>();
 
