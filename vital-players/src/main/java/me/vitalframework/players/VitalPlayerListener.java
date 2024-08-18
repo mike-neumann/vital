@@ -11,6 +11,7 @@ import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,10 +25,10 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
-public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM extends VitalRepository<VP>> {
+public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PR extends VitalRepository<VP>> {
     @Getter
     @Autowired
-    private PM playerManager;
+    private PR playerRepository;
 
     @Getter
     @Autowired
@@ -43,14 +44,14 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM ex
     /**
      * Constructor for when not using dependency injection
      */
-    public VitalPlayerListener(P plugin, PM playerManager) {
+    public VitalPlayerListener(P plugin, PR playerRepository) {
         this.plugin = plugin;
-        this.playerManager = playerManager;
+        this.playerRepository = playerRepository;
     }
 
     public void handlePlayerJoin(@NonNull UUID uniqueId, @NonNull T player) {
         // Retrieve the VitalPlayer associated with the joining player, if it exists.
-        final Optional<VP> optionalVitalPlayer = Optional.ofNullable(playerManager.getComponentByUniqueId(uniqueId));
+        final Optional<VP> optionalVitalPlayer = Optional.ofNullable(playerRepository.getComponentByUniqueId(uniqueId));
 
         if (optionalVitalPlayer.isEmpty()) {
             // Create a new VitalPlayer for the joining player.
@@ -58,7 +59,7 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM ex
                 final VP vitalPlayer = vitalPlayerType().getDeclaredConstructor(playerType()).newInstance(player);
 
                 // Register the VitalPlayer with VitalUserManagement.
-                playerManager.registerComponent(vitalPlayer);
+                playerRepository.registerComponent(vitalPlayer);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException("error while creating vital player instance %s for %s"
@@ -69,7 +70,7 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM ex
 
     public void handlePlayerQuit(@NonNull UUID uniqueId) {
         // Retrieve the VitalPlayer associated with the leaving player.
-        final Optional<VP> optionalVitalPlayer = Optional.ofNullable(playerManager.getComponentByUniqueId(uniqueId));
+        final Optional<VP> optionalVitalPlayer = Optional.ofNullable(playerRepository.getComponentByUniqueId(uniqueId));
 
         if (optionalVitalPlayer.isEmpty()) {
             return;
@@ -78,7 +79,7 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM ex
         final VP vitalPlayer = optionalVitalPlayer.get();
 
         // Unregister the VitalPlayer from VitalUserManagement.
-        playerManager.unregisterComponent(vitalPlayer);
+        playerRepository.unregisterComponent(vitalPlayer);
     }
 
     /**
@@ -112,13 +113,13 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM ex
         }
 
         // should always be executed first.
-        @org.bukkit.event.EventHandler(priority = org.bukkit.event.EventPriority.LOWEST)
+        @org.bukkit.event.EventHandler(priority = EventPriority.LOW)
         public final void onPlayerJoin(@NonNull PlayerJoinEvent e) {
             handlePlayerJoin(e.getPlayer().getUniqueId(), e.getPlayer());
         }
 
         // should always be executed last.
-        @org.bukkit.event.EventHandler(priority = org.bukkit.event.EventPriority.HIGHEST)
+        @org.bukkit.event.EventHandler(priority = EventPriority.HIGH)
         public final void onPlayerQuit(@NonNull PlayerQuitEvent e) {
             handlePlayerQuit(e.getPlayer().getUniqueId());
         }
@@ -136,13 +137,13 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PM ex
         }
 
         // should always be executed first.
-        @net.md_5.bungee.event.EventHandler(priority = net.md_5.bungee.event.EventPriority.LOWEST)
+        @net.md_5.bungee.event.EventHandler(priority = net.md_5.bungee.event.EventPriority.LOW)
         public void onPostLogin(PostLoginEvent e) {
             handlePlayerJoin(e.getPlayer().getUniqueId(), e.getPlayer());
         }
 
         // should always be executed last.
-        @net.md_5.bungee.event.EventHandler(priority = net.md_5.bungee.event.EventPriority.HIGHEST)
+        @net.md_5.bungee.event.EventHandler(priority = net.md_5.bungee.event.EventPriority.HIGH)
         public void onPlayerDisconnect(PlayerDisconnectEvent e) {
             handlePlayerQuit(e.getPlayer().getUniqueId());
         }

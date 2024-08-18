@@ -5,7 +5,7 @@ import me.vitalframework.Vital;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
@@ -16,8 +16,8 @@ import java.util.Map;
  *
  * @author xRa1ny
  */
-@Component
-public class VitalItemManager {
+@Service
+public class VitalItemService {
     /**
      * Attempts to set the specified {@link VitalItem} by its class.
      *

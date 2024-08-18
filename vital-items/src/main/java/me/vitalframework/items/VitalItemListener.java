@@ -17,15 +17,15 @@ public class VitalItemListener extends VitalListener.Spigot {
     /**
      * The management system for custom item stacks.
      */
-    private final VitalItemManager vitalItemManager;
+    private final VitalItemService vitalItemService;
 
     /**
      * Constructs a new instance of the VitalItemStackListener.
      *
-     * @param vitalItemManager The management system for custom item stacks.
+     * @param vitalItemService The management system for custom item stacks.
      */
-    public VitalItemListener(@NonNull VitalItemManager vitalItemManager) {
-        this.vitalItemManager = vitalItemManager;
+    public VitalItemListener(@NonNull VitalItemService vitalItemService) {
+        this.vitalItemService = vitalItemService;
     }
 
     /**
@@ -41,7 +41,7 @@ public class VitalItemListener extends VitalListener.Spigot {
         }
 
         // Find the custom item stack that matches the player's interaction item.
-        vitalItemManager.getItems()
+        vitalItemService.getItems()
                 .stream()
                 .filter(i -> i.equals(e.getItem()))
                 .findFirst()

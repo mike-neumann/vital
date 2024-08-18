@@ -9,7 +9,7 @@ import java.util.UUID;
  * Defines common methods and lifecycle events for Vital components.
  *
  * @author xRa1ny
- * @apiNote A component may be managed by its respective component manager ({@link VitalRepository})
+ * @apiNote A component may be managed by its respective component repository ({@link VitalRepository})
  */
 public interface VitalComponent {
     /**
@@ -33,13 +33,13 @@ public interface VitalComponent {
     }
 
     /**
-     * Called when this component is registered on a manager
+     * Called when this component is registered on a repository
      * Implement this method to perform any required initialization when the component is registered.
      */
     void onRegistered();
 
     /**
-     * Called when this component is unregistered from a manager
+     * Called when this component is unregistered from a repository
      * Implement this method to perform any cleanup or finalization when the component is unregistered.
      */
     void onUnregistered();

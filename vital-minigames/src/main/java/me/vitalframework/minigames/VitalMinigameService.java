@@ -6,22 +6,21 @@ import me.vitalframework.Vital;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Manages the current state of a minigame using the Vital framework.
  *
  * @author xRa1ny
- * @apiNote This class may be extended from, to add more specific mini-game manager logic or function, depending on the mini-game you are trying to implement.
  */
-@Component
-public class VitalMinigameManager {
+@Service
+public class VitalMinigameService {
     private final JavaPlugin plugin;
 
     @Getter
     private VitalMinigameState vitalMinigameState;
 
-    public VitalMinigameManager(JavaPlugin plugin) {
+    public VitalMinigameService(JavaPlugin plugin) {
         this.plugin = plugin;
     }
 

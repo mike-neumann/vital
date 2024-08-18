@@ -3,13 +3,13 @@ package me.vitalframework.inventories;
 import lombok.NonNull;
 import me.vitalframework.Vital;
 import org.bukkit.entity.Player;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
- * The main vital inventory manager for registering inventories.
+ * The main vital inventory service for registering inventories.
  */
-@Component
-public class VitalInventoryManager {
+@Service
+public class VitalInventoryService {
     /**
      * Opens a registered {@link VitalInventory} for the given {@link Player}.
      *

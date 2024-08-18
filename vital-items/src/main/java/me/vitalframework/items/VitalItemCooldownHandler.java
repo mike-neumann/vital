@@ -2,8 +2,8 @@ package me.vitalframework.items;
 
 import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
-import me.vitalframework.tasks.annotation.VitalRepeatableTaskInfo;
 import me.vitalframework.tasks.VitalRepeatableTask;
+import me.vitalframework.tasks.annotation.VitalRepeatableTaskInfo;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.springframework.stereotype.Component;
@@ -19,18 +19,12 @@ import java.util.Map;
 @Component
 @VitalRepeatableTaskInfo(interval = 50)
 public class VitalItemCooldownHandler extends VitalRepeatableTask.Spigot {
-    private final VitalItemManager itemManager;
+    private final VitalItemService itemService;
 
-    /**
-     * Creates a new VitalItemStackCooldownHandler.
-     *
-     * @param javaPlugin  The JavaPlugin instance.
-     * @param itemManager Vital's item manager.
-     */
-    public VitalItemCooldownHandler(@NonNull JavaPlugin javaPlugin, VitalItemManager itemManager) {
+    public VitalItemCooldownHandler(@NonNull JavaPlugin javaPlugin, VitalItemService itemService) {
         super(javaPlugin);
 
-        this.itemManager = itemManager;
+        this.itemService = itemService;
     }
 
     /**
@@ -55,7 +49,7 @@ public class VitalItemCooldownHandler extends VitalRepeatableTask.Spigot {
      */
     @Override
     public void onTick() {
-        for (VitalItem vitalItem : itemManager.getItems()) {
+        for (VitalItem vitalItem : itemService.getItems()) {
             // Reduce Cooldown
             for (Map.Entry<Player, Integer> entry : vitalItem.getPlayerCooldownMap().entrySet()) {
                 if (entry.getValue() <= 0) {

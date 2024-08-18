@@ -21,7 +21,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
     /**
      * Gets a {@link List} of all {@link VitalComponent} instance matching the supplied class.
      *
-     * @param clazz The class to match the registered {@link VitalComponent} of this manager with.
+     * @param clazz The class to match the registered {@link VitalComponent} of this repository with.
      * @param <X>   The type of the {@link VitalComponent} to match with.
      * @return A {@link List} of all {@link VitalComponent} instances matching the supplied class.
      */
@@ -63,7 +63,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
     }
 
     /**
-     * Checks if the given {@link VitalComponent} is registered on this manager.
+     * Checks if the given {@link VitalComponent} is registered on this repository.
      *
      * @param component The {@link VitalComponent}.
      * @return true if the {@link VitalComponent} is registered, false otherwise.
@@ -104,7 +104,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
      * Gets the VitalComponent by the specified class.
      *
      * @param clazz The class of the VitalComponent.
-     * @param <X>   The {@link VitalComponent} type to grab from this manager instance.
+     * @param <X>   The {@link VitalComponent} type to grab from this repository instance.
      * @return The fetched component; or null.
      */
     @Nullable
@@ -117,7 +117,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
     }
 
     /**
-     * Gets a random VitalComponent, matching the given {@link Predicate} registered on this manager instance.
+     * Gets a random VitalComponent, matching the given {@link Predicate} registered on this repository instance.
      *
      * @param predicate The predicate for filtering.
      * @return The fetched component; or null.
@@ -137,7 +137,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
     }
 
     /**
-     * Gets a random VitalComponent registered on this manager instance.
+     * Gets a random VitalComponent registered on this repository instance.
      *
      * @return The fetched component; or null.
      */
