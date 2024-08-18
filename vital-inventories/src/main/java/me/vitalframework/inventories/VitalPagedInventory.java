@@ -5,10 +5,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import me.vitalframework.inventories.annotation.VitalPagedInventoryInfo;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +22,7 @@ public abstract class VitalPagedInventory extends VitalInventory {
      * The current page of this paged inventory menu.
      */
     @Getter
-    private long page = 0;
+    private long page = 1;
 
     @Getter
     @Setter
@@ -43,7 +41,7 @@ public abstract class VitalPagedInventory extends VitalInventory {
      *
      * @param previousInventory The previous {@link Inventory} to open after clicking out of inventory bounds.
      */
-    public VitalPagedInventory(@Nullable Inventory previousInventory) {
+    public VitalPagedInventory(@Nullable VitalInventory previousInventory) {
         super(previousInventory);
 
         final Optional<VitalPagedInventoryInfo> optionalVitalPagedInventoryInfo = Optional.ofNullable(getClass().getAnnotation(VitalPagedInventoryInfo.class));
@@ -99,25 +97,7 @@ public abstract class VitalPagedInventory extends VitalInventory {
 
         this.page = page;
         onPageChange(page, player);
-        update();
-    }
-
-    @Override
-    public void update() {
-        updateWithoutItems();
-
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            final InventoryHolder inventoryHolder = player.getOpenInventory().getTopInventory().getHolder();
-
-            if (!(inventoryHolder instanceof VitalPagedInventory vitalInventory) || !vitalInventory.equals(this)) {
-                continue;
-            }
-
-            // update the inventory for the looping player.
-            onPageChange(page, player);
-        }
-
-        updateItems();
+        super.update(player);
     }
 
     protected <T> List<T> sliceForPage(@NonNull List<T> list) {
@@ -134,5 +114,17 @@ public abstract class VitalPagedInventory extends VitalInventory {
         }
 
         return list.subList(startIndex, endIndex);
+    }
+
+    @Override
+    public void open(Player player) {
+        super.open(player);
+        setPage(1, player);
+    }
+
+    @Override
+    public void update(Player player) {
+        super.update(player);
+        setPage(page, player);
     }
 }

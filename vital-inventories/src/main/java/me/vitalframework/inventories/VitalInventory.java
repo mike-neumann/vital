@@ -1,190 +1,153 @@
 package me.vitalframework.inventories;
 
-import jakarta.annotation.Nullable;
 import lombok.Getter;
-import lombok.NonNull;
 import me.vitalframework.RequiresAnnotation;
 import me.vitalframework.inventories.annotation.VitalInventoryInfo;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Range;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 
-public class VitalInventory implements InventoryHolder, RequiresAnnotation<VitalInventoryInfo> {
-    @Getter
-    @NonNull
-    private final Map<Map.Entry<Player, Integer>, Consumer<InventoryClickEvent>> slotActionMap = new HashMap<>();
-
+public class VitalInventory implements RequiresAnnotation<VitalInventoryInfo> {
     private final int size;
+    private final String name;
+    private final Map<Player, Inventory> playerInventories = new HashMap<>();
+    private final Map<Integer, ItemStack> items = new HashMap<>();
+    private final Map<Map.Entry<Player, Integer>, Consumer<InventoryClickEvent>> actions = new HashMap<>();
 
     @Getter
-    @NonNull
-    private final Inventory inventory;
+    private final VitalInventory previousInventory;
 
-    @NonNull
-    private final Map<Integer, ItemStack> slotItemMap = new HashMap<>();
-
-    @Nullable
-    private final ItemStack background;
-
-    @Getter
-    @Nullable
-    private final Inventory previousInventory;
-
-    public VitalInventory(@Nullable Inventory previousInventory) {
+    public VitalInventory(@Nullable VitalInventory previousInventory) {
         final VitalInventoryInfo info = getRequiredAnnotation();
 
-        final ItemStack backgroundItemStack = new ItemStack(info.background());
-        final ItemMeta backgroundItemMeta = backgroundItemStack.getItemMeta();
-
-        if (backgroundItemMeta != null) {
-            backgroundItemMeta.setDisplayName(null);
-            backgroundItemStack.setItemMeta(backgroundItemMeta);
-        }
-
-        background = backgroundItemStack;
         size = info.size();
-        inventory = Bukkit.createInventory(this, size, LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(info.name())));
+        name = info.name();
         this.previousInventory = previousInventory;
     }
 
-    protected void setItem(@Range(from = 0, to = 54) int slot, @Nullable ItemStack itemStack) {
-        slotItemMap.put(slot, itemStack);
+    public void setItem(int slot, ItemStack itemStack, Player player, Consumer<InventoryClickEvent> action) {
+        items.put(slot, itemStack);
+        actions.put(Map.entry(player, slot), action);
+    }
+
+    public void setItem(int slot, ItemStack itemStack, Player player) {
+        setItem(slot, itemStack, player, e -> {
+        });
+    }
+
+//    public void setGlobalItem(int slot, ItemStack itemStack, Consumer<InventoryClickEvent> action) {
+//        globalItems.put(slot, Map.entry(itemStack, action));
+//    }
+//
+//    public void setGlobalItem(int slot, ItemStack itemStack) {
+//        setGlobalItem(slot, itemStack, e -> {
+//        });
+//    }
+//
+//    public void setPlayerItem(int slot, ItemStack itemStack, Player player, Consumer<InventoryClickEvent> action) {
+//        playerItems.put(Map.entry(player, slot), Map.entry(itemStack, action));
+//    }
+//
+//    public void setPlayerItem(int slot, ItemStack itemStack, Player player) {
+//        setPlayerItem(slot, itemStack, player, e -> {
+//        });
+//    }
+
+    @Override
+    public final Class<VitalInventoryInfo> requiredAnnotationType() {
+        return VitalInventoryInfo.class;
+    }
+
+    public boolean hasInventoryOpen(Player player) {
+        return playerInventories.containsKey(player);
+    }
+
+    public void update() {
+        onUpdate();
+
+        playerInventories.forEach((player, inventory) -> update(player));
+    }
+
+    public void update(Player player) {
+        final Inventory inventory = playerInventories.get(player);
+
+        onUpdate(player);
+
+        items.forEach(inventory::setItem);
+        //globalItems.forEach((slot, entry) -> inventory.setItem(slot, entry.getKey()));
+        //playerItems.forEach((playerSlot, entry) -> inventory.setItem(playerSlot.getValue(), entry.getKey()));
+    }
+
+    public void open(Player player) {
+        final Inventory inventory = Bukkit.createInventory(player, size, name);
+
+        playerInventories.put(player, inventory);
+
+        onOpen(player);
+        update(player);
+        player.openInventory(inventory);
+    }
+
+    public void click(InventoryClickEvent e) {
+//        final Map.Entry<ItemStack, Consumer<InventoryClickEvent>> entry = globalItems.get(e.getSlot());
+//
+//        if (entry != null) {
+//            final Consumer<InventoryClickEvent> action = entry.getValue();
+//
+//            action.accept(e);
+//        }
+//
+//        final Map.Entry<ItemStack, Consumer<InventoryClickEvent>> playerEntry = playerItems.get(Map.entry((Player) e.getWhoClicked(), e.getSlot()));
+//
+//        if (playerEntry != null) {
+//            final Consumer<InventoryClickEvent> action = playerEntry.getValue();
+//
+//            action.accept(e);
+//        }
+        final Consumer<InventoryClickEvent> action = actions.get(Map.entry(e.getWhoClicked(), e.getSlot()));
+
+        if (action != null) {
+            action.accept(e);
+        }
+    }
+
+    public void close(Player player) {
+        playerInventories.remove(player);
+        onClose(player);
     }
 
     /**
-     * Sets the given item to the specified slot while also binding an action to the given item and player in this inventory.
-     *
-     * @param slot      The slot the item may occupy
-     * @param itemStack The item itself.
-     * @param player    The player object for the click handler.
-     * @param event     The click handler itself.
+     * used for when this inventory is opened for any player
      */
-    protected void setItem(@Range(from = 0, to = 54) int slot, @NonNull ItemStack itemStack, @NonNull Player player, @NonNull Consumer<InventoryClickEvent> event) {
-        setItem(slot, itemStack);
-        onClick(player, slot, event);
-    }
+    public void onOpen(Player player) {
 
-    protected void onOpen(@NonNull Player player) {
-
-    }
-
-    protected void onClose(@NonNull Player player) {
-
-    }
-
-    protected void onClick(@NonNull Player player, int slot, @NonNull ItemStack itemStack) {
-
-    }
-
-    protected void onClick(@NonNull Player player, int slot, @NonNull Consumer<InventoryClickEvent> event) {
-        slotActionMap.put(Map.entry(player, slot), event);
     }
 
     /**
-     * Called when this inventory is updated.
+     * used for when setting static items (non player information)
      */
     public void onUpdate() {
 
     }
 
     /**
-     * Called when this inventory is updated;
-     *
-     * @param player The player.
-     * @apiNote This method is called for every player this inventory is updated.
+     * used for when needing to set items that hold player specific information
      */
-    public void onUpdate(@NonNull Player player) {
+    public void onUpdate(Player player) {
 
-    }
-
-    public void updateItems() {
-        getInventory().clear();
-
-        for (int i = 0; i < size; i++) {
-            getInventory().setItem(i, background);
-        }
-
-        slotItemMap.forEach(getInventory()::setItem);
     }
 
     /**
-     * This method will call any onUpdate method used to inject or update inventory information without modifying any items in inventory itself.
-     *
-     * @see VitalInventory#onUpdate(Player)
-     * @see VitalInventory#onUpdate()
+     * used for when this inventory is closed for an opened player
      */
-    public void updateWithoutItems() {
-        // first call developer onUpdate
-        onUpdate();
+    public void onClose(Player player) {
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            final InventoryHolder inventoryHolder = player.getOpenInventory().getTopInventory().getHolder();
-
-            if (!(inventoryHolder instanceof VitalInventory vitalInventory) || !vitalInventory.equals(this)) {
-                continue;
-            }
-
-            // update the inventory for the looping player.
-            onUpdate(player);
-        }
-    }
-
-    /**
-     * Updates this inventory removing all items and resetting them for all players that have this inventory open.
-     *
-     * @see VitalInventory#onUpdate(Player)
-     * @see VitalInventory#onUpdate()
-     */
-    public void update() {
-        updateWithoutItems();
-        updateItems();
-    }
-
-    @Override
-    public Class<VitalInventoryInfo> requiredAnnotationType() {
-        return VitalInventoryInfo.class;
-    }
-
-    /**
-     * Handles a player's click within this inventory menu.
-     *
-     * @param e The InventoryClickEvent.
-     */
-    public final void handleClick(@NonNull InventoryClickEvent e) {
-        final Optional<ItemStack> optionalItemStack = Optional.ofNullable(e.getCurrentItem());
-
-        if (optionalItemStack.isEmpty()) {
-            return;
-        }
-
-        final ItemStack itemStack = optionalItemStack.get();
-        final Material material = itemStack.getType();
-
-        if (material.equals(Material.AIR) || itemStack.equals(background)) {
-            return;
-        }
-
-        final Player player = (Player) e.getWhoClicked();
-
-        player.playSound(player.getLocation(), Sound.BLOCK_LEVER_CLICK, .3f, 1f);
-
-        final Optional<Consumer<InventoryClickEvent>> optionalItemAction = Optional.ofNullable(slotActionMap.getOrDefault(Map.entry(player, e.getSlot()), null));
-
-        optionalItemAction.ifPresentOrElse(itemAction -> itemAction.accept(e),
-                () -> onClick(player, e.getSlot(), itemStack));
     }
 }

@@ -19,6 +19,6 @@ public class VitalInventoryService {
     public void openVitalInventory(@NonNull Player player, @NonNull Class<? extends VitalInventory> vitalInventoryClass) {
         final VitalInventory vitalInventory = Vital.getContext().getBean(vitalInventoryClass);
 
-        player.openInventory(vitalInventory.getInventory());
+        vitalInventory.open(player);
     }
 }
