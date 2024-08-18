@@ -333,6 +333,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
                 }
             } catch (Exception e) {
                 commandReturnState = VitalCommandReturnState.ERROR;
+                log.error("error while executing command", e);
             }
 
             final String joinedArgs = String.join(" ", args);
