@@ -18,9 +18,7 @@ public interface VitalComponent {
      * @return The {@link UUID} representing this component.
      */
     @NonNull
-    default UUID getUniqueId() {
-        return UUID.randomUUID();
-    }
+    UUID getUniqueId();
 
     /**
      * Gets the name of this component.

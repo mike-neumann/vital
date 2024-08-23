@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Represents a hologram in the Vital-Framework.
@@ -23,6 +24,9 @@ import java.util.List;
  * @author xRa1ny
  */
 public class VitalHologram implements VitalComponent {
+    @Getter
+    private final UUID uniqueId = UUID.randomUUID();
+
     @Getter
     @Setter
     private String name;

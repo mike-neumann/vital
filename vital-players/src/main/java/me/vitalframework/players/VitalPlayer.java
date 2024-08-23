@@ -30,24 +30,6 @@ public abstract class VitalPlayer<T> implements VitalComponent {
     }
 
     /**
-     * Gets the unique ID of the associated Minecraft player.
-     *
-     * @return The unique ID of the player.
-     */
-    @Override
-    @NonNull
-    public abstract UUID getUniqueId();
-
-    /**
-     * Gets the name of the associated Minecraft player.
-     *
-     * @return The name of the player.
-     */
-    @Override
-    @NonNull
-    public abstract String getName();
-
-    /**
      * Called when this VitalComponent is registered.
      */
     @Override
@@ -70,13 +52,13 @@ public abstract class VitalPlayer<T> implements VitalComponent {
 
         @Override
         @NonNull
-        public UUID getUniqueId() {
+        public final UUID getUniqueId() {
             return getPlayer().getUniqueId();
         }
 
         @Override
         @NonNull
-        public String getName() {
+        public final String getName() {
             return getPlayer().getName();
         }
     }
@@ -91,13 +73,13 @@ public abstract class VitalPlayer<T> implements VitalComponent {
 
         @Override
         @NonNull
-        public UUID getUniqueId() {
+        public final UUID getUniqueId() {
             return getPlayer().getUniqueId();
         }
 
         @Override
         @NonNull
-        public String getName() {
+        public final String getName() {
             return getPlayer().getName();
         }
     }

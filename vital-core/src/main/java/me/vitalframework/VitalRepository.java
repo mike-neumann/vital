@@ -69,7 +69,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
      * @return true if the {@link VitalComponent} is registered, false otherwise.
      */
     public final boolean isComponentRegistered(@NonNull T component) {
-        return components.contains(component);
+        return components.contains(component) || getComponentByUniqueId(component.getUniqueId()) != null;
     }
 
     /**
@@ -174,6 +174,19 @@ public abstract class VitalRepository<T extends VitalComponent> {
         components.remove(component);
         component.onUnregistered();
         onComponentUnregistered(component);
+    }
+
+    public final void unregisterAllComponents() {
+        components.stream().toList().forEach(this::unregisterComponent);
+    }
+
+    /**
+     * Updates all components with the supplied ones
+     */
+    public final void updateComponents(Collection<T> components) {
+        unregisterAllComponents();
+
+        components.forEach(this::registerComponent);
     }
 
     /**
