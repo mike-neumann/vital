@@ -21,4 +21,12 @@ public class VitalInventoryService {
 
         vitalInventory.open(player);
     }
+
+    public <T extends VitalInventory> T getVitalInventory(@NonNull Class<T> vitalInventoryClass) {
+        try {
+            return Vital.getContext().getBean(vitalInventoryClass);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

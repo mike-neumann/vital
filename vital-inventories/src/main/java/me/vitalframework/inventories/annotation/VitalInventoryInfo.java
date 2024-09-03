@@ -4,6 +4,7 @@ import lombok.NonNull;
 import me.vitalframework.inventories.VitalInventory;
 import org.bukkit.Material;
 import org.jetbrains.annotations.Range;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,6 +16,7 @@ import java.lang.annotation.Target;
  *
  * @author xRa1ny
  */
+@Component
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface VitalInventoryInfo {
