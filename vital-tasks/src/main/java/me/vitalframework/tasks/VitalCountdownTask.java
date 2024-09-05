@@ -12,12 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, ?>> implements RequiresAnnotation<VitalCountdownTaskInfo> {
     @Getter
+    private final int initialCountdown;
+    @Getter
     @Autowired
     private P plugin;
-
-    @Getter
-    private final int initialCountdown;
-
     @Getter
     @Setter
     private int countdown;

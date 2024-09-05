@@ -6,8 +6,8 @@ import lombok.Setter;
 import me.vitalframework.annotation.RequiresBungeecord;
 import me.vitalframework.annotation.RequiresSpigot;
 import me.vitalframework.statistics.config.VitalStatisticsConfig;
-import me.vitalframework.tasks.annotation.VitalRepeatableTaskInfo;
 import me.vitalframework.tasks.VitalRepeatableTask;
+import me.vitalframework.tasks.annotation.VitalRepeatableTaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -108,13 +108,13 @@ public interface HealthCheckTask {
     @RequiresSpigot
     @VitalRepeatableTaskInfo(interval = 50)
     class Spigot extends VitalRepeatableTask.Spigot implements HealthCheckTask {
+        private final Map<Long, Integer> lastTps = new HashMap<>();
+        private final Map<Long, Integer> lastUnhealthyTps = new HashMap<>();
+        private final VitalStatisticsConfig vitalStatisticsConfig;
         private long lastTickTime = System.currentTimeMillis();
         private long lastSecondTime = System.currentTimeMillis();
         private int ticks;
         private int tps;
-        private final Map<Long, Integer> lastTps = new HashMap<>();
-        private final Map<Long, Integer> lastUnhealthyTps = new HashMap<>();
-        private final VitalStatisticsConfig vitalStatisticsConfig;
 
         public Spigot(VitalStatisticsConfig vitalStatisticsConfig) {
             this.vitalStatisticsConfig = vitalStatisticsConfig;
@@ -136,13 +136,13 @@ public interface HealthCheckTask {
     @RequiresBungeecord
     @VitalRepeatableTaskInfo(interval = 50)
     class Bungeecord extends VitalRepeatableTask.Bungeecord implements HealthCheckTask {
+        private final Map<Long, Integer> lastTps = new HashMap<>();
+        private final Map<Long, Integer> lastUnhealthyTps = new HashMap<>();
+        private final VitalStatisticsConfig vitalStatisticsConfig;
         private long lastTickTime = System.currentTimeMillis();
         private long lastSecondTime = System.currentTimeMillis();
         private int ticks;
         private int tps;
-        private final Map<Long, Integer> lastTps = new HashMap<>();
-        private final Map<Long, Integer> lastUnhealthyTps = new HashMap<>();
-        private final VitalStatisticsConfig vitalStatisticsConfig;
 
         public Bungeecord(VitalStatisticsConfig vitalStatisticsConfig) {
             this.vitalStatisticsConfig = vitalStatisticsConfig;
