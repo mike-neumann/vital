@@ -6,8 +6,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -26,9 +24,9 @@ public class VitalInventoryListener extends VitalListener.Spigot {
      */
     @EventHandler
     public void onPlayerClickInInventory(InventoryClickEvent e) {
-        final Inventory clickedInventory = e.getClickedInventory();
-        final Player player = (Player) e.getWhoClicked();
-        final VitalInventory vitalInventory = Vital.getContext().getBeansOfType(VitalInventory.class).values().stream()
+        final var clickedInventory = e.getClickedInventory();
+        final var player = (Player) e.getWhoClicked();
+        final var vitalInventory = Vital.getContext().getBeansOfType(VitalInventory.class).values().stream()
                 .filter(inventory -> inventory.hasInventoryOpen(player))
                 .findFirst().orElse(null);
 
@@ -46,7 +44,7 @@ public class VitalInventoryListener extends VitalListener.Spigot {
             return;
         }
 
-        final Optional<ItemStack> optionalCurrentItem = Optional.ofNullable(e.getCurrentItem());
+        final var optionalCurrentItem = Optional.ofNullable(e.getCurrentItem());
 
         if (optionalCurrentItem.isEmpty()) {
             return;
@@ -63,8 +61,8 @@ public class VitalInventoryListener extends VitalListener.Spigot {
      */
     @EventHandler
     public void onPlayerCloseInventory(InventoryCloseEvent e) {
-        final Player player = (Player) e.getPlayer();
-        final VitalInventory vitalInventory = Vital.getContext().getBeansOfType(VitalInventory.class).values().stream()
+        final var player = (Player) e.getPlayer();
+        final var vitalInventory = Vital.getContext().getBeansOfType(VitalInventory.class).values().stream()
                 .filter(inventory -> inventory.hasInventoryOpen(player))
                 .findFirst().orElse(null);
 

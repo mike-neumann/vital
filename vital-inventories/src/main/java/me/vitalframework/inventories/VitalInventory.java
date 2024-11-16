@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +23,8 @@ public class VitalInventory implements RequiresAnnotation<VitalInventoryInfo> {
     @Getter
     private final VitalInventory previousInventory;
 
-    public VitalInventory(@Nullable VitalInventory previousInventory) {
-        final VitalInventoryInfo info = getRequiredAnnotation();
+    public VitalInventory(VitalInventory previousInventory) {
+        final var info = getRequiredAnnotation();
 
         size = info.size();
         name = info.name();
@@ -76,7 +75,7 @@ public class VitalInventory implements RequiresAnnotation<VitalInventoryInfo> {
     }
 
     public void update(Player player) {
-        final Inventory inventory = playerInventories.get(player);
+        final var inventory = playerInventories.get(player);
 
         onUpdate(player);
 
@@ -86,7 +85,7 @@ public class VitalInventory implements RequiresAnnotation<VitalInventoryInfo> {
     }
 
     public void open(Player player) {
-        final Inventory inventory = Bukkit.createInventory(player, size, name);
+        final var inventory = Bukkit.createInventory(player, size, name);
 
         playerInventories.put(player, inventory);
 

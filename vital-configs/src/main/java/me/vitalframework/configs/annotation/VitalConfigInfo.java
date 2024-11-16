@@ -1,7 +1,7 @@
 package me.vitalframework.configs.annotation;
 
 import me.vitalframework.configs.VitalConfig;
-import me.vitalframework.configs.processor.FileProcessor;
+import me.vitalframework.configs.processor.VitalConfigFileProcessor;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
@@ -32,5 +32,5 @@ public @interface VitalConfigInfo {
      * @return The processor used by this config.
      * @apiNote file processors are used to process config files.
      */
-    Class<? extends FileProcessor> processor();
+    Class<? extends VitalConfigFileProcessor> processor();
 }

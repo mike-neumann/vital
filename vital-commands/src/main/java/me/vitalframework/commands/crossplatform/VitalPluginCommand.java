@@ -10,8 +10,8 @@ import org.bukkit.command.TabCompleter;
  *
  * @author xRa1ny
  */
-public class PluginCommand {
-    private PluginCommand() {
+public class VitalPluginCommand {
+    private VitalPluginCommand() {
         // may not be instantiated.
     }
 

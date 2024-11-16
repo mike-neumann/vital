@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Property {
+public @interface VitalConfigProperty {
     /**
      * Defines the class types this annotated field manages.
      *

@@ -8,8 +8,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,7 +79,7 @@ public class VitalGlobalScoreboard implements VitalScoreboard {
     public void update() {
         updateContent();
 
-        for (Player player : playerList) {
+        for (var player : playerList) {
             update(player);
         }
     }
@@ -92,17 +90,14 @@ public class VitalGlobalScoreboard implements VitalScoreboard {
     public void updateContent() {
         vitalScoreboardContent.update();
 
-        final Objective objective = vitalScoreboardContent.getBukkitScoreboard().getObjective(PlainTextComponentSerializer.plainText()
+        final var objective = vitalScoreboardContent.getBukkitScoreboard().getObjective(PlainTextComponentSerializer.plainText()
                 .serialize(LegacyComponentSerializer.legacySection()
                         .deserialize(vitalScoreboardContent.getTitle())));
 
-        for (int i = 0; i < lines.size(); i++) {
-            final Supplier<String> lineSupplier = lines.get(i);
-            final String line = lineSupplier.get();
-
-            assert objective != null;
-
-            final Score score = objective.getScore(LegacyComponentSerializer.legacySection()
+        for (var i = 0; i < lines.size(); i++) {
+            final var lineSupplier = lines.get(i);
+            final var line = lineSupplier.get();
+            final var score = objective.getScore(LegacyComponentSerializer.legacySection()
                     .serialize(MiniMessage.miniMessage()
                             .deserialize(line)) + "\u00A7".repeat(i));
 

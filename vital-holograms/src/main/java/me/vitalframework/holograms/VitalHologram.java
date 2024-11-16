@@ -1,6 +1,5 @@
 package me.vitalframework.holograms;
 
-import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -10,8 +9,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -50,7 +47,7 @@ public class VitalHologram implements VitalComponent {
     @Setter
     private Material displayType;
 
-    public VitalHologram(@NonNull String name, @NonNull Location location, @Nullable Material displayType, @NonNull String... lines) {
+    public VitalHologram(@NonNull String name, @NonNull Location location, Material displayType, @NonNull String... lines) {
         this.name = name;
         this.lines.addAll(List.of(lines));
         this.location = location;
@@ -59,11 +56,11 @@ public class VitalHologram implements VitalComponent {
     }
 
     public void remove() {
-        for (Entity entity : base.getPassengers()) {
+        for (var entity : base.getPassengers()) {
             entity.remove();
         }
 
-        for (ArmorStand armorStand : baseLines) {
+        for (var armorStand : baseLines) {
             armorStand.remove();
         }
 
@@ -80,21 +77,21 @@ public class VitalHologram implements VitalComponent {
         base.teleport(location);
 
         if (displayType != null) {
-            for (Entity entity : base.getPassengers()) {
+            for (var entity : base.getPassengers()) {
                 entity.remove();
             }
 
-            final Item item = location.getWorld().dropItem(base.getEyeLocation(), new ItemStack(displayType));
+            final var item = location.getWorld().dropItem(base.getEyeLocation(), new ItemStack(displayType));
 
             item.setPickupDelay(Integer.MAX_VALUE);
             base.addPassenger(item);
         }
 
-        final int initialBaseLineSize = baseLines.size();
+        final var initialBaseLineSize = baseLines.size();
 
-        for (int i = lines.size() - 1; i > -1; i--) {
-            final String line = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(lines.get(i)));
-            final Location lineLocation = location.clone().add(0, lines.size(), 0);
+        for (var i = lines.size() - 1; i > -1; i--) {
+            final var line = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(lines.get(i)));
+            final var lineLocation = location.clone().add(0, lines.size(), 0);
             final ArmorStand armorStand;
 
             if (i >= initialBaseLineSize) {

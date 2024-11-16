@@ -1,13 +1,12 @@
 package me.vitalframework.configs;
 
 import lombok.NonNull;
-import me.vitalframework.configs.annotation.Property;
+import me.vitalframework.configs.annotation.VitalConfigProperty;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 import java.util.Map;
@@ -17,29 +16,29 @@ import java.util.Map;
  *
  * @author xRa1ny
  */
-public class ConfigItemStack {
+public class VitalConfigItemStack {
     /**
      * the type of this item
      */
-    @Property(Material.class)
+    @VitalConfigProperty(Material.class)
     public Material type;
 
     /**
      * the display name of this item
      */
-    @Property(String.class)
+    @VitalConfigProperty(String.class)
     public String displayName;
 
     /**
      * all lore attached to this item's item meta
      */
-    @Property(String.class)
+    @VitalConfigProperty(String.class)
     public List<String> lore;
 
     /**
      * all enchantments this item has
      */
-    @Property({
+    @VitalConfigProperty({
             String.class,
             Integer.class
     })
@@ -48,7 +47,7 @@ public class ConfigItemStack {
     /**
      * all item flags this item holds
      */
-    @Property(ItemFlag.class)
+    @VitalConfigProperty(ItemFlag.class)
     public List<ItemFlag> itemFlags;
 
     /**
@@ -58,26 +57,26 @@ public class ConfigItemStack {
      * @return the config item instance
      */
     @NonNull
-    public static ConfigItemStack of(@NonNull ItemStack itemStack) {
-        final ItemMeta itemMeta = itemStack.getItemMeta();
-        final ConfigItemStack configItemStack = new ConfigItemStack();
+    public static VitalConfigItemStack of(@NonNull ItemStack itemStack) {
+        final var itemMeta = itemStack.getItemMeta();
+        final var vitalConfigItemStack = new VitalConfigItemStack();
 
-        configItemStack.type = itemStack.getType();
+        vitalConfigItemStack.type = itemStack.getType();
 
         if (itemMeta.getDisplayName() != null) {
-            configItemStack.displayName = itemMeta.getDisplayName();
+            vitalConfigItemStack.displayName = itemMeta.getDisplayName();
         } else {
-            configItemStack.displayName = itemStack.getType().name();
+            vitalConfigItemStack.displayName = itemStack.getType().name();
         }
 
-        configItemStack.lore = !itemMeta.hasLore() ? List.of() : itemMeta.getLore();
-        configItemStack.enchantments = Map.ofEntries(itemMeta.getEnchants().entrySet().stream()
+        vitalConfigItemStack.lore = !itemMeta.hasLore() ? List.of() : itemMeta.getLore();
+        vitalConfigItemStack.enchantments = Map.ofEntries(itemMeta.getEnchants().entrySet().stream()
                 .map(entry -> Map.entry(entry.getKey().getKey().getKey(), entry.getValue()))
                 .toArray(Map.Entry[]::new));
-        configItemStack.itemFlags = itemMeta.getItemFlags().stream()
+        vitalConfigItemStack.itemFlags = itemMeta.getItemFlags().stream()
                 .toList();
 
-        return configItemStack;
+        return vitalConfigItemStack;
     }
 
     /**
@@ -87,8 +86,8 @@ public class ConfigItemStack {
      */
     @NonNull
     public ItemStack toItemStack() {
-        final ItemStack itemStack = new ItemStack(type);
-        final ItemMeta itemMeta = itemStack.getItemMeta();
+        final var itemStack = new ItemStack(type);
+        final var itemMeta = itemStack.getItemMeta();
 
         itemMeta.setDisplayName(displayName);
         itemMeta.setLore(lore);

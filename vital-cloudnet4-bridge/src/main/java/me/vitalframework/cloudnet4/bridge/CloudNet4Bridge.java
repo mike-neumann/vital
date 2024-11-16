@@ -7,7 +7,6 @@ import eu.cloudnetservice.modules.bridge.BridgeDocProperties;
 import eu.cloudnetservice.modules.bridge.player.PlayerManager;
 import eu.cloudnetservice.modules.bridge.player.ServicePlayer;
 import eu.cloudnetservice.modules.bridge.player.executor.PlayerExecutor;
-import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import me.vitalframework.cloudnet4.driver.CloudNet4Driver;
 
@@ -75,7 +74,7 @@ public class CloudNet4Bridge {
      * @param uniqueId The player uniqueId.
      * @return The cloudnet service; or null if not found.
      */
-    @Nullable
+
     public static ServiceInfoSnapshot getCloudServerByPlayerUniqueId(@NonNull UUID uniqueId) {
         return CloudNet4Driver.getCloudServers(server -> server.readPropertyOrDefault(BridgeDocProperties.PLAYERS, List.of()).stream()
                         .map(ServicePlayer::uniqueId)
@@ -91,7 +90,7 @@ public class CloudNet4Bridge {
      * @param uniqueId The player uniqueId.
      * @return The cloudnet service; or null if not found.
      */
-    @Nullable
+
     public static ServiceInfoSnapshot getNonProxyCloudServerByPlayerUniqueId(@NonNull UUID uniqueId) {
         return CloudNet4Driver.getCloudServers(server -> server.readPropertyOrDefault(BridgeDocProperties.PLAYERS, List.of()).stream()
                         .map(ServicePlayer::uniqueId)

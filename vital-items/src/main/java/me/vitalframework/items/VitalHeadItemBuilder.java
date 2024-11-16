@@ -1,6 +1,5 @@
 package me.vitalframework.items;
 
-import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -23,7 +22,7 @@ public class VitalHeadItemBuilder extends VitalItemBuilder {
     private OfflinePlayer owningPlayer;
 
     @Override
-    public VitalHeadItemBuilder name(@Nullable String name) {
+    public VitalHeadItemBuilder name(String name) {
         super.name(name);
 
         return this;
@@ -116,8 +115,8 @@ public class VitalHeadItemBuilder extends VitalItemBuilder {
 
     @Override
     public @NonNull <Z> ItemStack build() {
-        final ItemStack itemStack = super.build();
-        final SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
+        final var itemStack = super.build();
+        final var skullMeta = (SkullMeta) itemStack.getItemMeta();
 
         skullMeta.setOwningPlayer(owningPlayer);
         itemStack.setItemMeta(skullMeta);
@@ -131,7 +130,7 @@ public class VitalHeadItemBuilder extends VitalItemBuilder {
      * @param owningPlayer The owning player.
      * @return This builder config.
      */
-    public VitalHeadItemBuilder owningPlayer(@Nullable OfflinePlayer owningPlayer) {
+    public VitalHeadItemBuilder owningPlayer(OfflinePlayer owningPlayer) {
         this.owningPlayer = owningPlayer;
 
         return this;

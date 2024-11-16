@@ -1,7 +1,5 @@
 package me.vitalframework.commands;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
@@ -10,12 +8,11 @@ import me.vitalframework.RequiresAnnotation;
 import me.vitalframework.commands.annotation.VitalCommandArg;
 import me.vitalframework.commands.annotation.VitalCommandArgHandler;
 import me.vitalframework.commands.annotation.VitalCommandInfo;
-import me.vitalframework.commands.crossplatform.PluginCommand;
+import me.vitalframework.commands.crossplatform.VitalPluginCommand;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -23,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -107,7 +103,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         return VitalCommandInfo.class;
     }
 
-    @Nullable
+
     public final VitalCommandArg getExecutingArg(@NonNull String arg) {
         return vitalCommandArgs.entrySet().stream()
                 .filter(entry -> entry.getKey().matcher(arg).matches())
@@ -122,7 +118,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         Method commandArgHandlerMethod = null;
 
         // Iterate through the methods of the current class.
-        for (Method method : getClass().getDeclaredMethods()) {
+        for (var method : getClass().getDeclaredMethods()) {
             // Retrieve the `@VitalCommandArgHandler` annotation for the method.
             final VitalCommandArgHandler commandArgHandler = method.getAnnotation(VitalCommandArgHandler.class);
 
@@ -150,7 +146,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         // If the handler method was found, dynamically inject each parameter supported for its implementation...
         final List<Object> injectedParameters = new ArrayList<>();
 
-        for (Parameter parameter : commandArgHandlerMethod.getParameters()) {
+        for (var parameter : commandArgHandlerMethod.getParameters()) {
             // If the parameters managed type is of instance of `CommandSender`, inject either `CommandSender` or `Player`
             if (commandSenderClass.isAssignableFrom(parameter.getType())) {
                 injectedParameters.add(sender);
@@ -178,20 +174,20 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
      */
     @NonNull
     protected final List<String> handleTabComplete(@NonNull CS sender, @NonNull String @NonNull [] args) {
-        final List<String> tabCompleted = new ArrayList<>();
+        final var tabCompleted = new ArrayList<String>();
 
-        for (VitalCommandArg arg : vitalCommandArgs.values()) {
+        for (var arg : vitalCommandArgs.values()) {
             // Split the value of the command argument into individual parts.
-            final String[] originalArgs = arg.value().split(" ");
+            final var originalArgs = arg.value().split(" ");
             // Clone the originalArgs to avoid modification.
-            final String[] editedArgs = originalArgs.clone();
+            final var editedArgs = originalArgs.clone();
 
             // Check if the originalArgs length is greater than or equal to the provided args length
             // or if the last element of originalArgs ends with "%*".
             if (originalArgs.length >= args.length || originalArgs[originalArgs.length - 1].endsWith("%*")) {
-                for (int i = 0; i < args.length; i++) {
+                for (var i = 0; i < args.length; i++) {
                     // Determine the original argument at the current index.
-                    final String originalArg = i >= originalArgs.length ? originalArgs[originalArgs.length - 1] : originalArgs[i];
+                    final var originalArg = i >= originalArgs.length ? originalArgs[originalArgs.length - 1] : originalArgs[i];
 
                     if (!originalArg.startsWith("%") && !(originalArg.endsWith("%") || originalArg.endsWith("%*"))) {
                         continue;
@@ -202,7 +198,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
                 }
 
                 // Determine the final argument from originalArgs and args.
-                final String finalArg = originalArgs[args.length - 1 >= originalArgs.length ? originalArgs.length - 1 : args.length - 1];
+                final var finalArg = originalArgs[args.length - 1 >= originalArgs.length ? originalArgs.length - 1 : args.length - 1];
 
                 // Check if the joined editedArgs start with the joined provided args.
                 if (!String.join(" ", editedArgs).startsWith(String.join(" ", args))) {
@@ -216,24 +212,13 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
                     break;
                 }
 
-                if (finalArg.equalsIgnoreCase(VitalCommandArg.MATERIAL)) {
-                    for (Material material : Material.values()) {
-                        tabCompleted.add(material.name());
-                    }
-                } else if (finalArg.equalsIgnoreCase(VitalCommandArg.PLAYER)) {
-                    for (String playerName : getAllPlayerNames()) {
-                        // Check if the player name is already in the tabCompleted list.
-                        if (tabCompleted.contains(playerName)) {
-                            continue;
-                        }
+                final var commandArgType = VitalCommandArg.Type.getTypeByPlaceholder(finalArg);
 
-                        tabCompleted.add(playerName);
-                    }
-                } else if (finalArg.startsWith(VitalCommandArg.NUMBER)) {
-                    tabCompleted.add("0");
-                } else if (finalArg.startsWith(VitalCommandArg.BOOLEAN)) {
-                    tabCompleted.add("true");
-                    tabCompleted.add("false");
+                if (commandArgType != null) {
+                    commandArgType.getConsumer().accept(new VitalCommandArg.Type.TabContext(
+                            tabCompleted,
+                            getAllPlayerNames()
+                    ));
                 } else if (finalArg.startsWith("%") && (finalArg.endsWith("%") || finalArg.endsWith("%*"))) {
                     tabCompleted.add(finalArg.replace("%", "").replace("%*", ""));
                 } else {
@@ -242,10 +227,10 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
             }
         }
 
-        final String formattedArgs = String.join(" ", Stream.of(args)
+        final var formattedArgs = String.join(" ", Stream.of(args)
                 .map(arg -> "?")
                 .toList());
-        final List<String> commandTabCompleted = onCommandTabComplete(sender, formattedArgs);
+        final var commandTabCompleted = onCommandTabComplete(sender, formattedArgs);
 
         // when our OWN implementation is not empty, clear all of Vital's defaults.
         if (!commandTabCompleted.isEmpty()) {
@@ -310,7 +295,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
 
         try {
             // find executing command arg
-            final VitalCommandArg executingArg = getExecutingArg(String.join(" ", args));
+            final var executingArg = getExecutingArg(String.join(" ", args));
             VitalCommandReturnState commandReturnState;
 
             try {
@@ -318,10 +303,10 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
                     commandReturnState = onBaseCommand(sender);
                 } else {
                     // extract user values from command
-                    final List<String> values = new ArrayList<>();
+                    final var values = new ArrayList<String>();
 
-                    for (String commandArg : executingArg.value().split(" ")) {
-                        for (String userArg : args) {
+                    for (var commandArg : executingArg.value().split(" ")) {
+                        for (var userArg : args) {
                             if (!userArg.equalsIgnoreCase(commandArg)) {
                                 // we have a custom arg
                                 values.add(userArg);
@@ -389,7 +374,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
      *
      * @param sender The CommandSender
      */
-    protected void onCommandInternalError(@NonNull CS sender, @NonNull String args, @Nullable VitalCommandArg arg) {
+    protected void onCommandInternalError(@NonNull CS sender, @NonNull String args, VitalCommandArg arg) {
 
     }
 
@@ -398,7 +383,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
      *
      * @param sender The CommandSender
      */
-    protected void onCommandError(@NonNull CS sender, @NonNull String args, @Nullable VitalCommandArg arg) {
+    protected void onCommandError(@NonNull CS sender, @NonNull String args, VitalCommandArg arg) {
 
     }
 
@@ -407,7 +392,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
      *
      * @param sender The CommandSender
      */
-    protected void onCommandRequiresPermission(@NonNull CS sender, @NonNull String args, @Nullable VitalCommandArg arg) {
+    protected void onCommandRequiresPermission(@NonNull CS sender, @NonNull String args, VitalCommandArg arg) {
 
     }
 
@@ -416,11 +401,11 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
      *
      * @param sender The CommandSender
      */
-    protected void onCommandRequiresPlayer(@NonNull CS sender, @NonNull String args, @Nullable VitalCommandArg arg) {
+    protected void onCommandRequiresPlayer(@NonNull CS sender, @NonNull String args, VitalCommandArg arg) {
 
     }
 
-    public static abstract class Spigot extends VitalCommand<JavaPlugin, org.bukkit.command.CommandSender> implements PluginCommand.Spigot {
+    public static abstract class Spigot extends VitalCommand<JavaPlugin, org.bukkit.command.CommandSender> implements VitalPluginCommand.Spigot {
         public Spigot() {
             super(org.bukkit.command.CommandSender.class);
         }
@@ -435,14 +420,14 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         }
 
         @Override
-        public final boolean onCommand(@Nonnull org.bukkit.command.CommandSender sender, @Nonnull Command command, @Nonnull String label, @Nonnull String[] args) {
+        public final boolean onCommand(@NonNull org.bukkit.command.CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
             execute(sender, args);
 
             return true;
         }
 
         @Override
-        public final List<String> onTabComplete(@Nonnull org.bukkit.command.CommandSender sender, @Nonnull Command command, @Nonnull String label, @Nonnull String[] args) {
+        public final List<String> onTabComplete(@NonNull org.bukkit.command.CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
             return handleTabComplete(sender, args);
         }
 
@@ -465,7 +450,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
     }
 
     public static abstract class Bungeecord extends VitalCommand<Plugin, net.md_5.bungee.api.CommandSender> {
-        private PluginCommand.Bungeecord command;
+        private VitalPluginCommand.Bungeecord command;
 
         public Bungeecord() {
             super(net.md_5.bungee.api.CommandSender.class);
@@ -482,7 +467,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         private void setupCommand() {
             // wrap a custom bungeecord command class, since in bungeecord, command classes MUST BE EXTENDED FROM.
             // extending is not possible here since the VitalCommand object MUST BE A class, and classes CANNOT HAVE MULTIPLE EXTEND STATEMENTS...
-            this.command = new PluginCommand.Bungeecord(getName()) {
+            this.command = new VitalPluginCommand.Bungeecord(getName()) {
                 @Override
                 public void execute(net.md_5.bungee.api.CommandSender sender, String[] args) {
                     Bungeecord.this.execute(sender, args);

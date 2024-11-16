@@ -44,7 +44,7 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
      * Constructor for when using dependency injection
      */
     public VitalRepeatableTask() {
-        final VitalRepeatableTaskInfo vitalRepeatableTaskInfo = getRequiredAnnotation();
+        final var vitalRepeatableTaskInfo = getRequiredAnnotation();
 
         interval = vitalRepeatableTaskInfo.interval();
     }
@@ -53,7 +53,7 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
      * Constructor for when not using dependency injection
      */
     public VitalRepeatableTask(@NonNull P plugin) {
-        final VitalRepeatableTaskInfo vitalRepeatableTaskInfo = getRequiredAnnotation();
+        final var vitalRepeatableTaskInfo = getRequiredAnnotation();
 
         this.plugin = plugin;
         interval = vitalRepeatableTaskInfo.interval();

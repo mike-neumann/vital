@@ -1,8 +1,7 @@
 package me.vitalframework.configs;
 
-import jakarta.annotation.Nullable;
 import lombok.NonNull;
-import me.vitalframework.configs.annotation.Property;
+import me.vitalframework.configs.annotation.VitalConfigProperty;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.bukkit.Bukkit;
@@ -16,33 +15,33 @@ import java.util.UUID;
  * @param <T> The player type of this config player.
  * @author xRa1ny
  */
-public abstract class ConfigPlayer<T> {
-    @Property(String.class)
+public abstract class VitalConfigPlayer<T> {
+    @VitalConfigProperty(String.class)
     public String name;
 
-    @Property(UUID.class)
+    @VitalConfigProperty(UUID.class)
     public UUID uuid;
 
-    @Nullable
+
     public abstract T toPlayer();
 
-    public static class Spigot extends ConfigPlayer<Player> {
-        @Property(ConfigLocation.class)
-        public ConfigLocation location;
+    public static class Spigot extends VitalConfigPlayer<Player> {
+        @VitalConfigProperty(VitalConfigLocation.class)
+        public VitalConfigLocation location;
 
-        @Property(double.class)
+        @VitalConfigProperty(double.class)
         public double health;
 
-        @Property(double.class)
+        @VitalConfigProperty(double.class)
         public double foodLevel;
 
         @NonNull
-        public static ConfigPlayer.Spigot of(@NonNull Player player) {
-            final ConfigPlayer.Spigot configPlayer = new ConfigPlayer.Spigot();
+        public static VitalConfigPlayer.Spigot of(@NonNull Player player) {
+            final var configPlayer = new VitalConfigPlayer.Spigot();
 
             configPlayer.name = player.getName();
             configPlayer.uuid = player.getUniqueId();
-            configPlayer.location = ConfigLocation.of(player.getLocation());
+            configPlayer.location = VitalConfigLocation.of(player.getLocation());
             configPlayer.health = player.getHealth();
             configPlayer.foodLevel = player.getFoodLevel();
 
@@ -50,16 +49,16 @@ public abstract class ConfigPlayer<T> {
         }
 
         @Override
-        @Nullable
+
         public Player toPlayer() {
             return Bukkit.getPlayer(uuid);
         }
     }
 
-    public static class Bungeecord extends ConfigPlayer<ProxiedPlayer> {
+    public static class Bungeecord extends VitalConfigPlayer<ProxiedPlayer> {
         @NonNull
-        public static ConfigPlayer.Bungeecord of(@NonNull ProxiedPlayer player) {
-            final ConfigPlayer.Bungeecord configPlayer = new ConfigPlayer.Bungeecord();
+        public static VitalConfigPlayer.Bungeecord of(@NonNull ProxiedPlayer player) {
+            final var configPlayer = new VitalConfigPlayer.Bungeecord();
 
             configPlayer.name = player.getName();
             configPlayer.uuid = player.getUniqueId();
@@ -68,7 +67,7 @@ public abstract class ConfigPlayer<T> {
         }
 
         @Override
-        @Nullable
+
         public ProxiedPlayer toPlayer() {
             return ProxyServer.getInstance().getPlayer(uuid);
         }

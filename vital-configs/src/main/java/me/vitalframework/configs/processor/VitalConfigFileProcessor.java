@@ -1,9 +1,8 @@
 package me.vitalframework.configs.processor;
 
-import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import me.vitalframework.configs.VitalConfig;
-import me.vitalframework.configs.annotation.Property;
+import me.vitalframework.configs.annotation.VitalConfigProperty;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -15,7 +14,7 @@ import java.util.Map;
  *
  * @author xRa1ny
  */
-public interface FileProcessor {
+public interface VitalConfigFileProcessor {
     /**
      * Loads the file processed by this processor.
      *
@@ -101,7 +100,7 @@ public interface FileProcessor {
     @NonNull
     default List<Field> getPropertyFieldsFromType(@NonNull Class<?> type) {
         return Arrays.stream(type.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(Property.class))
+                .filter(field -> field.isAnnotationPresent(VitalConfigProperty.class))
                 .toList();
     }
 
@@ -114,7 +113,7 @@ public interface FileProcessor {
     @NonNull
     default List<Field> getNonPropertyFieldsFromType(@NonNull Class<?> type) {
         return Arrays.stream(type.getDeclaredFields())
-                .filter(field -> !field.isAnnotationPresent(Property.class))
+                .filter(field -> !field.isAnnotationPresent(VitalConfigProperty.class))
                 .toList();
     }
 
@@ -125,7 +124,7 @@ public interface FileProcessor {
      * @param property The property key of the annotated field.
      * @return The fetched field; or null.
      */
-    @Nullable
+
     default Field getFieldByProperty(@NonNull Class<?> type, @NonNull String property) {
         return getPropertyFieldsFromType(type).stream()
                 .filter(field -> field.getName().equals(property))

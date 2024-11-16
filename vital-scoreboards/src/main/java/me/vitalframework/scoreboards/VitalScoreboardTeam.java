@@ -10,7 +10,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a team within a scoreboard in the Vital plugin framework.
@@ -104,22 +107,22 @@ public class VitalScoreboardTeam {
         }
 
         // Update all options
-        for (Map.Entry<Team.Option, Team.OptionStatus> entry : options.entrySet()) {
-            final Team.Option option = entry.getKey();
-            final Team.OptionStatus status = entry.getValue();
+        for (var entry : options.entrySet()) {
+            final var option = entry.getKey();
+            final var status = entry.getValue();
 
             bukkitTeam.setOption(option, status);
         }
 
         // Clear all members
-        final Set<String> entries = bukkitTeam.getEntries();
+        final var entries = bukkitTeam.getEntries();
 
-        for (String entry : entries) {
+        for (var entry : entries) {
             bukkitTeam.removeEntry(entry);
         }
 
         // Add new members
-        for (Player player : playerList) {
+        for (var player : playerList) {
             bukkitTeam.addPlayer(player);
         }
     }

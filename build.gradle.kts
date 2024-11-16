@@ -27,8 +27,8 @@ subprojects {
         compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
 
         api("org.springframework.boot:spring-boot-starter:3.3.1")
-        api("jakarta.annotation:jakarta.annotation-api:3.0.0")
         api("org.reflections:reflections:0.10.2")
+        api("org.projectlombok:lombok:1.18.32")
     }
 
 //    java {

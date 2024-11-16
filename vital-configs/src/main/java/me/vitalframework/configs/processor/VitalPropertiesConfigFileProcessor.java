@@ -12,7 +12,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 
-public class PropertiesFileProcessor implements FileProcessor {
+public class VitalPropertiesConfigFileProcessor implements VitalConfigFileProcessor {
     @NonNull
     private final File file;
 
@@ -20,7 +20,7 @@ public class PropertiesFileProcessor implements FileProcessor {
     @NonNull
     private final Properties properties = new Properties();
 
-    public PropertiesFileProcessor(@NonNull File file) {
+    public VitalPropertiesConfigFileProcessor(@NonNull File file) {
         this.file = file;
     }
 
@@ -67,7 +67,7 @@ public class PropertiesFileProcessor implements FileProcessor {
 
     @Override
     public Map<String, String> serialize(@NonNull Object object) {
-        Map<String, String> stringObjectMap = new HashMap<>();
+        final var stringObjectMap = new HashMap<String, String>();
 
         getPropertyFieldsFromType(object.getClass()).stream()
                 .filter(field -> String.class.isAssignableFrom(field.getType()))

@@ -3,7 +3,7 @@ package me.vitalframework.configs.processor;
 import lombok.Getter;
 import lombok.NonNull;
 import me.vitalframework.configs.VitalConfig;
-import me.vitalframework.configs.annotation.Property;
+import me.vitalframework.configs.annotation.VitalConfigProperty;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;
@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class YMLFileProcessor implements FileProcessor {
+public class VitalYMLConfigFileProcessor implements VitalConfigFileProcessor {
     @NonNull
     private final File file;
 
@@ -31,19 +31,19 @@ public class YMLFileProcessor implements FileProcessor {
     @NonNull
     private final Map<String, Object> data = new HashMap<>();
 
-    public YMLFileProcessor(@NonNull File file) {
+    public VitalYMLConfigFileProcessor(@NonNull File file) {
         this.file = file;
 
-        final LoaderOptions loaderOptions = new LoaderOptions();
+        final var loaderOptions = new LoaderOptions();
 
         loaderOptions.setTagInspector(tag -> true);
 
-        final org.yaml.snakeyaml.constructor.Constructor constructor = new org.yaml.snakeyaml.constructor.Constructor(loaderOptions);
-        final DumperOptions dumperOptions = new DumperOptions();
+        final var constructor = new org.yaml.snakeyaml.constructor.Constructor(loaderOptions);
+        final var dumperOptions = new DumperOptions();
 
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
-        final Representer representer = new Representer(dumperOptions);
+        final var representer = new Representer(dumperOptions);
 
         yaml = new Yaml(constructor, representer, dumperOptions, loaderOptions);
     }
@@ -58,8 +58,8 @@ public class YMLFileProcessor implements FileProcessor {
         rootTypeDescription.setExcludes(rootExcludes);
         yaml.addTypeDescription(rootTypeDescription);
 
-        for (Field field : getPropertyFieldsFromType(type)) {
-            final Property property = field.getAnnotation(Property.class);
+        for (var field : getPropertyFieldsFromType(type)) {
+            final VitalConfigProperty vitalConfigProperty = field.getAnnotation(VitalConfigProperty.class);
             final TypeDescription typeDescription = new TypeDescription(field.getType(), "!%s"
                     .formatted(field.getType().getSimpleName()));
             final String[] excludes = getNonPropertyFieldsFromType(field.getType()).stream()
@@ -70,7 +70,7 @@ public class YMLFileProcessor implements FileProcessor {
             yaml.addTypeDescription(typeDescription);
 
             // add type descriptors for annotated property types...
-            for (Class<?> propertyType : property.value()) {
+            for (var propertyType : vitalConfigProperty.value()) {
                 addTypeDescriptors(propertyType);
             }
 

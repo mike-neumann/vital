@@ -4,7 +4,7 @@ import lombok.Getter;
 
 import java.util.UUID;
 
-public class VitalMinigameState implements MinigameState {
+public class VitalMinigameState implements VitalBaseMinigameState {
     @Getter
     private final UUID uniqueId = UUID.randomUUID();
 }

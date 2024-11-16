@@ -8,7 +8,7 @@ import org.bukkit.NamespacedKey;
  *
  * @author xRa1ny
  */
-public interface NamespacedKeys {
+public interface VitalNamespacedKey {
     /**
      * The namespace used for all Vital plugin-related keys.
      */

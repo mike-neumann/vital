@@ -7,7 +7,6 @@ import eu.cloudnetservice.driver.provider.ServiceTaskProvider;
 import eu.cloudnetservice.driver.service.ServiceConfiguration;
 import eu.cloudnetservice.driver.service.ServiceInfoSnapshot;
 import eu.cloudnetservice.driver.service.ServiceTask;
-import jakarta.annotation.Nullable;
 import lombok.NonNull;
 
 import java.util.List;
@@ -92,7 +91,7 @@ public class CloudNet4Driver {
      * @param serverName The name of the server, e.g: Lobby-1
      * @return The fetched cloud server; or null.
      */
-    @Nullable
+
     public static ServiceInfoSnapshot getCloudServer(@NonNull String serverName) {
         return getCloudServiceProvider().serviceByName(serverName);
     }
@@ -103,7 +102,7 @@ public class CloudNet4Driver {
      * @param taskName The task name.
      * @return The fetched cloud server; or null.
      */
-    @Nullable
+
     public static ServiceTask getServerTask(@NonNull String taskName) {
         return getServiceTaskProvider().serviceTask(taskName);
     }
@@ -116,7 +115,7 @@ public class CloudNet4Driver {
      * @throws NoSuchElementException When the server task could not be located.
      */
     public static void startCloudServer(@NonNull String taskName) throws NoSuchElementException {
-        final ServiceTask serviceTask = Optional.ofNullable(getServerTask(taskName))
+        final var serviceTask = Optional.ofNullable(getServerTask(taskName))
                 .orElseThrow();
 
         getCloudServiceFactory().createCloudService(ServiceConfiguration.builder(serviceTask)
@@ -129,7 +128,7 @@ public class CloudNet4Driver {
      * @param serverName The server name.
      */
     public static void stopCloudServer(@NonNull String serverName) {
-        final ServiceInfoSnapshot serviceInfoSnapshot = Optional.ofNullable(getCloudServer(serverName))
+        final var serviceInfoSnapshot = Optional.ofNullable(getCloudServer(serverName))
                 .orElseThrow();
 
         serviceInfoSnapshot.provider().delete();

@@ -18,7 +18,7 @@ public class VitalMinigameService {
     private final JavaPlugin plugin;
 
     @Getter
-    private MinigameState vitalMinigameState;
+    private VitalBaseMinigameState vitalMinigameState;
 
     public VitalMinigameService(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -31,7 +31,7 @@ public class VitalMinigameService {
      * @param <T>                     The type of minigame state.
      * @return True if the current state is of the specified class, otherwise false.
      */
-    public <T extends MinigameState> boolean isVitalMinigameState(@NonNull Class<T> vitalMinigameStateClass) {
+    public <T extends VitalBaseMinigameState> boolean isVitalMinigameState(@NonNull Class<T> vitalMinigameStateClass) {
         if (vitalMinigameState == null) {
             return false;
         }
@@ -45,8 +45,8 @@ public class VitalMinigameService {
      * @param vitalMinigameStateClass The Class of the minigame state to set to (must be registered).
      * @apiNote this method attempts to construct a dependency injected instance
      */
-    public void setVitalMinigameState(@NonNull Class<? extends MinigameState> vitalMinigameStateClass) {
-        final MinigameState minigameState = Vital.getContext().getBean(vitalMinigameStateClass);
+    public void setVitalMinigameState(@NonNull Class<? extends VitalBaseMinigameState> vitalMinigameStateClass) {
+        final var minigameState = Vital.getContext().getBean(vitalMinigameStateClass);
 
         setVitalMinigameState(minigameState);
     }
@@ -57,7 +57,7 @@ public class VitalMinigameService {
      *
      * @param minigameState The new minigame state to set.
      */
-    public void setVitalMinigameState(@NonNull MinigameState minigameState) {
+    public void setVitalMinigameState(@NonNull VitalBaseMinigameState minigameState) {
         if (this.vitalMinigameState != null) {
             if (this.vitalMinigameState instanceof VitalCountdownMinigameState vitalCountdownMinigameState) {
                 vitalCountdownMinigameState.stop();

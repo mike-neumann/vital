@@ -1,6 +1,5 @@
 package me.vitalframework;
 
-import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -38,7 +37,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
      * @param uniqueId The UUID of the VitalComponent.
      * @return true if a VitalComponent is registered with the specified UUID, false otherwise.
      */
-    public final boolean isComponentRegisteredByUuid(@NonNull UUID uniqueId) {
+    public final boolean isComponentRegisteredByUniqueId(@NonNull UUID uniqueId) {
         return Optional.ofNullable(getComponentByUniqueId(uniqueId)).isPresent();
     }
 
@@ -78,7 +77,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
      * @param uniqueId The uniqueId of the VitalComponent.
      * @return THe fetched component; or null.
      */
-    @Nullable
+
     public final T getComponentByUniqueId(@NonNull UUID uniqueId) {
         return components.stream()
                 .filter(vitalComponent -> uniqueId.equals(vitalComponent.getUniqueId()))
@@ -92,7 +91,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
      * @param name The name of the VitalComponent.
      * @return The fetched component; or null.
      */
-    @Nullable
+
     public final T getComponentByName(@NonNull String name) {
         return components.stream()
                 .filter(vitalComponent -> name.equals(vitalComponent.getName()))
@@ -107,7 +106,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
      * @param <X>   The {@link VitalComponent} type to grab from this repository instance.
      * @return The fetched component; or null.
      */
-    @Nullable
+
     public final <X extends VitalComponent> X getComponentByClass(@NonNull Class<X> clazz) {
         return components.stream()
                 .filter(vitalComponent -> clazz.equals(vitalComponent.getClass()))
@@ -122,16 +121,16 @@ public abstract class VitalRepository<T extends VitalComponent> {
      * @param predicate The predicate for filtering.
      * @return The fetched component; or null.
      */
-    @Nullable
+
     public final T getRandomComponent(@NonNull Predicate<T> predicate) {
         if (components.isEmpty()) {
             return null;
         }
 
-        final List<T> filteredVitalComponentList = getComponents().stream()
+        final var filteredVitalComponentList = getComponents().stream()
                 .filter(predicate)
                 .toList();
-        final int randomIndex = new Random().nextInt(filteredVitalComponentList.size());
+        final var randomIndex = new Random().nextInt(filteredVitalComponentList.size());
 
         return filteredVitalComponentList.get(randomIndex);
     }
@@ -141,7 +140,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
      *
      * @return The fetched component; or null.
      */
-    @Nullable
+
     public final T getRandomComponent() {
         return getRandomComponent(t -> true);
     }
@@ -195,7 +194,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
      * @param clazz The class of the {@link VitalComponent} to unregister.
      */
     public final void unregisterComponentByClass(@NonNull Class<? extends T> clazz) {
-        final Optional<? extends T> optionalInstance = Optional.ofNullable(getComponentByClass(clazz));
+        final var optionalInstance = Optional.ofNullable(getComponentByClass(clazz));
 
         optionalInstance.ifPresent(this::unregisterComponent);
     }

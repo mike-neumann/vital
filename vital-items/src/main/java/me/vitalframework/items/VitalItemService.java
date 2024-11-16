@@ -7,6 +7,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public class VitalItemService {
      */
     @NonNull
     public Map<Integer, ItemStack> addItem(@NonNull Inventory inventory, @NonNull Class<? extends VitalItem> itemStackClass) {
-        final VitalItem vitalItem = Vital.getContext().getBean(itemStackClass);
+        final var vitalItem = Vital.getContext().getBean(itemStackClass);
 
         return inventory.addItem(vitalItem);
     }
@@ -68,10 +69,26 @@ public class VitalItemService {
         setItem(player.getInventory(), slot, itemStackClass);
     }
 
-    public List<VitalItem> getItems() {
-        return Vital.getContext().getBeansOfType(VitalItem.class)
-                .values()
-                .stream()
-                .toList();
+    @NonNull
+    public Collection<? extends VitalItem> getItems(Class<? extends VitalItem> vitalItemClass) {
+        try {
+            return Vital.getContext().getBeansOfType(vitalItemClass).values();
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    @NonNull
+    public Collection<? extends VitalItem> getItems() {
+        return getItems(VitalItem.class);
+    }
+
+
+    public <T extends VitalItem> T getItem(@NonNull Class<T> vitalItemClass) {
+        try {
+            return Vital.getContext().getBean(vitalItemClass);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

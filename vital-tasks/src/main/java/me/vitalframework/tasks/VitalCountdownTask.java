@@ -13,9 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, ?>> implements RequiresAnnotation<VitalCountdownTaskInfo> {
     @Getter
     private final int initialCountdown;
+
     @Getter
     @Autowired
     private P plugin;
+
     @Getter
     @Setter
     private int countdown;
@@ -30,7 +32,7 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
      * Constructor for when using dependency injection
      */
     public VitalCountdownTask() {
-        final VitalCountdownTaskInfo vitalCountdownTaskInfo = getRequiredAnnotation();
+        final var vitalCountdownTaskInfo = getRequiredAnnotation();
 
         initialCountdown = vitalCountdownTaskInfo.countdown();
         countdown = initialCountdown;
@@ -41,7 +43,7 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
      * Constructor for when not using dependency injection
      */
     public VitalCountdownTask(@NonNull P plugin) {
-        final VitalCountdownTaskInfo vitalCountdownTaskInfo = getRequiredAnnotation();
+        final var vitalCountdownTaskInfo = getRequiredAnnotation();
 
         this.plugin = plugin;
         initialCountdown = vitalCountdownTaskInfo.countdown();

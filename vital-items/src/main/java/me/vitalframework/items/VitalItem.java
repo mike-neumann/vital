@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashMap;
@@ -33,18 +32,17 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
     private int initialCooldown = 0;
 
     public VitalItem() {
-        final VitalItemInfo info = getRequiredAnnotation();
-        final ItemStack itemStack = new VitalItemBuilder()
+        final var info = getRequiredAnnotation();
+        final var itemStack = new VitalItemBuilder()
                 .type(info.type())
                 .name(info.name())
                 .amount(info.amount())
                 .lore(List.of(info.lore()))
-                .namespacedKey(NamespacedKeys.ITEM_UUID, PersistentDataType.STRING, UUID.randomUUID().toString())
+                .namespacedKey(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING, UUID.randomUUID().toString())
                 .itemFlags(List.of(info.itemFlags()))
                 .unbreakable(info.unbreakable())
                 .build();
-
-        final ItemMeta meta = itemStack.getItemMeta();
+        final var meta = itemStack.getItemMeta();
 
         if (info.enchanted()) {
             meta.addEnchant(Enchantment.LUCK, 1, true);
@@ -58,7 +56,7 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
     }
 
     public VitalItem(@NonNull ItemStack itemStack, boolean enchanted) {
-        final ItemMeta meta = itemStack.getItemMeta();
+        final var meta = itemStack.getItemMeta();
 
         if (enchanted) {
             meta.addEnchant(Enchantment.LUCK, 1, true);
@@ -135,12 +133,11 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
             return;
         }
 
-        final Action action = e.getAction();
+        final var action = e.getAction();
 
-        if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
-            onLeftClick(e);
-        } else {
-            onRightClick(e);
+        switch (action) {
+            case Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK -> onLeftClick(e);
+            default -> onRightClick(e);
         }
 
         playerCooldownMap.put(e.getPlayer(), initialCooldown);
@@ -162,15 +159,15 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
             return item.equals(this);
         }
 
-        if (!item.getItemMeta().getPersistentDataContainer().has(NamespacedKeys.ITEM_UUID, PersistentDataType.STRING)) {
+        if (!item.getItemMeta().getPersistentDataContainer().has(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING)) {
             String toString = toString();
 
             return toString.equals(item.toString().replace("%s x %d"
                     .formatted(item.getType(), item.getAmount()), item.getType() + " x 1"));
         }
 
-        final UUID uuid = UUID.fromString(getItemMeta().getPersistentDataContainer().get(NamespacedKeys.ITEM_UUID, PersistentDataType.STRING));
-        final UUID otherUuid = UUID.fromString(item.getItemMeta().getPersistentDataContainer().get(NamespacedKeys.ITEM_UUID, PersistentDataType.STRING));
+        final var uuid = UUID.fromString(getItemMeta().getPersistentDataContainer().get(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING));
+        final var otherUuid = UUID.fromString(item.getItemMeta().getPersistentDataContainer().get(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING));
 
         return uuid.equals(otherUuid);
     }

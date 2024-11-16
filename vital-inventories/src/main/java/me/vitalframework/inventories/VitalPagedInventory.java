@@ -1,6 +1,5 @@
 package me.vitalframework.inventories;
 
-import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -41,10 +40,10 @@ public abstract class VitalPagedInventory extends VitalInventory {
      *
      * @param previousInventory The previous {@link Inventory} to open after clicking out of inventory bounds.
      */
-    public VitalPagedInventory(@Nullable VitalInventory previousInventory) {
+    public VitalPagedInventory(VitalInventory previousInventory) {
         super(previousInventory);
 
-        final Optional<VitalPagedInventoryInfo> optionalVitalPagedInventoryInfo = Optional.ofNullable(getClass().getAnnotation(VitalPagedInventoryInfo.class));
+        final var optionalVitalPagedInventoryInfo = Optional.ofNullable(getClass().getAnnotation(VitalPagedInventoryInfo.class));
 
         optionalVitalPagedInventoryInfo.ifPresent(vitalPagedInventoryInfo -> {
             fromSlot = vitalPagedInventoryInfo.fromSlot();
@@ -101,13 +100,13 @@ public abstract class VitalPagedInventory extends VitalInventory {
     }
 
     protected <T> List<T> sliceForPage(@NonNull List<T> list) {
-        final int startIndex = (int) (getPageContent() * (page - 1));
+        final var startIndex = (int) (getPageContent() * (page - 1));
 
         if (startIndex >= list.size() || startIndex < 0) {
             return List.of();
         }
 
-        final int endIndex = startIndex + getPageContent();
+        final var endIndex = startIndex + getPageContent();
 
         if (endIndex >= list.size()) {
             return list.subList(startIndex, list.size());

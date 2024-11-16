@@ -12,7 +12,7 @@ import me.vitalframework.commands.annotation.VitalCommandArg;
 import me.vitalframework.commands.annotation.VitalCommandArgHandler;
 import me.vitalframework.commands.annotation.VitalCommandInfo;
 import me.vitalframework.statistics.config.VitalStatisticsConfig;
-import me.vitalframework.statistics.task.HealthCheckTask;
+import me.vitalframework.statistics.task.VitalHealthCheckTask;
 import me.vitalframework.utils.VitalUtils;
 import net.md_5.bungee.api.ProxyServer;
 import org.bukkit.Bukkit;
@@ -21,13 +21,12 @@ import org.springframework.core.SpringVersion;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * Stats command to view vital's current runtime information
  */
-public interface StatsCommand<CS> {
-    HealthCheckTask getHealthCheckTask();
+public interface VitalStatsCommand<CS> {
+    VitalHealthCheckTask getVitalHealthCheckTask();
 
     VitalStatisticsConfig getVitalStatisticsConfig();
 
@@ -38,39 +37,39 @@ public interface StatsCommand<CS> {
 
         final String serverStatus;
 
-        if (getHealthCheckTask().getTps() >= getVitalStatisticsConfig().getMinTps()) {
+        if (getVitalHealthCheckTask().getTps() >= getVitalStatisticsConfig().getMinTps()) {
             serverStatus = "<green>HEALTHY</green>";
         } else {
             serverStatus = "<red>UNHEALTHY</yellow>";
         }
 
-        sendMessage(sender, "Server status: <yellow>" + getHealthCheckTask().getTps() + " TPS (" + serverStatus + ")");
+        sendMessage(sender, "Server status: <yellow>" + getVitalHealthCheckTask().getTps() + " TPS (" + serverStatus + ")");
 
-        final double ramUsageInGigaBytes = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024f / 1024 / 1024;
+        final var ramUsageInGigaBytes = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024f / 1024 / 1024;
 
         sendMessage(sender, "RAM usage: <yellow>" + ramUsageInGigaBytes + " GB");
 
-        final Map<String, VitalSubModule> vitalModuleNames = Vital.getContext().getBeansOfType(VitalSubModule.class);
+        final var vitalModuleNames = Vital.getContext().getBeansOfType(VitalSubModule.class);
 
         sendMessage(sender, "Vital modules: <yellow>" + vitalModuleNames.size());
 
-        for (Map.Entry<String, VitalSubModule> entry : vitalModuleNames.entrySet()) {
+        for (var entry : vitalModuleNames.entrySet()) {
             sendMessage(sender, " - <yellow>" + entry.getKey());
         }
     }
 
     default VitalCommandReturnState handleOnHealthTps(CS sender) {
-        sendMessage(sender, "TPS: <yellow>" + getHealthCheckTask().getTps());
-        sendMessage(sender, "TPS reports: <yellow>" + getHealthCheckTask().getLastTps().size() + " of " + getVitalStatisticsConfig().getMaxTpsTaskCache());
+        sendMessage(sender, "TPS: <yellow>" + getVitalHealthCheckTask().getTps());
+        sendMessage(sender, "TPS reports: <yellow>" + getVitalHealthCheckTask().getLastTps().size() + " of " + getVitalStatisticsConfig().getMaxTpsTaskCache());
 
-        for (Map.Entry<Long, Integer> entry : getHealthCheckTask().getLastTps().entrySet()) {
+        for (var entry : getVitalHealthCheckTask().getLastTps().entrySet()) {
             sendMessage(sender, " - <yellow>" + new SimpleDateFormat("HH:mm:ss").format(new Date(entry.getKey())) + ", " + entry.getValue() + " TPS");
 
         }
 
-        sendMessage(sender, "Bad TPS reports: <yellow>" + getHealthCheckTask().getLastUnhealthyTps().size() + " of " + getVitalStatisticsConfig().getMaxTpsTaskCache());
+        sendMessage(sender, "Bad TPS reports: <yellow>" + getVitalHealthCheckTask().getLastUnhealthyTps().size() + " of " + getVitalStatisticsConfig().getMaxTpsTaskCache());
 
-        for (Map.Entry<Long, Integer> entry : getHealthCheckTask().getLastUnhealthyTps().entrySet()) {
+        for (var entry : getVitalHealthCheckTask().getLastUnhealthyTps().entrySet()) {
             sendMessage(sender, " - <yellow>" + new SimpleDateFormat("HH:mm:ss").format(new Date(entry.getKey())) + ", " + entry.getValue() + " TPS");
         }
 
@@ -87,12 +86,12 @@ public interface StatsCommand<CS> {
                     @VitalCommandArg("tps")
             }
     )
-    class Spigot extends VitalCommand.Spigot implements StatsCommand<CommandSender> {
-        private final HealthCheckTask healthCheckTask;
+    class Spigot extends VitalCommand.Spigot implements VitalStatsCommand<CommandSender> {
+        private final VitalHealthCheckTask vitalHealthCheckTask;
         private final VitalStatisticsConfig vitalStatisticsConfig;
 
-        protected Spigot(HealthCheckTask healthCheckTask, VitalStatisticsConfig vitalStatisticsConfig) {
-            this.healthCheckTask = healthCheckTask;
+        protected Spigot(VitalHealthCheckTask vitalHealthCheckTask, VitalStatisticsConfig vitalStatisticsConfig) {
+            this.vitalHealthCheckTask = vitalHealthCheckTask;
             this.vitalStatisticsConfig = vitalStatisticsConfig;
         }
 
@@ -126,12 +125,12 @@ public interface StatsCommand<CS> {
                     @VitalCommandArg("tps")
             }
     )
-    class Bungeecord extends VitalCommand.Bungeecord implements StatsCommand<net.md_5.bungee.api.CommandSender> {
-        private final HealthCheckTask healthCheckTask;
+    class Bungeecord extends VitalCommand.Bungeecord implements VitalStatsCommand<net.md_5.bungee.api.CommandSender> {
+        private final VitalHealthCheckTask vitalHealthCheckTask;
         private final VitalStatisticsConfig vitalStatisticsConfig;
 
-        protected Bungeecord(HealthCheckTask healthCheckTask, VitalStatisticsConfig vitalStatisticsConfig) {
-            this.healthCheckTask = healthCheckTask;
+        protected Bungeecord(VitalHealthCheckTask vitalHealthCheckTask, VitalStatisticsConfig vitalStatisticsConfig) {
+            this.vitalHealthCheckTask = vitalHealthCheckTask;
             this.vitalStatisticsConfig = vitalStatisticsConfig;
         }
 

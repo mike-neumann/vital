@@ -1,6 +1,5 @@
 package me.vitalframework.utils;
 
-import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -97,7 +96,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param message      The message.
      * @param tagResolvers The tag resolvers for custom minimessage support.
      */
-    void sendMessage(@NonNull CS sender, @NonNull String message, @Nullable TagResolver... tagResolvers);
+    void sendMessage(@NonNull CS sender, @NonNull String message, TagResolver... tagResolvers);
 
     /**
      * Broadcasts a message to all players currently connected to the server, matching the given {@link Predicate}.
@@ -132,7 +131,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param fadeOut      The fade out times (measured in ticks).
      * @param tagResolvers Any custom tag resolvers for custom minimessage tags.
      */
-    void sendTitle(@NonNull P player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers);
+    void sendTitle(@NonNull P player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers);
 
     /**
      * Sends a title to the given player in minimessage syntax with the specified tag resolvers for any custom minimessage tags for replacement.
@@ -143,7 +142,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param subtitle     The subtitle.
      * @param tagResolvers Any custom tag resolvers for minimessage.
      */
-    void sendTitle(@NonNull P player, @Nullable String title, @Nullable String subtitle, @NonNull TagResolver @NonNull ... tagResolvers);
+    void sendTitle(@NonNull P player, String title, String subtitle, @NonNull TagResolver @NonNull ... tagResolvers);
 
     /**
      * Broadcasts a title to all players currently connected to this server.
@@ -156,7 +155,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param playerPredicate The {@link Predicate} specifying the condition in which the title is broadcast.
      * @param tagResolvers    Any tag resolvers for custom minimessage replacement syntax.
      */
-    default void broadcastTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendTitle(player, title, subtitle, fadeIn, stay, fadeOut, tagResolvers));
     }
 
@@ -168,7 +167,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param playerPredicate The {@link Predicate} specifying the condition in which the title is broadcast.
      * @param tagResolvers    Any tag resolvers for custom minimessage tag syntax.
      */
-    default void broadcastTitle(@Nullable String title, @Nullable String subtitle, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastTitle(String title, String subtitle, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendTitle(player, title, subtitle, tagResolvers));
     }
 
@@ -179,7 +178,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param subtitle     The subtitle to broadcast.
      * @param tagResolvers Any tag resolvers for custom minimessage tag syntax.
      */
-    default void broadcastTitle(@Nullable String title, @Nullable String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastTitle(String title, String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
         broadcastAction(player -> sendTitle(player, title, subtitle, tagResolvers));
     }
 
@@ -193,7 +192,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param fadeOut      The fade-out amount (in ticks).
      * @param tagResolvers Any tag resolvers for custom minimessage tag syntax.
      */
-    default void broadcastTitle(@Nullable String title, @Nullable String subtitle, int fadeIn, int stay, int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
         broadcastAction(player -> sendTitle(player, title, subtitle, fadeIn, stay, fadeOut, tagResolvers));
     }
 
@@ -207,7 +206,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param tagResolvers Any custom tag resolvers for custom minimessage tags.
      * @apiNote The title will stay approx. 1h
      */
-    void sendPersistentTitle(@NonNull P player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers);
+    void sendPersistentTitle(@NonNull P player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers);
 
     /**
      * Broadcasts a persistent (permanent) title to all players in minimessage syntax with the specified predicate and tag resolvers for any custom minimessage tags for replacement.
@@ -219,7 +218,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param tagResolvers    Any custom tag resolvers for custom minimessage tags.
      * @apiNote The title will stay approx. 1h
      */
-    default void broadcastPersistentTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastPersistentTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendPersistentTitle(player, title, subtitle, fadeIn, tagResolvers));
     }
 
@@ -232,7 +231,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param tagResolvers Any custom tag resolvers for custom minimessage tags.
      * @apiNote The title will stay approx. 1h
      */
-    default void broadcastPersistentTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastPersistentTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers) {
         broadcastAction(player -> sendPersistentTitle(player, title, subtitle, fadeIn, tagResolvers));
     }
 
@@ -275,7 +274,7 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void sendMessage(@NonNull org.bukkit.command.CommandSender sender, @NonNull String message, @Nullable TagResolver... tagResolvers) {
+        public void sendMessage(@NonNull org.bukkit.command.CommandSender sender, @NonNull String message, TagResolver... tagResolvers) {
             // must be used since, both version (paper and spigot) support the bungeeapi implementations...
             sender.spigot().sendMessage(BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message, tagResolvers == null ? new TagResolver[0] : tagResolvers)));
         }
@@ -335,7 +334,7 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void sendTitle(@NonNull Player player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendTitle(@NonNull Player player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
             player.sendTitle(
                     title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers)),
                     subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers)),
@@ -346,7 +345,7 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void sendTitle(@NonNull Player player, @Nullable String title, @Nullable String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendTitle(@NonNull Player player, String title, String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
             player.sendTitle(
                     title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers)),
                     subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers))
@@ -354,37 +353,37 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void broadcastTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
             broadcastAction(player -> sendTitle(player, title, subtitle, fadeIn, stay, fadeOut, tagResolvers));
         }
 
         @Override
-        public void broadcastTitle(@Nullable String title, @Nullable String subtitle, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastTitle(String title, String subtitle, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
             broadcastAction(player -> sendTitle(player, title, subtitle, tagResolvers));
         }
 
         @Override
-        public void broadcastTitle(@Nullable String title, @Nullable String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastTitle(String title, String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
             broadcastTitle(title, subtitle, player -> true, tagResolvers);
         }
 
         @Override
-        public void broadcastTitle(@Nullable String title, @Nullable String subtitle, int fadeIn, int stay, int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
             broadcastTitle(title, subtitle, fadeIn, stay, fadeOut, player -> true, tagResolvers);
         }
 
         @Override
-        public void sendPersistentTitle(@NonNull Player player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendPersistentTitle(@NonNull Player player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers) {
             sendTitle(player, title, subtitle, fadeIn, 72_000 /* 1h */, 0, tagResolvers);
         }
 
         @Override
-        public void broadcastPersistentTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fade, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastPersistentTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fade, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
             broadcastAction(player -> sendPersistentTitle(player, title, subtitle, fade, tagResolvers));
         }
 
         @Override
-        public void broadcastPersistentTitle(@Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fade, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastPersistentTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fade, @NonNull TagResolver @NonNull ... tagResolvers) {
             broadcastAction(player -> sendPersistentTitle(player, title, subtitle, fade, tagResolvers));
         }
 
@@ -591,18 +590,18 @@ public interface VitalUtils<CS, P extends CS> {
          * @return true if the location is within the area; false otherwise.
          */
         public boolean isInsideLocationArea(@NonNull Location location1, @NonNull Location location2, @NonNull Location location) {
-            final double ourMinX = Math.min(location1.getX(), location2.getX());
-            final double ourMaxX = Math.max(location1.getX(), location2.getX());
+            final var ourMinX = Math.min(location1.getX(), location2.getX());
+            final var ourMaxX = Math.max(location1.getX(), location2.getX());
 
-            final double ourMinY = Math.min(location1.getY(), location2.getY());
-            final double ourMaxY = Math.max(location1.getY(), location2.getY());
+            final var ourMinY = Math.min(location1.getY(), location2.getY());
+            final var ourMaxY = Math.max(location1.getY(), location2.getY());
 
-            final double ourMinZ = Math.min(location1.getZ(), location2.getZ());
-            final double ourMaxZ = Math.max(location1.getZ(), location2.getZ());
+            final var ourMinZ = Math.min(location1.getZ(), location2.getZ());
+            final var ourMaxZ = Math.max(location1.getZ(), location2.getZ());
 
-            final double theirX = location.getX();
-            final double theirY = location.getY();
-            final double theirZ = location.getZ();
+            final var theirX = location.getX();
+            final var theirY = location.getY();
+            final var theirZ = location.getZ();
 
             return theirX >= ourMinX && theirX <= ourMaxX &&
                     theirY >= ourMinY && theirY <= ourMaxY &&
@@ -618,18 +617,18 @@ public interface VitalUtils<CS, P extends CS> {
          */
         @NonNull
         public Location getRandomLocationInLocationArea(@NonNull Location location1, @NonNull Location location2) {
-            final double ourMinX = Math.min(location1.getX(), location2.getX());
-            final double ourMaxX = Math.max(location1.getX(), location2.getX());
+            final var ourMinX = Math.min(location1.getX(), location2.getX());
+            final var ourMaxX = Math.max(location1.getX(), location2.getX());
 
-            final double ourMinY = Math.min(location1.getY(), location2.getY());
-            final double ourMaxY = Math.max(location1.getY(), location2.getY());
+            final var ourMinY = Math.min(location1.getY(), location2.getY());
+            final var ourMaxY = Math.max(location1.getY(), location2.getY());
 
-            final double ourMinZ = Math.min(location1.getZ(), location2.getZ());
-            final double ourMaxZ = Math.max(location1.getZ(), location2.getZ());
+            final var ourMinZ = Math.min(location1.getZ(), location2.getZ());
+            final var ourMaxZ = Math.max(location1.getZ(), location2.getZ());
 
-            final double randomX = new Random().nextDouble(ourMinX, ourMaxX);
-            final double randomY = new Random().nextDouble(ourMinY, ourMaxY);
-            final double randomZ = new Random().nextDouble(ourMinZ, ourMaxZ);
+            final var randomX = new Random().nextDouble(ourMinX, ourMaxX);
+            final var randomY = new Random().nextDouble(ourMinY, ourMaxY);
+            final var randomZ = new Random().nextDouble(ourMinZ, ourMaxZ);
 
             return new Location(location1.getWorld(), randomX, randomY, randomZ);
         }
@@ -645,7 +644,7 @@ public interface VitalUtils<CS, P extends CS> {
          */
         @NonNull
         public Location getCenterBlockLocation(@NonNull Location location, double xOffset, double yOffset, double zOffset) {
-            final Location finalLocation = location.getBlock().getLocation().clone()
+            final var finalLocation = location.getBlock().getLocation().clone()
                     .add(.5, .5, .5)
                     .add(xOffset, yOffset, zOffset);
 
@@ -691,35 +690,35 @@ public interface VitalUtils<CS, P extends CS> {
 
         @NonNull
         public List<Location> getCircumferenceOfLocationArea(@NonNull Location location1, @NonNull Location location2) {
-            final double minX = Math.min(location1.getX(), location2.getX());
-            final double maxX = Math.max(location1.getX(), location2.getX());
-            final double minY = Math.min(location1.getY(), location2.getY());
-            final double maxY = Math.max(location1.getY(), location2.getY());
-            final double minZ = Math.min(location1.getZ(), location2.getZ());
-            final double maxZ = Math.max(location1.getZ(), location2.getZ());
+            final var minX = Math.min(location1.getX(), location2.getX());
+            final var maxX = Math.max(location1.getX(), location2.getX());
+            final var minY = Math.min(location1.getY(), location2.getY());
+            final var maxY = Math.max(location1.getY(), location2.getY());
+            final var minZ = Math.min(location1.getZ(), location2.getZ());
+            final var maxZ = Math.max(location1.getZ(), location2.getZ());
 
-            final List<Location> circumference = new ArrayList<>();
+            final var circumference = new ArrayList<Location>();
 
-            for (double y = minY; y <= maxY; y++) {
-                for (double z = minZ; z <= maxZ; z++) {
+            for (var y = minY; y <= maxY; y++) {
+                for (var z = minZ; z <= maxZ; z++) {
                     circumference.add(new Location(location1.getWorld(), minX, y, z));
                 }
             }
 
-            for (double y = minY; y <= maxY; y++) {
-                for (double z = minZ; z <= maxZ; z++) {
+            for (var y = minY; y <= maxY; y++) {
+                for (var z = minZ; z <= maxZ; z++) {
                     circumference.add(new Location(location1.getWorld(), maxX, y, z));
                 }
             }
 
-            for (double y = minY; y <= maxY; y++) {
-                for (double x = minX; x <= maxX; x++) {
+            for (var y = minY; y <= maxY; y++) {
+                for (var x = minX; x <= maxX; x++) {
                     circumference.add(new Location(location1.getWorld(), x, y, minZ));
                 }
             }
 
-            for (double y = minY; y <= maxY; y++) {
-                for (double x = minX; x <= maxX; x++) {
+            for (var y = minY; y <= maxY; y++) {
+                for (var x = minX; x <= maxX; x++) {
                     circumference.add(new Location(location1.getWorld(), x, y, maxZ));
                 }
             }
@@ -729,18 +728,18 @@ public interface VitalUtils<CS, P extends CS> {
 
         @NonNull
         public List<Location> getVolumeOfLocationArea(@NonNull Location location1, @NonNull Location location2) {
-            final double minX = Math.min(location1.getX(), location2.getX());
-            final double maxX = Math.max(location1.getX(), location2.getX());
-            final double minY = Math.min(location1.getY(), location2.getY());
-            final double maxY = Math.max(location1.getY(), location2.getY());
-            final double minZ = Math.min(location1.getZ(), location2.getZ());
-            final double maxZ = Math.max(location1.getZ(), location2.getZ());
+            final var minX = Math.min(location1.getX(), location2.getX());
+            final var maxX = Math.max(location1.getX(), location2.getX());
+            final var minY = Math.min(location1.getY(), location2.getY());
+            final var maxY = Math.max(location1.getY(), location2.getY());
+            final var minZ = Math.min(location1.getZ(), location2.getZ());
+            final var maxZ = Math.max(location1.getZ(), location2.getZ());
 
-            final List<Location> volume = new ArrayList<>();
+            final var volume = new ArrayList<Location>();
 
-            for (double x = minX; x <= maxX; x++) {
-                for (double y = minY; y <= maxY; y++) {
-                    for (double z = minZ; z <= maxZ; z++) {
+            for (var x = minX; x <= maxX; x++) {
+                for (var y = minY; y <= maxY; y++) {
+                    for (var z = minZ; z <= maxZ; z++) {
                         volume.add(new Location(location1.getWorld(), x, y, z));
                     }
                 }
@@ -804,7 +803,7 @@ public interface VitalUtils<CS, P extends CS> {
          * @see VitalUtils.Spigot#cleanGameRules(World) for more information about cleansed world rules.
          */
         public void cleanGameRules(@NonNull String worldName) {
-            final World world = Optional.ofNullable(Bukkit.getWorld(worldName))
+            final var world = Optional.ofNullable(Bukkit.getWorld(worldName))
                     .orElseThrow(() -> new RuntimeException("World %s does not exist"
                             .formatted(worldName)));
 
@@ -824,12 +823,12 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void sendMessage(@NonNull net.md_5.bungee.api.CommandSender sender, @NonNull String message, @Nullable TagResolver... tagResolvers) {
+        public void sendMessage(@NonNull net.md_5.bungee.api.CommandSender sender, @NonNull String message, TagResolver... tagResolvers) {
             sender.sendMessage(BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message, tagResolvers == null ? new TagResolver[0] : tagResolvers)));
         }
 
         @Override
-        public void sendTitle(@NonNull ProxiedPlayer player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendTitle(@NonNull ProxiedPlayer player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
             player.sendTitle(ProxyServer.getInstance().createTitle()
                     .title(TextComponent.fromLegacy(title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers))))
                     .subTitle(TextComponent.fromLegacy(subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers))))
@@ -840,7 +839,7 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void sendTitle(@NonNull ProxiedPlayer player, @Nullable String title, @Nullable String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendTitle(@NonNull ProxiedPlayer player, String title, String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
             player.sendTitle(ProxyServer.getInstance().createTitle()
                     .title(TextComponent.fromLegacy(title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers))))
                     .subTitle(TextComponent.fromLegacy(subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers))))
@@ -848,7 +847,7 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void sendPersistentTitle(@NonNull ProxiedPlayer player, @Nullable String title, @Nullable String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendPersistentTitle(@NonNull ProxiedPlayer player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers) {
             sendTitle(player, title, subtitle, fadeIn, 72_000 /* 1h */, 0, tagResolvers);
         }
 

@@ -8,7 +8,6 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.ArrayList;
@@ -53,7 +52,7 @@ final class VitalScoreboardContent {
      * Updates the scoreboard content, including its title and teams.
      */
     public void update() {
-        Objective objective = bukkitScoreboard.getObjective(PlainTextComponentSerializer.plainText()
+        var objective = bukkitScoreboard.getObjective(PlainTextComponentSerializer.plainText()
                 .serialize(LegacyComponentSerializer.legacySection()
                         .deserialize(title)));
 
@@ -69,12 +68,12 @@ final class VitalScoreboardContent {
         objective.setDisplayName(LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)));
 
         // Reset scores for existing entries
-        for (String entry : bukkitScoreboard.getEntries()) {
+        for (var entry : bukkitScoreboard.getEntries()) {
             bukkitScoreboard.resetScores(entry);
         }
 
         // Update each scoreboard team
-        for (VitalScoreboardTeam team : teams) {
+        for (var team : teams) {
             team.update();
         }
     }

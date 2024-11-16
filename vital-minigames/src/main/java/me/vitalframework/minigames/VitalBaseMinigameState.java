@@ -10,7 +10,7 @@ import org.bukkit.event.Listener;
  *
  * @author xRa1ny
  */
-interface MinigameState extends VitalComponent, Listener {
+interface VitalBaseMinigameState extends VitalComponent, Listener {
     @Override
     default void onRegistered() {
 

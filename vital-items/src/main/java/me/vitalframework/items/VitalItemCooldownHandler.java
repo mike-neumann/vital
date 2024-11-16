@@ -4,11 +4,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
 import me.vitalframework.tasks.VitalRepeatableTask;
 import me.vitalframework.tasks.annotation.VitalRepeatableTaskInfo;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 /**
  * A class responsible for managing cooldowns of VitalItemStack items.
@@ -49,9 +46,9 @@ public class VitalItemCooldownHandler extends VitalRepeatableTask.Spigot {
      */
     @Override
     public void onTick() {
-        for (VitalItem vitalItem : itemService.getItems()) {
+        for (var vitalItem : itemService.getItems()) {
             // Reduce Cooldown
-            for (Map.Entry<Player, Integer> entry : vitalItem.getPlayerCooldownMap().entrySet()) {
+            for (var entry : vitalItem.getPlayerCooldownMap().entrySet()) {
                 if (entry.getValue() <= 0) {
                     continue;
                 }

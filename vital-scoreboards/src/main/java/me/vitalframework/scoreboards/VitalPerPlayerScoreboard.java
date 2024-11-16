@@ -8,8 +8,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
 
 import java.util.*;
 import java.util.function.Function;
@@ -76,7 +74,7 @@ public class VitalPerPlayerScoreboard implements VitalScoreboard {
         player.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         updateContent(player);
 
-        final VitalScoreboardContent scoreboard = vitalScoreboardContentMap.get(player);
+        final var scoreboard = vitalScoreboardContentMap.get(player);
 
         player.getPlayer().setScoreboard(scoreboard.getBukkitScoreboard());
     }
@@ -86,17 +84,17 @@ public class VitalPerPlayerScoreboard implements VitalScoreboard {
             return;
         }
 
-        final VitalScoreboardContent scoreboard = vitalScoreboardContentMap.get(player);
+        final var scoreboard = vitalScoreboardContentMap.get(player);
 
         scoreboard.update();
 
-        final Objective objective = scoreboard.getBukkitScoreboard().getObjective(PlainTextComponentSerializer.plainText()
+        final var objective = scoreboard.getBukkitScoreboard().getObjective(PlainTextComponentSerializer.plainText()
                 .serialize(LegacyComponentSerializer.legacySection()
                         .deserialize(scoreboard.getTitle())));
-        final List<String> lines = applyLines(player);
+        final var lines = applyLines(player);
 
-        for (int i = 0; i < lines.size(); i++) {
-            final Score score = objective.getScore(LegacyComponentSerializer.legacySection()
+        for (var i = 0; i < lines.size(); i++) {
+            final var score = objective.getScore(LegacyComponentSerializer.legacySection()
                     .serialize(MiniMessage.miniMessage()
                             .deserialize(lines.get(i))) + "\u00A7".repeat(i));
 
@@ -134,9 +132,9 @@ public class VitalPerPlayerScoreboard implements VitalScoreboard {
 
     @NonNull
     private List<String> applyLines(@NonNull Player player) {
-        final List<String> lines = new ArrayList<>();
+        final var lines = new ArrayList<String>();
 
-        for (Function<Player, String> line : lineList) {
+        for (var line : lineList) {
             lines.add(line.apply(player));
         }
 

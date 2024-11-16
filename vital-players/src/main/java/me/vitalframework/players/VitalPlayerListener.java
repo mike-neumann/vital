@@ -51,12 +51,12 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PR ex
 
     public void handlePlayerJoin(@NonNull UUID uniqueId, @NonNull T player) {
         // Retrieve the VitalPlayer associated with the joining player, if it exists.
-        final Optional<VP> optionalVitalPlayer = Optional.ofNullable(playerRepository.getComponentByUniqueId(uniqueId));
+        final var optionalVitalPlayer = Optional.ofNullable(playerRepository.getComponentByUniqueId(uniqueId));
 
         if (optionalVitalPlayer.isEmpty()) {
             // Create a new VitalPlayer for the joining player.
             try {
-                final VP vitalPlayer = vitalPlayerType().getDeclaredConstructor(playerType()).newInstance(player);
+                final var vitalPlayer = vitalPlayerType().getDeclaredConstructor(playerType()).newInstance(player);
 
                 // Register the VitalPlayer with VitalUserManagement.
                 playerRepository.registerComponent(vitalPlayer);
@@ -70,13 +70,13 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PR ex
 
     public void handlePlayerQuit(@NonNull UUID uniqueId) {
         // Retrieve the VitalPlayer associated with the leaving player.
-        final Optional<VP> optionalVitalPlayer = Optional.ofNullable(playerRepository.getComponentByUniqueId(uniqueId));
+        final var optionalVitalPlayer = Optional.ofNullable(playerRepository.getComponentByUniqueId(uniqueId));
 
         if (optionalVitalPlayer.isEmpty()) {
             return;
         }
 
-        final VP vitalPlayer = optionalVitalPlayer.get();
+        final var vitalPlayer = optionalVitalPlayer.get();
 
         // Unregister the VitalPlayer from VitalUserManagement.
         playerRepository.unregisterComponent(vitalPlayer);
@@ -100,7 +100,7 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PR ex
         @PostConstruct
         public void init() {
             // disconnect any connected player...
-            for (Player player : Bukkit.getOnlinePlayers()) {
+            for (var player : Bukkit.getOnlinePlayers()) {
                 player.kickPlayer("");
             }
 
@@ -129,7 +129,7 @@ public abstract class VitalPlayerListener<P, T, VP extends VitalPlayer<?>, PR ex
         @PostConstruct
         public void init() {
             // disconnect any connected player...
-            for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
+            for (var player : ProxyServer.getInstance().getPlayers()) {
                 player.disconnect();
             }
 

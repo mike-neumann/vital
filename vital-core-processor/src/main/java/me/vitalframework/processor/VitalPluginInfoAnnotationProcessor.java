@@ -11,18 +11,12 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
-import javax.tools.FileObject;
-import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,24 +44,24 @@ public class VitalPluginInfoAnnotationProcessor extends AbstractProcessor {
         Map.Entry<String, VitalPluginInfo> classNameVitalPluginInfoEntry = null;
 
         // Scan for the Main Class of this Plugin annotated with `VitalPluginInfo`.
-        for (Element element : roundEnv.getElementsAnnotatedWith(VitalPluginInfo.class)) {
-            ElementKind elementKind = element.getKind();
+        for (var element : roundEnv.getElementsAnnotatedWith(VitalPluginInfo.class)) {
+            var elementKind = element.getKind();
 
             if (!elementKind.equals(ElementKind.CLASS)) {
                 continue;
             }
 
-            final TypeElement typeElement = (TypeElement) element;
-            final TypeMirror typeMirror = typeElement.getSuperclass();
-            final String typeMirrorName = typeMirror.toString();
-            final String spigotPluginMirror = "org.bukkit.plugin.java.JavaPlugin";
-            final String bungeecordPluginMirror = "net.md_5.bungee.api.plugin.Plugin";
+            final var typeElement = (TypeElement) element;
+            final var typeMirror = typeElement.getSuperclass();
+            final var typeMirrorName = typeMirror.toString();
+            final var spigotPluginMirror = "org.bukkit.plugin.java.JavaPlugin";
+            final var bungeecordPluginMirror = "net.md_5.bungee.api.plugin.Plugin";
 
             if (!typeMirrorName.equals(spigotPluginMirror) && !typeMirrorName.equals(bungeecordPluginMirror)) {
                 continue;
             }
 
-            final String className = typeElement.getQualifiedName().toString();
+            final var className = typeElement.getQualifiedName().toString();
 
             classNameVitalPluginInfoEntry = Map.entry(className, element.getAnnotation(VitalPluginInfo.class));
         }
@@ -79,18 +73,18 @@ public class VitalPluginInfoAnnotationProcessor extends AbstractProcessor {
             return false;
         }
 
-        final String className = classNameVitalPluginInfoEntry.getKey();
-        final VitalPluginInfo vitalPluginInfo = classNameVitalPluginInfoEntry.getValue();
+        final var className = classNameVitalPluginInfoEntry.getKey();
+        final var vitalPluginInfo = classNameVitalPluginInfoEntry.getValue();
 
         // finally generate the `plugin.yml`.
         generatePluginYml(className, vitalPluginInfo.name(), vitalPluginInfo.apiVersion(), vitalPluginInfo.version(), vitalPluginInfo.environment());
 
-        final List<String> packageNames = new ArrayList<>(List.of(className.split("[.]")));
+        final var packageNames = new ArrayList<>(List.of(className.split("[.]")));
 
         packageNames.removeLast();
 
         // now we have the package name without the class at the end
-        final String packageName = String.join(".", packageNames);
+        final var packageName = String.join(".", packageNames);
 
         generatePluginConfigurationClass(packageName, vitalPluginInfo.springConfigLocations());
 
@@ -128,10 +122,10 @@ public class VitalPluginInfoAnnotationProcessor extends AbstractProcessor {
         } catch (ClassNotFoundException e) {
             try {
                 // If we couldn't find the dependency, attempt to create the `plugin.yml` ourselves.
-                final FileObject pluginYmlFileObject = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", environment.getYmlFileName());
+                final var pluginYmlFileObject = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", environment.getYmlFileName());
 
                 // Write the current PluginInfoHolder Information to the newly created `plugin.yml`.
-                try (Writer pluginYmlWriter = pluginYmlFileObject.openWriter()) {
+                try (var pluginYmlWriter = pluginYmlFileObject.openWriter()) {
                     pluginYmlWriter.write(VitalPluginInfoHolder.PLUGIN_INFO.toString());
                 }
             } catch (IOException ex) {
@@ -144,11 +138,11 @@ public class VitalPluginInfoAnnotationProcessor extends AbstractProcessor {
 
     public void generatePluginConfigurationClass(@NonNull String packageName, @NonNull String[] springConfigLocations) {
         try {
-            final JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(packageName + ".PluginConfiguration");
-            final InputStream resource = VitalPluginInfoAnnotationProcessor.class.getResourceAsStream("/Main.java");
+            final var javaFileObject = processingEnv.getFiler().createSourceFile(packageName + ".PluginConfiguration");
+            final var resource = VitalPluginInfoAnnotationProcessor.class.getResourceAsStream("/Main.java");
 
-            try (Writer writer = javaFileObject.openWriter()) {
-                final String template = IOUtils.toString(new InputStreamReader(resource));
+            try (var writer = javaFileObject.openWriter()) {
+                final var template = IOUtils.toString(new InputStreamReader(resource));
 
                 writer.write(template.replace("{packageName}", packageName).replace("{springConfigLocations}", "\"" + String.join(",", springConfigLocations) + "\"").replace("{scans}", "\"" + packageName + "\""));
             }

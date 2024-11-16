@@ -5,6 +5,9 @@ import me.vitalframework.Vital;
 import org.bukkit.entity.Player;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * The main vital inventory service for registering inventories.
  */
@@ -16,17 +19,36 @@ public class VitalInventoryService {
      * @param player              The {@link Player} to open the given {@link VitalInventory} for.
      * @param vitalInventoryClass The class of the {@link VitalInventory} to open for the given {@link Player}.
      */
-    public void openVitalInventory(@NonNull Player player, @NonNull Class<? extends VitalInventory> vitalInventoryClass) {
-        final VitalInventory vitalInventory = Vital.getContext().getBean(vitalInventoryClass);
+    public void openInventory(@NonNull Player player, @NonNull Class<? extends VitalInventory> vitalInventoryClass) {
+        final var vitalInventory = Vital.getContext().getBean(vitalInventoryClass);
 
         vitalInventory.open(player);
     }
 
-    public <T extends VitalInventory> T getVitalInventory(@NonNull Class<T> vitalInventoryClass) {
+    @NonNull
+    public Collection<? extends VitalInventory> getInventories(Class<? extends VitalInventory> vitalInventoryClass) {
+        try {
+            return Vital.getContext().getBeansOfType(vitalInventoryClass).values();
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    @NonNull
+    public Collection<? extends VitalInventory> getInventories() {
+        return getInventories(VitalInventory.class);
+    }
+
+
+    public <T extends VitalInventory> T getInventory(@NonNull Class<T> vitalInventoryClass) {
         try {
             return Vital.getContext().getBean(vitalInventoryClass);
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public void updateInventories() {
+        getInventories().forEach(VitalInventory::update);
     }
 }

@@ -1,6 +1,5 @@
 package me.vitalframework.items;
 
-import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -11,12 +10,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * A builder class for creating ItemStack objects with custom attributes.
@@ -40,7 +36,7 @@ public class VitalItemBuilder {
      * @param name The name.
      * @return This builder instance.
      */
-    public VitalItemBuilder name(@Nullable String name) {
+    public VitalItemBuilder name(String name) {
         this.name = name;
 
         return this;
@@ -179,7 +175,7 @@ public class VitalItemBuilder {
      * @return This builder instance.
      */
     public <Z> VitalItemBuilder namespacedKey(@NonNull String key, @NonNull PersistentDataType<?, Z> persistentDataType, @NonNull Z value) {
-        final NamespacedKey namespacedKey = new NamespacedKey("vital", key);
+        final var namespacedKey = new NamespacedKey("vital", key);
 
         namespacedKeyMap.put(namespacedKey, Map.entry(persistentDataType, value));
 
@@ -210,13 +206,13 @@ public class VitalItemBuilder {
     @NonNull
     public <Z> ItemStack build() {
         // Create ItemStack and ItemMeta
-        final ItemStack item = new ItemStack(type, amount);
+        final var item = new ItemStack(type, amount);
 
         if (type != Material.AIR) {
-            final ItemMeta meta = item.getItemMeta();
-            final PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
+            final var meta = item.getItemMeta();
+            final var persistentDataContainer = meta.getPersistentDataContainer();
 
-            persistentDataContainer.set(NamespacedKeys.ITEM_UUID, PersistentDataType.STRING, UUID.randomUUID().toString());
+            persistentDataContainer.set(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING, UUID.randomUUID().toString());
 
             if (name != null) {
                 if (!name.isBlank()) {
@@ -232,18 +228,18 @@ public class VitalItemBuilder {
 
             // Set Enchantments if set
             if (!enchantmentLevelMap.isEmpty()) {
-                for (Entry<Enchantment, Integer> entrySet : enchantmentLevelMap.entrySet()) {
+                for (var entrySet : enchantmentLevelMap.entrySet()) {
                     meta.addEnchant(entrySet.getKey(), entrySet.getValue(), true);
                 }
             }
 
             // Set ItemFlags if set, else use all
             if (!itemFlagList.isEmpty()) {
-                for (ItemFlag itemFlag : itemFlagList) {
+                for (var itemFlag : itemFlagList) {
                     meta.addItemFlags(itemFlag);
                 }
             } else {
-                for (ItemFlag itemFlag : ItemFlag.values()) {
+                for (var itemFlag : ItemFlag.values()) {
                     meta.addItemFlags(itemFlag);
                 }
             }
@@ -259,13 +255,12 @@ public class VitalItemBuilder {
             meta.setUnbreakable(unbreakable);
 
             if (!namespacedKeyMap.isEmpty()) {
-                for (Map.Entry<NamespacedKey, Map.Entry<PersistentDataType<?, ?>, ?>> entry : namespacedKeyMap.entrySet()) {
-                    final NamespacedKey namespacedKey = entry.getKey();
-
+                for (var entry : namespacedKeyMap.entrySet()) {
+                    final var namespacedKey = entry.getKey();
                     // noinspection unchecked
-                    final PersistentDataType<?, Z> persistentDataType = (PersistentDataType<?, Z>) entry.getValue().getKey();
+                    final var persistentDataType = (PersistentDataType<?, Z>) entry.getValue().getKey();
                     // noinspection unchecked
-                    final Z value = (Z) entry.getValue().getValue();
+                    final var value = (Z) entry.getValue().getValue();
 
                     if (!persistentDataType.getComplexType().equals(value.getClass())) {
                         continue;

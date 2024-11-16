@@ -14,13 +14,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 @Component
-public interface HealthCheckTask {
-    Logger log = LoggerFactory.getLogger(HealthCheckTask.class);
+public interface VitalHealthCheckTask {
+    Logger log = LoggerFactory.getLogger(VitalHealthCheckTask.class);
 
     long getLastTickTime();
 
@@ -60,7 +59,7 @@ public interface HealthCheckTask {
     VitalStatisticsConfig getVitalStatisticsConfig();
 
     default void handleTick() {
-        final long currentTimeMillis = System.currentTimeMillis();
+        final var currentTimeMillis = System.currentTimeMillis();
 
         if (currentTimeMillis - getLastTickTime() >= getVitalStatisticsConfig().getMaxTaskInactiveTolerance()) {
             // inconsistent ticks
@@ -93,12 +92,12 @@ public interface HealthCheckTask {
     }
 
     default <K, V> void removeFirst(Supplier<Map<K, V>> map) {
-        final List<Map.Entry<K, V>> cache = new ArrayList<>(map.get().entrySet().stream().toList());
+        final var cache = new ArrayList<>(map.get().entrySet().stream().toList());
 
         map.get().clear();
         cache.removeFirst();
 
-        for (Map.Entry<K, V> entry : cache) {
+        for (var entry : cache) {
             map.get().put(entry.getKey(), entry.getValue());
         }
     }
@@ -107,7 +106,7 @@ public interface HealthCheckTask {
     @Setter
     @RequiresSpigot
     @VitalRepeatableTaskInfo(interval = 50)
-    class Spigot extends VitalRepeatableTask.Spigot implements HealthCheckTask {
+    class Spigot extends VitalRepeatableTask.Spigot implements VitalHealthCheckTask {
         private final Map<Long, Integer> lastTps = new HashMap<>();
         private final Map<Long, Integer> lastUnhealthyTps = new HashMap<>();
         private final VitalStatisticsConfig vitalStatisticsConfig;
@@ -135,7 +134,7 @@ public interface HealthCheckTask {
     @Setter
     @RequiresBungeecord
     @VitalRepeatableTaskInfo(interval = 50)
-    class Bungeecord extends VitalRepeatableTask.Bungeecord implements HealthCheckTask {
+    class Bungeecord extends VitalRepeatableTask.Bungeecord implements VitalHealthCheckTask {
         private final Map<Long, Integer> lastTps = new HashMap<>();
         private final Map<Long, Integer> lastUnhealthyTps = new HashMap<>();
         private final VitalStatisticsConfig vitalStatisticsConfig;
