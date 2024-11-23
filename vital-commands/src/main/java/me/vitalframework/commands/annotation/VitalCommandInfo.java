@@ -59,12 +59,4 @@ public @interface VitalCommandInfo {
      * @return True if the command requires a player; false otherwise (default is true).
      */
     boolean requiresPlayer() default true;
-
-    /**
-     * Defines all valid arguments of this command.
-     *
-     * @return An array of valid command arguments (default is an empty array).
-     * @apiNote Supported patterns include "%PLAYER%", "%BOOLEAN%", and "%NUMBER%".
-     */
-    VitalCommandArg[] args() default {};
 }

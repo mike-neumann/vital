@@ -8,16 +8,6 @@ package me.vitalframework.commands;
  */
 public enum VitalCommandReturnState {
     /**
-     * Indicates that an internal error occurred during command execution.
-     */
-    INTERNAL_ERROR,
-
-    /**
-     * Indicates that an error occurred during command execution.
-     */
-    ERROR,
-
-    /**
      * Indicates that the command was executed with invalid arguments.
      */
     INVALID_ARGS,

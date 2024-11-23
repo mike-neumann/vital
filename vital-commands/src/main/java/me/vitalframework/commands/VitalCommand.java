@@ -20,10 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,6 +34,26 @@ import java.util.stream.Stream;
  */
 @Slf4j
 public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCommandInfo> {
+    public record ExecutionContext(
+            String executedArg,
+            String[] values,
+            VitalCommandArg arg
+    ) {
+    }
+
+    public record ArgExceptionHandlerContext(
+            Method handlerMethod,
+            Map<Integer, Object> injectableParams,
+            Throwable e
+    ) {
+    }
+
+    public record ArgHandlerContext(
+            Method handlerMethod,
+            Map<Integer, Object> injectableParams
+    ) {
+    }
+
     private final Class<CS> commandSenderClass;
 
     @Getter
@@ -53,7 +70,14 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
     private P plugin;
 
     @Getter
-    private Map<Pattern, VitalCommandArg> vitalCommandArgs;
+    private final Map<Pattern, VitalCommandArg> vitalCommandArgs;
+
+
+    @Getter
+    private final Map<VitalCommandArg, ArgHandlerContext> vitalCommandArgHandlers;
+
+    @Getter
+    private final Map<VitalCommandArg, ArgExceptionHandlerContext> vitalCommandArgExceptionHandlers;
 
     /**
      * Constructor for when using dependency injection
@@ -66,7 +90,9 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         name = vitalCommandInfo.name();
         permission = vitalCommandInfo.permission();
         requiresPlayer = vitalCommandInfo.requiresPlayer();
-        mapArgs(vitalCommandInfo);
+        vitalCommandArgs = getMappedArgs(vitalCommandInfo);
+        vitalCommandArgHandlers = getMappedCommandArgHandlers(vitalCommandArgs.values());
+        vitalCommandArgExceptionHandlers = getMappedCommandArgExceptionHandlers(vitalCommandArgs.values());
     }
 
     /**
@@ -80,11 +106,13 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         name = vitalCommandInfo.name();
         permission = vitalCommandInfo.permission();
         requiresPlayer = vitalCommandInfo.requiresPlayer();
-        mapArgs(vitalCommandInfo);
+        vitalCommandArgs = getMappedArgs(vitalCommandInfo);
     }
 
-    private void mapArgs(@NonNull VitalCommandInfo vitalCommandInfo) {
-        vitalCommandArgs = Arrays.stream(vitalCommandInfo.args())
+    private Map<Pattern, VitalCommandArg> getMappedArgs() {
+        return Arrays.stream(getClass().getMethods())
+                .filter(method -> method.isAnnotationPresent(VitalCommandArg.class))
+                .map(method -> method.getAnnotation(VitalCommandArg.class))
                 .map(arg -> Map.entry(
                         Pattern.compile(
                                 arg.value().replaceAll(" ", "[ ]")
@@ -93,16 +121,33 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
                         ),
                         arg
                 ))
-                .collect(Collectors.toSet())
-                .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Map<VitalCommandArg, Method> getMappedCommandArgHandlers() {
+        return Arrays.stream(getClass().getMethods())
+                .filter(method -> method.isAnnotationPresent(VitalCommandArg.class))
+                .map(method -> {
+                    // now we have a viable method ready for handling incoming arguments
+                    // we just need to filter out the injectable parameters for our method
+                    // since we only support a handful of injectable params for handler methods...
+                    final var vitalCommandArg = method.getAnnotation(VitalCommandArg.class);
+
+
+
+                    return Map.entry(vitalCommandArg, method);
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Map<VitalCommandArg, Method> getMappedCommandArgExceptionHandlers(@NonNull Collection<VitalCommandArg> vitalCommandArgs) {
+
     }
 
     @Override
     public final Class<VitalCommandInfo> requiredAnnotationType() {
         return VitalCommandInfo.class;
     }
-
 
     public final VitalCommandArg getExecutingArg(@NonNull String arg) {
         return vitalCommandArgs.entrySet().stream()
@@ -120,7 +165,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         // Iterate through the methods of the current class.
         for (var method : getClass().getDeclaredMethods()) {
             // Retrieve the `@VitalCommandArgHandler` annotation for the method.
-            final VitalCommandArgHandler commandArgHandler = method.getAnnotation(VitalCommandArgHandler.class);
+            final var commandArgHandler = method.getAnnotation(VitalCommandArgHandler.class);
 
             // Check if the method does not have the annotation or the annotation value does not match the commandArg value.
             if (commandArgHandler == null || !List.of(commandArgHandler.value()).contains(commandArg.value())) {
@@ -144,7 +189,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         }
 
         // If the handler method was found, dynamically inject each parameter supported for its implementation...
-        final List<Object> injectedParameters = new ArrayList<>();
+        final var injectedParameters = new ArrayList<>();
 
         for (var parameter : commandArgHandlerMethod.getParameters()) {
             // If the parameters managed type is of instance of `CommandSender`, inject either `CommandSender` or `Player`
@@ -293,48 +338,41 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
             return;
         }
 
+        // find executing command arg
+        final var executingArg = getExecutingArg(String.join(" ", args));
+        VitalCommandReturnState commandReturnState;
+
         try {
-            // find executing command arg
-            final var executingArg = getExecutingArg(String.join(" ", args));
-            VitalCommandReturnState commandReturnState;
+            if (executingArg == null) {
+                commandReturnState = onBaseCommand(sender);
+            } else {
+                // extract user values from command
+                final var values = new ArrayList<String>();
 
-            try {
-                if (executingArg == null) {
-                    commandReturnState = onBaseCommand(sender);
-                } else {
-                    // extract user values from command
-                    final var values = new ArrayList<String>();
-
-                    for (var commandArg : executingArg.value().split(" ")) {
-                        for (var userArg : args) {
-                            if (!userArg.equalsIgnoreCase(commandArg)) {
-                                // we have a custom arg
-                                values.add(userArg);
-                            }
+                for (var commandArg : executingArg.value().split(" ")) {
+                    for (var userArg : args) {
+                        if (!userArg.equalsIgnoreCase(commandArg)) {
+                            // we have a custom arg
+                            values.add(userArg);
                         }
                     }
-
-                    commandReturnState = executeCommandArgHandlerMethod(sender, executingArg, values.toArray(String[]::new));
                 }
-            } catch (Exception e) {
-                commandReturnState = VitalCommandReturnState.ERROR;
-                log.error("error while executing command", e);
+
+                commandReturnState = executeCommandArgHandlerMethod(sender, executingArg, values.toArray(String[]::new));
             }
-
-            final String joinedArgs = String.join(" ", args);
-
-            // Handle the command return state.
-            switch (commandReturnState) {
-                case ERROR -> onCommandError(sender, joinedArgs, executingArg);
-                case INTERNAL_ERROR -> onCommandInternalError(sender, joinedArgs, executingArg);
-                case INVALID_ARGS -> onCommandInvalidArgs(sender, joinedArgs);
-                case NO_PERMISSION -> onCommandRequiresPermission(sender, joinedArgs, executingArg);
-            }
-
         } catch (Exception e) {
-            log.error("Exception while executing command", e);
+            onCommandError(sender, String.join(" ", args), executingArg, e);
+
+            return;
         }
 
+        final String joinedArgs = String.join(" ", args);
+
+        // Handle the command return state.
+        switch (commandReturnState) {
+            case INVALID_ARGS -> onCommandInvalidArgs(sender, joinedArgs);
+            case NO_PERMISSION -> onCommandRequiresPermission(sender, joinedArgs, executingArg);
+        }
     }
 
     /**
@@ -370,20 +408,11 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
     }
 
     /**
-     * Called when this VitalCommand has been executed and an internal Error has occurred
+     * Called when this VitalCommand has been executed and an Error has occurred (Exception was thrown)
      *
      * @param sender The CommandSender
      */
-    protected void onCommandInternalError(@NonNull CS sender, @NonNull String args, VitalCommandArg arg) {
-
-    }
-
-    /**
-     * Called when this VitalCommand has been executed and an Error has occurred
-     *
-     * @param sender The CommandSender
-     */
-    protected void onCommandError(@NonNull CS sender, @NonNull String args, VitalCommandArg arg) {
+    protected void onCommandError(@NonNull CS sender, @NonNull String args, VitalCommandArg arg, @NonNull Exception e) {
 
     }
 
