@@ -81,10 +81,7 @@ public interface VitalStatsCommand<CS> {
     @VitalCommandInfo(
             name = "health",
             requiresPlayer = false,
-            permission = "vital.command.health",
-            args = {
-                    @VitalCommandArg("tps")
-            }
+            permission = "vital.command.health"
     )
     class Spigot extends VitalCommand.Spigot implements VitalStatsCommand<CommandSender> {
         private final VitalHealthCheckTask vitalHealthCheckTask;
@@ -109,7 +106,7 @@ public interface VitalStatsCommand<CS> {
             return VitalCommandReturnState.SUCCESS;
         }
 
-        @VitalCommandArgHandler("tps")
+        @VitalCommandArgHandler(@VitalCommandArg("tps"))
         public VitalCommandReturnState onTps(CommandSender sender) {
             return handleOnHealthTps(sender);
         }
@@ -120,10 +117,7 @@ public interface VitalStatsCommand<CS> {
     @VitalCommandInfo(
             name = "proxyhealth",
             requiresPlayer = false,
-            permission = "vital.command.proxyHealth",
-            args = {
-                    @VitalCommandArg("tps")
-            }
+            permission = "vital.command.proxyHealth"
     )
     class Bungeecord extends VitalCommand.Bungeecord implements VitalStatsCommand<net.md_5.bungee.api.CommandSender> {
         private final VitalHealthCheckTask vitalHealthCheckTask;
@@ -147,7 +141,7 @@ public interface VitalStatsCommand<CS> {
             return VitalCommandReturnState.SUCCESS;
         }
 
-        @VitalCommandArgHandler("tps")
+        @VitalCommandArgHandler(@VitalCommandArg("tps"))
         public VitalCommandReturnState onTps(net.md_5.bungee.api.CommandSender sender) {
             return handleOnHealthTps(sender);
         }

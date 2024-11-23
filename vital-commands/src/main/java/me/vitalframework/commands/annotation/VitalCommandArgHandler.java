@@ -21,5 +21,5 @@ public @interface VitalCommandArgHandler {
      *
      * @return An array of command argument values.
      */
-    String[] value();
+    VitalCommandArg value();
 }
