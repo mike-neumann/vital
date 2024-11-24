@@ -1,7 +1,6 @@
 package me.vitalframework.configs;
 
 import lombok.NonNull;
-import me.vitalframework.configs.annotation.VitalConfigProperty;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.WorldCreator;
@@ -12,22 +11,22 @@ import org.bukkit.WorldCreator;
  * @author xRa1ny
  */
 public class VitalConfigLocation {
-    @VitalConfigProperty(String.class)
+    @VitalConfig.Property(String.class)
     public String world;
 
-    @VitalConfigProperty(double.class)
+    @VitalConfig.Property(double.class)
     public double x;
 
-    @VitalConfigProperty(double.class)
+    @VitalConfig.Property(double.class)
     public double y;
 
-    @VitalConfigProperty(double.class)
+    @VitalConfig.Property(double.class)
     public double z;
 
-    @VitalConfigProperty(float.class)
+    @VitalConfig.Property(float.class)
     public float pitch;
 
-    @VitalConfigProperty(float.class)
+    @VitalConfig.Property(float.class)
     public float yaw;
 
     @NonNull

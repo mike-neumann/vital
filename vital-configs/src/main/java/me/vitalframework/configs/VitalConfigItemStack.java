@@ -1,7 +1,6 @@
 package me.vitalframework.configs;
 
 import lombok.NonNull;
-import me.vitalframework.configs.annotation.VitalConfigProperty;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -20,25 +19,25 @@ public class VitalConfigItemStack {
     /**
      * the type of this item
      */
-    @VitalConfigProperty(Material.class)
+    @VitalConfig.Property(Material.class)
     public Material type;
 
     /**
      * the display name of this item
      */
-    @VitalConfigProperty(String.class)
+    @VitalConfig.Property(String.class)
     public String displayName;
 
     /**
      * all lore attached to this item's item meta
      */
-    @VitalConfigProperty(String.class)
+    @VitalConfig.Property(String.class)
     public List<String> lore;
 
     /**
      * all enchantments this item has
      */
-    @VitalConfigProperty({
+    @VitalConfig.Property({
             String.class,
             Integer.class
     })
@@ -47,7 +46,7 @@ public class VitalConfigItemStack {
     /**
      * all item flags this item holds
      */
-    @VitalConfigProperty(ItemFlag.class)
+    @VitalConfig.Property(ItemFlag.class)
     public List<ItemFlag> itemFlags;
 
     /**

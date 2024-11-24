@@ -1,19 +1,26 @@
 package me.vitalframework.inventories;
 
 import lombok.Getter;
+import lombok.NonNull;
 import me.vitalframework.RequiresAnnotation;
-import me.vitalframework.inventories.annotation.VitalInventoryInfo;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Range;
+import org.springframework.stereotype.Component;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class VitalInventory implements RequiresAnnotation<VitalInventoryInfo> {
+public class VitalInventory implements RequiresAnnotation<VitalInventory.Info> {
     private final int size;
     private final String name;
     private final Map<Player, Inventory> playerInventories = new HashMap<>();
@@ -60,8 +67,8 @@ public class VitalInventory implements RequiresAnnotation<VitalInventoryInfo> {
 //    }
 
     @Override
-    public final Class<VitalInventoryInfo> requiredAnnotationType() {
-        return VitalInventoryInfo.class;
+    public final Class<Info> requiredAnnotationType() {
+        return Info.class;
     }
 
     public boolean hasInventoryOpen(Player player) {
@@ -148,5 +155,39 @@ public class VitalInventory implements RequiresAnnotation<VitalInventoryInfo> {
      */
     public void onClose(Player player) {
 
+    }
+
+    /**
+     * Annotation used to provide information about a {@link VitalInventory}.
+     *
+     * @author xRa1ny
+     */
+    @Component
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface Info {
+        /**
+         * The title of this inventory menu.
+         *
+         * @return The title of the inventory menu.
+         */
+        @NonNull
+        String name();
+
+        /**
+         * The size in slots of this inventory menu. Default is 9 (one row).
+         *
+         * @return The size of the inventory menu.
+         */
+        @Range(from = 9, to = 54)
+        int size() default 9;
+
+        /**
+         * The material used as the background of this inventory menu. Default is AIR.
+         *
+         * @return The background material.
+         */
+        @NonNull
+        Material background() default Material.AIR;
     }
 }

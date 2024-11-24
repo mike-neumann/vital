@@ -5,12 +5,17 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import me.vitalframework.RequiresAnnotation;
-import me.vitalframework.tasks.annotation.VitalCountdownTaskInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, ?>> implements RequiresAnnotation<VitalCountdownTaskInfo> {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, ?>> implements RequiresAnnotation<VitalCountdownTask.Info> {
     @Getter
     private final int initialCountdown;
 
@@ -57,8 +62,8 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
     }
 
     @Override
-    public final Class<VitalCountdownTaskInfo> requiredAnnotationType() {
-        return VitalCountdownTaskInfo.class;
+    public final Class<Info> requiredAnnotationType() {
+        return Info.class;
     }
 
     /**
@@ -157,6 +162,25 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
     }
 
     protected abstract T createVitalRepeatableTask();
+
+    @Component
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Info {
+        /**
+         * Defines the countdown for this annotated countdown task in seconds.
+         *
+         * @return The countdown in seconds
+         */
+        int countdown();
+
+        /**
+         * Defines the interval between countdown task ticks in milliseconds.
+         *
+         * @return The interval in milliseconds.
+         */
+        int interval() default 1_000;
+    }
 
     public static abstract class Spigot extends VitalCountdownTask<JavaPlugin, VitalRepeatableTask.Spigot> {
         public Spigot() {

@@ -2,25 +2,29 @@ package me.vitalframework.configs;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import me.vitalframework.configs.annotation.VitalConfigInfo;
 import me.vitalframework.configs.processor.VitalConfigFileProcessor;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Optional;
 
 /**
- * @apiNote Must be annotated with {@link VitalConfigInfo}.
+ * @apiNote Must be annotated with {@link Info}.
  */
 @Slf4j
 public abstract class VitalConfig {
     private VitalConfigFileProcessor vitalConfigFileProcessor;
 
     public VitalConfig() {
-        final var info = Optional.ofNullable(getClass().getAnnotation(VitalConfigInfo.class))
+        final var info = Optional.ofNullable(getClass().getAnnotation(Info.class))
                 .orElseThrow(() -> new RuntimeException("config needs to be annotated with @ConfigInfo!"));
 
         load(info.name(), info.processor());
@@ -102,9 +106,53 @@ public abstract class VitalConfig {
     private void injectFields(@NonNull Map<String, ?> serializedContentMap) {
         serializedContentMap
                 .forEach((key, value) -> {
-                    final Optional<Field> optionalField = Optional.ofNullable(vitalConfigFileProcessor.getFieldByProperty(getClass(), key));
+                    final var optionalField = Optional.ofNullable(vitalConfigFileProcessor.getFieldByProperty(getClass(), key));
 
                     optionalField.ifPresent(field -> injectField(VitalConfig.this, field, value));
                 });
+    }
+
+    /**
+     * Defines meta-information for the annotated {@link VitalConfig}.
+     *
+     * @author xRa1ny
+     */
+    @Component
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Info {
+        /**
+         * Defines the file name for the annotated config.
+         *
+         * @return The file name
+         * @apiNote Includes the file extension (e.g test.yml; test.properties)
+         */
+        String name();
+
+        /**
+         * Defines the file processor used by this config.
+         *
+         * @return The processor used by this config.
+         * @apiNote file processors are used to process config files.
+         */
+        Class<? extends VitalConfigFileProcessor> processor();
+    }
+
+    /**
+     * Defines a field within a config extending class to be a key.
+     *
+     * @author xRa1ny
+     * @apiNote Not to be confused with .properties files, this annotation is also used for every other config type supported by vital.
+     */
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Property {
+        /**
+         * Defines the class types this annotated field manages.
+         *
+         * @return The classes this annotated field manages.
+         * @apiNote When annotating a list or map, specify their generic types.
+         */
+        Class<?>[] value();
     }
 }

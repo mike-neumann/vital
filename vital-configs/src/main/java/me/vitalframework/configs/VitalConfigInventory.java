@@ -1,7 +1,6 @@
 package me.vitalframework.configs;
 
 import lombok.NonNull;
-import me.vitalframework.configs.annotation.VitalConfigProperty;
 import org.bukkit.Bukkit;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -17,10 +16,10 @@ import java.util.Objects;
  * @author xRa1ny
  */
 public class VitalConfigInventory {
-    @VitalConfigProperty(InventoryType.class)
+    @VitalConfig.Property(InventoryType.class)
     public InventoryType type;
 
-    @VitalConfigProperty(VitalConfigItemStack.class)
+    @VitalConfig.Property(VitalConfigItemStack.class)
     public VitalConfigItemStack[] contents;
 
     @NonNull

@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import me.vitalframework.RequiresAnnotation;
-import me.vitalframework.tasks.annotation.VitalRepeatableTaskInfo;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
@@ -12,7 +11,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -21,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author xRa1ny
  */
-public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements RequiresAnnotation<VitalRepeatableTaskInfo> {
+public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements RequiresAnnotation<VitalRepeatableTask.Info> {
     @Getter
     @Autowired
     private P plugin;
@@ -68,8 +72,8 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
     }
 
     @Override
-    public final Class<VitalRepeatableTaskInfo> requiredAnnotationType() {
-        return VitalRepeatableTaskInfo.class;
+    public final Class<Info> requiredAnnotationType() {
+        return Info.class;
     }
 
     /**
@@ -137,6 +141,23 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
     protected abstract void cancelRunnable();
 
     protected abstract void cancelTask();
+
+    /**
+     * Annotation used to provide information about the interval of a {@link VitalRepeatableTask}.
+     *
+     * @author xRa1ny
+     */
+    @Component
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface Info {
+        /**
+         * Defines the interval at which the repeatable task should execute, in milliseconds.
+         *
+         * @return The interval for the repeatable task execution.
+         */
+        int interval();
+    }
 
     public static abstract class Spigot extends VitalRepeatableTask<JavaPlugin, BukkitRunnable, BukkitTask> {
         public Spigot() {

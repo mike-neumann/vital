@@ -2,7 +2,6 @@ package me.vitalframework.configs.processor;
 
 import lombok.NonNull;
 import me.vitalframework.configs.VitalConfig;
-import me.vitalframework.configs.annotation.VitalConfigProperty;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -100,7 +99,7 @@ public interface VitalConfigFileProcessor {
     @NonNull
     default List<Field> getPropertyFieldsFromType(@NonNull Class<?> type) {
         return Arrays.stream(type.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(VitalConfigProperty.class))
+                .filter(field -> field.isAnnotationPresent(VitalConfig.Property.class))
                 .toList();
     }
 
@@ -113,7 +112,7 @@ public interface VitalConfigFileProcessor {
     @NonNull
     default List<Field> getNonPropertyFieldsFromType(@NonNull Class<?> type) {
         return Arrays.stream(type.getDeclaredFields())
-                .filter(field -> !field.isAnnotationPresent(VitalConfigProperty.class))
+                .filter(field -> !field.isAnnotationPresent(VitalConfig.Property.class))
                 .toList();
     }
 

@@ -3,10 +3,14 @@ package me.vitalframework.inventories;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import me.vitalframework.inventories.annotation.VitalPagedInventoryInfo;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.Range;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,7 +47,7 @@ public abstract class VitalPagedInventory extends VitalInventory {
     public VitalPagedInventory(VitalInventory previousInventory) {
         super(previousInventory);
 
-        final var optionalVitalPagedInventoryInfo = Optional.ofNullable(getClass().getAnnotation(VitalPagedInventoryInfo.class));
+        final var optionalVitalPagedInventoryInfo = Optional.ofNullable(getClass().getAnnotation(Info.class));
 
         optionalVitalPagedInventoryInfo.ifPresent(vitalPagedInventoryInfo -> {
             fromSlot = vitalPagedInventoryInfo.fromSlot();
@@ -125,5 +129,25 @@ public abstract class VitalPagedInventory extends VitalInventory {
     public void update(Player player) {
         super.update(player);
         setPage(page, player);
+    }
+
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Info {
+        /**
+         * Defines the starting slot for each page item.
+         *
+         * @return The starting slot for each page item.
+         */
+        @Range(from = 0, to = 9)
+        int fromSlot() default 0;
+
+        /**
+         * Defines the ending slot for each page item.
+         *
+         * @return The ending slot for each page item.
+         */
+        @Range(from = 0, to = 9)
+        int toSlot() default 0;
     }
 }

@@ -3,7 +3,6 @@ package me.vitalframework.items;
 import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
 import me.vitalframework.tasks.VitalRepeatableTask;
-import me.vitalframework.tasks.annotation.VitalRepeatableTaskInfo;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Component;
  * @author xRa1ny
  */
 @Component
-@VitalRepeatableTaskInfo(interval = 50)
+@VitalRepeatableTask.Info(interval = 50)
 public class VitalItemCooldownHandler extends VitalRepeatableTask.Spigot {
     private final VitalItemService itemService;
 

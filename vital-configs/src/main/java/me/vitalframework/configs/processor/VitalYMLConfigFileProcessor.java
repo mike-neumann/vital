@@ -3,7 +3,6 @@ package me.vitalframework.configs.processor;
 import lombok.Getter;
 import lombok.NonNull;
 import me.vitalframework.configs.VitalConfig;
-import me.vitalframework.configs.annotation.VitalConfigProperty;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;
@@ -49,9 +48,9 @@ public class VitalYMLConfigFileProcessor implements VitalConfigFileProcessor {
     }
 
     private void addTypeDescriptors(@NonNull Class<?> type) {
-        final TypeDescription rootTypeDescription = new TypeDescription(type, "!%s"
+        final var rootTypeDescription = new TypeDescription(type, "!%s"
                 .formatted(type.getSimpleName()));
-        final String[] rootExcludes = getNonPropertyFieldsFromType(type).stream()
+        final var rootExcludes = getNonPropertyFieldsFromType(type).stream()
                 .map(Field::getName)
                 .toArray(String[]::new);
 
@@ -59,10 +58,10 @@ public class VitalYMLConfigFileProcessor implements VitalConfigFileProcessor {
         yaml.addTypeDescription(rootTypeDescription);
 
         for (var field : getPropertyFieldsFromType(type)) {
-            final VitalConfigProperty vitalConfigProperty = field.getAnnotation(VitalConfigProperty.class);
-            final TypeDescription typeDescription = new TypeDescription(field.getType(), "!%s"
+            final var vitalConfigProperty = field.getAnnotation(VitalConfig.Property.class);
+            final var typeDescription = new TypeDescription(field.getType(), "!%s"
                     .formatted(field.getType().getSimpleName()));
-            final String[] excludes = getNonPropertyFieldsFromType(field.getType()).stream()
+            final var excludes = getNonPropertyFieldsFromType(field.getType()).stream()
                     .map(Field::getName)
                     .toArray(String[]::new);
 

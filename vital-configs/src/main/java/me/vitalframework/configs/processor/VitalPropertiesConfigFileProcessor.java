@@ -7,8 +7,6 @@ import me.vitalframework.configs.VitalConfig;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.util.*;
 
 
@@ -89,13 +87,13 @@ public class VitalPropertiesConfigFileProcessor implements VitalConfigFileProces
     @Override
     public Object deserialize(@NonNull Map<String, ?> serializedContentMap, @NonNull Class<Object> type) throws Exception {
         try {
-            final Constructor<?> defaultConstructor = type.getConstructor();
-            final Object object = defaultConstructor.newInstance();
+            final var defaultConstructor = type.getConstructor();
+            final var object = defaultConstructor.newInstance();
 
             // default constructor was found, inject field properties...
             serializedContentMap
                     .forEach((key, value) -> {
-                        final Optional<Field> optionalField = Optional.ofNullable(getFieldByProperty(type, key));
+                        final var optionalField = Optional.ofNullable(getFieldByProperty(type, key));
 
                         optionalField.ifPresent(field -> VitalConfig.injectField(object, field, value));
                     });
@@ -103,7 +101,7 @@ public class VitalPropertiesConfigFileProcessor implements VitalConfigFileProces
             return object;
         } catch (NoSuchMethodException e) {
             // default constructor not found, attempt to get constructor matching properties...
-            final Constructor<?> constructor = type.getConstructor(getPropertyFieldsFromType(type).stream().map(Object::getClass).toArray(Class[]::new));
+            final var constructor = type.getConstructor(getPropertyFieldsFromType(type).stream().map(Object::getClass).toArray(Class[]::new));
 
             // constructor found, create new instance with this constructor...
 

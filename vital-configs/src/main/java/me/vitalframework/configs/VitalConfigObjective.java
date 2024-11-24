@@ -1,7 +1,6 @@
 package me.vitalframework.configs;
 
 import lombok.NonNull;
-import me.vitalframework.configs.annotation.VitalConfigProperty;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -15,25 +14,25 @@ public class VitalConfigObjective {
     /**
      * the criteria in string format
      */
-    @VitalConfigProperty(String.class)
+    @VitalConfig.Property(String.class)
     public String criteria;
 
     /**
      * the display slot of the objective
      */
-    @VitalConfigProperty(DisplaySlot.class)
+    @VitalConfig.Property(DisplaySlot.class)
     public DisplaySlot slot;
 
     /**
      * the actual title
      */
-    @VitalConfigProperty(String.class)
+    @VitalConfig.Property(String.class)
     public String title;
 
     /**
      * all displayed lines
      */
-    @VitalConfigProperty(String.class)
+    @VitalConfig.Property(String.class)
     public String[] lines;
 
     /**
@@ -68,7 +67,7 @@ public class VitalConfigObjective {
 
         // set lines...
         for (var i = 0; i < lines.length; i++) {
-            final String line = lines[i];
+            final var line = lines[i];
 
             objective.getScore(line).setScore(i);
         }

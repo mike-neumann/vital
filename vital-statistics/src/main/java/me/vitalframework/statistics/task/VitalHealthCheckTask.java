@@ -7,7 +7,6 @@ import me.vitalframework.annotation.RequiresBungeecord;
 import me.vitalframework.annotation.RequiresSpigot;
 import me.vitalframework.statistics.config.VitalStatisticsConfig;
 import me.vitalframework.tasks.VitalRepeatableTask;
-import me.vitalframework.tasks.annotation.VitalRepeatableTaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -105,7 +104,7 @@ public interface VitalHealthCheckTask {
     @Getter
     @Setter
     @RequiresSpigot
-    @VitalRepeatableTaskInfo(interval = 50)
+    @VitalRepeatableTask.Info(interval = 50)
     class Spigot extends VitalRepeatableTask.Spigot implements VitalHealthCheckTask {
         private final Map<Long, Integer> lastTps = new HashMap<>();
         private final Map<Long, Integer> lastUnhealthyTps = new HashMap<>();
@@ -133,7 +132,7 @@ public interface VitalHealthCheckTask {
     @Getter
     @Setter
     @RequiresBungeecord
-    @VitalRepeatableTaskInfo(interval = 50)
+    @VitalRepeatableTask.Info(interval = 50)
     class Bungeecord extends VitalRepeatableTask.Bungeecord implements VitalHealthCheckTask {
         private final Map<Long, Integer> lastTps = new HashMap<>();
         private final Map<Long, Integer> lastUnhealthyTps = new HashMap<>();

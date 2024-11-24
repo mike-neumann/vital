@@ -1,7 +1,6 @@
 package me.vitalframework.configs;
 
 import lombok.NonNull;
-import me.vitalframework.configs.annotation.VitalConfigProperty;
 import me.vitalframework.holograms.VitalHologram;
 import org.bukkit.Material;
 
@@ -13,16 +12,16 @@ import java.util.List;
  * @author xRa1ny
  */
 public class VitalConfigHologram {
-    @VitalConfigProperty(String.class)
+    @VitalConfig.Property(String.class)
     public String name;
 
-    @VitalConfigProperty(String.class)
+    @VitalConfig.Property(String.class)
     public List<String> lines;
 
-    @VitalConfigProperty(VitalConfigLocation.class)
+    @VitalConfig.Property(VitalConfigLocation.class)
     public VitalConfigLocation location;
 
-    @VitalConfigProperty(Material.class)
+    @VitalConfig.Property(Material.class)
     public Material displayType;
 
     @NonNull

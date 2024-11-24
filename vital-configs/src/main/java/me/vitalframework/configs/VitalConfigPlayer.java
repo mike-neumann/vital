@@ -1,7 +1,6 @@
 package me.vitalframework.configs;
 
 import lombok.NonNull;
-import me.vitalframework.configs.annotation.VitalConfigProperty;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.bukkit.Bukkit;
@@ -16,23 +15,23 @@ import java.util.UUID;
  * @author xRa1ny
  */
 public abstract class VitalConfigPlayer<T> {
-    @VitalConfigProperty(String.class)
+    @VitalConfig.Property(String.class)
     public String name;
 
-    @VitalConfigProperty(UUID.class)
+    @VitalConfig.Property(UUID.class)
     public UUID uuid;
 
 
     public abstract T toPlayer();
 
     public static class Spigot extends VitalConfigPlayer<Player> {
-        @VitalConfigProperty(VitalConfigLocation.class)
+        @VitalConfig.Property(VitalConfigLocation.class)
         public VitalConfigLocation location;
 
-        @VitalConfigProperty(double.class)
+        @VitalConfig.Property(double.class)
         public double health;
 
-        @VitalConfigProperty(double.class)
+        @VitalConfig.Property(double.class)
         public double foodLevel;
 
         @NonNull

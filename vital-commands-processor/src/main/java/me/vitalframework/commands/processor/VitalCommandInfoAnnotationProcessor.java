@@ -2,7 +2,7 @@ package me.vitalframework.commands.processor;
 
 import lombok.NonNull;
 import me.vitalframework.VitalPluginEnvironment;
-import me.vitalframework.commands.annotation.VitalCommandInfo;
+import me.vitalframework.commands.VitalCommand;
 import me.vitalframework.processor.VitalPluginInfoAnnotationProcessor;
 import me.vitalframework.processor.VitalPluginInfoHolder;
 import org.reflections.Reflections;
@@ -41,11 +41,11 @@ public class VitalCommandInfoAnnotationProcessor extends AbstractProcessor {
         vitalPluginInfoAnnotationProcessor.init(processingEnv);
         vitalPluginInfoAnnotationProcessor.process(annotations, roundEnv);
 
-        final var vitalCommandInfoList = new ArrayList<VitalCommandInfo>();
+        final var vitalCommandInfoList = new ArrayList<VitalCommand.Info>();
 
         // Scan for all commands annotated with `VitalCommandInfo.
-        for (var element : roundEnv.getElementsAnnotatedWith(VitalCommandInfo.class)) {
-            final var vitalCommandInfo = element.getAnnotation(VitalCommandInfo.class);
+        for (var element : roundEnv.getElementsAnnotatedWith(VitalCommand.Info.class)) {
+            final var vitalCommandInfo = element.getAnnotation(VitalCommand.Info.class);
 
             if (!vitalCommandInfoList.contains(vitalCommandInfo)) {
                 vitalCommandInfoList.add(vitalCommandInfo);
@@ -53,8 +53,8 @@ public class VitalCommandInfoAnnotationProcessor extends AbstractProcessor {
         }
 
         // also scan all vital packages
-        for (var element : new Reflections("me.vitalframework").getTypesAnnotatedWith(VitalCommandInfo.class, true)) {
-            final var vitalCommandInfo = element.getDeclaredAnnotation(VitalCommandInfo.class);
+        for (var element : new Reflections("me.vitalframework").getTypesAnnotatedWith(VitalCommand.Info.class, true)) {
+            final var vitalCommandInfo = element.getDeclaredAnnotation(VitalCommand.Info.class);
 
             if (!vitalCommandInfoList.contains(vitalCommandInfo)) {
                 vitalCommandInfoList.add(vitalCommandInfo);
@@ -72,10 +72,10 @@ public class VitalCommandInfoAnnotationProcessor extends AbstractProcessor {
     /**
      * Generates the plugin yml if non-existent, or adds to the content, the necessary command name information for automatic command registration.
      *
-     * @param vitalCommandInfoList The list of {@link VitalCommandInfo} annotations.
+     * @param vitalCommandInfoList The list of {@link VitalCommand.Info} annotations.
      * @param pluginEnvironment    The environment this plugin uses.
      */
-    private void generatePluginYmlCommands(@NonNull List<VitalCommandInfo> vitalCommandInfoList, VitalPluginEnvironment pluginEnvironment) {
+    private void generatePluginYmlCommands(@NonNull List<VitalCommand.Info> vitalCommandInfoList, VitalPluginEnvironment pluginEnvironment) {
         try {
             // Create the new `plugin.yml` file resource as the basic processor left it uncreated.
             final var pluginYmlFileObject = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", pluginEnvironment.getYmlFileName());
