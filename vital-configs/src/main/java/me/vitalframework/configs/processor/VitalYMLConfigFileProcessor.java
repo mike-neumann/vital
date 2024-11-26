@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class VitalYMLConfigFileProcessor implements VitalConfigFileProcessor {
+public class VitalYMLConfigFileProcessor implements VitalConfig.FileProcessor {
     @NonNull
     private final File file;
 

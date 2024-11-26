@@ -10,7 +10,7 @@ import java.io.FileWriter;
 import java.util.*;
 
 
-public class VitalPropertiesConfigFileProcessor implements VitalConfigFileProcessor {
+public class VitalPropertiesConfigFileProcessor implements VitalConfig.FileProcessor {
     @NonNull
     private final File file;
 
