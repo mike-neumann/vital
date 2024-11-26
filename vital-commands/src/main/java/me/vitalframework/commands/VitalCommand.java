@@ -405,7 +405,8 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         final var executingArg = getArg(joinedPlayerArgs);
         ReturnState commandReturnState;
 
-        if (executingArg == null) {
+        // if the player has not put in any arguments, we may execute the base command handler method
+        if (executingArg == null && joinedPlayerArgs.isBlank()) {
             try {
                 commandReturnState = onBaseCommand(sender);
             } catch (Exception e) {
@@ -413,7 +414,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
 
                 return;
             }
-        } else {
+        } else if (executingArg != null) {
             final var values = new ArrayList<String>();
 
             for (var commandArg : executingArg.value().split(" ")) {
@@ -436,6 +437,9 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
 
                 return;
             }
+        } else {
+            // we have neither executed the base command argument by passing an empty value, or any mapped argument
+            commandReturnState = ReturnState.INVALID_ARGS;
         }
 
         final String joinedArgs = String.join(" ", args);
