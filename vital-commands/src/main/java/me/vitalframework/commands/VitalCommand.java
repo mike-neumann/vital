@@ -38,27 +38,19 @@ import java.util.stream.Stream;
  * @param <CS> The command sender type of this command.
  * @author xRa1ny
  */
+@Getter
 @Slf4j
 public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCommand.Info> {
-    private final Class<CS> commandSenderClass;
-
-    @Getter
-    private final String name;
-
-    @Getter
-    private final String permission;
-
-    @Getter
-    private final boolean requiresPlayer;
-    @Getter
-    private final Map<Pattern, Arg> args;
-    @Getter
-    private final Map<Arg, ArgHandlerContext> argHandlers;
-    @Getter
-    private final Map<Arg, ArgExceptionHandlerContext> argExceptionHandlers;
-    @Getter
     @Autowired
     private P plugin;
+
+    private final Class<CS> commandSenderClass;
+    private final String name;
+    private final String permission;
+    private final boolean requiresPlayer;
+    private final Map<Pattern, Arg> args;
+    private final Map<Arg, ArgHandlerContext> argHandlers;
+    private final Map<Arg, Map<Class<? extends Throwable>, ArgExceptionHandlerContext>> argExceptionHandlers;
 
     /**
      * Constructor for when using dependency injection
@@ -138,15 +130,17 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private Map<Arg, ArgExceptionHandlerContext> getMappedArgExceptionHandlers() {
-        return Arrays.stream(getClass().getMethods())
+    private Map<Arg, Map<Class<? extends Throwable>, ArgExceptionHandlerContext>> getMappedArgExceptionHandlers() {
+        final var mappedArgExceptionHandlers = new HashMap<Arg, Map<Class<? extends Throwable>, ArgExceptionHandlerContext>>();
+
+        Arrays.stream(getClass().getMethods())
                 .filter(method -> method.isAnnotationPresent(ArgExceptionHandler.class))
-                .map(method -> {
-                    final var commandArgExceptionHandler = method.getAnnotation(ArgExceptionHandler.class);
-                    final var arg = getArg(commandArgExceptionHandler.value());
+                .forEach(method -> {
+                    final var argExceptionHandler = method.getAnnotation(ArgExceptionHandler.class);
+                    final var arg = getArg(argExceptionHandler.value());
 
                     if (arg == null) {
-                        throw new IllegalArgumentException("Exception handler mapping failed, arg '" + commandArgExceptionHandler.value() + "' does not exist");
+                        throw new IllegalArgumentException("Exception handler mapping failed, arg '" + argExceptionHandler.value() + "' does not exist");
                     }
 
                     final var parameters = List.of(method.getParameters());
@@ -167,9 +161,16 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
                         }
                     }
 
-                    return Map.entry(arg, new ArgExceptionHandlerContext(method, commandSenderIndex, executedArgIndex, commandArgIndex, exceptionIndex));
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    final var argExceptionHandlerContext = new ArgExceptionHandlerContext(method, commandSenderIndex, executedArgIndex, commandArgIndex, exceptionIndex);
+
+                    if (!mappedArgExceptionHandlers.containsKey(arg)) {
+                        mappedArgExceptionHandlers.put(arg, new HashMap<>(Map.of(argExceptionHandler.type(), argExceptionHandlerContext)));
+                    } else {
+                        mappedArgExceptionHandlers.get(arg).put(argExceptionHandler.type(), argExceptionHandlerContext);
+                    }
+                });
+
+        return mappedArgExceptionHandlers;
     }
 
     @Override
@@ -185,11 +186,29 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
                 .orElse(null);
     }
 
-    private void executeArgExceptionHandlerMethod(@NonNull CS sender, @NonNull Exception exception, @NonNull String arg, @NonNull Arg commandArg, @NonNull String[] values) {
-        final var exceptionHandlerContext = argExceptionHandlers.get(commandArg);
+    private void executeArgExceptionHandlerMethod(@NonNull CS sender, @NonNull Throwable exception, @NonNull String arg, @NonNull Arg commandArg) {
+        final var exceptionHandlers = argExceptionHandlers.get(commandArg);
 
-        // we may or may not have an exception handler mapped to this command argument
-        if (exceptionHandlerContext != null) {
+        // we may not have any exception handlers mapped at all, if that is the case, call the base exception handler for this command
+        if (exceptionHandlers == null || exceptionHandlers.isEmpty()) {
+            onCommandError(sender, commandArg, exception);
+        } else {
+            final var optionalExceptionHandlerContext = exceptionHandlers.entrySet().stream()
+                    .filter(entry -> entry.getKey().isAssignableFrom(exception.getClass()))
+                    .map(Map.Entry::getValue)
+                    .findAny();
+
+            // we may or may not have an exception handler mapped for this execution context
+            if (optionalExceptionHandlerContext.isEmpty()) {
+                // if we don't have an exception handler mapped, call the base exception handler for this command
+                onCommandError(sender, commandArg, exception);
+
+                return;
+            }
+
+            final var exceptionHandlerContext = optionalExceptionHandlerContext.get();
+
+            // if we do have an exception, prepare for parameter injection...
             final var injectableParameters = new HashMap<Integer, Object>();
 
             if (exceptionHandlerContext.commandSenderIndex != null) {
@@ -221,7 +240,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
     }
 
     @NonNull
-    private VitalCommand.ReturnState executeArgHandlerMethod(@NonNull CS sender, @NonNull String arg, @NonNull Arg commandArg, @NonNull String @NonNull [] values) throws InvocationTargetException, IllegalAccessException {
+    private ReturnState executeArgHandlerMethod(@NonNull CS sender, @NonNull String arg, @NonNull Arg commandArg, @NonNull String @NonNull [] values) throws InvocationTargetException, IllegalAccessException {
         final var argHandlerContext = argHandlers.get(commandArg);
 
         if (argHandlerContext == null) {
@@ -383,17 +402,20 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
 
         // the arguments the player has typed in chat, joined to one single string separated by spaces
         final var joinedPlayerArgs = String.join(" ", args);
-        // find executing command arg
         final var executingArg = getArg(joinedPlayerArgs);
         ReturnState commandReturnState;
 
-        // extract user values from command
-        final var values = new ArrayList<String>();
-
-
         if (executingArg == null) {
-            commandReturnState = onBaseCommand(sender);
+            try {
+                commandReturnState = onBaseCommand(sender);
+            } catch (Exception e) {
+                onCommandError(sender, null, e);
+
+                return;
+            }
         } else {
+            final var values = new ArrayList<String>();
+
             for (var commandArg : executingArg.value().split(" ")) {
                 for (var userArg : args) {
                     if (!userArg.equalsIgnoreCase(commandArg)) {
@@ -406,7 +428,11 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
             try {
                 commandReturnState = executeArgHandlerMethod(sender, joinedPlayerArgs, executingArg, values.toArray(String[]::new));
             } catch (Exception e) {
-                executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, executingArg, values.toArray(String[]::new));
+                if (e instanceof InvocationTargetException invocationTargetException) {
+                    executeArgExceptionHandlerMethod(sender, invocationTargetException.getTargetException(), joinedPlayerArgs, executingArg);
+                } else {
+                    executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, executingArg);
+                }
 
                 return;
             }
@@ -422,13 +448,20 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
     }
 
     /**
+     * called when an exception occurs during command execution, that is either thrown on the base command, or not handled by any arg exception handler
+     */
+    protected void onCommandError(@NonNull CS sender, Arg arg, @NonNull Throwable e) {
+
+    }
+
+    /**
      * called when this command is executed with only the base command (/commandname)
      *
      * @param sender the sender
      * @return the status of this command execution
      */
     @NonNull
-    protected VitalCommand.ReturnState onBaseCommand(@NonNull CS sender) {
+    protected ReturnState onBaseCommand(@NonNull CS sender) {
         return ReturnState.INVALID_ARGS;
     }
 
@@ -656,6 +689,11 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
          * Defines the command arg this exception handling method should be mapped to
          */
         String value();
+
+        /**
+         * Defines the exception type this exception handler should manage
+         */
+        Class<? extends Throwable> type();
     }
 
     public record ArgHandlerContext(
