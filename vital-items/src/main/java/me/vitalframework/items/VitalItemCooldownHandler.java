@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 @VitalRepeatableTask.Info(interval = 50)
 public class VitalItemCooldownHandler extends VitalRepeatableTask.Spigot {
+    @NonNull
     private final VitalItemService itemService;
 
     public VitalItemCooldownHandler(@NonNull JavaPlugin javaPlugin, VitalItemService itemService) {
@@ -23,26 +24,11 @@ public class VitalItemCooldownHandler extends VitalRepeatableTask.Spigot {
         this.itemService = itemService;
     }
 
-    /**
-     * Called when the task starts.
-     */
-    @Override
-    public void onStart() {
-        // Initialization or actions when the task starts.
+    @PostConstruct
+    public void init() {
+        start();
     }
 
-    /**
-     * Called when the task stops.
-     */
-    @Override
-    public void onStop() {
-        // Cleanup or actions when the task stops.
-    }
-
-    /**
-     * Called on each tick of the repeatable task.
-     * Reduces cooldowns for registered VitalItemStack items.
-     */
     @Override
     public void onTick() {
         for (var vitalItem : itemService.getItems()) {
@@ -64,10 +50,5 @@ public class VitalItemCooldownHandler extends VitalRepeatableTask.Spigot {
                 }
             }
         }
-    }
-
-    @PostConstruct
-    public void init() {
-        start();
     }
 }

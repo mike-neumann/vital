@@ -75,7 +75,7 @@ public class VitalCommandInfoAnnotationProcessor extends AbstractProcessor {
      * @param vitalCommandInfoList The list of {@link VitalCommand.Info} annotations.
      * @param pluginEnvironment    The environment this plugin uses.
      */
-    private void generatePluginYmlCommands(@NonNull List<VitalCommand.Info> vitalCommandInfoList, VitalPluginEnvironment pluginEnvironment) {
+    private void generatePluginYmlCommands(@NonNull List<VitalCommand.Info> vitalCommandInfoList, @NonNull VitalPluginEnvironment pluginEnvironment) {
         try {
             // Create the new `plugin.yml` file resource as the basic processor left it uncreated.
             final var pluginYmlFileObject = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", pluginEnvironment.getYmlFileName());

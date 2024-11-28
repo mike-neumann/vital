@@ -1,5 +1,7 @@
 package me.vitalframework;
 
+import lombok.NonNull;
+
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 
@@ -17,6 +19,7 @@ public interface RequiresAnnotation<T extends Annotation> {
      * @return The required annotation.
      * @throws RuntimeException If the required annotation is not found on the component.
      */
+    @NonNull
     default T getRequiredAnnotation() {
         return Optional.ofNullable(getClass().getAnnotation(requiredAnnotationType()))
                 .orElseThrow(() -> new RuntimeException("%s must be annotated with @%s"
@@ -28,5 +31,6 @@ public interface RequiresAnnotation<T extends Annotation> {
      *
      * @return The class type of the required annotation.
      */
+    @NonNull
     Class<T> requiredAnnotationType();
 }

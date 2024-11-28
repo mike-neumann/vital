@@ -425,6 +425,7 @@ public class MyInventory extends VitalInventory {
 When creating a global inventory that instance is available through dependency injection via Spring beans:
 
 ```java
+
 @Component
 public class MyComponent {
     private final MyInventory myInventory;

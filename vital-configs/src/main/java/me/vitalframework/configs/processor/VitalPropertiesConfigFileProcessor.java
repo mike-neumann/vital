@@ -2,6 +2,7 @@ package me.vitalframework.configs.processor;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import me.vitalframework.configs.VitalConfig;
 
 import java.io.File;
@@ -9,18 +10,14 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.*;
 
-
+@RequiredArgsConstructor
+@Getter
 public class VitalPropertiesConfigFileProcessor implements VitalConfig.FileProcessor {
     @NonNull
     private final File file;
 
-    @Getter
     @NonNull
     private final Properties properties = new Properties();
-
-    public VitalPropertiesConfigFileProcessor(@NonNull File file) {
-        this.file = file;
-    }
 
     @Override
     public Map<String, String> load(@NonNull Class<?> type) throws Exception {
@@ -104,7 +101,6 @@ public class VitalPropertiesConfigFileProcessor implements VitalConfig.FileProce
             final var constructor = type.getConstructor(getPropertyFieldsFromType(type).stream().map(Object::getClass).toArray(Class[]::new));
 
             // constructor found, create new instance with this constructor...
-
             return constructor.newInstance(serializedContentMap.values());
         }
     }

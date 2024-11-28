@@ -2,40 +2,25 @@ package me.vitalframework;
 
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A listener component for handling events in the Vital-Framework.
  *
  * @author xRa1ny
  */
+@Getter
+@RequiredArgsConstructor
 public abstract class VitalListener<T> {
-    @Getter
-    @Autowired
-    private T plugin;
-
-    /**
-     * Constructor for when using dependency injection
-     */
-    protected VitalListener() {
-
-    }
-
-    /**
-     * Constructor for when not using dependency injection
-     */
-    protected VitalListener(T plugin) {
-        this.plugin = plugin;
-    }
+    @NonNull
+    private final T plugin;
 
     public static abstract class Spigot extends VitalListener<JavaPlugin> implements org.bukkit.event.Listener {
-        public Spigot() {
-        }
-
-        public Spigot(JavaPlugin plugin) {
+        public Spigot(@NonNull JavaPlugin plugin) {
             super(plugin);
         }
 
@@ -46,10 +31,7 @@ public abstract class VitalListener<T> {
     }
 
     public static abstract class Bungeecord extends VitalListener<Plugin> implements net.md_5.bungee.api.plugin.Listener {
-        public Bungeecord() {
-        }
-
-        public Bungeecord(Plugin plugin) {
+        public Bungeecord(@NonNull Plugin plugin) {
             super(plugin);
         }
 

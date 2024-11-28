@@ -20,23 +20,23 @@ import java.util.function.Supplier;
  *
  * @author xRa1ny
  */
+@Getter
 public class VitalGlobalScoreboard implements VitalScoreboard {
     /**
      * The scoreboard content of this global scoreboard.
      */
-    @Getter
     @NonNull
     private final VitalScoreboardContent vitalScoreboardContent;
+
     /**
      * The list of users associated with this global scoreboard.
      */
-    @Getter
     @NonNull
     private final List<Player> playerList = new ArrayList<>();
+
     /**
      * The lines of this global scoreboard.
      */
-    @Getter
     @NonNull
     private List<Supplier<String>> lines;
 

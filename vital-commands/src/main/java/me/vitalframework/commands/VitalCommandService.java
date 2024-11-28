@@ -9,7 +9,7 @@ import java.util.List;
 
 @Service
 public class VitalCommandService {
-    public Collection<? extends VitalCommand<?, ?>> getCommands(Class<? extends VitalCommand<?, ?>> vitalInventoryClass) {
+    public Collection<? extends VitalCommand<?, ?>> getCommands(@NonNull Class<? extends VitalCommand<?, ?>> vitalInventoryClass) {
         try {
             return Vital.getContext().getBeansOfType(vitalInventoryClass).values();
         } catch (Exception e) {

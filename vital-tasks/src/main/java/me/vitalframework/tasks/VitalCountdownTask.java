@@ -3,11 +3,11 @@ package me.vitalframework.tasks;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import me.vitalframework.RequiresAnnotation;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
@@ -15,42 +15,26 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+@RequiredArgsConstructor
+@Getter
 public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, ?>> implements RequiresAnnotation<VitalCountdownTask.Info> {
-    @Getter
+    @NonNull
+    private final P plugin;
+
     private final int initialCountdown;
 
-    @Getter
-    @Autowired
-    private P plugin;
-
-    @Getter
     @Setter
     private int countdown;
 
-    @Getter
     @Setter
     private int interval;
 
     private T vitalRepeatableTask;
 
-    /**
-     * Constructor for when using dependency injection
-     */
-    public VitalCountdownTask() {
-        final var vitalCountdownTaskInfo = getRequiredAnnotation();
-
-        initialCountdown = vitalCountdownTaskInfo.countdown();
-        countdown = initialCountdown;
-        interval = vitalCountdownTaskInfo.interval();
-    }
-
-    /**
-     * Constructor for when not using dependency injection
-     */
     public VitalCountdownTask(@NonNull P plugin) {
+        this.plugin = plugin;
         final var vitalCountdownTaskInfo = getRequiredAnnotation();
 
-        this.plugin = plugin;
         initialCountdown = vitalCountdownTaskInfo.countdown();
         countdown = initialCountdown;
         interval = vitalCountdownTaskInfo.interval();
@@ -62,7 +46,7 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
     }
 
     @Override
-    public final Class<Info> requiredAnnotationType() {
+    public final @NonNull Class<Info> requiredAnnotationType() {
         return Info.class;
     }
 
@@ -183,10 +167,7 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
     }
 
     public static abstract class Spigot extends VitalCountdownTask<JavaPlugin, VitalRepeatableTask.Spigot> {
-        public Spigot() {
-        }
-
-        public Spigot(JavaPlugin plugin) {
+        public Spigot(@NonNull JavaPlugin plugin) {
             super(plugin);
         }
 
@@ -212,10 +193,7 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
     }
 
     public static abstract class Bungeecord extends VitalCountdownTask<Plugin, VitalRepeatableTask.Bungeecord> {
-        public Bungeecord() {
-        }
-
-        public Bungeecord(Plugin plugin) {
+        public Bungeecord(@NonNull Plugin plugin) {
             super(plugin);
         }
 

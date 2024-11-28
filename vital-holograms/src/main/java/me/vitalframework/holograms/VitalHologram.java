@@ -20,30 +20,28 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
+@Getter
 public class VitalHologram implements VitalComponent {
-    @Getter
+    @NonNull
     private final UUID uniqueId = UUID.randomUUID();
 
-    @Getter
     @Setter
     private String name;
 
-    @Getter
     private ArmorStand base;
 
-    @Getter
     @Setter
+    @NonNull
     private List<ArmorStand> baseLines = new ArrayList<>();
 
-    @Getter
     @Setter
+    @NonNull
     private List<String> lines = new ArrayList<>();
 
-    @Getter
     @Setter
+    @NonNull
     private Location location;
 
-    @Getter
     @Setter
     private Material displayType;
 

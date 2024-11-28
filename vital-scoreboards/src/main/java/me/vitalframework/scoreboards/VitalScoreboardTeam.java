@@ -21,60 +21,53 @@ import java.util.Map;
  *
  * @author xRa1ny
  */
+@Getter
 public class VitalScoreboardTeam {
     /**
      * The name of this scoreboard team.
      */
-    @Getter
     @NonNull
     private final String name;
 
     /**
      * The members of this scoreboard team.
      */
-    @Getter
     @NonNull
     private final List<Player> playerList = new ArrayList<>();
 
     /**
      * The team options for this scoreboard team.
      */
-    @Getter
     @NonNull
     private final Map<Team.Option, Team.OptionStatus> options = new HashMap<>();
 
     /**
      * The Bukkit team instance representing this scoreboard team.
      */
-    @Getter
     @NonNull
     private final Team bukkitTeam;
 
     /**
      * The prefix of this scoreboard team.
      */
-    @Getter
     @Setter
     private String prefix;
 
     /**
      * The suffix of this scoreboard team.
      */
-    @Getter
     @Setter
     private String suffix;
 
     /**
      * Whether friendly fire is allowed for this team.
      */
-    @Getter
     @Setter
     private boolean friendlyFire;
 
     /**
      * When true, members of this team can see friendly invisibles.
      */
-    @Getter
     @Setter
     private boolean canSeeFriendlyInvisibles;
 

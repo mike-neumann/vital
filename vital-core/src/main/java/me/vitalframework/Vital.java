@@ -1,15 +1,16 @@
 package me.vitalframework;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.SneakyThrows;
-import me.vitalframework.spring.VitalBanner;
-import me.vitalframework.spring.VitalBungeecordConfiguration;
-import me.vitalframework.spring.VitalSpigotConfiguration;
+import org.springframework.boot.Banner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 
+import java.io.PrintStream;
 import java.util.Properties;
 
 /**
@@ -27,18 +28,15 @@ public class Vital {
      * @param plugin The plugin instance itself
      */
     @SneakyThrows
-    public static void run(Class<?> plugin, String pluginName) {
-        final var pluginClassLoader = plugin.getClassLoader();
+    public static <T> void run(@NonNull T plugin) {
+        final var pluginClassLoader = plugin.getClass().getClassLoader();
+
         // needed or else spring startup fails
         Thread.currentThread().setContextClassLoader(pluginClassLoader);
 
         final var loader = new DefaultResourceLoader(pluginClassLoader);
         final var builder = new SpringApplicationBuilder();
-        final var pluginConfiguration = Class.forName(plugin.getPackageName() + ".PluginConfiguration");
-        final var sources = new Class[]{pluginConfiguration, VitalSpigotConfiguration.class, VitalBungeecordConfiguration.class};
-
-        System.setProperty("plugin.name", pluginName);
-        System.setProperty("plugin.main", plugin.getName());
+        final var pluginConfiguration = Class.forName(plugin.getClass().getPackageName() + ".PluginConfiguration");
 
         try {
             final var properties = new Properties();
@@ -47,10 +45,12 @@ public class Vital {
 
             properties.forEach((key, value) -> System.setProperty(key.toString(), value.toString()));
         } catch (Exception ignored) {
+            // if we haven't defined an application.properties file, we may skip this step
         }
 
-        context = builder.sources(sources)
+        context = builder.sources(pluginConfiguration)
                 .initializers(applicationContext -> {
+                    applicationContext.getBeanFactory().registerSingleton("plugin", plugin);
                     applicationContext.setClassLoader(pluginClassLoader);
                     applicationContext.setEnvironment(new StandardEnvironment());
                 })
@@ -58,5 +58,20 @@ public class Vital {
                 .banner(new VitalBanner())
                 .logStartupInfo(false)
                 .run();
+    }
+
+    public static class VitalBanner implements Banner {
+        @Override
+        public void printBanner(Environment environment, Class<?> sourceClass, PrintStream out) {
+            out.print("""
+                      .
+                     /\\\\ __     ___ _        _  ______ \s
+                    ( ( )\\ \\   / ( ) |_ __ _| | \\ \\ \\ \\\s
+                     \\\\/  \\ \\ / /| | __/ _` | |  \\ \\ \\ \\
+                      ,    \\ V / | | || (_| | |  / / / /
+                    ========\\_/==|_|\\__\\__,_|_|=/_/_/_/\s
+                                                       \s
+                    """);
+        }
     }
 }

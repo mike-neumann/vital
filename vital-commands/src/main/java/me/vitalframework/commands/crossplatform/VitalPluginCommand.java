@@ -1,5 +1,6 @@
 package me.vitalframework.commands.crossplatform;
 
+import lombok.NonNull;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 import org.bukkit.command.CommandExecutor;
@@ -20,7 +21,7 @@ public class VitalPluginCommand {
     }
 
     public static abstract class Bungeecord extends Command implements TabExecutor {
-        public Bungeecord(String name) {
+        public Bungeecord(@NonNull String name) {
             super(name);
         }
     }

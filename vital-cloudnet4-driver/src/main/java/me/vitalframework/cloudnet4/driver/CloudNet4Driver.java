@@ -91,7 +91,6 @@ public class CloudNet4Driver {
      * @param serverName The name of the server, e.g: Lobby-1
      * @return The fetched cloud server; or null.
      */
-
     public static ServiceInfoSnapshot getCloudServer(@NonNull String serverName) {
         return getCloudServiceProvider().serviceByName(serverName);
     }
@@ -102,7 +101,6 @@ public class CloudNet4Driver {
      * @param taskName The task name.
      * @return The fetched cloud server; or null.
      */
-
     public static ServiceTask getServerTask(@NonNull String taskName) {
         return getServiceTaskProvider().serviceTask(taskName);
     }

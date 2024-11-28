@@ -10,7 +10,7 @@ import java.util.List;
 @Service
 public class VitalTaskService {
     @NonNull
-    public Collection<? extends VitalRepeatableTask<?, ?, ?>> getRepeatableTasks(Class<? extends VitalRepeatableTask<?, ?, ?>> vitalRepeatableTaskClass) {
+    public Collection<? extends VitalRepeatableTask<?, ?, ?>> getRepeatableTasks(@NonNull Class<? extends VitalRepeatableTask<?, ?, ?>> vitalRepeatableTaskClass) {
         try {
             return Vital.getContext().getBeansOfType(vitalRepeatableTaskClass).values();
         } catch (Exception e) {
@@ -24,7 +24,6 @@ public class VitalTaskService {
     public Collection<? extends VitalRepeatableTask<?, ?, ?>> getRepeatableTasks() {
         return getRepeatableTasks((Class<? extends VitalRepeatableTask<?, ?, ?>>) ((Class<?>) VitalRepeatableTask.class));
     }
-
 
     public <T extends VitalRepeatableTask<?, ?, ?>> T getRepeatableTask(@NonNull Class<T> vitalRepeatableTaskClass) {
         try {
@@ -49,7 +48,6 @@ public class VitalTaskService {
     public Collection<? extends VitalCountdownTask<?, ?>> getCountdownTasks() {
         return getCountdownTasks((Class<? extends VitalCountdownTask<?, ?>>) ((Class<?>) VitalCountdownTask.class));
     }
-
 
     public <T extends VitalCountdownTask<?, ?>> T getCountdownTask(@NonNull Class<T> vitalCountdownTaskClass) {
         try {

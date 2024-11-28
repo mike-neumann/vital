@@ -13,8 +13,9 @@ import java.util.function.Predicate;
  * @param <T> The type of Vital components managed by this class.
  * @author xRa1ny
  */
+@Getter
 public abstract class VitalRepository<T extends VitalComponent> {
-    @Getter
+    @NonNull
     private final List<T> components = new ArrayList<>();
 
     /**
@@ -77,7 +78,6 @@ public abstract class VitalRepository<T extends VitalComponent> {
      * @param uniqueId The uniqueId of the VitalComponent.
      * @return THe fetched component; or null.
      */
-
     public final T getComponentByUniqueId(@NonNull UUID uniqueId) {
         return components.stream()
                 .filter(vitalComponent -> uniqueId.equals(vitalComponent.getUniqueId()))
@@ -91,7 +91,6 @@ public abstract class VitalRepository<T extends VitalComponent> {
      * @param name The name of the VitalComponent.
      * @return The fetched component; or null.
      */
-
     public final T getComponentByName(@NonNull String name) {
         return components.stream()
                 .filter(vitalComponent -> name.equals(vitalComponent.getName()))
@@ -106,7 +105,6 @@ public abstract class VitalRepository<T extends VitalComponent> {
      * @param <X>   The {@link VitalComponent} type to grab from this repository instance.
      * @return The fetched component; or null.
      */
-
     public final <X extends VitalComponent> X getComponentByClass(@NonNull Class<X> clazz) {
         return components.stream()
                 .filter(vitalComponent -> clazz.equals(vitalComponent.getClass()))
@@ -121,7 +119,6 @@ public abstract class VitalRepository<T extends VitalComponent> {
      * @param predicate The predicate for filtering.
      * @return The fetched component; or null.
      */
-
     public final T getRandomComponent(@NonNull Predicate<T> predicate) {
         if (components.isEmpty()) {
             return null;
@@ -140,7 +137,6 @@ public abstract class VitalRepository<T extends VitalComponent> {
      *
      * @return The fetched component; or null.
      */
-
     public final T getRandomComponent() {
         return getRandomComponent(t -> true);
     }
@@ -182,7 +178,7 @@ public abstract class VitalRepository<T extends VitalComponent> {
     /**
      * Updates all components with the supplied ones
      */
-    public final void updateComponents(Collection<T> components) {
+    public final void updateComponents(@NonNull Collection<T> components) {
         unregisterAllComponents();
 
         components.forEach(this::registerComponent);

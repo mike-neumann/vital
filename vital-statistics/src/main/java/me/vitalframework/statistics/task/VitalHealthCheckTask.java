@@ -2,11 +2,14 @@ package me.vitalframework.statistics.task;
 
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
-import me.vitalframework.annotation.RequiresBungeecord;
-import me.vitalframework.annotation.RequiresSpigot;
+import me.vitalframework.RequiresBungeecord;
+import me.vitalframework.RequiresSpigot;
 import me.vitalframework.statistics.config.VitalStatisticsConfig;
 import me.vitalframework.tasks.VitalRepeatableTask;
+import net.md_5.bungee.api.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,6 +21,7 @@ import java.util.function.Supplier;
 
 @Component
 public interface VitalHealthCheckTask {
+    @NonNull
     Logger log = LoggerFactory.getLogger(VitalHealthCheckTask.class);
 
     long getLastTickTime();
@@ -46,6 +50,7 @@ public interface VitalHealthCheckTask {
      *
      * @return All tps reports of this healthcheck implementation
      */
+    @NonNull
     Map<Long, Integer> getLastTps();
 
     /**
@@ -53,8 +58,10 @@ public interface VitalHealthCheckTask {
      *
      * @return All unhealthy tps of this healthcheck implementation
      */
+    @NonNull
     Map<Long, Integer> getLastUnhealthyTps();
 
+    @NonNull
     VitalStatisticsConfig getVitalStatisticsConfig();
 
     default void handleTick() {
@@ -90,7 +97,7 @@ public interface VitalHealthCheckTask {
         setTicks(getTicks() + 1);
     }
 
-    default <K, V> void removeFirst(Supplier<Map<K, V>> map) {
+    default <K, V> void removeFirst(@NonNull Supplier<Map<K, V>> map) {
         final var cache = new ArrayList<>(map.get().entrySet().stream().toList());
 
         map.get().clear();
@@ -106,15 +113,22 @@ public interface VitalHealthCheckTask {
     @RequiresSpigot
     @VitalRepeatableTask.Info(interval = 50)
     class Spigot extends VitalRepeatableTask.Spigot implements VitalHealthCheckTask {
+        @NonNull
         private final Map<Long, Integer> lastTps = new HashMap<>();
+
+        @NonNull
         private final Map<Long, Integer> lastUnhealthyTps = new HashMap<>();
+
+        @NonNull
         private final VitalStatisticsConfig vitalStatisticsConfig;
+
         private long lastTickTime = System.currentTimeMillis();
         private long lastSecondTime = System.currentTimeMillis();
         private int ticks;
         private int tps;
 
-        public Spigot(VitalStatisticsConfig vitalStatisticsConfig) {
+        public Spigot(@NonNull JavaPlugin plugin, @NonNull VitalStatisticsConfig vitalStatisticsConfig) {
+            super(plugin);
             this.vitalStatisticsConfig = vitalStatisticsConfig;
         }
 
@@ -134,15 +148,22 @@ public interface VitalHealthCheckTask {
     @RequiresBungeecord
     @VitalRepeatableTask.Info(interval = 50)
     class Bungeecord extends VitalRepeatableTask.Bungeecord implements VitalHealthCheckTask {
+        @NonNull
         private final Map<Long, Integer> lastTps = new HashMap<>();
+
+        @NonNull
         private final Map<Long, Integer> lastUnhealthyTps = new HashMap<>();
+
+        @NonNull
         private final VitalStatisticsConfig vitalStatisticsConfig;
+
         private long lastTickTime = System.currentTimeMillis();
         private long lastSecondTime = System.currentTimeMillis();
         private int ticks;
         private int tps;
 
-        public Bungeecord(VitalStatisticsConfig vitalStatisticsConfig) {
+        public Bungeecord(@NonNull Plugin plugin, @NonNull VitalStatisticsConfig vitalStatisticsConfig) {
+            super(plugin);
             this.vitalStatisticsConfig = vitalStatisticsConfig;
         }
 

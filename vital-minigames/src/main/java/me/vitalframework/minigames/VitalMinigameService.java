@@ -2,6 +2,7 @@ package me.vitalframework.minigames;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import me.vitalframework.Vital;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
@@ -13,16 +14,14 @@ import org.springframework.stereotype.Service;
  *
  * @author xRa1ny
  */
+@Getter
+@RequiredArgsConstructor
 @Service
 public class VitalMinigameService {
+    @NonNull
     private final JavaPlugin plugin;
 
-    @Getter
     private VitalBaseMinigameState vitalMinigameState;
-
-    public VitalMinigameService(JavaPlugin plugin) {
-        this.plugin = plugin;
-    }
 
     /**
      * Checks if the current minigame state matches a specified class.

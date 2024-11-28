@@ -91,8 +91,7 @@ public abstract class VitalConfig {
                 final var fileCreated = file.createNewFile();
 
                 if (fileCreated) {
-                    log.info("%s config file created"
-                            .formatted(fileName));
+                    log.info("{} config file created", fileName);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

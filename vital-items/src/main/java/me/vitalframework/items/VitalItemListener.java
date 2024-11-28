@@ -4,6 +4,7 @@ import lombok.NonNull;
 import me.vitalframework.VitalListener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,17 +15,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class VitalItemListener extends VitalListener.Spigot {
-    /**
-     * The management system for custom item stacks.
-     */
+    @NonNull
     private final VitalItemService vitalItemService;
 
-    /**
-     * Constructs a new instance of the VitalItemStackListener.
-     *
-     * @param vitalItemService The management system for custom item stacks.
-     */
-    public VitalItemListener(@NonNull VitalItemService vitalItemService) {
+    public VitalItemListener(@NonNull JavaPlugin javaPlugin, @NonNull VitalItemService vitalItemService) {
+        super(javaPlugin);
+
         this.vitalItemService = vitalItemService;
     }
 

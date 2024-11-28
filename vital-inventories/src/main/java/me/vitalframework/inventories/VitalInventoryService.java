@@ -26,7 +26,7 @@ public class VitalInventoryService {
     }
 
     @NonNull
-    public Collection<? extends VitalInventory> getInventories(Class<? extends VitalInventory> vitalInventoryClass) {
+    public Collection<? extends VitalInventory> getInventories(@NonNull Class<? extends VitalInventory> vitalInventoryClass) {
         try {
             return Vital.getContext().getBeansOfType(vitalInventoryClass).values();
         } catch (Exception e) {

@@ -32,15 +32,18 @@ import java.util.function.Predicate;
  * @apiNote This class can be used standalone, detached from any Vital project. It only contains utilities for easier interaction with the SpigotAPI.
  */
 public interface VitalUtils<CS, P extends CS> {
+    @NonNull
     static Spigot spigot() {
         return new Spigot();
     }
 
+    @NonNull
     static Bungeecord bungeecord() {
         return new Bungeecord();
     }
 
-    static String chatButton(String color, String hover, String text, String click, ClickEvent.Action action) {
+    @NonNull
+    static String chatButton(@NonNull String color, @NonNull String hover, @NonNull String text, @NonNull String click, @NonNull ClickEvent.Action action) {
         return "<hover:show_text:'" + hover + "'>" +
                 "<click:" + action.name().toLowerCase() + ":'" + click + "'>" +
                 "<" + color + ">" + "[" + text + "]" +
@@ -48,27 +51,33 @@ public interface VitalUtils<CS, P extends CS> {
                 "</hover>";
     }
 
-    static String chatRunCommandButton(String color, String text, String command) {
+    @NonNull
+    static String chatRunCommandButton(@NonNull String color, @NonNull String text, @NonNull String command) {
         return chatButton(color, command, text, command, ClickEvent.Action.RUN_COMMAND);
     }
 
-    static String chatSuggestCommandButton(String color, String text, String command) {
+    @NonNull
+    static String chatSuggestCommandButton(@NonNull String color, @NonNull String text, @NonNull String command) {
         return chatButton(color, command, text, command, ClickEvent.Action.SUGGEST_COMMAND);
     }
 
-    static String chatRunCommandYesButton(String command) {
+    @NonNull
+    static String chatRunCommandYesButton(@NonNull String command) {
         return chatRunCommandButton("green", "YES", command);
     }
 
-    static String chatRunCommandNoButton(String command) {
+    @NonNull
+    static String chatRunCommandNoButton(@NonNull String command) {
         return chatRunCommandButton("red", "NO", command);
     }
 
-    static String chatRunCommandOkButton(String command) {
+    @NonNull
+    static String chatRunCommandOkButton(@NonNull String command) {
         return chatRunCommandButton("green", "OK", command);
     }
 
-    static String chatRunCommandXButton(String command) {
+    @NonNull
+    static String chatRunCommandXButton(@NonNull String command) {
         return chatRunCommandButton("red", "X", command);
     }
 
@@ -96,7 +105,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param message      The message.
      * @param tagResolvers The tag resolvers for custom minimessage support.
      */
-    void sendMessage(@NonNull CS sender, @NonNull String message, TagResolver... tagResolvers);
+    void sendMessage(@NonNull CS sender, @NonNull String message, @NonNull TagResolver... tagResolvers);
 
     /**
      * Broadcasts a message to all players currently connected to the server, matching the given {@link Predicate}.
@@ -105,7 +114,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param playerPredicate The Predicate specifying the condition in which the message should be broadcast.
      * @param tagResolvers    Any tag resolvers for custom minimessage tag syntax.
      */
-    default void broadcastMessage(@NonNull String message, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastMessage(@NonNull String message, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendMessage(player, message, tagResolvers));
     }
 
@@ -116,7 +125,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param tagResolvers Any tag resolvers for custom minimessage tag syntax.
      * @apiNote The given message will be broadcast in minimessage syntax.
      */
-    default void broadcastMessage(@NonNull String message, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastMessage(@NonNull String message, @NonNull TagResolver... tagResolvers) {
         broadcastMessage(message, player -> true, tagResolvers);
     }
 
@@ -131,7 +140,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param fadeOut      The fade out times (measured in ticks).
      * @param tagResolvers Any custom tag resolvers for custom minimessage tags.
      */
-    void sendTitle(@NonNull P player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers);
+    void sendTitle(@NonNull P player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver... tagResolvers);
 
     /**
      * Sends a title to the given player in minimessage syntax with the specified tag resolvers for any custom minimessage tags for replacement.
@@ -142,7 +151,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param subtitle     The subtitle.
      * @param tagResolvers Any custom tag resolvers for minimessage.
      */
-    void sendTitle(@NonNull P player, String title, String subtitle, @NonNull TagResolver @NonNull ... tagResolvers);
+    void sendTitle(@NonNull P player, String title, String subtitle, @NonNull TagResolver... tagResolvers);
 
     /**
      * Broadcasts a title to all players currently connected to this server.
@@ -155,7 +164,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param playerPredicate The {@link Predicate} specifying the condition in which the title is broadcast.
      * @param tagResolvers    Any tag resolvers for custom minimessage replacement syntax.
      */
-    default void broadcastTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendTitle(player, title, subtitle, fadeIn, stay, fadeOut, tagResolvers));
     }
 
@@ -167,7 +176,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param playerPredicate The {@link Predicate} specifying the condition in which the title is broadcast.
      * @param tagResolvers    Any tag resolvers for custom minimessage tag syntax.
      */
-    default void broadcastTitle(String title, String subtitle, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastTitle(String title, String subtitle, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendTitle(player, title, subtitle, tagResolvers));
     }
 
@@ -178,7 +187,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param subtitle     The subtitle to broadcast.
      * @param tagResolvers Any tag resolvers for custom minimessage tag syntax.
      */
-    default void broadcastTitle(String title, String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastTitle(String title, String subtitle, @NonNull TagResolver... tagResolvers) {
         broadcastAction(player -> sendTitle(player, title, subtitle, tagResolvers));
     }
 
@@ -192,7 +201,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param fadeOut      The fade-out amount (in ticks).
      * @param tagResolvers Any tag resolvers for custom minimessage tag syntax.
      */
-    default void broadcastTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut, @NonNull TagResolver... tagResolvers) {
         broadcastAction(player -> sendTitle(player, title, subtitle, fadeIn, stay, fadeOut, tagResolvers));
     }
 
@@ -206,7 +215,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param tagResolvers Any custom tag resolvers for custom minimessage tags.
      * @apiNote The title will stay approx. 1h
      */
-    void sendPersistentTitle(@NonNull P player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers);
+    void sendPersistentTitle(@NonNull P player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver... tagResolvers);
 
     /**
      * Broadcasts a persistent (permanent) title to all players in minimessage syntax with the specified predicate and tag resolvers for any custom minimessage tags for replacement.
@@ -218,7 +227,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param tagResolvers    Any custom tag resolvers for custom minimessage tags.
      * @apiNote The title will stay approx. 1h
      */
-    default void broadcastPersistentTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastPersistentTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendPersistentTitle(player, title, subtitle, fadeIn, tagResolvers));
     }
 
@@ -231,7 +240,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param tagResolvers Any custom tag resolvers for custom minimessage tags.
      * @apiNote The title will stay approx. 1h
      */
-    default void broadcastPersistentTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastPersistentTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver... tagResolvers) {
         broadcastAction(player -> sendPersistentTitle(player, title, subtitle, fadeIn, tagResolvers));
     }
 
@@ -242,7 +251,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param message      The message in minimessage syntax.
      * @param tagResolvers Any custom tag resolver for minimessage tag syntax.
      */
-    void sendActionBar(@NonNull P player, @NonNull String message, @NonNull TagResolver @NonNull ... tagResolvers);
+    void sendActionBar(@NonNull P player, @NonNull String message, @NonNull TagResolver... tagResolvers);
 
     /**
      * Broadcasts an action bar message for all players in minimessage syntax.
@@ -251,7 +260,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param playerPredicate The predicate every player MUST MATCH WITH.
      * @param tagResolvers    Any custom tag resolvers for minimessage tag syntax.
      */
-    default void broadcastActionBar(@NonNull String message, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastActionBar(@NonNull String message, @NonNull Predicate<P> playerPredicate, @NonNull TagResolver... tagResolvers) {
         broadcastAction(playerPredicate, player -> sendActionBar(player, message, tagResolvers));
     }
 
@@ -261,7 +270,7 @@ public interface VitalUtils<CS, P extends CS> {
      * @param message      The message.
      * @param tagResolvers Any custom tag resolvers for minimessage tag syntax.
      */
-    default void broadcastActionBar(@NonNull String message, @NonNull TagResolver @NonNull ... tagResolvers) {
+    default void broadcastActionBar(@NonNull String message, @NonNull TagResolver... tagResolvers) {
         broadcastAction(player -> sendActionBar(player, message, tagResolvers));
     }
 
@@ -280,13 +289,13 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void broadcastMessage(@NonNull String message, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastMessage(@NonNull String message, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver... tagResolvers) {
             // must be used since, both version (paper and spigot) support the bungeeapi implementations...
             broadcastAction(playerPredicate, player -> player.spigot().sendMessage(BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message, tagResolvers))));
         }
 
         @Override
-        public void broadcastMessage(@NonNull String message, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastMessage(@NonNull String message, @NonNull TagResolver... tagResolvers) {
             broadcastMessage(message, player -> true, tagResolvers);
         }
 
@@ -334,7 +343,7 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void sendTitle(@NonNull Player player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendTitle(@NonNull Player player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver... tagResolvers) {
             player.sendTitle(
                     title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers)),
                     subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers)),
@@ -345,7 +354,7 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void sendTitle(@NonNull Player player, String title, String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendTitle(@NonNull Player player, String title, String subtitle, @NonNull TagResolver... tagResolvers) {
             player.sendTitle(
                     title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers)),
                     subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers))
@@ -353,37 +362,37 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void broadcastTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver... tagResolvers) {
             broadcastAction(player -> sendTitle(player, title, subtitle, fadeIn, stay, fadeOut, tagResolvers));
         }
 
         @Override
-        public void broadcastTitle(String title, String subtitle, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastTitle(String title, String subtitle, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver... tagResolvers) {
             broadcastAction(player -> sendTitle(player, title, subtitle, tagResolvers));
         }
 
         @Override
-        public void broadcastTitle(String title, String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastTitle(String title, String subtitle, @NonNull TagResolver... tagResolvers) {
             broadcastTitle(title, subtitle, player -> true, tagResolvers);
         }
 
         @Override
-        public void broadcastTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut, @NonNull TagResolver... tagResolvers) {
             broadcastTitle(title, subtitle, fadeIn, stay, fadeOut, player -> true, tagResolvers);
         }
 
         @Override
-        public void sendPersistentTitle(@NonNull Player player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendPersistentTitle(@NonNull Player player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver... tagResolvers) {
             sendTitle(player, title, subtitle, fadeIn, 72_000 /* 1h */, 0, tagResolvers);
         }
 
         @Override
-        public void broadcastPersistentTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fade, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastPersistentTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fade, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver... tagResolvers) {
             broadcastAction(player -> sendPersistentTitle(player, title, subtitle, fade, tagResolvers));
         }
 
         @Override
-        public void broadcastPersistentTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fade, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastPersistentTitle(String title, String subtitle, @Range(from = 0, to = 72_000) int fade, @NonNull TagResolver... tagResolvers) {
             broadcastAction(player -> sendPersistentTitle(player, title, subtitle, fade, tagResolvers));
         }
 
@@ -448,19 +457,19 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void sendActionBar(@NonNull Player player, @NonNull String message, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendActionBar(@NonNull Player player, @NonNull String message, @NonNull TagResolver... tagResolvers) {
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, BungeeComponentSerializer.get().serialize(
                     MiniMessage.miniMessage().deserialize(message, tagResolvers)
             ));
         }
 
         @Override
-        public void broadcastActionBar(@NonNull String message, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastActionBar(@NonNull String message, @NonNull Predicate<Player> playerPredicate, @NonNull TagResolver... tagResolvers) {
             broadcastAction(playerPredicate, player -> sendActionBar(player, message, tagResolvers));
         }
 
         @Override
-        public void broadcastActionBar(@NonNull String message, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void broadcastActionBar(@NonNull String message, @NonNull TagResolver... tagResolvers) {
             broadcastActionBar(message, player -> true, tagResolvers);
         }
 
@@ -828,7 +837,7 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void sendTitle(@NonNull ProxiedPlayer player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendTitle(@NonNull ProxiedPlayer player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @Range(from = 0, to = 72_000) int stay, @Range(from = 0, to = 72_000) int fadeOut, @NonNull TagResolver... tagResolvers) {
             player.sendTitle(ProxyServer.getInstance().createTitle()
                     .title(TextComponent.fromLegacy(title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers))))
                     .subTitle(TextComponent.fromLegacy(subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers))))
@@ -839,7 +848,7 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void sendTitle(@NonNull ProxiedPlayer player, String title, String subtitle, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendTitle(@NonNull ProxiedPlayer player, String title, String subtitle, @NonNull TagResolver... tagResolvers) {
             player.sendTitle(ProxyServer.getInstance().createTitle()
                     .title(TextComponent.fromLegacy(title == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title, tagResolvers))))
                     .subTitle(TextComponent.fromLegacy(subtitle == null ? "" : LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle, tagResolvers))))
@@ -847,12 +856,12 @@ public interface VitalUtils<CS, P extends CS> {
         }
 
         @Override
-        public void sendPersistentTitle(@NonNull ProxiedPlayer player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendPersistentTitle(@NonNull ProxiedPlayer player, String title, String subtitle, @Range(from = 0, to = 72_000) int fadeIn, @NonNull TagResolver... tagResolvers) {
             sendTitle(player, title, subtitle, fadeIn, 72_000 /* 1h */, 0, tagResolvers);
         }
 
         @Override
-        public void sendActionBar(@NonNull ProxiedPlayer proxiedPlayer, @NonNull String message, @NonNull TagResolver @NonNull ... tagResolvers) {
+        public void sendActionBar(@NonNull ProxiedPlayer proxiedPlayer, @NonNull String message, @NonNull TagResolver... tagResolvers) {
             proxiedPlayer.sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(message, tagResolvers))));
         }
     }

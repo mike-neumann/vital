@@ -19,11 +19,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Getter
 public class VitalYMLConfigFileProcessor implements VitalConfig.FileProcessor {
     @NonNull
     private final File file;
 
-    @Getter
     @NonNull
     private final Yaml yaml;
 

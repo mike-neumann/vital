@@ -19,23 +19,23 @@ import java.util.List;
  *
  * @author xRa1ny
  */
+@Getter
 final class VitalScoreboardContent {
     /**
      * The Bukkit scoreboard instance associated with this content.
      */
-    @Getter
     @NonNull
     private final Scoreboard bukkitScoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+
     /**
      * The scoreboard teams belonging to this content.
      */
-    @Getter
     @NonNull
     private final List<VitalScoreboardTeam> teams = new ArrayList<>();
+
     /**
      * The title of this scoreboard content.
      */
-    @Getter
     @NonNull
     private String title;
 
@@ -116,4 +116,3 @@ final class VitalScoreboardContent {
         update();
     }
 }
-

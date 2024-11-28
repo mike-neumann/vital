@@ -2,10 +2,13 @@ package me.vitalframework;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Defines different plugin environments needed for automatic plugin ".yml" creation
  */
+@Getter
+@RequiredArgsConstructor
 public enum VitalPluginEnvironment {
     /**
      * Needed for spigot plugins.
@@ -17,10 +20,6 @@ public enum VitalPluginEnvironment {
      */
     BUNGEECORD("bungee.yml");
 
-    @Getter
+    @NonNull
     private final String ymlFileName;
-
-    VitalPluginEnvironment(@NonNull String ymlFileName) {
-        this.ymlFileName = ymlFileName;
-    }
 }

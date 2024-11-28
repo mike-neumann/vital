@@ -1,6 +1,6 @@
-package me.vitalframework.annotation;
+package me.vitalframework;
 
-import me.vitalframework.VitalPluginEnvironment;
+import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
@@ -23,6 +23,7 @@ public @interface VitalPluginInfo {
      *
      * @return The name of this plugin.
      */
+    @NonNull
     String name();
 
     /**
@@ -30,6 +31,7 @@ public @interface VitalPluginInfo {
      *
      * @return The description of this plugin.
      */
+    @NonNull
     String description() default "A Vital Plugin";
 
     /**
@@ -38,6 +40,7 @@ public @interface VitalPluginInfo {
      * @return The api version this plugin uses.
      * @apiNote api-version may be identical to server environment version.
      */
+    @NonNull
     String apiVersion() default "1.20";
 
     /**
@@ -45,6 +48,7 @@ public @interface VitalPluginInfo {
      *
      * @return The version of this plugin.
      */
+    @NonNull
     String version() default "1.0";
 
     /**
@@ -52,7 +56,7 @@ public @interface VitalPluginInfo {
      *
      * @return The author/s of this plugin.
      */
-
+    @NonNull
     String authors() default "";
 
     /**
@@ -60,6 +64,7 @@ public @interface VitalPluginInfo {
      *
      * @return The environment used for this vital plugin instance.
      */
+    @NonNull
     VitalPluginEnvironment environment();
 
     /**
@@ -67,5 +72,6 @@ public @interface VitalPluginInfo {
      *
      * @return The locations of any configuration files for spring
      */
+    @NonNull
     String[] springConfigLocations() default "classpath:application.properties";
 }

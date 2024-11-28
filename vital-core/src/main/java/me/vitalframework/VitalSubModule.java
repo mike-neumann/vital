@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class VitalSubModule {
     @PostConstruct
     public final void init() {
-        log.info("Using %s"
-                .formatted(getClass().getSimpleName()));
+        log.info("Using {}", getClass().getSimpleName());
     }
 }

@@ -10,7 +10,6 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
@@ -25,37 +24,20 @@ import java.util.concurrent.TimeUnit;
  *
  * @author xRa1ny
  */
+@Getter
 public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements RequiresAnnotation<VitalRepeatableTask.Info> {
-    @Getter
-    @Autowired
-    private P plugin;
+    @NonNull
+    private final P plugin;
 
-    @Getter
     private R runnable;
-
-    @Getter
     private T task;
 
-    @Getter
     @Setter
     private int interval;
 
-    @Getter
     @Setter
     private boolean allowTick = true;
 
-    /**
-     * Constructor for when using dependency injection
-     */
-    public VitalRepeatableTask() {
-        final var vitalRepeatableTaskInfo = getRequiredAnnotation();
-
-        interval = vitalRepeatableTaskInfo.interval();
-    }
-
-    /**
-     * Constructor for when not using dependency injection
-     */
     public VitalRepeatableTask(@NonNull P plugin) {
         final var vitalRepeatableTaskInfo = getRequiredAnnotation();
 
@@ -63,16 +45,13 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
         interval = vitalRepeatableTaskInfo.interval();
     }
 
-    /**
-     * Constructor for when not using dependency injection
-     */
     public VitalRepeatableTask(@NonNull P plugin, int interval) {
         this.plugin = plugin;
         this.interval = interval;
     }
 
     @Override
-    public final Class<Info> requiredAnnotationType() {
+    public final @NonNull Class<Info> requiredAnnotationType() {
         return Info.class;
     }
 
@@ -134,8 +113,10 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
 
     }
 
+    @NonNull
     protected abstract R createRunnable();
 
+    @NonNull
     protected abstract T createTask();
 
     protected abstract void cancelRunnable();
@@ -160,9 +141,6 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
     }
 
     public static abstract class Spigot extends VitalRepeatableTask<JavaPlugin, BukkitRunnable, BukkitTask> {
-        public Spigot() {
-        }
-
         public Spigot(@NonNull JavaPlugin plugin) {
             super(plugin);
         }
@@ -172,7 +150,7 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
         }
 
         @Override
-        protected BukkitRunnable createRunnable() {
+        protected @NonNull BukkitRunnable createRunnable() {
             return new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -186,7 +164,7 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
         }
 
         @Override
-        protected BukkitTask createTask() {
+        protected @NonNull BukkitTask createTask() {
             return getRunnable().runTaskTimer(getPlugin(), 0L, (long) ((getInterval() / 1000D) * 20L));
         }
 
@@ -202,9 +180,6 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
     }
 
     public static abstract class Bungeecord extends VitalRepeatableTask<Plugin, Runnable, ScheduledTask> {
-        public Bungeecord() {
-        }
-
         public Bungeecord(@NonNull Plugin plugin) {
             super(plugin);
         }
@@ -214,7 +189,7 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
         }
 
         @Override
-        protected Runnable createRunnable() {
+        protected @NonNull Runnable createRunnable() {
             return () -> {
                 if (!isAllowTick()) {
                     return;
@@ -225,7 +200,7 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
         }
 
         @Override
-        protected ScheduledTask createTask() {
+        protected @NonNull ScheduledTask createTask() {
             return ProxyServer.getInstance().getScheduler().schedule(getPlugin(), getRunnable(), 0L, getInterval(), TimeUnit.MILLISECONDS);
         }
 

@@ -20,14 +20,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+@Getter
 public class VitalInventory implements RequiresAnnotation<VitalInventory.Info> {
     private final int size;
+
+    @NonNull
     private final String name;
+
+    @NonNull
     private final Map<Player, Inventory> playerInventories = new HashMap<>();
+
+    @NonNull
     private final Map<Integer, ItemStack> items = new HashMap<>();
+
+    @NonNull
     private final Map<Map.Entry<Player, Integer>, Consumer<InventoryClickEvent>> actions = new HashMap<>();
 
-    @Getter
     private final VitalInventory previousInventory;
 
     public VitalInventory(VitalInventory previousInventory) {
@@ -38,40 +46,22 @@ public class VitalInventory implements RequiresAnnotation<VitalInventory.Info> {
         this.previousInventory = previousInventory;
     }
 
-    public void setItem(int slot, ItemStack itemStack, Player player, Consumer<InventoryClickEvent> action) {
+    @Override
+    public final @NonNull Class<Info> requiredAnnotationType() {
+        return Info.class;
+    }
+
+    public void setItem(int slot, ItemStack itemStack, @NonNull Player player, @NonNull Consumer<InventoryClickEvent> action) {
         items.put(slot, itemStack);
         actions.put(Map.entry(player, slot), action);
     }
 
-    public void setItem(int slot, ItemStack itemStack, Player player) {
+    public void setItem(int slot, ItemStack itemStack, @NonNull Player player) {
         setItem(slot, itemStack, player, e -> {
         });
     }
 
-//    public void setGlobalItem(int slot, ItemStack itemStack, Consumer<InventoryClickEvent> action) {
-//        globalItems.put(slot, Map.entry(itemStack, action));
-//    }
-//
-//    public void setGlobalItem(int slot, ItemStack itemStack) {
-//        setGlobalItem(slot, itemStack, e -> {
-//        });
-//    }
-//
-//    public void setPlayerItem(int slot, ItemStack itemStack, Player player, Consumer<InventoryClickEvent> action) {
-//        playerItems.put(Map.entry(player, slot), Map.entry(itemStack, action));
-//    }
-//
-//    public void setPlayerItem(int slot, ItemStack itemStack, Player player) {
-//        setPlayerItem(slot, itemStack, player, e -> {
-//        });
-//    }
-
-    @Override
-    public final Class<Info> requiredAnnotationType() {
-        return Info.class;
-    }
-
-    public boolean hasInventoryOpen(Player player) {
+    public boolean hasInventoryOpen(@NonNull Player player) {
         return playerInventories.containsKey(player);
     }
 
@@ -81,17 +71,15 @@ public class VitalInventory implements RequiresAnnotation<VitalInventory.Info> {
         playerInventories.forEach((player, inventory) -> update(player));
     }
 
-    public void update(Player player) {
+    public void update(@NonNull Player player) {
         final var inventory = playerInventories.get(player);
 
         onUpdate(player);
 
         items.forEach(inventory::setItem);
-        //globalItems.forEach((slot, entry) -> inventory.setItem(slot, entry.getKey()));
-        //playerItems.forEach((playerSlot, entry) -> inventory.setItem(playerSlot.getValue(), entry.getKey()));
     }
 
-    public void open(Player player) {
+    public void open(@NonNull Player player) {
         final var inventory = Bukkit.createInventory(player, size, name);
 
         playerInventories.put(player, inventory);
@@ -101,22 +89,7 @@ public class VitalInventory implements RequiresAnnotation<VitalInventory.Info> {
         player.openInventory(inventory);
     }
 
-    public void click(InventoryClickEvent e) {
-//        final Map.Entry<ItemStack, Consumer<InventoryClickEvent>> entry = globalItems.get(e.getSlot());
-//
-//        if (entry != null) {
-//            final Consumer<InventoryClickEvent> action = entry.getValue();
-//
-//            action.accept(e);
-//        }
-//
-//        final Map.Entry<ItemStack, Consumer<InventoryClickEvent>> playerEntry = playerItems.get(Map.entry((Player) e.getWhoClicked(), e.getSlot()));
-//
-//        if (playerEntry != null) {
-//            final Consumer<InventoryClickEvent> action = playerEntry.getValue();
-//
-//            action.accept(e);
-//        }
+    public void click(@NonNull InventoryClickEvent e) {
         final var action = actions.get(Map.entry(e.getWhoClicked(), e.getSlot()));
 
         if (action != null) {
@@ -124,7 +97,7 @@ public class VitalInventory implements RequiresAnnotation<VitalInventory.Info> {
         }
     }
 
-    public void close(Player player) {
+    public void close(@NonNull Player player) {
         playerInventories.remove(player);
         onClose(player);
     }
@@ -132,7 +105,7 @@ public class VitalInventory implements RequiresAnnotation<VitalInventory.Info> {
     /**
      * used for when this inventory is opened for any player
      */
-    public void onOpen(Player player) {
+    public void onOpen(@NonNull Player player) {
 
     }
 
@@ -146,14 +119,14 @@ public class VitalInventory implements RequiresAnnotation<VitalInventory.Info> {
     /**
      * used for when needing to set items that hold player specific information
      */
-    public void onUpdate(Player player) {
+    public void onUpdate(@NonNull Player player) {
 
     }
 
     /**
      * used for when this inventory is closed for an opened player
      */
-    public void onClose(Player player) {
+    public void onClose(@NonNull Player player) {
 
     }
 

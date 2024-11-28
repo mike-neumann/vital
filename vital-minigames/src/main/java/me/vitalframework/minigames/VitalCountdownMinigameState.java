@@ -1,7 +1,9 @@
 package me.vitalframework.minigames;
 
 import lombok.Getter;
+import lombok.NonNull;
 import me.vitalframework.tasks.VitalCountdownTask;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.UUID;
 
@@ -10,7 +12,12 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
+@Getter
 public abstract class VitalCountdownMinigameState extends VitalCountdownTask.Spigot implements VitalBaseMinigameState {
-    @Getter
+    @NonNull
     private final UUID uniqueId = UUID.randomUUID();
+
+    public VitalCountdownMinigameState(@NonNull JavaPlugin plugin) {
+        super(plugin);
+    }
 }

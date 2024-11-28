@@ -70,7 +70,7 @@ public class VitalItemService {
     }
 
     @NonNull
-    public Collection<? extends VitalItem> getItems(Class<? extends VitalItem> vitalItemClass) {
+    public Collection<? extends VitalItem> getItems(@NonNull Class<? extends VitalItem> vitalItemClass) {
         try {
             return Vital.getContext().getBeansOfType(vitalItemClass).values();
         } catch (Exception e) {

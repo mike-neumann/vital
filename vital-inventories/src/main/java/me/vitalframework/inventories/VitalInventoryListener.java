@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -17,6 +18,10 @@ import java.util.Optional;
  */
 @Component
 public class VitalInventoryListener extends VitalListener.Spigot {
+    public VitalInventoryListener(JavaPlugin plugin) {
+        super(plugin);
+    }
+
     /**
      * Handles the event when a player clicks in an inventory.
      *

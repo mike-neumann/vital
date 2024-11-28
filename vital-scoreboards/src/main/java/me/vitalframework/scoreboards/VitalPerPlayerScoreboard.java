@@ -18,23 +18,23 @@ import java.util.function.Function;
  *
  * @author xRa1ny
  */
+@Getter
 public class VitalPerPlayerScoreboard implements VitalScoreboard {
     /**
      * the title of this per player scoreboard
      */
-    @Getter
     @NonNull
     private final String title;
+
     /**
      * the scoreboard contents for each member of this per player scoreboard
      */
-    @Getter
     @NonNull
     private final Map<Player, VitalScoreboardContent> vitalScoreboardContentMap = new HashMap<>();
+
     /**
      * the lines of this per player scoreboard
      */
-    @Getter
     @NonNull
     private List<Function<Player, String>> lineList;
 

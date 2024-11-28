@@ -12,7 +12,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Used to easily create an interactive paged Inventory Menu.
@@ -20,22 +19,16 @@ import java.util.Optional;
  *
  * @author xRa1ny
  */
+@Getter
 public abstract class VitalPagedInventory extends VitalInventory {
-    /**
-     * The current page of this paged inventory menu.
-     */
-    @Getter
     private long page = 1;
 
-    @Getter
     @Setter
     private int fromSlot = 0;
 
-    @Getter
     @Setter
     private int toSlot = 0;
 
-    @Getter
     @Setter
     private int maxPage = 1;
 
@@ -47,12 +40,10 @@ public abstract class VitalPagedInventory extends VitalInventory {
     public VitalPagedInventory(VitalInventory previousInventory) {
         super(previousInventory);
 
-        final var optionalVitalPagedInventoryInfo = Optional.ofNullable(getClass().getAnnotation(Info.class));
+        final var info = getClass().getAnnotation(Info.class);
 
-        optionalVitalPagedInventoryInfo.ifPresent(vitalPagedInventoryInfo -> {
-            fromSlot = vitalPagedInventoryInfo.fromSlot();
-            toSlot = vitalPagedInventoryInfo.toSlot();
-        });
+        fromSlot = info.fromSlot();
+        toSlot = info.toSlot();
     }
 
     /**
@@ -103,6 +94,10 @@ public abstract class VitalPagedInventory extends VitalInventory {
         super.update(player);
     }
 
+    /**
+     * Slices the given list of items to fit the inventory for the current page
+     */
+    @NonNull
     protected <T> List<T> sliceForPage(@NonNull List<T> list) {
         final var startIndex = (int) (getPageContent() * (page - 1));
 
@@ -120,13 +115,13 @@ public abstract class VitalPagedInventory extends VitalInventory {
     }
 
     @Override
-    public void open(Player player) {
+    public void open(@NonNull Player player) {
         super.open(player);
         setPage(1, player);
     }
 
     @Override
-    public void update(Player player) {
+    public void update(@NonNull Player player) {
         super.update(player);
         setPage(page, player);
     }

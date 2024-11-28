@@ -3,7 +3,7 @@ package me.vitalframework.processor;
 import lombok.Getter;
 import lombok.NonNull;
 import me.vitalframework.VitalPluginEnvironment;
-import me.vitalframework.annotation.VitalPluginInfo;
+import me.vitalframework.VitalPluginInfo;
 import org.apache.commons.io.IOUtils;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -102,7 +102,7 @@ public class VitalPluginInfoAnnotationProcessor extends AbstractProcessor {
      * @param version     The version of this plugin.
      * @param environment The plugin environment for yml generation.
      */
-    public void generatePluginYml(@NonNull String className, @NonNull String name, @NonNull String apiVersion, @NonNull String version, VitalPluginEnvironment environment) {
+    public void generatePluginYml(@NonNull String className, @NonNull String name, @NonNull String apiVersion, @NonNull String version, @NonNull VitalPluginEnvironment environment) {
         // append basic plugin meta information to plugin info holder.
         VitalPluginInfoHolder.PLUGIN_INFO.append("main: ").append(className);
         VitalPluginInfoHolder.PLUGIN_INFO.append("\n");

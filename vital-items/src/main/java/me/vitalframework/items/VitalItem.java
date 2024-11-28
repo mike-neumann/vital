@@ -29,12 +29,11 @@ import java.util.UUID;
  *
  * @author xRa1ny
  */
+@Getter
 public abstract class VitalItem extends ItemStack implements RequiresAnnotation<VitalItem.Info> {
-    @Getter
     @NonNull
     private final Map<Player, Integer> playerCooldownMap = new HashMap<>();
 
-    @Getter
     private int initialCooldown = 0;
 
     public VitalItem() {
@@ -75,8 +74,47 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
     }
 
     @Override
-    public Class<Info> requiredAnnotationType() {
+    public @NonNull Class<Info> requiredAnnotationType() {
         return Info.class;
+    }
+
+    public final void handleInteraction(@NonNull PlayerInteractEvent e) {
+        if (!playerCooldownMap.containsKey(e.getPlayer())) {
+            playerCooldownMap.put(e.getPlayer(), 0);
+        }
+
+        if (playerCooldownMap.get(e.getPlayer()) >= 1) {
+            onCooldown(e);
+            return;
+        }
+
+        final var action = e.getAction();
+
+        switch (action) {
+            case Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK -> onLeftClick(e);
+            default -> onRightClick(e);
+        }
+
+        playerCooldownMap.put(e.getPlayer(), initialCooldown);
+    }
+
+    /**
+     * Checks if this item is enchanted.
+     *
+     * @return true if the item is enchanted, false otherwise.
+     */
+    public final boolean isEnchanted() {
+        return getItemMeta() == null || !getItemMeta().getEnchants().isEmpty();
+    }
+
+    /**
+     * Gets the current cooldown of the given player.
+     *
+     * @param player The player.
+     * @return The current cooldown.
+     */
+    public int getCooldown(@NonNull Player player) {
+        return playerCooldownMap.getOrDefault(player, 0);
     }
 
     /**
@@ -124,31 +162,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
 
     }
 
-    /**
-     * Handles player interaction with this item, considering cool-downs.
-     *
-     * @param e The player interact event.
-     */
-    public final void handleInteraction(@NonNull PlayerInteractEvent e) {
-        if (!playerCooldownMap.containsKey(e.getPlayer())) {
-            playerCooldownMap.put(e.getPlayer(), 0);
-        }
-
-        if (playerCooldownMap.get(e.getPlayer()) >= 1) {
-            onCooldown(e);
-            return;
-        }
-
-        final var action = e.getAction();
-
-        switch (action) {
-            case Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK -> onLeftClick(e);
-            default -> onRightClick(e);
-        }
-
-        playerCooldownMap.put(e.getPlayer(), initialCooldown);
-    }
-
     @Override
     public final String toString() {
         return super.toString().replace("%s x %d"
@@ -179,25 +192,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
     }
 
     /**
-     * Checks if this item is enchanted.
-     *
-     * @return true if the item is enchanted, false otherwise.
-     */
-    public final boolean isEnchanted() {
-        return getItemMeta() == null || !getItemMeta().getEnchants().isEmpty();
-    }
-
-    /**
-     * Gets the current cooldown of the given player.
-     *
-     * @param player The player.
-     * @return The current cooldown.
-     */
-    public int getCooldown(@NonNull Player player) {
-        return playerCooldownMap.getOrDefault(player, 0);
-    }
-
-    /**
      * Annotation to provide information about a {@link VitalItem} that can be interacted with in the game.
      *
      * @author xRa1ny
@@ -211,6 +205,7 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
          *
          * @return The name of the item stack.
          */
+        @NonNull
         String name();
 
         /**
@@ -234,6 +229,7 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
          *
          * @return The material/type of the item stack, represented by the Material enum.
          */
+        @NonNull
         Material type();
 
         /**
@@ -242,6 +238,7 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
          *
          * @return An array of item flags affecting the item's display.
          */
+        @NonNull
         ItemFlag[] itemFlags() default {};
 
         /**

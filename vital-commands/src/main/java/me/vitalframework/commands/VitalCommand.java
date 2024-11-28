@@ -15,7 +15,6 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
@@ -41,35 +40,29 @@ import java.util.stream.Stream;
 @Getter
 @Slf4j
 public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCommand.Info> {
-    @Autowired
-    private P plugin;
+    @NonNull
+    private final P plugin;
 
+    @NonNull
     private final Class<CS> commandSenderClass;
+
+    @NonNull
     private final String name;
+
+    @NonNull
     private final String permission;
+
     private final boolean requiresPlayer;
+
+    @NonNull
     private final Map<Pattern, Arg> args;
+
+    @NonNull
     private final Map<Arg, ArgHandlerContext> argHandlers;
+
+    @NonNull
     private final Map<Arg, Map<Class<? extends Throwable>, ArgExceptionHandlerContext>> argExceptionHandlers;
 
-    /**
-     * Constructor for when using dependency injection
-     */
-    protected VitalCommand(@NonNull Class<CS> commandSenderClass) {
-        final var vitalCommandInfo = getRequiredAnnotation();
-
-        this.commandSenderClass = commandSenderClass;
-        name = vitalCommandInfo.name();
-        permission = vitalCommandInfo.permission();
-        requiresPlayer = vitalCommandInfo.requiresPlayer();
-        args = getMappedArgs();
-        argHandlers = getMappedArgHandlers();
-        argExceptionHandlers = getMappedArgExceptionHandlers();
-    }
-
-    /**
-     * Constructor for when not using dependency injection
-     */
     protected VitalCommand(@NonNull P plugin, @NonNull Class<CS> commandSenderClass) {
         final var vitalCommandInfo = getRequiredAnnotation();
 
@@ -81,6 +74,11 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         args = getMappedArgs();
         argHandlers = getMappedArgHandlers();
         argExceptionHandlers = getMappedArgExceptionHandlers();
+    }
+
+    @Override
+    public final @NonNull Class<Info> requiredAnnotationType() {
+        return Info.class;
     }
 
     private Map<Pattern, Arg> getMappedArgs() {
@@ -173,12 +171,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         return mappedArgExceptionHandlers;
     }
 
-    @Override
-    public final Class<Info> requiredAnnotationType() {
-        return Info.class;
-    }
-
-    public final Arg getArg(@NonNull String arg) {
+    private Arg getArg(@NonNull String arg) {
         return args.entrySet().stream()
                 .filter(entry -> entry.getKey().matcher(arg).matches())
                 .map(Map.Entry::getValue)
@@ -240,7 +233,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
     }
 
     @NonNull
-    private ReturnState executeArgHandlerMethod(@NonNull CS sender, @NonNull String arg, @NonNull Arg commandArg, @NonNull String @NonNull [] values) throws InvocationTargetException, IllegalAccessException {
+    private ReturnState executeArgHandlerMethod(@NonNull CS sender, @NonNull String arg, @NonNull Arg commandArg, @NonNull String[] values) throws InvocationTargetException, IllegalAccessException {
         final var argHandlerContext = argHandlers.get(commandArg);
 
         if (argHandlerContext == null) {
@@ -272,15 +265,8 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         return (ReturnState) argHandlerContext.handlerMethod.invoke(this, sortedParameters);
     }
 
-    /**
-     * Handles the tab complete action on any command sender.
-     *
-     * @param sender The sender.
-     * @param args   Any args used during tab completion.
-     * @return A list of all supported tab completions.
-     */
     @NonNull
-    protected final List<String> handleTabComplete(@NonNull CS sender, @NonNull String @NonNull [] args) {
+    protected final List<String> handleTabComplete(@NonNull CS sender, @NonNull String[] args) {
         final var tabCompleted = new ArrayList<String>();
 
         for (var arg : this.args.values()) {
@@ -350,36 +336,12 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         return tabCompleted;
     }
 
-    /**
-     * If this generic sender is of type player.
-     *
-     * @param commandSender The sender.
-     * @return True if the sender is a player; false otherwise.
-     */
     public abstract boolean isPlayer(@NonNull CS commandSender);
 
-    /**
-     * Checks if the given sender has the required permissions to run this c command.
-     *
-     * @param commandSender The sender.
-     * @param permission    The permission to check for.
-     * @return True if the sender is permitted; false otherwise.
-     */
     public abstract boolean hasPermission(@NonNull CS commandSender, @NonNull String permission);
 
-    /**
-     * Gets all player names that are currently connected.
-     *
-     * @return A list of all player names currently connected.
-     */
     public abstract List<String> getAllPlayerNames();
 
-    /**
-     * Execute this command with any set specifications.
-     *
-     * @param sender Who sent the command.
-     * @param args   Any args used during command execution.
-     */
     public final void execute(@NonNull CS sender, @NonNull String[] args) {
         // Check if the command requires a player sender.
         if (requiresPlayer) {
@@ -546,6 +508,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
          *
          * @return The name of the command.
          */
+        @NonNull
         String name();
 
         /**
@@ -553,6 +516,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
          *
          * @return The description of this command.
          */
+        @NonNull
         String description() default "A Vital Command";
 
         /**
@@ -560,6 +524,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
          *
          * @return The aliases of this command.
          */
+        @NonNull
         String[] aliases() default {};
 
         /**
@@ -567,6 +532,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
          *
          * @return The usages message of this command.
          */
+        @NonNull
         String usage() default "";
 
         /**
@@ -574,6 +540,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
          *
          * @return The required permission (default is an empty string).
          */
+        @NonNull
         String permission() default "";
 
         /**
@@ -600,6 +567,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
          * @return The value of the command argument.
          * @see Type
          */
+        @NonNull
         String value();
 
         /**
@@ -608,6 +576,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
          *
          * @return The permission node (default is an empty string).
          */
+        @NonNull
         String permission() default "";
 
         /**
@@ -680,6 +649,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
          *
          * @return An array of command argument values.
          */
+        @NonNull
         Arg value();
     }
 
@@ -692,16 +662,20 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         /**
          * Defines the command arg this exception handling method should be mapped to
          */
+        @NonNull
         String value();
 
         /**
          * Defines the exception type this exception handler should manage
          */
+        @NonNull
         Class<? extends Throwable> type();
     }
 
     public record ArgHandlerContext(
+            @NonNull
             Method handlerMethod,
+
             Integer commandSenderIndex,
             Integer executedArgIndex,
             Integer commandArgIndex,
@@ -710,7 +684,9 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
     }
 
     public record ArgExceptionHandlerContext(
+            @NonNull
             Method handlerMethod,
+
             Integer commandSenderIndex,
             Integer executedArgIndex,
             Integer argIndex,
@@ -719,10 +695,6 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
     }
 
     public static abstract class Spigot extends VitalCommand<JavaPlugin, org.bukkit.command.CommandSender> implements VitalPluginCommand.Spigot {
-        public Spigot() {
-            super(org.bukkit.command.CommandSender.class);
-        }
-
         public Spigot(@NonNull JavaPlugin plugin) {
             super(plugin, org.bukkit.command.CommandSender.class);
         }
@@ -764,12 +736,6 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
 
     public static abstract class Bungeecord extends VitalCommand<Plugin, net.md_5.bungee.api.CommandSender> {
         private VitalPluginCommand.Bungeecord command;
-
-        public Bungeecord() {
-            super(net.md_5.bungee.api.CommandSender.class);
-
-            setupCommand();
-        }
 
         public Bungeecord(@NonNull Plugin plugin) {
             super(plugin, net.md_5.bungee.api.CommandSender.class);
