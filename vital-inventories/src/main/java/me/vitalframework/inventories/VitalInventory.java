@@ -117,7 +117,7 @@ public class VitalInventory implements RequiresAnnotation<VitalInventory.Info> {
 //
 //            action.accept(e);
 //        }
-        final Consumer<InventoryClickEvent> action = actions.get(Map.entry(e.getWhoClicked(), e.getSlot()));
+        final var action = actions.get(Map.entry(e.getWhoClicked(), e.getSlot()));
 
         if (action != null) {
             action.accept(e);
