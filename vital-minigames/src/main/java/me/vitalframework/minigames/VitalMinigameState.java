@@ -9,4 +9,7 @@ import java.util.UUID;
 public class VitalMinigameState implements VitalBaseMinigameState {
     @NonNull
     private final UUID uniqueId = UUID.randomUUID();
+
+    @NonNull
+    private final String name = getClass().getSimpleName();
 }

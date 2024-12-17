@@ -1,7 +1,7 @@
 plugins {
     `maven-publish`
     `java-gradle-plugin`
-    kotlin("jvm") version "1.9.23"
+    kotlin("jvm") version "1.9.24"
 }
 
 gradlePlugin {

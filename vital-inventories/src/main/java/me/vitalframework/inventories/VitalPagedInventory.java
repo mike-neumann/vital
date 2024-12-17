@@ -24,13 +24,13 @@ public abstract class VitalPagedInventory extends VitalInventory {
     private long page = 1;
 
     @Setter
+    private long maxPage = 1;
+
+    @Setter
     private int fromSlot = 0;
 
     @Setter
     private int toSlot = 0;
-
-    @Setter
-    private int maxPage = 1;
 
     /**
      * Constructs a new paged inventory with the specified previous inventory to open after clicking out of inventory menu bounds.

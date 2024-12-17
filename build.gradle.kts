@@ -1,6 +1,7 @@
 plugins {
     `java-library`
     `maven-publish`
+    kotlin("jvm") version "1.9.24"
 }
 
 subprojects {
@@ -56,4 +57,12 @@ subprojects {
                 "implNote:a:Implementation Note:"
             )
     }
+}
+
+repositories {
+    mavenCentral()
+}
+
+kotlin {
+    jvmToolchain(21)
 }

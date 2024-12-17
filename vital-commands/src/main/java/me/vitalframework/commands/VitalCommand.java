@@ -182,9 +182,9 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
     private void executeArgExceptionHandlerMethod(@NonNull CS sender, @NonNull Throwable exception, @NonNull String arg, @NonNull Arg commandArg) {
         final var exceptionHandlers = argExceptionHandlers.get(commandArg);
 
-        // we may not have any exception handlers mapped at all, if that is the case, call the base exception handler for this command
         if (exceptionHandlers == null || exceptionHandlers.isEmpty()) {
-            onCommandError(sender, commandArg, exception);
+            // we do not have any exception handler mapped for this argument
+            throw new RuntimeException(exception);
         } else {
             final var optionalExceptionHandlerContext = exceptionHandlers.entrySet().stream()
                     .filter(entry -> entry.getKey().isAssignableFrom(exception.getClass()))
