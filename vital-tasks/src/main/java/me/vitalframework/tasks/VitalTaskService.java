@@ -12,7 +12,7 @@ public class VitalTaskService {
     @NonNull
     public Collection<? extends VitalRepeatableTask<?, ?, ?>> getRepeatableTasks(@NonNull Class<? extends VitalRepeatableTask<?, ?, ?>> vitalRepeatableTaskClass) {
         try {
-            return Vital.getContext().getBeansOfType(vitalRepeatableTaskClass).values();
+            return Vital.INSTANCE.getContext().getBeansOfType(vitalRepeatableTaskClass).values();
         } catch (Exception e) {
             return List.of();
         }
@@ -27,7 +27,7 @@ public class VitalTaskService {
 
     public <T extends VitalRepeatableTask<?, ?, ?>> T getRepeatableTask(@NonNull Class<T> vitalRepeatableTaskClass) {
         try {
-            return Vital.getContext().getBean(vitalRepeatableTaskClass);
+            return Vital.INSTANCE.getContext().getBean(vitalRepeatableTaskClass);
         } catch (Exception e) {
             return null;
         }
@@ -36,7 +36,7 @@ public class VitalTaskService {
     @NonNull
     public Collection<? extends VitalCountdownTask<?, ?>> getCountdownTasks(@NonNull Class<? extends VitalCountdownTask<?, ?>> vitalCountdownTaskClass) {
         try {
-            return Vital.getContext().getBeansOfType(vitalCountdownTaskClass).values();
+            return Vital.INSTANCE.getContext().getBeansOfType(vitalCountdownTaskClass).values();
         } catch (Exception e) {
             return List.of();
         }
@@ -51,7 +51,7 @@ public class VitalTaskService {
 
     public <T extends VitalCountdownTask<?, ?>> T getCountdownTask(@NonNull Class<T> vitalCountdownTaskClass) {
         try {
-            return Vital.getContext().getBean(vitalCountdownTaskClass);
+            return Vital.INSTANCE.getContext().getBean(vitalCountdownTaskClass);
         } catch (Exception e) {
             return null;
         }

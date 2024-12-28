@@ -20,7 +20,7 @@ public class VitalInventoryService {
      * @param vitalInventoryClass The class of the {@link VitalInventory} to open for the given {@link Player}.
      */
     public void openInventory(@NonNull Player player, @NonNull Class<? extends VitalInventory> vitalInventoryClass) {
-        final var vitalInventory = Vital.getContext().getBean(vitalInventoryClass);
+        final var vitalInventory = Vital.INSTANCE.getContext().getBean(vitalInventoryClass);
 
         vitalInventory.open(player);
     }
@@ -28,7 +28,7 @@ public class VitalInventoryService {
     @NonNull
     public Collection<? extends VitalInventory> getInventories(@NonNull Class<? extends VitalInventory> vitalInventoryClass) {
         try {
-            return Vital.getContext().getBeansOfType(vitalInventoryClass).values();
+            return Vital.INSTANCE.getContext().getBeansOfType(vitalInventoryClass).values();
         } catch (Exception e) {
             return List.of();
         }
@@ -42,7 +42,7 @@ public class VitalInventoryService {
 
     public <T extends VitalInventory> T getInventory(@NonNull Class<T> vitalInventoryClass) {
         try {
-            return Vital.getContext().getBean(vitalInventoryClass);
+            return Vital.INSTANCE.getContext().getBean(vitalInventoryClass);
         } catch (Exception e) {
             return null;
         }

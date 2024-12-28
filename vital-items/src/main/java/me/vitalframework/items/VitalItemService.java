@@ -28,7 +28,7 @@ public class VitalItemService {
      */
     @NonNull
     public Map<Integer, ItemStack> addItem(@NonNull Inventory inventory, @NonNull Class<? extends VitalItem> itemStackClass) {
-        final var vitalItem = Vital.getContext().getBean(itemStackClass);
+        final var vitalItem = Vital.INSTANCE.getContext().getBean(itemStackClass);
 
         return inventory.addItem(vitalItem);
     }
@@ -53,7 +53,7 @@ public class VitalItemService {
      * @param itemStackClass The class of te {@link VitalItem} (must be registered).
      */
     public void setItem(@NonNull Inventory inventory, int slot, @NonNull Class<? extends VitalItem> itemStackClass) {
-        final VitalItem vitalItem = Vital.getContext().getBean(itemStackClass);
+        final VitalItem vitalItem = Vital.INSTANCE.getContext().getBean(itemStackClass);
 
         inventory.setItem(slot, vitalItem);
     }
@@ -72,7 +72,7 @@ public class VitalItemService {
     @NonNull
     public Collection<? extends VitalItem> getItems(@NonNull Class<? extends VitalItem> vitalItemClass) {
         try {
-            return Vital.getContext().getBeansOfType(vitalItemClass).values();
+            return Vital.INSTANCE.getContext().getBeansOfType(vitalItemClass).values();
         } catch (Exception e) {
             return List.of();
         }
@@ -86,7 +86,7 @@ public class VitalItemService {
 
     public <T extends VitalItem> T getItem(@NonNull Class<T> vitalItemClass) {
         try {
-            return Vital.getContext().getBean(vitalItemClass);
+            return Vital.INSTANCE.getContext().getBean(vitalItemClass);
         } catch (Exception e) {
             return null;
         }

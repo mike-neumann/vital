@@ -1,6 +1,6 @@
-package me.vitalframework.items;
+package me.vitalframework.items
 
-import org.bukkit.NamespacedKey;
+import org.bukkit.NamespacedKey
 
 /**
  * Defines namespaced keys for various purposes within the Vital plugin.
@@ -8,9 +8,10 @@ import org.bukkit.NamespacedKey;
  *
  * @author xRa1ny
  */
-public interface VitalNamespacedKey {
+object VitalNamespacedKey {
     /**
      * A namespaced key for storing a unique identifier on ItemStacks.
      */
-    NamespacedKey ITEM_UUID = NamespacedKey.fromString("item-uuid");
+    @JvmField
+    val ITEM_UUID: NamespacedKey? = NamespacedKey.fromString("item-uuid")
 }

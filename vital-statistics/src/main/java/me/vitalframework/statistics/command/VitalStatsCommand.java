@@ -2,7 +2,7 @@ package me.vitalframework.statistics.command;
 
 import lombok.Getter;
 import lombok.NonNull;
-import me.vitalframework.RequiresBungeecord;
+import me.vitalframework.RequiresBungee;
 import me.vitalframework.RequiresSpigot;
 import me.vitalframework.Vital;
 import me.vitalframework.VitalSubModule;
@@ -42,7 +42,7 @@ public interface VitalStatsCommand<CS> {
         }
 
         final var ramUsageInGigaBytes = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024f / 1024 / 1024;
-        final var vitalModuleNames = Vital.getContext().getBeansOfType(VitalSubModule.class);
+        final var vitalModuleNames = Vital.INSTANCE.getContext().getBeansOfType(VitalSubModule.class);
 
         sendMessage(sender, "Spring version: <yellow>" + SpringVersion.getVersion());
         sendMessage(sender, "Server status: <yellow>" + getVitalHealthCheckTask().getTps() + " TPS (" + serverStatus + ")");
@@ -107,7 +107,7 @@ public interface VitalStatsCommand<CS> {
     }
 
     @Getter
-    @RequiresBungeecord
+    @RequiresBungee
     class Bungeecord extends VitalCommand.Bungeecord implements VitalStatsCommand<net.md_5.bungee.api.CommandSender> {
         @NonNull
         private final VitalHealthCheckTask vitalHealthCheckTask;

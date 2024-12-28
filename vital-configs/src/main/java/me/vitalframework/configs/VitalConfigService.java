@@ -12,7 +12,7 @@ public class VitalConfigService {
     @NonNull
     public Collection<? extends VitalConfig> getConfigs(Class<? extends VitalConfig> vitalConfigClass) {
         try {
-            return Vital.getContext().getBeansOfType(vitalConfigClass).values();
+            return Vital.INSTANCE.getContext().getBeansOfType(vitalConfigClass).values();
         } catch (Exception e) {
             return List.of();
         }
@@ -26,7 +26,7 @@ public class VitalConfigService {
 
     public <T extends VitalConfig> T getConfig(@NonNull Class<T> vitalConfigClass) {
         try {
-            return Vital.getContext().getBean(vitalConfigClass);
+            return Vital.INSTANCE.getContext().getBean(vitalConfigClass);
         } catch (Exception e) {
             return null;
         }

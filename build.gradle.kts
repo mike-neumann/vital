@@ -1,15 +1,16 @@
 plugins {
     `java-library`
     `maven-publish`
-    kotlin("jvm") version "1.9.24"
+    kotlin("jvm") version "2.1.0"
 }
 
 subprojects {
     group = "me.vitalframework"
     version = "1.0"
 
-    apply<MavenPublishPlugin>()
-    apply<JavaLibraryPlugin>()
+    apply(plugin = "java-library")
+    apply(plugin = "maven-publish")
+    apply(plugin = "kotlin")
 
     repositories {
         mavenLocal()
@@ -32,10 +33,19 @@ subprojects {
         api("org.projectlombok:lombok:1.18.32")
     }
 
-//    java {
-//        withSourcesJar()
-//        withJavadocJar()
-//    }
+    java {
+        withSourcesJar()
+        withJavadocJar()
+    }
+
+    tasks.compileKotlin {
+        // so default impls of interfaces work across multiplatform compiled kotlin code (kotlin >> java)
+        compilerOptions.freeCompilerArgs.add("-Xjvm-default=all")
+    }
+
+    kotlin {
+        jvmToolchain(21)
+    }
 
     publishing {
         publications {
@@ -50,19 +60,10 @@ subprojects {
     }
 
     tasks.javadoc {
-        (options as StandardJavadocDocletOptions)
-            .tags(
-                "apiNote:a:API Note:",
-                "implSpec:a:Implementation Requirements:",
-                "implNote:a:Implementation Note:"
-            )
+        (options as StandardJavadocDocletOptions).tags(
+            "apiNote:a:API Note:",
+            "implSpec:a:Implementation Requirements:",
+            "implNote:a:Implementation Note:"
+        )
     }
-}
-
-repositories {
-    mavenCentral()
-}
-
-kotlin {
-    jvmToolchain(21)
 }

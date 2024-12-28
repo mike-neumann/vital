@@ -31,7 +31,7 @@ public class VitalInventoryListener extends VitalListener.Spigot {
     public void onPlayerClickInInventory(InventoryClickEvent e) {
         final var clickedInventory = e.getClickedInventory();
         final var player = (Player) e.getWhoClicked();
-        final var vitalInventory = Vital.getContext().getBeansOfType(VitalInventory.class).values().stream()
+        final var vitalInventory = Vital.INSTANCE.getContext().getBeansOfType(VitalInventory.class).values().stream()
                 .filter(inventory -> inventory.hasInventoryOpen(player))
                 .findFirst().orElse(null);
 
@@ -67,7 +67,7 @@ public class VitalInventoryListener extends VitalListener.Spigot {
     @EventHandler
     public void onPlayerCloseInventory(InventoryCloseEvent e) {
         final var player = (Player) e.getPlayer();
-        final var vitalInventory = Vital.getContext().getBeansOfType(VitalInventory.class).values().stream()
+        final var vitalInventory = Vital.INSTANCE.getContext().getBeansOfType(VitalInventory.class).values().stream()
                 .filter(inventory -> inventory.hasInventoryOpen(player))
                 .findFirst().orElse(null);
 

@@ -51,7 +51,7 @@ plugins {
 ```java
 package my.domain.company.projectname;
 
-@VitalPluginInfo(
+@Vital.Info(
         name = "test-plugin",
         environment = VitalPluginEnvironment.SPIGOT_PAPER
 )
@@ -68,7 +68,7 @@ Bungeecord:
 ```java
 package my.domain.company.projectname;
 
-@VitalPluginInfo(
+@Vital.Info(
         name = "test-plugin",
         environment = VitalPluginEnvironment.BUNGEECORD
 )

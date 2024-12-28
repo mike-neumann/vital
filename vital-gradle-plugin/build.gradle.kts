@@ -1,7 +1,6 @@
 plugins {
     `maven-publish`
     `java-gradle-plugin`
-    kotlin("jvm") version "1.9.24"
 }
 
 gradlePlugin {
@@ -15,8 +14,4 @@ gradlePlugin {
 
 dependencies {
     api(project(":vital-core"))
-}
-
-kotlin {
-    jvmToolchain(21)
 }

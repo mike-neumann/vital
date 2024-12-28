@@ -735,7 +735,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
     }
 
     public static abstract class Bungeecord extends VitalCommand<Plugin, net.md_5.bungee.api.CommandSender> {
-        private VitalPluginCommand.Bungeecord command;
+        private VitalPluginCommand.Bungee command;
 
         public Bungeecord(@NonNull Plugin plugin) {
             super(plugin, net.md_5.bungee.api.CommandSender.class);
@@ -746,7 +746,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         private void setupCommand() {
             // wrap a custom bungeecord command class, since in bungeecord, command classes MUST BE EXTENDED FROM.
             // extending is not possible here since the VitalCommand object MUST BE A class, and classes CANNOT HAVE MULTIPLE EXTEND STATEMENTS...
-            this.command = new VitalPluginCommand.Bungeecord(getName()) {
+            this.command = new VitalPluginCommand.Bungee(getName()) {
                 @Override
                 public void execute(net.md_5.bungee.api.CommandSender sender, String[] args) {
                     Bungeecord.this.execute(sender, args);

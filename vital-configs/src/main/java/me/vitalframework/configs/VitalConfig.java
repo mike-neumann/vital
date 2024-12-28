@@ -2,6 +2,8 @@ package me.vitalframework.configs;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import me.vitalframework.RequiresAnnotation;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -17,16 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * @apiNote Must be annotated with {@link Info}.
- */
 @Slf4j
-public abstract class VitalConfig {
+public abstract class VitalConfig implements RequiresAnnotation<VitalConfig.Info> {
     private FileProcessor vitalConfigFileProcessor;
 
     public VitalConfig() {
-        final var info = Optional.ofNullable(getClass().getAnnotation(Info.class))
-                .orElseThrow(() -> new RuntimeException("config needs to be annotated with @ConfigInfo!"));
+        final var info = getRequiredAnnotation();
 
         load(info.name(), info.processor());
     }
@@ -42,6 +40,11 @@ public abstract class VitalConfig {
             throw new RuntimeException("error while injecting field %s with %s"
                     .formatted(field.getName(), String.valueOf(value)));
         }
+    }
+
+    @Override
+    public final @NotNull Class<@NotNull Info> requiredAnnotationType() {
+        return Info.class;
     }
 
     public void save() {

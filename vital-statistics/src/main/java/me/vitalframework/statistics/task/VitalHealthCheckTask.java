@@ -4,7 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import me.vitalframework.RequiresBungeecord;
+import me.vitalframework.RequiresBungee;
 import me.vitalframework.RequiresSpigot;
 import me.vitalframework.statistics.config.VitalStatisticsConfig;
 import me.vitalframework.tasks.VitalRepeatableTask;
@@ -145,7 +145,7 @@ public interface VitalHealthCheckTask {
 
     @Getter
     @Setter
-    @RequiresBungeecord
+    @RequiresBungee
     @VitalRepeatableTask.Info(interval = 50)
     class Bungeecord extends VitalRepeatableTask.Bungeecord implements VitalHealthCheckTask {
         @NonNull
