@@ -30,7 +30,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         var classNameVitalPluginInfoEntry: MutableMap.MutableEntry<String, Vital.Info>? = null
 
         roundEnv.getElementsAnnotatedWith(Vital.Info::class.java)
-            .filter { it.kind != ElementKind.CLASS }
+            .filter { it.kind == ElementKind.CLASS }
             .forEach {
                 val typeElement = it as TypeElement
                 val typeMirror = typeElement.superclass
@@ -51,7 +51,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         if (classNameVitalPluginInfoEntry == null) {
             processingEnv.messager.printMessage(
                 Diagnostic.Kind.ERROR,
-                "No Main Plugin Class Found! Main Plugin Class Must Be Annotated With @VitalPluginInfo"
+                "No Main Plugin Class Found! Main Plugin Class Must Be Annotated With @Vital.Info"
             )
 
             return false

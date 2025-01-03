@@ -17,8 +17,6 @@ import java.util.*;
 /**
  * A builder class for creating ItemStack objects with custom attributes.
  * This class provides a fluent builder pattern for creating items with names, lore, enchantments, and more.
- *
- * @author xRa1ny
  */
 public class VitalItemBuilder {
     private final List<String> lore = new ArrayList<>();
@@ -32,9 +30,6 @@ public class VitalItemBuilder {
 
     /**
      * Define the name for this {@link ItemStack}.
-     *
-     * @param name The name.
-     * @return This builder instance.
      */
     public VitalItemBuilder name(String name) {
         this.name = name;
@@ -43,10 +38,7 @@ public class VitalItemBuilder {
     }
 
     /**
-     * Define the type for this {@link ItemStack}.
-     *
-     * @param type The {@link Material}.
-     * @return This builder instance.
+     * Define the type for this item.
      */
     public VitalItemBuilder type(Material type) {
         this.type = type;
@@ -55,10 +47,7 @@ public class VitalItemBuilder {
     }
 
     /**
-     * Define the lore for this {@link ItemStack}.
-     *
-     * @param lore The lore {@link List}.
-     * @return This builder instance.
+     * Define the lore for this item.
      */
     public VitalItemBuilder lore(@NonNull List<String> lore) {
         this.lore.addAll(lore);
@@ -67,10 +56,7 @@ public class VitalItemBuilder {
     }
 
     /**
-     * Add ONE lore LINE for this {@link ItemStack}.
-     *
-     * @param lore The lore line to add.
-     * @return This builder instance.
+     * Add ONE lore LINE for this item.
      */
     public VitalItemBuilder lore(@NonNull String lore) {
         this.lore.add(lore);
@@ -79,10 +65,7 @@ public class VitalItemBuilder {
     }
 
     /**
-     * Define the item flags for this {@link ItemStack}.
-     *
-     * @param itemFlagList The {@link List} of all {@link ItemFlag} instances.
-     * @return This builder instance.
+     * Define the item flags for this item.
      */
     public VitalItemBuilder itemFlags(@NonNull List<ItemFlag> itemFlagList) {
         this.itemFlagList.addAll(itemFlagList);
@@ -91,10 +74,7 @@ public class VitalItemBuilder {
     }
 
     /**
-     * Add ONE {@link ItemFlag} for this {@link ItemStack}.
-     *
-     * @param itemFlag The {@link ItemFlag} to add.
-     * @return This builder instance.
+     * Add ONE item flag for this item.
      */
     public VitalItemBuilder itemFlag(@NonNull ItemFlag itemFlag) {
         itemFlagList.add(itemFlag);
@@ -103,10 +83,7 @@ public class VitalItemBuilder {
     }
 
     /**
-     * Define the enchantments for this {@link ItemStack}.
-     *
-     * @param enchantmentLevelMap The {@link Map} of all {@link Enchantment} instances and their level.
-     * @return This builder instance.
+     * Define the enchantments for this item.
      */
     public VitalItemBuilder enchantments(@NonNull Map<Enchantment, Integer> enchantmentLevelMap) {
         this.enchantmentLevelMap.putAll(enchantmentLevelMap);
@@ -115,11 +92,7 @@ public class VitalItemBuilder {
     }
 
     /**
-     * Add one {@link Enchantment} and its level for this {@link ItemStack}.
-     *
-     * @param enchantment      The {@link Enchantment}.
-     * @param enchantmentLevel The enchantment level.
-     * @return This builder instance.
+     * Add one enchantment and its level for this item.
      */
     public VitalItemBuilder enchantment(@NonNull Enchantment enchantment, int enchantmentLevel) {
         enchantmentLevelMap.put(enchantment, enchantmentLevel);
@@ -129,9 +102,6 @@ public class VitalItemBuilder {
 
     /**
      * Adds an enchantment if true.
-     *
-     * @param enchanted If this item should be enchanted.
-     * @return This builder instance.
      */
     public VitalItemBuilder enchanted(boolean enchanted) {
         if (enchanted) {
@@ -142,10 +112,7 @@ public class VitalItemBuilder {
     }
 
     /**
-     * Define the amount for this {@link ItemStack}.
-     *
-     * @param amount The amount.
-     * @return This builder instance.
+     * Define the amount for this item.
      */
     public VitalItemBuilder amount(int amount) {
         this.amount = amount;
@@ -154,10 +121,7 @@ public class VitalItemBuilder {
     }
 
     /**
-     * Define if this {@link ItemStack} is unbreakable or not.
-     *
-     * @param unbreakable True if the {@link ItemStack} should be unbreakable; false otherwise.
-     * @return This builder instance.
+     * Define if this item is unbreakable or not.
      */
     public VitalItemBuilder unbreakable(boolean unbreakable) {
         this.unbreakable = unbreakable;
@@ -166,13 +130,7 @@ public class VitalItemBuilder {
     }
 
     /**
-     * Add one {@link NamespacedKey} for this {@link ItemStack}.
-     *
-     * @param key                The key.
-     * @param persistentDataType The {@link PersistentDataType} of the value to register.
-     * @param value              The value the {@link NamespacedKey} instance should hold.
-     * @param <Z>                The type of {@link PersistentDataType} the value should be composed of.
-     * @return This builder instance.
+     * Add one namespaced key for this item.
      */
     public <Z> VitalItemBuilder namespacedKey(@NonNull String key, @NonNull PersistentDataType<?, Z> persistentDataType, @NonNull Z value) {
         final var namespacedKey = new NamespacedKey("vital", key);
@@ -183,13 +141,7 @@ public class VitalItemBuilder {
     }
 
     /**
-     * Add one {@link NamespacedKey} for this {@link ItemStack}.
-     *
-     * @param namespacedKey      The {@link NamespacedKey}.
-     * @param persistentDataType The {@link PersistentDataType} of the value to register.
-     * @param value              The value the {@link NamespacedKey} instance should hold.
-     * @param <Z>                The type of {@link PersistentDataType} the value should be composed of.
-     * @return This builder instance.
+     * Add one namespaced key for this item.
      */
     public <Z> VitalItemBuilder namespacedKey(@NonNull NamespacedKey namespacedKey, @NonNull PersistentDataType<?, Z> persistentDataType, @NonNull Z value) {
         namespacedKeyMap.put(namespacedKey, Map.entry(persistentDataType, value));
@@ -199,9 +151,6 @@ public class VitalItemBuilder {
 
     /**
      * Converts the builder's configuration into an ItemStack.
-     *
-     * @param <Z> Placeholder for {@link PersistentDataType} IGNORE.
-     * @return The constructed ItemStack.
      */
     @NonNull
     public <Z> ItemStack build() {

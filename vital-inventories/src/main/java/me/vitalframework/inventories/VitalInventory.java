@@ -131,9 +131,7 @@ public class VitalInventory implements RequiresAnnotation<VitalInventory.Info> {
     }
 
     /**
-     * Annotation used to provide information about a {@link VitalInventory}.
-     *
-     * @author xRa1ny
+     * Annotation used to provide information about an inventory.
      */
     @Component
     @Retention(RetentionPolicy.RUNTIME)
@@ -141,16 +139,12 @@ public class VitalInventory implements RequiresAnnotation<VitalInventory.Info> {
     public @interface Info {
         /**
          * The title of this inventory menu.
-         *
-         * @return The title of the inventory menu.
          */
         @NonNull
         String name();
 
         /**
          * The size in slots of this inventory menu. Default is 9 (one row).
-         *
-         * @return The size of the inventory menu.
          */
         @Range(from = 9, to = 54)
         int size() default 9;

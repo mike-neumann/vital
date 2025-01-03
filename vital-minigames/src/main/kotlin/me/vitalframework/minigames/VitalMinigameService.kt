@@ -18,26 +18,26 @@ class VitalMinigameService(
     /**
      * Checks if the current minigame state matches a specified class.
      */
-    fun isVitalMinigameState(vitalMinigameStateClass: Class<out VitalBaseMinigameState>): Boolean {
+    fun <T : VitalBaseMinigameState> isMinigameState(type: Class<T>): Boolean {
         if (vitalMinigameState == null) {
             return false
         }
 
-        return vitalMinigameStateClass == (vitalMinigameState as VitalMinigameState).javaClass
+        return type == (vitalMinigameState as VitalMinigameState).javaClass
     }
 
     /**
      * Sets the current minigame state by Class.
      */
-    fun setVitalMinigameState(vitalMinigameStateClass: Class<out VitalBaseMinigameState>) {
-        setVitalMinigameState(context.getBean(vitalMinigameStateClass))
+    fun <T : VitalBaseMinigameState> setMinigameState(type: Class<T>) {
+        setMinigameState(context.getBean(type))
     }
 
     /**
      * Sets the current minigame state.
      * If a previous state exists, it is unregistered before registering the new state.
      */
-    fun setVitalMinigameState(minigameState: VitalBaseMinigameState) {
+    fun setMinigameState(minigameState: VitalBaseMinigameState) {
         if (this.vitalMinigameState != null) {
             if (this.vitalMinigameState is VitalCountdownMinigameState) {
                 (vitalMinigameState as VitalCountdownMinigameState).stop()

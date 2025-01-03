@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 /**
  * Listens for player interactions with custom item stacks and handles their interactions accordingly.
  * This class is responsible for detecting player interactions with custom items and invoking their associated actions.
- *
- * @author xRa1ny
  */
 @Component
 public class VitalItemListener extends VitalListener.Spigot {
@@ -26,8 +24,6 @@ public class VitalItemListener extends VitalListener.Spigot {
 
     /**
      * Listens for player interactions with items and handles them.
-     *
-     * @param e The PlayerInteractEvent triggered by the player's interaction.
      */
     @EventHandler
     public void onPlayerInteract(@NonNull PlayerInteractEvent e) {

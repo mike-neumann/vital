@@ -16,8 +16,6 @@ import java.util.List;
 /**
  * Used to easily create an interactive paged Inventory Menu.
  * This class extends VitalInventoryMenu for creating paginated menus.
- *
- * @author xRa1ny
  */
 @Getter
 public abstract class VitalPagedInventory extends VitalInventory {
@@ -34,8 +32,6 @@ public abstract class VitalPagedInventory extends VitalInventory {
 
     /**
      * Constructs a new paged inventory with the specified previous inventory to open after clicking out of inventory menu bounds.
-     *
-     * @param previousInventory The previous {@link Inventory} to open after clicking out of inventory bounds.
      */
     public VitalPagedInventory(VitalInventory previousInventory) {
         super(previousInventory);
@@ -48,8 +44,6 @@ public abstract class VitalPagedInventory extends VitalInventory {
 
     /**
      * Gets the amount of items required to fill a page from {@link VitalPagedInventory#fromSlot} to {@link VitalPagedInventory#toSlot}.
-     *
-     * @return The amount.
      */
     public int getPageContent() {
         return (toSlot + 1/* since content is INCLUSIVE to the SLOT itself */) - fromSlot;
@@ -57,8 +51,6 @@ public abstract class VitalPagedInventory extends VitalInventory {
 
     /**
      * Updates the maxPage indicator with the given total content amount.
-     *
-     * @param totalContent The total amount of content available for paging.
      */
     public void updateMaxPage(int totalContent) {
         maxPage = (int) Math.ceil((double) totalContent / getPageContent());
@@ -66,9 +58,6 @@ public abstract class VitalPagedInventory extends VitalInventory {
 
     /**
      * Called when the page of this paged inventory menu changes.
-     *
-     * @param page   The new page.
-     * @param player The player viewing the inventory.
      */
     protected void onPageChange(long page, @NonNull Player player) {
 
@@ -76,9 +65,6 @@ public abstract class VitalPagedInventory extends VitalInventory {
 
     /**
      * Sets the current page of this paged inventory menu.
-     *
-     * @param page   The page.
-     * @param player The player viewing the inventory.
      */
     public final void setPage(long page, @NonNull Player player) {
         if (page <= 0) {
@@ -131,16 +117,12 @@ public abstract class VitalPagedInventory extends VitalInventory {
     public @interface Info {
         /**
          * Defines the starting slot for each page item.
-         *
-         * @return The starting slot for each page item.
          */
         @Range(from = 0, to = 9)
         int fromSlot() default 0;
 
         /**
          * Defines the ending slot for each page item.
-         *
-         * @return The ending slot for each page item.
          */
         @Range(from = 0, to = 9)
         int toSlot() default 0;

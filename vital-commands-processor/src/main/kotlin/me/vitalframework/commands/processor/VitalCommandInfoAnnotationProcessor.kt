@@ -26,11 +26,10 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
 
         // Make sure the basic processor runs before this one.
         val vitalPluginInfoAnnotationProcessor = VitalPluginInfoAnnotationProcessor()
+        val vitalCommandInfoList = ArrayList<VitalCommand.Info>()
 
         vitalPluginInfoAnnotationProcessor.init(processingEnv)
         vitalPluginInfoAnnotationProcessor.process(annotations, roundEnv)
-
-        val vitalCommandInfoList = ArrayList<VitalCommand.Info>()
 
         // Scan for all commands annotated with `VitalCommandInfo.
         roundEnv.getElementsAnnotatedWith(VitalCommand.Info::class.java).forEach {

@@ -1,9 +1,8 @@
 package me.vitalframework.minigames
 
-import me.vitalframework.VitalComponent
 import org.bukkit.event.Listener
 
-interface VitalBaseMinigameState : VitalComponent, Listener {
+interface VitalBaseMinigameState : Listener {
     /**
      * Called when this state is enabled.
      */

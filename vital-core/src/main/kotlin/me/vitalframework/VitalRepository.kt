@@ -1,150 +1,77 @@
 package me.vitalframework
 
-import java.util.*
-
 /**
  * Abstract class for managing a list of registered components.
  */
-abstract class VitalRepository<T : VitalComponent> {
-    private val components = mutableListOf<T>()
-
-    fun getAllComponents() = components.toList()
-
-    @PublishedApi
-    internal fun <X : T> getComponents(type: Class<X>) = components
-        .filter { type.isAssignableFrom(it.javaClass) }
-        .map { type.cast(it) }
+abstract class VitalRepository<ID, T : VitalEntity<ID>> {
+    private val entities = mutableListOf<T>()
 
     /**
-     * Gets a list of all components matching the supplied type.
+     * Saves the specified entity.
      */
-    inline fun <reified X : T> getComponents() = getComponents(X::class.java)
+    fun save(entity: T) {
+        if (exists(entity)) {
+            return
+        }
 
-    /**
-     * Checks if a component is registered with the specified uuid.
-     */
-    fun isComponentRegistered(uniqueId: UUID) = getComponent(uniqueId) != null
-
-    /**
-     * Checks if a component is registered with the specified name.
-     */
-    fun isComponentRegistered(name: String) = getComponentByName(name) != null
-
-    @PublishedApi
-    internal fun <X : T> isComponentRegistered(type: Class<X>) = getComponent(type) != null
-
-    /**
-     * Checks if a component is registered with the specified type.
-     */
-    inline fun <reified X : T> isComponentRegistered() = isComponentRegistered(X::class.java)
-
-    /**
-     * Checks if the given component is registered on this repository.
-     */
-    fun isComponentRegistered(component: T): Boolean {
-        return components.contains(component) || getComponent(component.uniqueId) != null
+        entities.add(entity)
+        onSave(entity)
     }
 
     /**
-     * Gets the component by the specified uuid.
+     * Checks if the specified entity is saved on this repository.
      */
-    fun getComponent(uniqueId: UUID) = components.find { uniqueId == it.uniqueId }
+    fun exists(entity: T) = entities.contains(entity)
 
     /**
-     * Gets the component by the specified name.
+     * Checks if an entity is saved by the specified id.
      */
-    fun getComponentByName(name: String) = components.find { name == it.name }
-
-    @PublishedApi
-    internal fun <X : T> getComponent(type: Class<X>) = components
-        .filter { type == it.javaClass }
-        .map { type.cast(it) }
-        .firstOrNull()
+    fun exists(id: ID) = entities.any { it.id == id }
 
     /**
-     * Gets the component by the specified class.
+     * Gets all saved entities on this repository.
      */
-    inline fun <reified X : T> getComponent() = getComponent(X::class.java)
+    fun getAll() = entities
 
     /**
-     * Gets a random component, matching the given predicate registered on this repository.
+     * Gets a saved entity by its id.
+     */
+    fun get(id: ID) = entities.find { it.id == id }
+
+    /**
+     * Gets a random entity, matching the given predicate.
      */
     @JvmOverloads
-    fun getRandomComponent(predicate: (T) -> Boolean = { true }): T? {
-        if (components.isEmpty()) {
-            return null
-        }
-
-        val filteredVitalComponentList = components
+    fun getRandom(predicate: (T) -> Boolean = { true }): T? {
+        return entities
             .filter(predicate)
-            .toList()
-        val randomIndex = Random().nextInt(filteredVitalComponentList.size)
-
-        return filteredVitalComponentList[randomIndex]
+            .randomOrNull()
     }
 
+
     /**
-     * Registers the specified component.
+     * Deletes the specified entity from this repository.
      */
-    fun registerComponent(component: T) {
-        if (isComponentRegistered(component)) {
+    fun delete(entity: T) {
+        if (!exists(entity)) {
             return
         }
 
-        components.add(component)
-        onComponentRegistered(component)
-        component.onRegistered()
+        entities.remove(entity)
+        onDelete(entity)
     }
 
     /**
-     * Unregisters the specified component.
+     * Called when an entity has been saved.
      */
-    fun unregisterComponent(component: T) {
-        if (!isComponentRegistered(component)) {
-            return
-        }
-
-        components.remove(component)
-        component.onUnregistered()
-        onComponentUnregistered(component)
-    }
-
-    fun unregisterAllComponents() {
-        components.stream().toList().forEach { unregisterComponent(it) }
-    }
-
-    /**
-     * Updates all components with the supplied ones
-     */
-    fun updateComponents(components: List<T>) {
-        unregisterAllComponents()
-
-        components.forEach { registerComponent(it) }
-    }
-
-    @PublishedApi
-    internal fun <X : T> unregisterComponent(type: Class<X>) {
-        getComponent(type)?.let { unregisterComponent(it) }
-    }
-
-    /**
-     * Attempts to unregister a component by its specified class.
-     */
-    inline fun <reified X : T> unregisterComponent() {
-        unregisterComponent(X::class.java)
-    }
-
-    /**
-     * Called when the specified component is registered.
-     */
-    open fun onComponentRegistered(component: T) {
+    protected open fun onSave(entity: T) {
 
     }
 
     /**
-     * Called when the specified component is unregistered.
+     * Called when an entity has been deleted.
      */
-    open fun onComponentUnregistered(component: T) {
+    protected open fun onDelete(entity: T) {
 
     }
 }

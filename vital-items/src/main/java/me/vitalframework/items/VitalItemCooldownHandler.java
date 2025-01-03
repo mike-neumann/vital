@@ -9,8 +9,6 @@ import org.springframework.stereotype.Component;
 /**
  * A class responsible for managing cooldowns of VitalItemStack items.
  * This class extends VitalRepeatableTask to periodically reduce cooldowns.
- *
- * @author xRa1ny
  */
 @Component
 @VitalRepeatableTask.Info(interval = 50)

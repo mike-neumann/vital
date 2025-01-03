@@ -80,7 +80,7 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
     }
 
     /**
-     * Resets the countdown to its initial value, restarting its responsible {@link VitalRepeatableTask}.
+     * Resets the countdown to its initial value, restarting its responsible repeatable task.
      */
     public final void restart() {
         vitalRepeatableTask.stop();
@@ -138,8 +138,6 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
 
     /**
      * Called when the countdown is told to restart.
-     *
-     * @see VitalCountdownTask#restart()
      */
     public void onRestart() {
 
@@ -153,15 +151,11 @@ public abstract class VitalCountdownTask<P, T extends VitalRepeatableTask<?, ?, 
     public @interface Info {
         /**
          * Defines the countdown for this annotated countdown task in seconds.
-         *
-         * @return The countdown in seconds
          */
         int countdown();
 
         /**
          * Defines the interval between countdown task ticks in milliseconds.
-         *
-         * @return The interval in milliseconds.
          */
         int interval() default 1_000;
     }

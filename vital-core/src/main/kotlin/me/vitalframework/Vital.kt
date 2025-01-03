@@ -7,6 +7,8 @@ import org.bukkit.plugin.Plugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.Banner
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.core.env.Environment
@@ -57,6 +59,7 @@ object Vital {
 
         context = builder.sources(pluginConfiguration)
             .initializers({
+                // here we register the plugin instance as a bean so we can inject it elsewhere
                 it.beanFactory.registerSingleton("plugin", plugin)
                 it.classLoader = pluginClassLoader
                 it.environment = StandardEnvironment()
@@ -88,9 +91,10 @@ object Vital {
     /**
      * Specifies metadata for the projects plugin implementations.
      */
+    @ConditionalOnBean(name = ["plugin"])
     @Component
     @Target(AnnotationTarget.CLASS)
-    @Retention(AnnotationRetention.SOURCE)
+    @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(
         /**
          * Defines the name of this plugin.

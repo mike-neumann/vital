@@ -7,8 +7,6 @@ import org.bukkit.WorldCreator;
 
 /**
  * Wrapper class to store location data to a config file.
- *
- * @author xRa1ny
  */
 public class VitalConfigLocation {
     @VitalConfig.Property(String.class)

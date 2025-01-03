@@ -43,7 +43,7 @@ public abstract class VitalConfig implements RequiresAnnotation<VitalConfig.Info
     }
 
     @Override
-    public final @NotNull Class<@NotNull Info> requiredAnnotationType() {
+    public final @NotNull Class<Info> requiredAnnotationType() {
         return Info.class;
     }
 
@@ -116,118 +116,77 @@ public abstract class VitalConfig implements RequiresAnnotation<VitalConfig.Info
     }
 
     /**
-     * Defines meta-information for the annotated {@link VitalConfig}.
-     *
-     * @author xRa1ny
+     * Defines meta-information for the annotated config.
      */
     @Component
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface Info {
         /**
-         * Defines the file name for the annotated config.
-         *
-         * @return The file name
-         * @apiNote Includes the file extension (e.g test.yml; test.properties)
+         * Defines the file name (including extension) for the annotated config.
          */
         String name();
 
         /**
          * Defines the file processor used by this config.
-         *
-         * @return The processor used by this config.
-         * @apiNote file processors are used to process config files.
          */
         Class<? extends FileProcessor> processor();
     }
 
     /**
      * Defines a field within a config extending class to be a key.
-     *
-     * @author xRa1ny
-     * @apiNote Not to be confused with .properties files, this annotation is also used for every other config type supported by vital.
      */
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface Property {
         /**
          * Defines the class types this annotated field manages.
-         *
-         * @return The classes this annotated field manages.
-         * @apiNote When annotating a list or map, specify their generic types.
+         * When annotating a list or map, specify their generic types.
          */
         Class<?>[] value();
     }
 
     /**
      * Describes an object which is capable of processing the contents of a given config file.
-     *
-     * @author xRa1ny
      */
     public interface FileProcessor {
         /**
          * Loads the file processed by this processor.
-         *
-         * @param type The {@link VitalConfig} subtype of this config file.
-         * @return The serialized content of this config.
-         * @throws Exception If any error occurs while loading the config.
          */
         Map<String, ?> load(@NonNull Class<?> type) throws Exception;
 
         /**
          * Reads a config value by the specified key.
-         *
-         * @param key The key.
-         * @return The value the given config key holds.
          */
         Object read(@NonNull String key);
 
         /**
          * Reads a config value by the specified key, if that value was not found, returns a default value.
-         *
-         * @param key The key.
-         * @param def The default value.
-         * @return The value of the given config key.
          */
         Object read(@NonNull String key, @NonNull Object def);
 
         /**
          * Writes the given serialized content to this config.
-         *
-         * @param serializedContentMap The serialized content to write to this config.
          */
         void write(@NonNull Map<String, ?> serializedContentMap);
 
         /**
          * Writes the given object to this config.
-         *
-         * @param object The object.
          */
         void write(@NonNull Object object);
 
         /**
          * Writes the given value to this config.
-         *
-         * @param key   The key of this value.
-         * @param value The value.
-         * @throws Exception If any error occurs while writing the value.
          */
         void write(@NonNull String key, @NonNull Object value) throws Exception;
 
         /**
          * Saves the given serialized content to this config.
-         *
-         * @param serializedContentMap The serialized content.
-         * @throws Exception If any error occurs while saving the content.
          */
         void save(@NonNull Map<String, ?> serializedContentMap) throws Exception;
 
         /**
          * Serializes the given object for config usage.
-         *
-         * @param object The object to serialize.
-         * @return The serialized object.
-         * @throws Exception If any error occurs while serialization.
          */
         Map<String, ?> serialize(@NonNull Object object) throws Exception;
 

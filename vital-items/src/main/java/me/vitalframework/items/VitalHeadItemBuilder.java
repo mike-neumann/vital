@@ -15,8 +15,6 @@ import java.util.Map;
 
 /**
  * Builder utility class designed for convenient creation of head item stacks.
- *
- * @author xRa1ny
  */
 public class VitalHeadItemBuilder extends VitalItemBuilder {
     private OfflinePlayer owningPlayer;
@@ -126,9 +124,6 @@ public class VitalHeadItemBuilder extends VitalItemBuilder {
 
     /**
      * Sets the owning player of this head builder configuration.
-     *
-     * @param owningPlayer The owning player.
-     * @return This builder config.
      */
     public VitalHeadItemBuilder owningPlayer(OfflinePlayer owningPlayer) {
         this.owningPlayer = owningPlayer;

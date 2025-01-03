@@ -5,8 +5,6 @@ import org.bukkit.NamespacedKey
 /**
  * Defines namespaced keys for various purposes within the Vital plugin.
  * This interface centralizes key definitions to avoid conflicts and ensure consistency.
- *
- * @author xRa1ny
  */
 object VitalNamespacedKey {
     /**

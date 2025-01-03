@@ -88,13 +88,13 @@ public interface VitalStatsCommand<CS> {
 
         @Override
         public void sendMessage(@NonNull CommandSender sender, @NonNull String message) {
-            VitalUtils.spigot().sendMessage(sender, message);
+            VitalUtils.Spigot.INSTANCE.sendMessage(sender, message);
         }
 
         @Override
         protected @NonNull VitalCommand.ReturnState onBaseCommand(@NonNull CommandSender sender) {
-            VitalUtils.spigot().sendMessage(sender, "MC Version: <yellow>" + Bukkit.getVersion());
-            VitalUtils.spigot().sendMessage(sender, "Bukkit Version: <yellow>" + Bukkit.getBukkitVersion());
+            VitalUtils.Spigot.INSTANCE.sendMessage(sender, "MC Version: <yellow>" + Bukkit.getVersion());
+            VitalUtils.Spigot.INSTANCE.sendMessage(sender, "Bukkit Version: <yellow>" + Bukkit.getBukkitVersion());
             handleOnBaseCommand(sender);
 
             return VitalCommand.ReturnState.SUCCESS;
@@ -123,12 +123,12 @@ public interface VitalStatsCommand<CS> {
 
         @Override
         public void sendMessage(net.md_5.bungee.api.@NonNull CommandSender sender, @NonNull String message) {
-            VitalUtils.bungeecord().sendMessage(sender, message);
+            VitalUtils.Bungee.INSTANCE.sendMessage(sender, message);
         }
 
         @Override
         protected @NonNull VitalCommand.ReturnState onBaseCommand(net.md_5.bungee.api.@NonNull CommandSender sender) {
-            VitalUtils.bungeecord().sendMessage(sender, "Bungee version: <yellow>" + ProxyServer.getInstance().getVersion());
+            VitalUtils.Bungee.INSTANCE.sendMessage(sender, "Bungee version: <yellow>" + ProxyServer.getInstance().getVersion());
             handleOnBaseCommand(sender);
 
             return VitalCommand.ReturnState.SUCCESS;

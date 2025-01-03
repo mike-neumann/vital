@@ -13,8 +13,6 @@ import java.util.Optional;
 
 /**
  * Listener for handling VitalInventoryMenu related events.
- *
- * @author xRa1ny
  */
 @Component
 public class VitalInventoryListener extends VitalListener.Spigot {

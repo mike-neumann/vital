@@ -15,9 +15,6 @@ import java.util.List;
 public class VitalInventoryService {
     /**
      * Opens a registered {@link VitalInventory} for the given {@link Player}.
-     *
-     * @param player              The {@link Player} to open the given {@link VitalInventory} for.
-     * @param vitalInventoryClass The class of the {@link VitalInventory} to open for the given {@link Player}.
      */
     public void openInventory(@NonNull Player player, @NonNull Class<? extends VitalInventory> vitalInventoryClass) {
         final var vitalInventory = Vital.INSTANCE.getContext().getBean(vitalInventoryClass);

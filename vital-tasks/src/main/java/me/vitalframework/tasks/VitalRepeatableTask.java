@@ -21,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * Abstract base class for creating repeatable tasks in the Vital plugin framework.
  * Repeatable tasks can be used to execute specific logic at defined intervals.
- *
- * @author xRa1ny
  */
 @Getter
 public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements RequiresAnnotation<VitalRepeatableTask.Info> {
@@ -70,8 +68,6 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
 
     /**
      * Checks if this repeatable task is currently running.
-     *
-     * @return True if the task is running, false otherwise.
      */
     public final boolean isRunning() {
         return runnable != null && task != null;
@@ -124,9 +120,7 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
     protected abstract void cancelTask();
 
     /**
-     * Annotation used to provide information about the interval of a {@link VitalRepeatableTask}.
-     *
-     * @author xRa1ny
+     * Annotation used to provide information about the interval of a repeatable task.
      */
     @Component
     @Retention(RetentionPolicy.RUNTIME)
@@ -134,8 +128,6 @@ public abstract class VitalRepeatableTask<P, R extends Runnable, T> implements R
     public @interface Info {
         /**
          * Defines the interval at which the repeatable task should execute, in milliseconds.
-         *
-         * @return The interval for the repeatable task execution.
          */
         int interval();
     }

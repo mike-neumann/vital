@@ -14,17 +14,11 @@ import java.util.Map;
 /**
  * Manages custom item stacks and their associated cooldowns.
  * This class is responsible for managing a collection of custom item stacks and coordinating their usage cooldowns.
- *
- * @author xRa1ny
  */
 @Service
 public class VitalItemService {
     /**
-     * Attempts to set the specified {@link VitalItem} by its class.
-     *
-     * @param inventory      The {@link Inventory} to add the item to.
-     * @param itemStackClass The class of the {@link VitalItem} (must be registered).
-     * @return The {@link Map} containing all items that didn't fit.
+     * Attempts to set the specified item by its class.
      */
     @NonNull
     public Map<Integer, ItemStack> addItem(@NonNull Inventory inventory, @NonNull Class<? extends VitalItem> itemStackClass) {
@@ -34,11 +28,7 @@ public class VitalItemService {
     }
 
     /**
-     * Attempts to set the specified {@link VitalItem} by its class.
-     *
-     * @param player         The {@link Player} to add the item to.
-     * @param itemStackClass The class of the {@link VitalItem} (must be registered).
-     * @return The {@link Map} containing all items that didn't fit.
+     * Attempts to add the specified item by its class.
      */
     @NonNull
     public Map<Integer, ItemStack> addItem(@NonNull Player player, @NonNull Class<? extends VitalItem> itemStackClass) {
@@ -46,11 +36,7 @@ public class VitalItemService {
     }
 
     /**
-     * Attempts to set the {@link VitalItem} by its given class to the given slot in the specified {@link Inventory}.
-     *
-     * @param inventory      The {@link Inventory}.
-     * @param slot           The slot.
-     * @param itemStackClass The class of te {@link VitalItem} (must be registered).
+     * Attempts to set the item by its given class to the given slot in the specified inventory.
      */
     public void setItem(@NonNull Inventory inventory, int slot, @NonNull Class<? extends VitalItem> itemStackClass) {
         final VitalItem vitalItem = Vital.INSTANCE.getContext().getBean(itemStackClass);
@@ -59,11 +45,7 @@ public class VitalItemService {
     }
 
     /**
-     * Attempts to set the {@link VitalItem} by its given class to the given slot in the specified {@link Player}'s {@link Inventory}.
-     *
-     * @param player         The {@link Player}.
-     * @param slot           The slot.
-     * @param itemStackClass The class of te {@link VitalItem} (must be registered).
+     * Attempts to set the item by its given class to the given slot in the specified player inventory.
      */
     public void setItem(@NonNull Player player, int slot, @NonNull Class<? extends VitalItem> itemStackClass) {
         setItem(player.getInventory(), slot, itemStackClass);

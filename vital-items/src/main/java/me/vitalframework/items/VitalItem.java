@@ -23,11 +23,9 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Used to create {@link ItemStack} that can be interacted with.
+ * Used to create an item that can be interacted with.
  * This class provides a foundation for creating custom items with specific behaviors,
  * cooldowns, and interactions.
- *
- * @author xRa1ny
  */
 @Getter
 public abstract class VitalItem extends ItemStack implements RequiresAnnotation<VitalItem.Info> {
@@ -100,8 +98,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
 
     /**
      * Checks if this item is enchanted.
-     *
-     * @return true if the item is enchanted, false otherwise.
      */
     public final boolean isEnchanted() {
         return getItemMeta() == null || !getItemMeta().getEnchants().isEmpty();
@@ -109,9 +105,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
 
     /**
      * Gets the current cooldown of the given player.
-     *
-     * @param player The player.
-     * @return The current cooldown.
      */
     public int getCooldown(@NonNull Player player) {
         return playerCooldownMap.getOrDefault(player, 0);
@@ -119,8 +112,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
 
     /**
      * Called when this item has been left-clicked.
-     *
-     * @param e The player interact event.
      */
     public void onLeftClick(@NonNull PlayerInteractEvent e) {
 
@@ -128,8 +119,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
 
     /**
      * Called when this item has been right-clicked.
-     *
-     * @param e The player interact event.
      */
     public void onRightClick(@NonNull PlayerInteractEvent e) {
 
@@ -137,8 +126,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
 
     /**
      * Called when this item has been left or right-clicked, but the cooldown has not yet expired.
-     *
-     * @param e The player interact event.
      */
     public void onCooldown(@NonNull PlayerInteractEvent e) {
 
@@ -146,8 +133,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
 
     /**
      * Called when the cooldown of this item expires for the specified player.
-     *
-     * @param player The player.
      */
     public void onCooldownExpire(@NonNull Player player) {
 
@@ -155,8 +140,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
 
     /**
      * Called on every cooldown timer tick for the given player.
-     *
-     * @param player The player.
      */
     public void onCooldownTick(@NonNull Player player) {
 
@@ -192,9 +175,7 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
     }
 
     /**
-     * Annotation to provide information about a {@link VitalItem} that can be interacted with in the game.
-     *
-     * @author xRa1ny
+     * Annotation to provide information about an item that can be interacted with in the game.
      */
     @Component
     @Target(ElementType.TYPE)
@@ -202,8 +183,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
     public @interface Info {
         /**
          * Defines the name of the custom item stack.
-         *
-         * @return The name of the item stack.
          */
         @NonNull
         String name();
@@ -211,23 +190,17 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
         /**
          * Defines an array of lore lines for the custom item stack.
          * Lore lines provide additional information about the item.
-         *
-         * @return An array of lore lines.
          */
         @NonNull
         String[] lore() default {};
 
         /**
          * Defines the amount of items in the stack (stack size).
-         *
-         * @return The stack size, which is the number of items in the stack.
          */
         int amount() default 1;
 
         /**
          * Specifies the material or type of the custom item stack.
-         *
-         * @return The material/type of the item stack, represented by the Material enum.
          */
         @NonNull
         Material type();
@@ -235,8 +208,6 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
         /**
          * Defines an array of item flags that control specific display properties of the item stack.
          * Item flags can be used to hide attributes, enchantments, and more.
-         *
-         * @return An array of item flags affecting the item's display.
          */
         @NonNull
         ItemFlag[] itemFlags() default {};
@@ -244,22 +215,16 @@ public abstract class VitalItem extends ItemStack implements RequiresAnnotation<
         /**
          * Defines the cooldown time (in seconds) for the custom item stack's interaction.
          * The cooldown restricts how frequently the item can be used.
-         *
-         * @return The cooldown time in seconds. A value of 0 indicates no cooldown.
          */
         int cooldown() default 0;
 
         /**
          * Indicates whether the custom item stack should have enchantment visual effects.
-         *
-         * @return True if the item should appear as if enchanted; false otherwise.
          */
         boolean enchanted() default false;
 
         /**
          * Indicates whether the custom item stack should be unbreakable.
-         *
-         * @return True if the item should be unbreakable; false otherwise.
          */
         boolean unbreakable() default true;
     }

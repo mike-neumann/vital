@@ -12,8 +12,6 @@ import java.util.Map;
 
 /**
  * Wrapper class to store itemstack data in a config file.
- *
- * @author xRa1ny
  */
 public class VitalConfigItemStack {
     /**
