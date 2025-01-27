@@ -1,98 +1,75 @@
-package me.vitalframework.configs;
+package me.vitalframework.configs
 
-import lombok.NonNull;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.List;
-import java.util.Map;
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
+import org.bukkit.Registry
+import org.bukkit.inventory.ItemFlag
+import org.bukkit.inventory.ItemStack
 
 /**
  * Wrapper class to store itemstack data in a config file.
  */
-public class VitalConfigItemStack {
-    /**
-     * the type of this item
-     */
-    @VitalConfig.Property(Material.class)
-    public Material type;
+class VitalConfigItemStack {
+    companion object {
+        fun of(itemStack: ItemStack): VitalConfigItemStack {
+            val itemMeta = itemStack.itemMeta
+            val vitalConfigItemStack = VitalConfigItemStack()
 
-    /**
-     * the display name of this item
-     */
-    @VitalConfig.Property(String.class)
-    public String displayName;
+            vitalConfigItemStack.type = itemStack.type
 
-    /**
-     * all lore attached to this item's item meta
-     */
-    @VitalConfig.Property(String.class)
-    public List<String> lore;
+            if (itemMeta!!.displayName != null) {
+                vitalConfigItemStack.displayName = itemMeta.displayName
+            } else {
+                vitalConfigItemStack.displayName = itemStack.type.name
+            }
 
-    /**
-     * all enchantments this item has
-     */
-    @VitalConfig.Property({
-            String.class,
-            Integer.class
-    })
-    public Map<String, Integer> enchantments;
+            vitalConfigItemStack.lore =
+                if (!itemMeta.hasLore()) {
+                    mutableListOf<String>()
+                } else {
+                    itemMeta.lore!!.toMutableList()
+                }
 
-    /**
-     * all item flags this item holds
-     */
-    @VitalConfig.Property(ItemFlag.class)
-    public List<ItemFlag> itemFlags;
+            vitalConfigItemStack.enchantments =
+                mutableMapOf(*itemMeta.enchants.entries.map { it.key.key.key to it.value }.toTypedArray())
+            vitalConfigItemStack.itemFlags = itemMeta.itemFlags.toMutableList()
 
-    /**
-     * converts a bukkit item stack into a config serializable one
-     *
-     * @param itemStack the bukkit item
-     * @return the config item instance
-     */
-    @NonNull
-    public static VitalConfigItemStack of(@NonNull ItemStack itemStack) {
-        final var itemMeta = itemStack.getItemMeta();
-        final var vitalConfigItemStack = new VitalConfigItemStack();
-
-        vitalConfigItemStack.type = itemStack.getType();
-
-        if (itemMeta.getDisplayName() != null) {
-            vitalConfigItemStack.displayName = itemMeta.getDisplayName();
-        } else {
-            vitalConfigItemStack.displayName = itemStack.getType().name();
+            return vitalConfigItemStack
         }
-
-        vitalConfigItemStack.lore = !itemMeta.hasLore() ? List.of() : itemMeta.getLore();
-        vitalConfigItemStack.enchantments = Map.ofEntries(itemMeta.getEnchants().entrySet().stream()
-                .map(entry -> Map.entry(entry.getKey().getKey().getKey(), entry.getValue()))
-                .toArray(Map.Entry[]::new));
-        vitalConfigItemStack.itemFlags = itemMeta.getItemFlags().stream()
-                .toList();
-
-        return vitalConfigItemStack;
     }
 
-    /**
-     * converts this config item back into a bukkit one
-     *
-     * @return the bukkit item instance
-     */
-    @NonNull
-    public ItemStack toItemStack() {
-        final var itemStack = new ItemStack(type);
-        final var itemMeta = itemStack.getItemMeta();
+    @VitalConfig.Property(Material::class)
+    var type: Material? = null
 
-        itemMeta.setDisplayName(displayName);
-        itemMeta.setLore(lore);
-        enchantments.forEach((key, level) -> itemMeta.addEnchant(Registry.ENCHANTMENT.get(NamespacedKey.minecraft(key)), level, true));
-        itemMeta.addItemFlags(itemFlags.toArray(ItemFlag[]::new));
+    @VitalConfig.Property(String::class)
+    var displayName: String? = null
 
-        itemStack.setItemMeta(itemMeta);
+    @VitalConfig.Property(String::class)
+    var lore = mutableListOf<String>()
 
-        return itemStack;
+    @VitalConfig.Property(
+        String::class, Int::class
+    )
+    var enchantments = mutableMapOf<String, Int>()
+
+    @VitalConfig.Property(ItemFlag::class)
+    var itemFlags = mutableListOf<ItemFlag>()
+
+    fun toItemStack(): ItemStack {
+        val itemStack = ItemStack(type!!)
+        val itemMeta = itemStack.itemMeta
+
+        itemMeta!!.setDisplayName(displayName)
+        itemMeta.lore = lore
+        enchantments.forEach { (key: String?, level: Int?) ->
+            itemMeta.addEnchant(
+                Registry.ENCHANTMENT.get(NamespacedKey.minecraft(key!!))!!, level!!, true
+            )
+        }
+        itemMeta.addItemFlags(*itemFlags.toTypedArray())
+
+        itemStack.itemMeta = itemMeta
+
+        return itemStack
     }
 }

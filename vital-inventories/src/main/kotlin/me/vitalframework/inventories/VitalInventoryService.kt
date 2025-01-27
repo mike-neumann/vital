@@ -1,51 +1,37 @@
-package me.vitalframework.inventories;
+package me.vitalframework.inventories
 
-import lombok.NonNull;
-import me.vitalframework.Vital;
-import org.bukkit.entity.Player;
-import org.springframework.stereotype.Service;
-
-import java.util.Collection;
-import java.util.List;
+import me.vitalframework.Vital.context
+import org.bukkit.entity.Player
+import org.springframework.stereotype.Service
 
 /**
  * The main vital inventory service for registering inventories.
  */
 @Service
-public class VitalInventoryService {
-    /**
-     * Opens a registered {@link VitalInventory} for the given {@link Player}.
-     */
-    public void openInventory(@NonNull Player player, @NonNull Class<? extends VitalInventory> vitalInventoryClass) {
-        final var vitalInventory = Vital.INSTANCE.getContext().getBean(vitalInventoryClass);
+class VitalInventoryService {
+    fun openInventory(player: Player, vitalInventoryClass: Class<VitalInventory>) {
+        val vitalInventory: VitalInventory = context.getBean(vitalInventoryClass)
 
-        vitalInventory.open(player);
+        vitalInventory.open(player)
     }
 
-    @NonNull
-    public Collection<? extends VitalInventory> getInventories(@NonNull Class<? extends VitalInventory> vitalInventoryClass) {
+    fun getInventories(vitalInventoryClass: Class<VitalInventory>) =
         try {
-            return Vital.INSTANCE.getContext().getBeansOfType(vitalInventoryClass).values();
-        } catch (Exception e) {
-            return List.of();
+            context.getBeansOfType(vitalInventoryClass).values
+        } catch (e: Exception) {
+            mutableListOf()
         }
-    }
 
-    @NonNull
-    public Collection<? extends VitalInventory> getInventories() {
-        return getInventories(VitalInventory.class);
-    }
+    fun getInventories() = getInventories(VitalInventory::class.java)
 
-
-    public <T extends VitalInventory> T getInventory(@NonNull Class<T> vitalInventoryClass) {
+    fun <T : VitalInventory> getInventory(vitalInventoryClass: Class<T>) =
         try {
-            return Vital.INSTANCE.getContext().getBean(vitalInventoryClass);
-        } catch (Exception e) {
-            return null;
+            context.getBean(vitalInventoryClass)
+        } catch (e: Exception) {
+            null
         }
-    }
 
-    public void updateInventories() {
-        getInventories().forEach(VitalInventory::update);
+    fun updateInventories() {
+        getInventories().forEach { it.update() }
     }
 }

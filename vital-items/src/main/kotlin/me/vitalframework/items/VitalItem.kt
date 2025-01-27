@@ -112,6 +112,6 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
         val itemFlags: Array<ItemFlag> = [],
         val cooldown: Int = 0,
         val enchanted: Boolean = false,
-        val unbreakable: Boolean = true
+        val unbreakable: Boolean = true,
     )
 }

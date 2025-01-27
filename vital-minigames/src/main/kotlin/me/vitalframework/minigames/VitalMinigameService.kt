@@ -18,13 +18,8 @@ class VitalMinigameService(
     /**
      * Checks if the current minigame state matches a specified class.
      */
-    fun <T : VitalBaseMinigameState> isMinigameState(type: Class<T>): Boolean {
-        if (vitalMinigameState == null) {
-            return false
-        }
-
-        return type == (vitalMinigameState as VitalMinigameState).javaClass
-    }
+    fun <T : VitalBaseMinigameState> isMinigameState(type: Class<T>) =
+        vitalMinigameState != null && type == (vitalMinigameState as VitalMinigameState).javaClass
 
     /**
      * Sets the current minigame state by Class.

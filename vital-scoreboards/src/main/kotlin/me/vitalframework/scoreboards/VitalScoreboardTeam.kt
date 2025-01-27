@@ -1,160 +1,88 @@
-package me.vitalframework.scoreboards;
+package me.vitalframework.scoreboards
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import org.bukkit.entity.Player
+import org.bukkit.scoreboard.Scoreboard
+import org.bukkit.scoreboard.Team
+import org.bukkit.scoreboard.Team.OptionStatus
 
 /**
  * Represents a team within a scoreboard in the Vital plugin framework.
  * This class manages team properties, members, and updates.
- *
- * @author xRa1ny
  */
-@Getter
-public class VitalScoreboardTeam {
-    /**
-     * The name of this scoreboard team.
-     */
-    @NonNull
-    private final String name;
-
-    /**
-     * The members of this scoreboard team.
-     */
-    @NonNull
-    private final List<Player> playerList = new ArrayList<>();
-
-    /**
-     * The team options for this scoreboard team.
-     */
-    @NonNull
-    private final Map<Team.Option, Team.OptionStatus> options = new HashMap<>();
-
-    /**
-     * The Bukkit team instance representing this scoreboard team.
-     */
-    @NonNull
-    private final Team bukkitTeam;
-
-    /**
-     * The prefix of this scoreboard team.
-     */
-    @Setter
-    private String prefix;
-
-    /**
-     * The suffix of this scoreboard team.
-     */
-    @Setter
-    private String suffix;
-
-    /**
-     * Whether friendly fire is allowed for this team.
-     */
-    @Setter
-    private boolean friendlyFire;
-
-    /**
-     * When true, members of this team can see friendly invisibles.
-     */
-    @Setter
-    private boolean canSeeFriendlyInvisibles;
-
-    /**
-     * Creates a new VitalScoreboardTeam with the specified name and associated scoreboard content.
-     *
-     * @param name The name of the team.
-     */
-    VitalScoreboardTeam(@NonNull String name, @NonNull Scoreboard scoreboard) {
-        this.name = name;
-        bukkitTeam = scoreboard.registerNewTeam(PlainTextComponentSerializer.plainText()
-                .serialize(LegacyComponentSerializer.legacySection()
-                        .deserialize(name)));
-    }
+class VitalScoreboardTeam internal constructor(
+    val name: String,
+    scoreboard: Scoreboard,
+) {
+    val players = mutableListOf<Player>()
+    val options = mutableMapOf<Team.Option, OptionStatus>()
+    val bukkitTeam: Team = scoreboard.registerNewTeam(
+        PlainTextComponentSerializer.plainText()
+            .serialize(
+                LegacyComponentSerializer.legacySection()
+                    .deserialize(name)
+            )
+    )
+    var prefix: String? = null
+    var suffix: String? = null
+    var friendlyFire = false
+    var canSeeFriendlyInvisibles = false
 
     /**
      * Updates the properties and members of this scoreboard team.
      */
-    public void update() {
-        bukkitTeam.setDisplayName(name);
-        bukkitTeam.setAllowFriendlyFire(friendlyFire);
-        bukkitTeam.setCanSeeFriendlyInvisibles(canSeeFriendlyInvisibles);
+    fun update() {
+        bukkitTeam.displayName = name
+        bukkitTeam.setAllowFriendlyFire(friendlyFire)
+        bukkitTeam.setCanSeeFriendlyInvisibles(canSeeFriendlyInvisibles)
 
-        if (prefix != null) {
-            bukkitTeam.setPrefix(LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(prefix)));
+        prefix?.let {
+            bukkitTeam.prefix =
+                LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(it))
         }
 
-        if (suffix != null) {
-            bukkitTeam.setSuffix(LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(suffix)));
+        suffix?.let {
+            bukkitTeam.suffix =
+                LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(it))
         }
 
         // Update all options
-        for (var entry : options.entrySet()) {
-            final var option = entry.getKey();
-            final var status = entry.getValue();
-
-            bukkitTeam.setOption(option, status);
+        options.forEach { (option, status) ->
+            bukkitTeam.setOption(option, status)
         }
 
         // Clear all members
-        final var entries = bukkitTeam.getEntries();
-
-        for (var entry : entries) {
-            bukkitTeam.removeEntry(entry);
+        bukkitTeam.entries.forEach {
+            bukkitTeam.removeEntry(it)
         }
 
         // Add new members
-        for (var player : playerList) {
-            bukkitTeam.addPlayer(player);
+        players.forEach {
+            bukkitTeam.addPlayer(it)
         }
     }
 
-    /**
-     * Sets the option of this scoreboard team to the specified status.
-     *
-     * @param option The team option.
-     * @param status The team option status.
-     */
-    public void setOption(@NonNull Team.Option option, @NonNull Team.OptionStatus status) {
-        options.put(option, status);
+    fun setOption(option: Team.Option, status: OptionStatus) {
+        options.put(option, status)
     }
 
-    /**
-     * Adds a player to this scoreboard team.
-     *
-     * @param player The player to add.
-     */
-    public void addPlayer(@NonNull Player player) {
-        if (playerList.contains(player)) {
-            return;
+    fun addPlayer(player: Player) {
+        if (player in players) {
+            return
         }
 
-        playerList.add(player);
-        update();
+        players.add(player)
+        update()
     }
 
-    /**
-     * Removes a player from this scoreboard team.
-     *
-     * @param player The player to remove.
-     */
-    public void removePlayer(@NonNull Player player) {
-        if (!playerList.contains(player)) {
-            return;
+    fun removePlayer(player: Player) {
+        if (player !in players) {
+            return
         }
 
-        playerList.remove(player);
-        update();
+        players.remove(player)
+        update()
     }
 }

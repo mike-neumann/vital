@@ -1,34 +1,23 @@
-package me.vitalframework.configs;
+package me.vitalframework.configs
 
-import lombok.NonNull;
-import me.vitalframework.Vital;
-import org.springframework.stereotype.Service;
-
-import java.util.Collection;
-import java.util.List;
+import me.vitalframework.Vital.context
+import org.springframework.stereotype.Service
 
 @Service
-public class VitalConfigService {
-    @NonNull
-    public Collection<? extends VitalConfig> getConfigs(Class<? extends VitalConfig> vitalConfigClass) {
+class VitalConfigService {
+    fun getConfigs(vitalConfigClass: Class<VitalConfig>) =
         try {
-            return Vital.INSTANCE.getContext().getBeansOfType(vitalConfigClass).values();
-        } catch (Exception e) {
-            return List.of();
+            context.getBeansOfType(vitalConfigClass).values
+        } catch (e: Exception) {
+            mutableListOf()
         }
-    }
 
-    @NonNull
-    public Collection<? extends VitalConfig> getConfigs() {
-        return getConfigs(VitalConfig.class);
-    }
+    fun getConfigs() = getConfigs(VitalConfig::class.java)
 
-
-    public <T extends VitalConfig> T getConfig(@NonNull Class<T> vitalConfigClass) {
+    fun <T : VitalConfig> getConfig(vitalConfigClass: Class<T>) =
         try {
-            return Vital.INSTANCE.getContext().getBean(vitalConfigClass);
-        } catch (Exception e) {
-            return null;
+            context.getBean<T?>(vitalConfigClass)
+        } catch (e: Exception) {
+            null
         }
-    }
 }

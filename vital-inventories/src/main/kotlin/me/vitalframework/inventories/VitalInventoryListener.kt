@@ -1,37 +1,25 @@
-package me.vitalframework.inventories;
+package me.vitalframework.inventories
 
-import me.vitalframework.Vital;
-import me.vitalframework.VitalListener;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.springframework.stereotype.Component;
-
-import java.util.Optional;
+import me.vitalframework.Vital.context
+import me.vitalframework.VitalListener
+import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.plugin.java.JavaPlugin
+import org.springframework.stereotype.Component
 
 /**
  * Listener for handling VitalInventoryMenu related events.
  */
 @Component
-public class VitalInventoryListener extends VitalListener.Spigot {
-    public VitalInventoryListener(JavaPlugin plugin) {
-        super(plugin);
-    }
-
-    /**
-     * Handles the event when a player clicks in an inventory.
-     *
-     * @param e The InventoryClickEvent.
-     */
+class VitalInventoryListener(plugin: JavaPlugin) : VitalListener.Spigot(plugin) {
     @EventHandler
-    public void onPlayerClickInInventory(InventoryClickEvent e) {
-        final var clickedInventory = e.getClickedInventory();
-        final var player = (Player) e.getWhoClicked();
-        final var vitalInventory = Vital.INSTANCE.getContext().getBeansOfType(VitalInventory.class).values().stream()
-                .filter(inventory -> inventory.hasInventoryOpen(player))
-                .findFirst().orElse(null);
+    fun onPlayerClickInInventory(e: InventoryClickEvent) {
+        val clickedInventory = e.clickedInventory
+        val player = e.whoClicked as Player
+        val vitalInventory = context.getBeansOfType(VitalInventory::class.java).values
+            .firstOrNull { it.hasInventoryOpen(player) }
 
         if (clickedInventory == null) {
             // TODO: navigate to previous menu, currently still buggy
@@ -40,39 +28,23 @@ public class VitalInventoryListener extends VitalListener.Spigot {
 //                vitalInventory.getPreviousInventory().open(player);
 //            }
 
-            return;
+            return
         }
 
-        if (vitalInventory == null) {
-            return;
+        if (vitalInventory == null || e.currentItem == null) {
+            return
         }
 
-        final var optionalCurrentItem = Optional.ofNullable(e.getCurrentItem());
-
-        if (optionalCurrentItem.isEmpty()) {
-            return;
-        }
-
-        vitalInventory.click(e);
-        e.setCancelled(true);
+        vitalInventory.click(e)
+        e.isCancelled = true
     }
 
-    /**
-     * Handles the event when a player closes an inventory.
-     *
-     * @param e The InventoryCloseEvent.
-     */
     @EventHandler
-    public void onPlayerCloseInventory(InventoryCloseEvent e) {
-        final var player = (Player) e.getPlayer();
-        final var vitalInventory = Vital.INSTANCE.getContext().getBeansOfType(VitalInventory.class).values().stream()
-                .filter(inventory -> inventory.hasInventoryOpen(player))
-                .findFirst().orElse(null);
+    fun onPlayerCloseInventory(e: InventoryCloseEvent) {
+        val player = e.player as Player
+        val vitalInventory = context.getBeansOfType(VitalInventory::class.java).values
+            .firstOrNull { it.hasInventoryOpen(player) }
 
-        if (vitalInventory == null) {
-            return;
-        }
-
-        vitalInventory.close(player);
+        vitalInventory?.close(player)
     }
 }

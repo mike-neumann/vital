@@ -36,7 +36,7 @@ fun itemBuilder(init: VitalItemStackBuilder.() -> Unit): ItemStack {
         meta.setDisplayName(
             LegacyComponentSerializer.legacySection().serialize(
                 MiniMessage.miniMessage().deserialize("<reset><white>${itemStackBuilder.name}")
-                        .decoration(TextDecoration.ITALIC, false)
+                    .decoration(TextDecoration.ITALIC, false)
             )
         )
     }

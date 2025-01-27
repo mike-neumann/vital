@@ -29,11 +29,10 @@ object CloudNet4Bridge {
             else -> false
         }
 
-
     /**
      * Gets the cloudnet service the given player uuid is currently connected to.
      */
-    fun getCloudServerByPlayerUniqueId(playerUniqueId: UUID) = CloudNet4Driver.getCloudServers {
+    fun getCloudServer(playerUniqueId: UUID) = CloudNet4Driver.getCloudServers {
         it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf())
             .map { it.uniqueId }
             .any { it == playerUniqueId }
@@ -42,7 +41,7 @@ object CloudNet4Bridge {
     /**
      * Gets the non-proxy cloudnet service the given player uuid is currently connected to.
      */
-    fun getNonProxyCloudServerByPlayerUniqueId(playerUniqueId: UUID) = CloudNet4Driver.getCloudServers {
+    fun getNonProxyCloudServer(playerUniqueId: UUID) = CloudNet4Driver.getCloudServers {
         it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf())
             .map { it.uniqueId }
             .any { it == playerUniqueId } && !isProxy(it)
