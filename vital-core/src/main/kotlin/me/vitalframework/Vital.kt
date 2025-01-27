@@ -1,9 +1,12 @@
 package me.vitalframework
 
+import net.md_5.bungee.api.scheduler.ScheduledTask
 import org.bukkit.command.CommandSender
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
+import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.scheduler.BukkitTask
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.Banner
@@ -30,6 +33,10 @@ typealias SpigotPlayer = org.bukkit.entity.Player
 typealias BungeePlayer = net.md_5.bungee.api.connection.ProxiedPlayer
 typealias SpigotEventPriority = org.bukkit.event.EventPriority
 typealias BungeeEventPriority = net.md_5.bungee.event.EventPriority
+typealias SpigotRunnable = BukkitRunnable
+typealias BungeeRunnable = Runnable
+typealias SpigotTask = BukkitTask
+typealias BungeeTask = ScheduledTask
 
 /**
  * The main instance of the Vital-Framework.

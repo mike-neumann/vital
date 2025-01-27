@@ -11,5 +11,5 @@ object VitalNamespacedKey {
      * A namespaced key for storing a unique identifier on ItemStacks.
      */
     @JvmField
-    val ITEM_UUID: NamespacedKey? = NamespacedKey.fromString("item-uuid")
+    val ITEM_UUID = NamespacedKey.fromString("item-uuid")!!
 }

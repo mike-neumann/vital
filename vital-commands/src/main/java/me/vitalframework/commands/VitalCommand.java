@@ -734,10 +734,10 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
         }
     }
 
-    public static abstract class Bungeecord extends VitalCommand<Plugin, net.md_5.bungee.api.CommandSender> {
+    public static abstract class Bungee extends VitalCommand<Plugin, net.md_5.bungee.api.CommandSender> {
         private VitalPluginCommand.Bungee command;
 
-        public Bungeecord(@NonNull Plugin plugin) {
+        public Bungee(@NonNull Plugin plugin) {
             super(plugin, net.md_5.bungee.api.CommandSender.class);
 
             setupCommand();
@@ -749,12 +749,12 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
             this.command = new VitalPluginCommand.Bungee(getName()) {
                 @Override
                 public void execute(net.md_5.bungee.api.CommandSender sender, String[] args) {
-                    Bungeecord.this.execute(sender, args);
+                    Bungee.this.execute(sender, args);
                 }
 
                 @Override
                 public Iterable<String> onTabComplete(net.md_5.bungee.api.CommandSender sender, String[] args) {
-                    return Bungeecord.this.handleTabComplete(sender, args);
+                    return Bungee.this.handleTabComplete(sender, args);
                 }
             };
         }
