@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class VitalStatisticsService(
-    val statisticsConfig: VitalStatisticsConfig
+    val statisticsConfig: VitalStatisticsConfig,
 ) {
     private val log = logger()
     var lastTickTime = 0L

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 class VitalItemListener(
     plugin: SpigotPlugin,
-    val itemService: VitalItemService
+    val itemService: VitalItemService,
 ) : VitalListener.Spigot(plugin) {
     @SpigotEventHandler
     fun onPlayerInteract(e: PlayerInteractEvent) {

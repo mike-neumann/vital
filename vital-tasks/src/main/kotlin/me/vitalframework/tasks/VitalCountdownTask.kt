@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
 abstract class VitalCountdownTask<P, R : Runnable, T>(
-    val plugin: P
+    val plugin: P,
 ) : RequiresAnnotation<VitalCountdownTask.Info> {
     val initialCountdown: Long
     var countdown: Long
@@ -94,11 +94,11 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(
         val countdown: Long,
-        val interval: Long = 1_000L
+        val interval: Long = 1_000L,
     )
 
     open class Spigot(
-        plugin: SpigotPlugin
+        plugin: SpigotPlugin,
     ) : VitalCountdownTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
         override fun createRunnable() = object : SpigotRunnable() {
             override fun run() {
@@ -118,7 +118,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     }
 
     open class Bungee(
-        plugin: BungeePlugin
+        plugin: BungeePlugin,
     ) : VitalCountdownTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
         override fun createRunnable(): BungeeRunnable = BungeeRunnable {
             handleTick()

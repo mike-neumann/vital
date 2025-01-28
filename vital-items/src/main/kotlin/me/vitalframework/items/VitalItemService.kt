@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class VitalItemService(
-    val items: List<VitalItem>
+    val items: List<VitalItem>,
 ) {
     fun handleInteraction(e: PlayerInteractEvent) {
         items.firstOrNull { it == e.item }?.handleInteraction(e)
