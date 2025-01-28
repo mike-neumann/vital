@@ -1,7 +1,9 @@
 package me.vitalframework.utils
 
 import me.vitalframework.BungeeCommandSender
+import me.vitalframework.BungeePlayer
 import me.vitalframework.SpigotCommandSender
+import me.vitalframework.SpigotPlayer
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer
@@ -9,10 +11,8 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
-import net.md_5.bungee.api.connection.ProxiedPlayer
 import org.bukkit.*
 import org.bukkit.entity.Entity
-import org.bukkit.entity.Player
 import org.bukkit.inventory.CreativeCategory
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -133,8 +133,8 @@ interface VitalUtils<CS, P : CS> {
     }
 
 
-    object Spigot : VitalUtils<SpigotCommandSender, Player> {
-        override fun broadcastAction(playerPredicate: (Player) -> Boolean, action: (Player) -> Unit) {
+    object Spigot : VitalUtils<SpigotCommandSender, SpigotPlayer> {
+        override fun broadcastAction(playerPredicate: (SpigotPlayer) -> Boolean, action: (SpigotPlayer) -> Unit) {
             Bukkit.getOnlinePlayers().stream()
                 .filter(playerPredicate)
                 .forEach(action)
@@ -152,7 +152,7 @@ interface VitalUtils<CS, P : CS> {
 
         override fun broadcastMessage(
             message: String,
-            playerPredicate: (Player) -> Boolean,
+            playerPredicate: (SpigotPlayer) -> Boolean,
         ) {
             // must be used since, both version (paper and spigot) support the bungeeapi implementations...
             broadcastAction(playerPredicate) {
@@ -171,7 +171,7 @@ interface VitalUtils<CS, P : CS> {
             sound: Sound,
             volume: Float,
             pitch: Float,
-            playerPredicate: (Player) -> Boolean = { true },
+            playerPredicate: (SpigotPlayer) -> Boolean = { true },
         ) {
             broadcastAction(playerPredicate) { it.playSound(it, sound, volume, pitch) }
         }
@@ -183,12 +183,12 @@ interface VitalUtils<CS, P : CS> {
          * @param sound The sound to broadcast.
          */
         @JvmOverloads
-        fun broadcastSound(sound: Sound, playerPredicate: (Player) -> Boolean = { true }) {
+        fun broadcastSound(sound: Sound, playerPredicate: (SpigotPlayer) -> Boolean = { true }) {
             broadcastSound(sound, 1f, 1f, playerPredicate)
         }
 
         override fun sendTitle(
-            player: Player,
+            player: SpigotPlayer,
             title: String?,
             subtitle: String?,
             fadeIn: @Range(from = 0, to = 72000) Int,
@@ -206,7 +206,7 @@ interface VitalUtils<CS, P : CS> {
             )
         }
 
-        override fun sendTitle(player: Player, title: String?, subtitle: String?) {
+        override fun sendTitle(player: SpigotPlayer, title: String?, subtitle: String?) {
             player.sendTitle(
                 if (title == null) "" else LegacyComponentSerializer.legacySection()
                     .serialize(MiniMessage.miniMessage().deserialize(title)),
@@ -218,13 +218,13 @@ interface VitalUtils<CS, P : CS> {
         override fun broadcastTitle(
             title: String?,
             subtitle: String?,
-            playerPredicate: (Player) -> Boolean,
+            playerPredicate: (SpigotPlayer) -> Boolean,
         ) {
             broadcastAction { sendTitle(it, title, subtitle) }
         }
 
         override fun sendPersistentTitle(
-            player: Player,
+            player: SpigotPlayer,
             title: String?,
             subtitle: String?,
             fadeIn: @Range(from = 0, to = 72000) Int,
@@ -236,7 +236,7 @@ interface VitalUtils<CS, P : CS> {
             title: String?,
             subtitle: String?,
             fadeIn: @Range(from = 0, to = 72000) Int,
-            playerPredicate: (Player) -> Boolean,
+            playerPredicate: (SpigotPlayer) -> Boolean,
         ) {
             broadcastAction { sendPersistentTitle(it, title, subtitle, fadeIn) }
         }
@@ -249,7 +249,7 @@ interface VitalUtils<CS, P : CS> {
             potionEffectType: PotionEffectType,
             duration: Int,
             amplifier: Int,
-            playerPredicate: (Player) -> Boolean = { true },
+            playerPredicate: (SpigotPlayer) -> Boolean = { true },
         ) {
             broadcastAction(playerPredicate) {
                 it.addPotionEffect(PotionEffect(potionEffectType, duration, amplifier))
@@ -262,7 +262,7 @@ interface VitalUtils<CS, P : CS> {
         @JvmOverloads
         fun broadcastClearPotionEffect(
             potionEffectType: PotionEffectType,
-            playerPredicate: (Player) -> Boolean = { true },
+            playerPredicate: (SpigotPlayer) -> Boolean = { true },
         ) {
             broadcastAction(playerPredicate) { it.removePotionEffect(potionEffectType) }
         }
@@ -271,7 +271,7 @@ interface VitalUtils<CS, P : CS> {
          * Clears all potion effects for all players currently connected to this server.
          */
         @JvmOverloads
-        fun broadcastClearPotionEffects(playerPredicate: (Player) -> Boolean = { true }) {
+        fun broadcastClearPotionEffects(playerPredicate: (SpigotPlayer) -> Boolean = { true }) {
             broadcastAction(playerPredicate) { player ->
                 player.activePotionEffects
                     .map { it.type }
@@ -279,7 +279,7 @@ interface VitalUtils<CS, P : CS> {
             }
         }
 
-        override fun sendActionBar(player: Player, message: String) {
+        override fun sendActionBar(player: SpigotPlayer, message: String) {
             player.spigot().sendMessage(
                 ChatMessageType.ACTION_BAR, *BungeeComponentSerializer.get().serialize(
                     MiniMessage.miniMessage().deserialize(message)
@@ -289,7 +289,7 @@ interface VitalUtils<CS, P : CS> {
 
         override fun broadcastActionBar(
             message: String,
-            playerPredicate: (Player) -> Boolean,
+            playerPredicate: (SpigotPlayer) -> Boolean,
         ) {
             broadcastAction(playerPredicate) { sendActionBar(it, message) }
         }
@@ -298,7 +298,11 @@ interface VitalUtils<CS, P : CS> {
          * Teleports the given player to the specified location with an effect.
          */
         @JvmOverloads
-        fun teleport(player: Player, location: Location, potionEffectType: PotionEffectType = PotionEffectType.SLOW) {
+        fun teleport(
+            player: SpigotPlayer,
+            location: Location,
+            potionEffectType: PotionEffectType = PotionEffectType.SLOW,
+        ) {
             player.removePotionEffect(potionEffectType)
             player.addPotionEffect(PotionEffect(potionEffectType, 2, Int.Companion.MAX_VALUE))
             player.teleport(location)
@@ -308,7 +312,7 @@ interface VitalUtils<CS, P : CS> {
         /**
          * Teleports the given player to the specified target entity with an effect.
          */
-        fun teleport(player: Player, to: Entity) {
+        fun teleport(player: SpigotPlayer, to: Entity) {
             teleport(player, to.location, PotionEffectType.SLOW)
         }
 
@@ -601,8 +605,8 @@ interface VitalUtils<CS, P : CS> {
         }
     }
 
-    object Bungee : VitalUtils<BungeeCommandSender, ProxiedPlayer> {
-        override fun broadcastAction(playerPredicate: (ProxiedPlayer) -> Boolean, action: (ProxiedPlayer) -> Unit) {
+    object Bungee : VitalUtils<BungeeCommandSender, BungeePlayer> {
+        override fun broadcastAction(playerPredicate: (BungeePlayer) -> Boolean, action: (BungeePlayer) -> Unit) {
             ProxyServer.getInstance().players
                 .filter(playerPredicate)
                 .forEach(action)
@@ -618,7 +622,7 @@ interface VitalUtils<CS, P : CS> {
         }
 
         override fun sendTitle(
-            player: ProxiedPlayer,
+            player: BungeePlayer,
             title: String?,
             subtitle: String?,
             fadeIn: @Range(from = 0, to = 72000) Int,
@@ -646,7 +650,7 @@ interface VitalUtils<CS, P : CS> {
         }
 
         override fun sendTitle(
-            player: ProxiedPlayer,
+            player: BungeePlayer,
             title: String?,
             subtitle: String?,
         ) {
@@ -668,7 +672,7 @@ interface VitalUtils<CS, P : CS> {
         }
 
         override fun sendPersistentTitle(
-            player: ProxiedPlayer,
+            player: BungeePlayer,
             title: String?,
             subtitle: String?,
             fadeIn: @Range(from = 0, to = 72000) Int,
@@ -676,7 +680,7 @@ interface VitalUtils<CS, P : CS> {
             sendTitle(player, title, subtitle, fadeIn, 72000,  /* 1h */0)
         }
 
-        override fun sendActionBar(player: ProxiedPlayer, message: String) {
+        override fun sendActionBar(player: BungeePlayer, message: String) {
             player.sendMessage(
                 ChatMessageType.ACTION_BAR,
                 TextComponent.fromLegacy(

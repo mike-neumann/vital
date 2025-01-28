@@ -12,8 +12,8 @@ import java.util.*
  * Utility class for easier interaction with the cloudnet v4 bridge module.
  */
 object CloudNet4Bridge {
-    val serviceRegistry: ServiceRegistry = InjectionLayer.ext().instance(ServiceRegistry::class.java)
-    val playerManager: PlayerManager = serviceRegistry.firstProvider(PlayerManager::class.java)
+    val serviceRegistry = InjectionLayer.ext().instance(ServiceRegistry::class.java)!!
+    val playerManager = serviceRegistry.firstProvider(PlayerManager::class.java)!!
 
     /**
      * Gets the player executor of the given player uuid.

@@ -1,7 +1,7 @@
 package me.vitalframework.inventories
 
+import me.vitalframework.SpigotPlayer
 import me.vitalframework.Vital.context
-import org.bukkit.entity.Player
 import org.springframework.stereotype.Service
 
 /**
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
  */
 @Service
 class VitalInventoryService {
-    fun openInventory(player: Player, vitalInventoryClass: Class<VitalInventory>) {
+    fun openInventory(player: SpigotPlayer, vitalInventoryClass: Class<VitalInventory>) {
         val vitalInventory: VitalInventory = context.getBean(vitalInventoryClass)
 
         vitalInventory.open(player)

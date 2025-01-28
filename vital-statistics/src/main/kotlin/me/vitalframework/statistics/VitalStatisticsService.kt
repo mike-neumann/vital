@@ -1,6 +1,6 @@
 package me.vitalframework.statistics
 
-import me.vitalframework.Vital.logger
+import me.vitalframework.logger
 import me.vitalframework.statistics.config.VitalStatisticsConfig
 import org.springframework.stereotype.Service
 

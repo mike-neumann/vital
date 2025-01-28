@@ -1,10 +1,10 @@
 package me.vitalframework.scoreboards
 
+import me.vitalframework.SpigotPlayer
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 import java.util.function.Function
 
 /**
@@ -13,16 +13,16 @@ import java.util.function.Function
  */
 class VitalPerPlayerScoreboard(
     val title: String,
-    vararg var lines: Function<Player, String>,
+    vararg var lines: Function<SpigotPlayer, String>,
 ) : VitalScoreboard {
-    val vitalScoreboardContentMap = mutableMapOf<Player, VitalScoreboardContent>()
+    val vitalScoreboardContentMap = mutableMapOf<SpigotPlayer, VitalScoreboardContent>()
 
     /**
      * updates the users specified scoreboard
      *
      * @param player the player
      */
-    fun update(player: Player) {
+    fun update(player: SpigotPlayer) {
         if (!vitalScoreboardContentMap.containsKey(player)) {
             return
         }
@@ -35,7 +35,7 @@ class VitalPerPlayerScoreboard(
         player.scoreboard = scoreboard.bukkitScoreboard
     }
 
-    private fun updateContent(player: Player) {
+    private fun updateContent(player: SpigotPlayer) {
         if (!vitalScoreboardContentMap.containsKey(player)) {
             return
         }
@@ -66,7 +66,7 @@ class VitalPerPlayerScoreboard(
         }
     }
 
-    fun addPlayer(player: Player) {
+    fun addPlayer(player: SpigotPlayer) {
         if (vitalScoreboardContentMap.containsKey(player)) {
             return
         }
@@ -75,7 +75,7 @@ class VitalPerPlayerScoreboard(
         update(player)
     }
 
-    fun removePlayer(player: Player) {
+    fun removePlayer(player: SpigotPlayer) {
         if (!vitalScoreboardContentMap.containsKey(player)) {
             return
         }
@@ -84,5 +84,5 @@ class VitalPerPlayerScoreboard(
         player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
     }
 
-    private fun applyLines(player: Player) = lines.map { it.apply(player) }
+    private fun applyLines(player: SpigotPlayer) = lines.map { it.apply(player) }
 }

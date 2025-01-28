@@ -1,8 +1,8 @@
 package me.vitalframework.minigames
 
-import org.bukkit.event.Listener
+import me.vitalframework.SpigotListener
 
-interface VitalBaseMinigameState : Listener {
+interface VitalBaseMinigameState : SpigotListener {
     /**
      * Called when this state is enabled.
      */

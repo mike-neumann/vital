@@ -1,6 +1,6 @@
 package me.vitalframework.inventories
 
-import org.bukkit.entity.Player
+import me.vitalframework.SpigotPlayer
 import org.jetbrains.annotations.Range
 import kotlin.math.ceil
 
@@ -39,13 +39,13 @@ abstract class VitalPagedInventory(previousInventory: VitalInventory?) : VitalIn
     /**
      * Called when the page of this paged inventory menu changes.
      */
-    protected fun onPageChange(page: Long, player: Player) {
+    protected fun onPageChange(page: Long, player: SpigotPlayer) {
     }
 
     /**
      * Sets the current page of this paged inventory menu.
      */
-    fun setPage(page: Long, player: Player) {
+    fun setPage(page: Long, player: SpigotPlayer) {
         var page = page
         if (page <= 0) {
             page = 1
@@ -79,12 +79,12 @@ abstract class VitalPagedInventory(previousInventory: VitalInventory?) : VitalIn
         return list.subList(startIndex, endIndex)
     }
 
-    override fun open(player: Player) {
+    override fun open(player: SpigotPlayer) {
         super.open(player)
         setPage(1, player)
     }
 
-    override fun update(player: Player) {
+    override fun update(player: SpigotPlayer) {
         super.update(player)
         setPage(page, player)
     }

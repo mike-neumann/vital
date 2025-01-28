@@ -1,7 +1,7 @@
 package me.vitalframework.configs
 
 import me.vitalframework.RequiresAnnotation
-import me.vitalframework.Vital.logger
+import me.vitalframework.logger
 import org.springframework.stereotype.Component
 import java.io.File
 import java.io.IOException

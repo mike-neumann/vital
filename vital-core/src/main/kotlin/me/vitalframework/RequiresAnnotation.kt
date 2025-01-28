@@ -7,7 +7,7 @@ package me.vitalframework
 interface RequiresAnnotation<T : Annotation> {
     fun getRequiredAnnotation(): T {
         return javaClass.getAnnotation(requiredAnnotationType())
-            ?: throw RuntimeException("${javaClass.getSimpleName()} must be annotated with @${requiredAnnotationType().getSimpleName()}")
+            ?: throw RuntimeException("${javaClass.getSimpleName()} must be annotated with '@${requiredAnnotationType().getSimpleName()}'")
     }
 
     /**

@@ -1,9 +1,9 @@
 package me.vitalframework.scoreboards
 
+import me.vitalframework.SpigotPlayer
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
-import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.scoreboard.Team
 import org.bukkit.scoreboard.Team.OptionStatus
@@ -16,7 +16,7 @@ class VitalScoreboardTeam internal constructor(
     val name: String,
     scoreboard: Scoreboard,
 ) {
-    val players = mutableListOf<Player>()
+    val players = mutableListOf<SpigotPlayer>()
     val options = mutableMapOf<Team.Option, OptionStatus>()
     val bukkitTeam: Team = scoreboard.registerNewTeam(
         PlainTextComponentSerializer.plainText()
@@ -68,7 +68,7 @@ class VitalScoreboardTeam internal constructor(
         options.put(option, status)
     }
 
-    fun addPlayer(player: Player) {
+    fun addPlayer(player: SpigotPlayer) {
         if (player in players) {
             return
         }
@@ -77,7 +77,7 @@ class VitalScoreboardTeam internal constructor(
         update()
     }
 
-    fun removePlayer(player: Player) {
+    fun removePlayer(player: SpigotPlayer) {
         if (player !in players) {
             return
         }

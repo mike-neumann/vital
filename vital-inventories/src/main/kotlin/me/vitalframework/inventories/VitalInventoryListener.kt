@@ -1,23 +1,23 @@
 package me.vitalframework.inventories
 
+import me.vitalframework.SpigotEventHandler
+import me.vitalframework.SpigotPlayer
+import me.vitalframework.SpigotPlugin
 import me.vitalframework.Vital.context
 import me.vitalframework.VitalListener
-import org.bukkit.entity.Player
-import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
-import org.bukkit.plugin.java.JavaPlugin
 import org.springframework.stereotype.Component
 
 /**
  * Listener for handling VitalInventoryMenu related events.
  */
 @Component
-class VitalInventoryListener(plugin: JavaPlugin) : VitalListener.Spigot(plugin) {
-    @EventHandler
+class VitalInventoryListener(plugin: SpigotPlugin) : VitalListener.Spigot(plugin) {
+    @SpigotEventHandler
     fun onPlayerClickInInventory(e: InventoryClickEvent) {
         val clickedInventory = e.clickedInventory
-        val player = e.whoClicked as Player
+        val player = e.whoClicked as SpigotPlayer
         val vitalInventory = context.getBeansOfType(VitalInventory::class.java).values
             .firstOrNull { it.hasInventoryOpen(player) }
 
@@ -39,9 +39,9 @@ class VitalInventoryListener(plugin: JavaPlugin) : VitalListener.Spigot(plugin) 
         e.isCancelled = true
     }
 
-    @EventHandler
+    @SpigotEventHandler
     fun onPlayerCloseInventory(e: InventoryCloseEvent) {
-        val player = e.player as Player
+        val player = e.player as SpigotPlayer
         val vitalInventory = context.getBeansOfType(VitalInventory::class.java).values
             .firstOrNull { it.hasInventoryOpen(player) }
 

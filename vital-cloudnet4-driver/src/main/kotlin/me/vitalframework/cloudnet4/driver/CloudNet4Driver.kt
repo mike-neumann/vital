@@ -13,9 +13,9 @@ import eu.cloudnetservice.driver.service.ServiceInfoSnapshot
  * @author xRa1ny
  */
 object CloudNet4Driver {
-    val cloudServiceProvider: CloudServiceProvider = InjectionLayer.ext().instance(CloudServiceProvider::class.java)
-    val serviceTaskProvider: ServiceTaskProvider = InjectionLayer.ext().instance(ServiceTaskProvider::class.java)
-    val cloudServiceFactory: CloudServiceFactory = InjectionLayer.ext().instance(CloudServiceFactory::class.java)
+    val cloudServiceProvider = InjectionLayer.ext().instance(CloudServiceProvider::class.java)!!
+    val serviceTaskProvider = InjectionLayer.ext().instance(ServiceTaskProvider::class.java)!!
+    val cloudServiceFactory = InjectionLayer.ext().instance(CloudServiceFactory::class.java)!!
 
     @JvmOverloads
     fun getCloudServers(predicate: (ServiceInfoSnapshot) -> Boolean = { true }) = cloudServiceProvider.runningServices()
@@ -24,8 +24,7 @@ object CloudNet4Driver {
     /**
      * Gets all cloudnet services by the given task name.
      */
-    fun getCloudServers(taskName: String): MutableCollection<ServiceInfoSnapshot> =
-        cloudServiceProvider.servicesByTask(taskName)
+    fun getCloudServers(taskName: String) = cloudServiceProvider.servicesByTask(taskName)
 
     /**
      * Gets the cloud server by the given name; or null;

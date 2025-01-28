@@ -1,10 +1,10 @@
 package me.vitalframework.scoreboards
 
+import me.vitalframework.SpigotPlayer
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 import java.util.function.Supplier
 
 /**
@@ -16,14 +16,14 @@ class VitalGlobalScoreboard(
     vararg var lines: Supplier<String>,
 ) : VitalScoreboard {
     val vitalScoreboardContent = VitalScoreboardContent(title)
-    val players = mutableListOf<Player>()
+    val players = mutableListOf<SpigotPlayer>()
 
     /**
      * Updates the scoreboard for a specific player.
      *
      * @param player The player for whom to update the scoreboard.
      */
-    private fun update(player: Player) {
+    private fun update(player: SpigotPlayer) {
         player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
         player.scoreboard = vitalScoreboardContent.bukkitScoreboard
     }
@@ -68,7 +68,7 @@ class VitalGlobalScoreboard(
         }
     }
 
-    fun addPlayer(player: Player) {
+    fun addPlayer(player: SpigotPlayer) {
         if (player in players) {
             return
         }
@@ -77,7 +77,7 @@ class VitalGlobalScoreboard(
         update()
     }
 
-    fun removePlayer(player: Player) {
+    fun removePlayer(player: SpigotPlayer) {
         if (player !in players) {
             return
         }

@@ -2,12 +2,11 @@ package me.vitalframework.tasks
 
 import me.vitalframework.*
 import net.md_5.bungee.api.ProxyServer
-import org.bukkit.scheduler.BukkitRunnable
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
 abstract class VitalRepeatableTask<P, R : Runnable, T>(
-    val plugin: P
+    val plugin: P,
 ) : RequiresAnnotation<VitalRepeatableTask.Info> {
     var interval: Long
     var allowTick = true
@@ -79,11 +78,11 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.TYPE)
     annotation class Info(
-        val interval: Long
+        val interval: Long,
     )
 
     open class Spigot(
-        plugin: SpigotPlugin
+        plugin: SpigotPlugin,
     ) : VitalRepeatableTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
         override fun createRunnable() = object : SpigotRunnable() {
             override fun run() {
@@ -103,7 +102,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     }
 
     class Bungee(
-        plugin: BungeePlugin
+        plugin: BungeePlugin,
     ) : VitalRepeatableTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
         override fun createRunnable(): BungeeRunnable = BungeeRunnable {
             handleTick()

@@ -1,9 +1,9 @@
 package me.vitalframework.inventories
 
 import me.vitalframework.RequiresAnnotation
+import me.vitalframework.SpigotPlayer
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component
 open class VitalInventory(previousInventory: VitalInventory?) : RequiresAnnotation<VitalInventory.Info> {
     private val size: Int
     private val name: String
-    private val playerInventories = mutableMapOf<Player, Inventory>()
+    private val playerInventories = mutableMapOf<SpigotPlayer, Inventory>()
     private val items = mutableMapOf<Int, ItemStack>()
-    private val actions = mutableMapOf<Pair<Player, Int>, (InventoryClickEvent) -> Unit>()
+    private val actions = mutableMapOf<Pair<SpigotPlayer, Int>, (InventoryClickEvent) -> Unit>()
     private val previousInventory: VitalInventory?
 
     init {
@@ -29,12 +29,12 @@ open class VitalInventory(previousInventory: VitalInventory?) : RequiresAnnotati
     override fun requiredAnnotationType() = Info::class.java
 
     @JvmOverloads
-    fun setItem(slot: Int, itemStack: ItemStack, player: Player, action: (InventoryClickEvent) -> Unit = {}) {
+    fun setItem(slot: Int, itemStack: ItemStack, player: SpigotPlayer, action: (InventoryClickEvent) -> Unit = {}) {
         items.put(slot, itemStack)
         actions.put(player to slot, action)
     }
 
-    fun hasInventoryOpen(player: Player) = playerInventories.containsKey(player)
+    fun hasInventoryOpen(player: SpigotPlayer) = playerInventories.containsKey(player)
 
     fun update() {
         onUpdate()
@@ -44,7 +44,7 @@ open class VitalInventory(previousInventory: VitalInventory?) : RequiresAnnotati
         }
     }
 
-    open fun update(player: Player) {
+    open fun update(player: SpigotPlayer) {
         val inventory: Inventory = playerInventories[player]!!
 
         onUpdate(player)
@@ -54,7 +54,7 @@ open class VitalInventory(previousInventory: VitalInventory?) : RequiresAnnotati
         }
     }
 
-    open fun open(player: Player) {
+    open fun open(player: SpigotPlayer) {
         val inventory = Bukkit.createInventory(player, size, name)
 
         playerInventories.put(player, inventory)
@@ -70,7 +70,7 @@ open class VitalInventory(previousInventory: VitalInventory?) : RequiresAnnotati
         action?.invoke(e)
     }
 
-    fun close(player: Player) {
+    fun close(player: SpigotPlayer) {
         playerInventories.remove(player)
         onClose(player)
     }
@@ -78,7 +78,7 @@ open class VitalInventory(previousInventory: VitalInventory?) : RequiresAnnotati
     /**
      * used for when this inventory is opened for any player
      */
-    fun onOpen(player: Player) {
+    fun onOpen(player: SpigotPlayer) {
     }
 
     /**
@@ -90,13 +90,13 @@ open class VitalInventory(previousInventory: VitalInventory?) : RequiresAnnotati
     /**
      * used for when needing to set items that hold player specific information
      */
-    fun onUpdate(player: Player) {
+    fun onUpdate(player: SpigotPlayer) {
     }
 
     /**
      * used for when this inventory is closed for an opened player
      */
-    fun onClose(player: Player) {
+    fun onClose(player: SpigotPlayer) {
     }
 
     /**

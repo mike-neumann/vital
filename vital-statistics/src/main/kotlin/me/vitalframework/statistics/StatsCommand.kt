@@ -5,9 +5,7 @@ import me.vitalframework.commands.VitalCommand
 import me.vitalframework.statistics.config.VitalStatisticsConfig
 import me.vitalframework.utils.VitalUtils
 import net.md_5.bungee.api.ProxyServer
-import net.md_5.bungee.api.plugin.Plugin
 import org.bukkit.Bukkit
-import org.bukkit.plugin.java.JavaPlugin
 import org.springframework.core.SpringVersion
 import java.text.SimpleDateFormat
 import java.util.*
@@ -64,9 +62,9 @@ interface StatsCommand<CS> {
 
     @RequiresSpigot
     class Spigot(
-        plugin: JavaPlugin,
+        plugin: SpigotPlugin,
         override val statisticsService: VitalStatisticsService,
-        override val statisticsConfig: VitalStatisticsConfig
+        override val statisticsConfig: VitalStatisticsConfig,
     ) : VitalCommand.Spigot(plugin), StatsCommand<SpigotCommandSender> {
         override fun sendMessage(sender: SpigotCommandSender, message: String) {
             VitalUtils.Spigot.sendMessage(sender, message)
@@ -88,9 +86,9 @@ interface StatsCommand<CS> {
 
     @RequiresBungee
     class Bungee(
-        plugin: Plugin,
+        plugin: BungeePlugin,
         override val statisticsService: VitalStatisticsService,
-        override val statisticsConfig: VitalStatisticsConfig
+        override val statisticsConfig: VitalStatisticsConfig,
     ) : VitalCommand.Bungee(plugin), StatsCommand<BungeeCommandSender> {
         override fun sendMessage(sender: BungeeCommandSender, message: String) {
             VitalUtils.Bungee.sendMessage(sender, message)

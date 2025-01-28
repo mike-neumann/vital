@@ -2,9 +2,9 @@ package me.vitalframework.players
 
 import lombok.Getter
 import lombok.RequiredArgsConstructor
+import me.vitalframework.BungeePlayer
+import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalEntity
-import net.md_5.bungee.api.connection.ProxiedPlayer
-import org.bukkit.entity.Player
 import java.util.*
 
 /**
@@ -15,11 +15,11 @@ import java.util.*
 abstract class VitalPlayer<T>(
     val player: T,
 ) : VitalEntity<UUID> {
-    class Spigot(player: Player) : VitalPlayer<Player>(player) {
+    class Spigot(player: SpigotPlayer) : VitalPlayer<SpigotPlayer>(player) {
         override var id = player.uniqueId
     }
 
-    class Bungee(player: ProxiedPlayer) : VitalPlayer<ProxiedPlayer>(player) {
+    class Bungee(player: BungeePlayer) : VitalPlayer<BungeePlayer>(player) {
         override var id: UUID = player.uniqueId
     }
 }
