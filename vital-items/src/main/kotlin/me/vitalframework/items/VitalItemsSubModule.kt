@@ -14,7 +14,7 @@ import java.util.*
 @Component("vital-items")
 class VitalItemsSubModule : VitalSubModule()
 
-fun itemBuilder(init: VitalItemStackBuilder.() -> Unit): ItemStack {
+inline fun itemBuilder(init: VitalItemStackBuilder.() -> Unit): ItemStack {
     val itemStackBuilder = VitalItemStackBuilder()
 
     itemStackBuilder.init()
@@ -59,7 +59,7 @@ fun itemBuilder(init: VitalItemStackBuilder.() -> Unit): ItemStack {
     return item
 }
 
-fun headBuilder(init: VitalHeadItemStackBuilder.() -> Unit): ItemStack {
+inline fun headBuilder(init: VitalHeadItemStackBuilder.() -> Unit): ItemStack {
     val headItemStackBuilder = VitalHeadItemStackBuilder()
 
     headItemStackBuilder.init()

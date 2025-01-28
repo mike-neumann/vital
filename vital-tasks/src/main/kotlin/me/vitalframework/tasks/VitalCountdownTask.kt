@@ -13,7 +13,9 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     var interval: Long
     var allowTick = true
     var runnable: R? = null
+        private set
     var task: T? = null
+        private set
 
     init {
         val info = getRequiredAnnotation()

@@ -18,7 +18,7 @@ object CloudNet4Driver {
     val cloudServiceFactory = InjectionLayer.ext().instance(CloudServiceFactory::class.java)!!
 
     @JvmOverloads
-    fun getCloudServers(predicate: (ServiceInfoSnapshot) -> Boolean = { true }) = cloudServiceProvider.runningServices()
+    inline fun getCloudServers(predicate: (ServiceInfoSnapshot) -> Boolean = { true }) = cloudServiceProvider.runningServices()
         .filter(predicate)
 
     /**

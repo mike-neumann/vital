@@ -11,7 +11,9 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     var interval: Long
     var allowTick = true
     var runnable: R? = null
+        private set
     var task: T? = null
+        private set
 
     init {
         val info = getRequiredAnnotation()
@@ -90,7 +92,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
             }
         }
 
-        override fun createTask() = runnable!!.runTaskTimer(plugin, 0L, ((interval / 1000.0) * 20L).toLong())
+        override fun createTask() = runnable!!.runTaskTimer(plugin, 0L, (interval / 1000L) * 20L)
 
         override fun cancelRunnable() {
             runnable?.cancel()
@@ -109,7 +111,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
         }
 
         override fun createTask() =
-            ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, interval, TimeUnit.MILLISECONDS)
+            ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, interval, TimeUnit.MILLISECONDS)!!
 
         override fun cancelRunnable() {
             task?.cancel()

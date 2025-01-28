@@ -10,20 +10,20 @@ import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Range
 import org.springframework.stereotype.Component
 
-open class VitalInventory(previousInventory: VitalInventory?) : RequiresAnnotation<VitalInventory.Info> {
+open class VitalInventory(
+    val previousInventory: VitalInventory?,
+) : RequiresAnnotation<VitalInventory.Info> {
     private val size: Int
     private val name: String
     private val playerInventories = mutableMapOf<SpigotPlayer, Inventory>()
     private val items = mutableMapOf<Int, ItemStack>()
     private val actions = mutableMapOf<Pair<SpigotPlayer, Int>, (InventoryClickEvent) -> Unit>()
-    private val previousInventory: VitalInventory?
 
     init {
         val info = getRequiredAnnotation()
 
         size = info.size
         name = info.name
-        this.previousInventory = previousInventory
     }
 
     override fun requiredAnnotationType() = Info::class.java
