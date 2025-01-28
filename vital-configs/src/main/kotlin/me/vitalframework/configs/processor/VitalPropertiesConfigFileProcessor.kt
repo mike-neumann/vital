@@ -8,8 +8,8 @@ import java.io.FileWriter
 import java.util.*
 
 class VitalPropertiesConfigFileProcessor(
-    override val file: File
-) : FileProcessor {
+    override val file: File,
+) : FileProcessor<String> {
     val properties = Properties()
 
     @Throws(Exception::class)
@@ -23,81 +23,79 @@ class VitalPropertiesConfigFileProcessor(
         return properties.getProperty(key)
     }
 
-    override fun read(key: String, def: Any): Any? {
+    override fun read(key: String, def: String): String? {
         return properties.getProperty(key, def.toString())
     }
 
-    override fun write(serializedContentMap: Map<String, *>) {
-        serializedContentMap.forEach { (key, value) ->
-            this.write(key, value!!)
+    override fun write(serializedContent: Map<String, String>) {
+        serializedContent.forEach { (key, value) ->
+            this.write(key, value)
         }
     }
 
-    override fun write(`object`: Any) {
-        write(serialize(`object`))
+    override fun write(instance: Any) {
+        write(serialize(instance))
     }
 
-    override fun write(key: String, value: Any) {
-        properties.setProperty(key, value.toString())
+    override fun write(key: String, value: String) {
+        properties.setProperty(key, value)
     }
 
     @Throws(Exception::class)
-    override fun save(serializedContentMap: Map<String, *>) {
-        serializedContentMap.entries
-            .map { (key, value) -> key to value.toString() }
-            .forEach { (key, value) ->
-                properties.setProperty(key, value)
-            }
+    override fun save(serializedContent: Map<String, String>) {
+        serializedContent.entries.forEach { (key, value) ->
+            properties.setProperty(key, value)
+        }
 
         properties.store(FileWriter(file), null)
     }
 
-    override fun serialize(`object`: Any): Map<String, String> {
-        val stringObjectMap = mutableMapOf<String, String>()
+    override fun serialize(instance: Any): Map<String, String> {
+        val stringObject = mutableMapOf<String, String>()
 
-        getPropertyFieldsFromType(`object`.javaClass)
+        getPropertyFieldsFromType(instance.javaClass)
             .filter { String::class.java.isAssignableFrom(it.type) }
             .map {
                 try {
                     // else use default snakeyaml mapping.
-                    return@map it.name to it[`object`]
+                    return@map it.name to it[instance]
                 } catch (e: IllegalAccessException) {
                     e.printStackTrace()
                     throw RuntimeException("error while serializing properties config field '${it.name}'")
                 }
             }
             .forEach { (key, value) ->
-                stringObjectMap[key] = value as String
+                stringObject[key] = value as String
             }
 
-        return stringObjectMap
+        return stringObject
     }
 
     @Throws(Exception::class)
-    override fun deserialize(serializedContentMap: Map<String, *>, type: Class<*>): Any? {
+    override fun deserialize(serializedContent: Map<String, String>, type: Class<*>): Any? {
         try {
             val defaultConstructor = type.getConstructor()
-            val `object` = defaultConstructor.newInstance()
+            val instance = defaultConstructor.newInstance()
 
             // default constructor was found, inject field properties...
-            serializedContentMap
+            serializedContent
                 .forEach { (key, value) ->
                     getFieldByProperty(type, key)?.let {
                         injectField(
-                            `object`,
+                            instance,
                             it,
                             value
                         )
                     }
                 }
 
-            return `object`
+            return instance
         } catch (e: NoSuchMethodException) {
             // default constructor not found, attempt to get constructor matching properties...
             val constructor = type.getConstructor(*getPropertyFieldsFromType(type).map { it.javaClass }.toTypedArray())
 
             // constructor found, create new instance with this constructor...
-            return constructor.newInstance(serializedContentMap.values)
+            return constructor.newInstance(serializedContent.values)
         }
     }
 }

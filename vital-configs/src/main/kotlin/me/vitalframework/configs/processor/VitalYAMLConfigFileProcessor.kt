@@ -14,14 +14,13 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.lang.reflect.Constructor
-import java.util.*
 
 @Getter
 class VitalYAMLConfigFileProcessor(
-    override val file: File
-) : FileProcessor {
+    override val file: File,
+) : FileProcessor<Any> {
     private val yaml: Yaml
-    private val data: MutableMap<String, Any?> = HashMap()
+    private val data: MutableMap<String, Any> = HashMap()
 
     init {
         val loaderOptions = LoaderOptions().apply {
@@ -65,13 +64,13 @@ class VitalYAMLConfigFileProcessor(
     }
 
     @Throws(Exception::class)
-    override fun load(type: Class<*>): Map<String, Any?> {
+    override fun load(type: Class<*>): Map<String, Any> {
         data.clear()
 
         // add type descriptors for complex types...
         addTypeDescriptors(type)
 
-        val data = yaml.load<Map<String, Any?>>(FileReader(file))
+        val data = yaml.load<Map<String, Any>>(FileReader(file))
 
         if (data != null) {
             this.data.putAll(data)
@@ -88,11 +87,11 @@ class VitalYAMLConfigFileProcessor(
         return data.getOrDefault(key, def)
     }
 
-    override fun write(serializedContentMap: Map<String, *>) {
-        data.putAll(serializedContentMap)
+    override fun write(serializedContent: Map<String, Any>) {
+        data.putAll(serializedContent)
     }
 
-    override fun write(`object`: Any) {
+    override fun write(instance: Any) {
     }
 
     @Throws(Exception::class)
@@ -101,23 +100,23 @@ class VitalYAMLConfigFileProcessor(
     }
 
     @Throws(Exception::class)
-    override fun save(serializedContentMap: Map<String, *>) {
-        data.putAll(serializedContentMap)
+    override fun save(serializedContent: Map<String, Any>) {
+        data.putAll(serializedContent)
         yaml.dump(data, FileWriter(file))
     }
 
     @Throws(Exception::class)
-    override fun serialize(`object`: Any): Map<String, Any?> {
-        val stringObjectMap = mutableMapOf<String, Any?>()
+    override fun serialize(instance: Any): Map<String, Any> {
+        val stringObjectMap = mutableMapOf<String, Any>()
 
-        getPropertyFieldsFromType(`object`.javaClass).stream()
+        getPropertyFieldsFromType(instance.javaClass).stream()
             .map {
                 try {
                     // else use default snakeyaml mapping.
                     // force field to be accessible even if private
                     it.isAccessible = true
 
-                    return@map it.name to it[`object`]
+                    return@map it.name to it[instance]
                 } catch (e: Exception) {
                     e.printStackTrace()
                     throw RuntimeException("error while serializing yml config field '${it.name}'")
@@ -131,26 +130,26 @@ class VitalYAMLConfigFileProcessor(
     }
 
     @Throws(Exception::class)
-    override fun deserialize(serializedContentMap: Map<String, *>, type: Class<*>): Any {
+    override fun deserialize(serializedContent: Map<String, Any>, type: Class<*>): Any {
         try {
             val defaultConstructor: Constructor<*> = type.getConstructor()
-            val `object` = defaultConstructor.newInstance()
+            val instance = defaultConstructor.newInstance()
 
             // default constructor was found, inject field properties...
-            serializedContentMap
+            serializedContent
                 .forEach { (key, value) ->
                     getFieldByProperty(type, key)?.let {
-                        injectField(`object`, it, value)
+                        injectField(instance, it, value)
                     }
                 }
 
-            return `object`
+            return instance
         } catch (e: NoSuchMethodException) {
             // default constructor not found, attempt to get constructor matching properties...
             val constructor = type.getConstructor(*getPropertyFieldsFromType(type).map { it.javaClass }.toTypedArray())
 
             // constructor found, create new instance with this constructor...
-            return constructor.newInstance(serializedContentMap.values)
+            return constructor.newInstance(serializedContent.values)
         }
     }
 }

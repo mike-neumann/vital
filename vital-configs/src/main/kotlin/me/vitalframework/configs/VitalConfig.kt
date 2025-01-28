@@ -6,12 +6,11 @@ import org.springframework.stereotype.Component
 import java.io.File
 import java.io.IOException
 import java.lang.reflect.Field
-import java.util.*
 import kotlin.reflect.KClass
 
 abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
     val log = logger()
-    var vitalConfigFileProcessor: FileProcessor? = null
+    var vitalConfigFileProcessor: FileProcessor<Any>? = null
         private set
 
     init {
@@ -31,7 +30,7 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
         }
     }
 
-    private fun load(fileName: String, processor: Class<out FileProcessor>) {
+    private fun load(fileName: String, processor: Class<out FileProcessor<Any>>) {
         try {
             val file = createFile(fileName)
 
@@ -101,7 +100,7 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
         /**
          * Defines the file processor used by this config.
          */
-        val processor: KClass<out FileProcessor>
+        val processor: KClass<out FileProcessor<Any>>,
     )
 
     /**
@@ -114,96 +113,97 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
          * Defines the class types this annotated field manages.
          * When annotating a list or map, specify their generic types.
          */
-        vararg val value: KClass<*>
+        vararg val value: KClass<*>,
     )
 
     /**
      * Describes an object which is capable of processing the contents of a given config file.
      */
-    interface FileProcessor {
+    interface FileProcessor<T> {
         val file: File
 
         /**
          * Loads the file processed by this processor.
          */
         @Throws(Exception::class)
-        fun load(type: Class<*>): Map<String, *>
+        fun load(clazz: Class<*>): Map<String, T>
 
         /**
          * Reads a config value by the specified key.
          */
-        fun read(key: String): Any?
+        fun read(key: String): T?
 
         /**
          * Reads a config value by the specified key, if that value was not found, returns a default value.
          */
-        fun read(key: String, def: Any): Any?
+        fun read(key: String, def: T): T?
 
         /**
          * Writes the given serialized content to this config.
          */
-        fun write(serializedContentMap: Map<String, *>)
+        fun write(serializedContent: Map<String, T>)
 
         /**
          * Writes the given object to this config.
          */
-        fun write(`object`: Any)
+        fun write(instance: Any)
 
         /**
          * Writes the given value to this config.
          */
         @Throws(Exception::class)
-        fun write(key: String, value: Any)
+        fun write(key: String, value: T)
 
         /**
          * Saves the given serialized content to this config.
          */
+        // must use star-projection here, default map impl does not support contravariance
         @Throws(Exception::class)
-        fun save(serializedContentMap: Map<String, *>)
+        fun save(serializedContent: Map<String, T>)
 
         /**
          * Serializes the given object for config usage.
          */
         @Throws(Exception::class)
-        fun serialize(`object`: Any): Map<String, *>
+        fun serialize(instance: Any): Map<String, T>
 
         /**
          * Deserializes the given serialized map to the specified object type.
          *
-         * @param serializedContentMap The serialized content.
+         * @param serializedContent The serialized content.
          * @param type                 The type to deserialize to.
          * @return The deserialized object.
          * @throws Exception If any error occurs while deserializing.
          */
         @Throws(Exception::class)
-        fun deserialize(serializedContentMap: Map<String, *>, type: Class<*>): Any?
+        fun deserialize(serializedContent: Map<String, T>, type: Class<*>): Any?
 
         /**
          * Gets all property fields of the given type.
          *
-         * @param type The type to fetch all property fields from.
+         * @param clazz The type to fetch all property fields from.
          * @return All property fields of the given type.
          */
-        fun getPropertyFieldsFromType(type: Class<*>) = type.declaredFields
+        fun getPropertyFieldsFromType(clazz: Class<*>) = clazz.declaredFields
             .filter { it.isAnnotationPresent(Property::class.java) }
 
         /**
          * Gets all non property fields of the given type.
          *
-         * @param type The type to fetch all non property fields from.
+         * @param clazz The type to fetch all non property fields from.
          * @return All non property fields of the given type.
          */
-        fun getNonPropertyFieldsFromType(type: Class<*>) = type.declaredFields
+        fun getNonPropertyFieldsFromType(clazz: Class<*>) = clazz.declaredFields
             .filter { !it.isAnnotationPresent(Property::class.java) }
 
         /**
          * Fetches a field of the given type by its property string.
          *
-         * @param type     The type to fetch the field from.
+         * @param clazz     The type to fetch the field from.
          * @param property The property key of the annotated field.
          * @return The fetched field; or null.
          */
-        fun getFieldByProperty(type: Class<*>, property: String) = getPropertyFieldsFromType(type)
+        fun getFieldByProperty(clazz: Class<*>, property: String) = getPropertyFieldsFromType(clazz)
             .firstOrNull { it.name == property }
     }
 
