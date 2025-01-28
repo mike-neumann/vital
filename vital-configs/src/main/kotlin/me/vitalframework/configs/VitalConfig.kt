@@ -1,194 +1,171 @@
-package me.vitalframework.configs;
+package me.vitalframework.configs
 
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import me.vitalframework.RequiresAnnotation;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
+import me.vitalframework.RequiresAnnotation
+import me.vitalframework.Vital.logger
+import org.springframework.stereotype.Component
+import java.io.File
+import java.io.IOException
+import java.lang.reflect.Field
+import java.util.*
+import kotlin.reflect.KClass
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
+    val log = logger()
+    var vitalConfigFileProcessor: FileProcessor? = null
+        private set
 
-@Slf4j
-public abstract class VitalConfig implements RequiresAnnotation<VitalConfig.Info> {
-    private FileProcessor vitalConfigFileProcessor;
+    init {
+        val info = getRequiredAnnotation()
 
-    public VitalConfig() {
-        final var info = getRequiredAnnotation();
-
-        load(info.name(), info.processor());
+        load(info.name, info.processor.java)
     }
 
-    public static void injectField(@NonNull Object accessor, @NonNull Field field, Object value) {
+    override fun requiredAnnotationType() = Info::class.java
+
+    fun save() {
         try {
-            // force field to be accessible even if private
-            // this is needed for injection...
-            field.setAccessible(true);
-            field.set(accessor, value);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            throw new RuntimeException("error while injecting field %s with %s"
-                    .formatted(field.getName(), String.valueOf(value)));
+            vitalConfigFileProcessor!!.save(vitalConfigFileProcessor!!.serialize(this))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw RuntimeException("error while saving config")
         }
     }
 
-    @Override
-    public final @NotNull Class<Info> requiredAnnotationType() {
-        return Info.class;
-    }
-
-    public void save() {
+    private fun load(fileName: String, processor: Class<out FileProcessor>) {
         try {
-            vitalConfigFileProcessor.save(vitalConfigFileProcessor.serialize(this));
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("error while saving config");
-        }
-    }
-
-    private void load(@NonNull String fileName, @NonNull Class<? extends FileProcessor> processor) {
-        try {
-            final var file = createFile(fileName);
+            val file = createFile(fileName)
 
             // attempt to create default processor instance.
-            final var defaultConstructor = processor.getDeclaredConstructor(File.class);
+            val defaultConstructor = processor.getDeclaredConstructor(File::class.java)
 
-            vitalConfigFileProcessor = defaultConstructor.newInstance(file);
+            vitalConfigFileProcessor = defaultConstructor.newInstance(file)
 
             try {
                 // after everything has worked without problem, inject field of our config with the values now retrievable...
-                injectFields(vitalConfigFileProcessor.load(getClass()));
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException("error while injecting fields for config %s with processor %s"
-                        .formatted(fileName, processor.getSimpleName()));
+                injectFields(vitalConfigFileProcessor!!.load(javaClass))
+            } catch (e: Exception) {
+                e.printStackTrace()
+                throw RuntimeException("error while injecting fields for config '$fileName' with processor '${processor.simpleName}'")
             }
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
-                 InvocationTargetException e) {
-            e.printStackTrace();
-            throw new RuntimeException("error while creating config file processor %s for config %s"
-                    .formatted(processor.getSimpleName(), fileName));
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw RuntimeException("error while creating config file processor '${processor.simpleName}' for config '$fileName'")
         }
     }
 
-    @NonNull
-    private File createFile(@NonNull String fileName) {
-        final var file = new File(fileName);
+    private fun createFile(fileName: String): File {
+        val file = File(fileName)
 
         if (!file.exists()) {
-            if (file.getParentFile() != null) {
-                file.getParentFile().mkdirs();
+            if (file.parentFile != null) {
+                file.parentFile.mkdirs()
             }
 
             try {
-                final var fileCreated = file.createNewFile();
+                val fileCreated = file.createNewFile()
 
                 if (fileCreated) {
-                    log.info("{} config file created", fileName);
+                    log.info("{} config file created", fileName)
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException("error while creating config file %s"
-                        .formatted(fileName));
+            } catch (e: IOException) {
+                e.printStackTrace()
+                throw RuntimeException("error while creating config file '$fileName'")
             }
         }
 
-        return file;
+        return file
     }
 
-    private void injectFields(@NonNull Map<String, ?> serializedContentMap) {
+    private fun injectFields(serializedContentMap: Map<String, *>) {
         serializedContentMap
-                .forEach((key, value) -> {
-                    final var optionalField = Optional.ofNullable(vitalConfigFileProcessor.getFieldByProperty(getClass(), key));
+            .forEach { (key: String, value: Any?) ->
+                val field = vitalConfigFileProcessor!!.getFieldByProperty(javaClass, key)
 
-                    optionalField.ifPresent(field -> injectField(VitalConfig.this, field, value));
-                });
+                field?.let {
+                    injectField(this@VitalConfig, it, value)
+                }
+            }
     }
 
     /**
      * Defines meta-information for the annotated config.
      */
     @Component
-    @Target(ElementType.TYPE)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface Info {
+    @Target(AnnotationTarget.CLASS)
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class Info(
         /**
          * Defines the file name (including extension) for the annotated config.
          */
-        String name();
-
+        val name: String,
         /**
          * Defines the file processor used by this config.
          */
-        Class<? extends FileProcessor> processor();
-    }
+        val processor: KClass<out FileProcessor>
+    )
 
     /**
      * Defines a field within a config extending class to be a key.
      */
-    @Target(ElementType.FIELD)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface Property {
+    @Target(AnnotationTarget.FIELD)
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class Property(
         /**
          * Defines the class types this annotated field manages.
          * When annotating a list or map, specify their generic types.
          */
-        Class<?>[] value();
-    }
+        vararg val value: KClass<*>
+    )
 
     /**
      * Describes an object which is capable of processing the contents of a given config file.
      */
-    public interface FileProcessor {
+    interface FileProcessor {
+        val file: File
+
         /**
          * Loads the file processed by this processor.
          */
-        Map<String, ?> load(@NonNull Class<?> type) throws Exception;
+        @Throws(Exception::class)
+        fun load(type: Class<*>): Map<String, *>
 
         /**
          * Reads a config value by the specified key.
          */
-        Object read(@NonNull String key);
+        fun read(key: String): Any?
 
         /**
          * Reads a config value by the specified key, if that value was not found, returns a default value.
          */
-        Object read(@NonNull String key, @NonNull Object def);
+        fun read(key: String, def: Any): Any?
 
         /**
          * Writes the given serialized content to this config.
          */
-        void write(@NonNull Map<String, ?> serializedContentMap);
+        fun write(serializedContentMap: Map<String, *>)
 
         /**
          * Writes the given object to this config.
          */
-        void write(@NonNull Object object);
+        fun write(`object`: Any)
 
         /**
          * Writes the given value to this config.
          */
-        void write(@NonNull String key, @NonNull Object value) throws Exception;
+        @Throws(Exception::class)
+        fun write(key: String, value: Any)
 
         /**
          * Saves the given serialized content to this config.
          */
-        void save(@NonNull Map<String, ?> serializedContentMap) throws Exception;
+        @Throws(Exception::class)
+        fun save(serializedContentMap: Map<String, *>)
 
         /**
          * Serializes the given object for config usage.
          */
-        Map<String, ?> serialize(@NonNull Object object) throws Exception;
+        @Throws(Exception::class)
+        fun serialize(`object`: Any): Map<String, *>
 
         /**
          * Deserializes the given serialized map to the specified object type.
@@ -198,7 +175,8 @@ public abstract class VitalConfig implements RequiresAnnotation<VitalConfig.Info
          * @return The deserialized object.
          * @throws Exception If any error occurs while deserializing.
          */
-        Object deserialize(@NonNull Map<String, ?> serializedContentMap, @NonNull Class<Object> type) throws Exception;
+        @Throws(Exception::class)
+        fun deserialize(serializedContentMap: Map<String, *>, type: Class<*>): Any?
 
         /**
          * Gets all property fields of the given type.
@@ -206,12 +184,8 @@ public abstract class VitalConfig implements RequiresAnnotation<VitalConfig.Info
          * @param type The type to fetch all property fields from.
          * @return All property fields of the given type.
          */
-        @NonNull
-        default List<Field> getPropertyFieldsFromType(@NonNull Class<?> type) {
-            return Arrays.stream(type.getDeclaredFields())
-                    .filter(field -> field.isAnnotationPresent(VitalConfig.Property.class))
-                    .toList();
-        }
+        fun getPropertyFieldsFromType(type: Class<*>) = type.declaredFields
+            .filter { it.isAnnotationPresent(Property::class.java) }
 
         /**
          * Gets all non property fields of the given type.
@@ -219,12 +193,8 @@ public abstract class VitalConfig implements RequiresAnnotation<VitalConfig.Info
          * @param type The type to fetch all non property fields from.
          * @return All non property fields of the given type.
          */
-        @NonNull
-        default List<Field> getNonPropertyFieldsFromType(@NonNull Class<?> type) {
-            return Arrays.stream(type.getDeclaredFields())
-                    .filter(field -> !field.isAnnotationPresent(VitalConfig.Property.class))
-                    .toList();
-        }
+        fun getNonPropertyFieldsFromType(type: Class<*>) = type.declaredFields
+            .filter { !it.isAnnotationPresent(Property::class.java) }
 
         /**
          * Fetches a field of the given type by its property string.
@@ -233,12 +203,22 @@ public abstract class VitalConfig implements RequiresAnnotation<VitalConfig.Info
          * @param property The property key of the annotated field.
          * @return The fetched field; or null.
          */
+        fun getFieldByProperty(type: Class<*>, property: String) = getPropertyFieldsFromType(type)
+            .firstOrNull { it.name == property }
+    }
 
-        default Field getFieldByProperty(@NonNull Class<?> type, @NonNull String property) {
-            return getPropertyFieldsFromType(type).stream()
-                    .filter(field -> field.getName().equals(property))
-                    .findFirst()
-                    .orElse(null);
+    companion object {
+        @JvmStatic
+        fun injectField(accessor: Any, field: Field, value: Any?) {
+            try {
+                // force field to be accessible even if private
+                // this is needed for injection...
+                field.isAccessible = true
+                field[accessor] = value
+            } catch (e: IllegalAccessException) {
+                e.printStackTrace()
+                throw RuntimeException("error while injecting field '${field.name}' with '$value'")
+            }
         }
     }
 }

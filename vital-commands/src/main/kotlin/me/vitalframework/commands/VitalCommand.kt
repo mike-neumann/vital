@@ -1,34 +1,22 @@
-package me.vitalframework.commands;
+package me.vitalframework.commands
 
-import jakarta.annotation.PostConstruct;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import me.vitalframework.RequiresAnnotation;
-import me.vitalframework.commands.crossplatform.VitalPluginCommand;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.plugin.Plugin;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.springframework.stereotype.Component;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import jakarta.annotation.PostConstruct
+import me.vitalframework.*
+import me.vitalframework.Vital.logger
+import me.vitalframework.commands.VitalCommand.Arg.Type
+import me.vitalframework.commands.crossplatform.VitalPluginCommand
+import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.connection.ProxiedPlayer
+import org.bukkit.Bukkit
+import org.bukkit.Material
+import org.bukkit.command.Command
+import org.bukkit.entity.Player
+import org.springframework.stereotype.Component
+import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Method
+import java.util.*
+import java.util.regex.Pattern
+import kotlin.reflect.KClass
 
 /**
  * Abstract base class for custom Minecraft commands using the Vital framework.
@@ -37,387 +25,395 @@ import java.util.stream.Stream;
  * @param <CS> The command sender type of this command.
  * @author xRa1ny
  */
-@Getter
-@Slf4j
-public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCommand.Info> {
-    @NonNull
-    private final P plugin;
+abstract class VitalCommand<P, CS : Any> protected constructor(
+    plugin: P,
+    commandSenderClass: Class<CS>
+) : RequiresAnnotation<VitalCommand.Info> {
+    val log = logger()
+    val plugin: P
+    val commandSenderClass: Class<CS>
+    val name: String
+    val permission: String
+    val requiresPlayer: Boolean
+    val args: Map<Pattern, Arg>
+    val argHandlers: Map<Arg, ArgHandlerContext>
+    val argExceptionHandlers: Map<Arg, Map<Class<out Throwable>, ArgExceptionHandlerContext>>
 
-    @NonNull
-    private final Class<CS> commandSenderClass;
+    init {
+        val vitalCommandInfo = getRequiredAnnotation()
 
-    @NonNull
-    private final String name;
-
-    @NonNull
-    private final String permission;
-
-    private final boolean requiresPlayer;
-
-    @NonNull
-    private final Map<Pattern, Arg> args;
-
-    @NonNull
-    private final Map<Arg, ArgHandlerContext> argHandlers;
-
-    @NonNull
-    private final Map<Arg, Map<Class<? extends Throwable>, ArgExceptionHandlerContext>> argExceptionHandlers;
-
-    protected VitalCommand(@NonNull P plugin, @NonNull Class<CS> commandSenderClass) {
-        final var vitalCommandInfo = getRequiredAnnotation();
-
-        this.plugin = plugin;
-        this.commandSenderClass = commandSenderClass;
-        name = vitalCommandInfo.name();
-        permission = vitalCommandInfo.permission();
-        requiresPlayer = vitalCommandInfo.requiresPlayer();
-        args = getMappedArgs();
-        argHandlers = getMappedArgHandlers();
-        argExceptionHandlers = getMappedArgExceptionHandlers();
+        this.plugin = plugin
+        this.commandSenderClass = commandSenderClass
+        name = vitalCommandInfo.name
+        permission = vitalCommandInfo.permission
+        requiresPlayer = vitalCommandInfo.requiresPlayer
+        args = getMappedArgs()
+        argHandlers = getMappedArgHandlers()
+        argExceptionHandlers = getMappedArgExceptionHandlers()
     }
 
-    @Override
-    public final @NonNull Class<Info> requiredAnnotationType() {
-        return Info.class;
-    }
+    override fun requiredAnnotationType() = Info::class.java
 
-    private Map<Pattern, Arg> getMappedArgs() {
-        return Arrays.stream(getClass().getMethods())
-                .filter(method -> method.isAnnotationPresent(ArgHandler.class))
-                .map(method -> method.getAnnotation(ArgHandler.class))
-                .map(handler -> Map.entry(
-                        Pattern.compile(
-                                handler.value().value().replaceAll(" ", "[ ]")
-                                        .replaceAll("%.+%[*]", "(.+)")
-                                        .replaceAll("%.+%", "(\\\\S+)")
-                        ),
-                        handler.value()
-                ))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
+    private fun getMappedArgs() = javaClass.methods
+        .filter { it.isAnnotationPresent(ArgHandler::class.java) }
+        .map { it.getAnnotation(ArgHandler::class.java) }
+        .associate {
+            Pattern.compile(
+                it.value.value.replace(" ".toRegex(), "[ ]")
+                    .replace("%.+%[*]".toRegex(), "(.+)")
+                    .replace("%.+%".toRegex(), "(\\\\S+)")
+            ) to it.value
+        }
 
-    private Map<Arg, ArgHandlerContext> getMappedArgHandlers() {
-        return Arrays.stream(getClass().getMethods())
-                .filter(method -> ReturnState.class.isAssignableFrom(method.getReturnType()))
-                .filter(method -> method.isAnnotationPresent(ArgHandler.class))
-                .map(method -> {
-                    // now we have a viable method ready for handling incoming arguments
-                    // we just need to filter out the injectable parameters for our method
-                    // since we only support a handful of injectable params for handler methods...
-                    final var vitalCommandArg = method.getAnnotation(ArgHandler.class).value();
-                    final var parameters = List.of(method.getParameters());
-                    Integer commandSenderIndex = null;
-                    Integer executedArgIndex = null;
-                    Integer commandArgIndex = null;
-                    Integer valuesIndex = null;
+    private fun getMappedArgHandlers() = javaClass.methods
+        .filter { ReturnState::class.java.isAssignableFrom(it.returnType) }
+        .filter { it.isAnnotationPresent(ArgHandler::class.java) }
+        .associate { method ->
+            // now we have a viable method ready for handling incoming arguments
+            // we just need to filter out the injectable parameters for our method
+            // since we only support a handful of injectable params for handler methods...
+            val vitalCommandArg = method.getAnnotation(ArgHandler::class.java).value
+            var commandSenderIndex: Int? = null
+            var executedArgIndex: Int? = null
+            var commandArgIndex: Int? = null
+            var valuesIndex: Int? = null
 
-                    for (var parameter : parameters) {
-                        if (commandSenderClass.isAssignableFrom(parameter.getType())) {
-                            commandSenderIndex = parameters.indexOf(parameter);
-                        } else if (String.class.isAssignableFrom(parameter.getType())) {
-                            executedArgIndex = parameters.indexOf(parameter);
-                        } else if (Arg.class.isAssignableFrom(parameter.getType())) {
-                            commandArgIndex = parameters.indexOf(parameter);
-                        } else if (String[].class.isAssignableFrom(parameter.getType())) {
-                            valuesIndex = parameters.indexOf(parameter);
-                        }
-                    }
-
-                    return Map.entry(vitalCommandArg, new ArgHandlerContext(method, commandSenderIndex, executedArgIndex, commandArgIndex, valuesIndex));
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private Map<Arg, Map<Class<? extends Throwable>, ArgExceptionHandlerContext>> getMappedArgExceptionHandlers() {
-        final var mappedArgExceptionHandlers = new HashMap<Arg, Map<Class<? extends Throwable>, ArgExceptionHandlerContext>>();
-
-        Arrays.stream(getClass().getMethods())
-                .filter(method -> method.isAnnotationPresent(ArgExceptionHandler.class))
-                .forEach(method -> {
-                    final var argExceptionHandler = method.getAnnotation(ArgExceptionHandler.class);
-                    final var arg = getArg(argExceptionHandler.value());
-
-                    if (arg == null) {
-                        throw new IllegalArgumentException("Exception handler mapping failed, arg '" + argExceptionHandler.value() + "' does not exist");
-                    }
-
-                    final var parameters = List.of(method.getParameters());
-                    Integer commandSenderIndex = null;
-                    Integer executedArgIndex = null;
-                    Integer commandArgIndex = null;
-                    Integer exceptionIndex = null;
-
-                    for (var parameter : parameters) {
-                        if (commandSenderClass.isAssignableFrom(parameter.getType())) {
-                            commandSenderIndex = parameters.indexOf(parameter);
-                        } else if (String.class.isAssignableFrom(parameter.getType())) {
-                            executedArgIndex = parameters.indexOf(parameter);
-                        } else if (Arg.class.isAssignableFrom(parameter.getType())) {
-                            commandArgIndex = parameters.indexOf(parameter);
-                        } else if (Exception.class.isAssignableFrom(parameter.getType())) {
-                            exceptionIndex = parameters.indexOf(parameter);
-                        }
-                    }
-
-                    final var argExceptionHandlerContext = new ArgExceptionHandlerContext(method, commandSenderIndex, executedArgIndex, commandArgIndex, exceptionIndex);
-
-                    if (!mappedArgExceptionHandlers.containsKey(arg)) {
-                        mappedArgExceptionHandlers.put(arg, new HashMap<>(Map.of(argExceptionHandler.type(), argExceptionHandlerContext)));
-                    } else {
-                        mappedArgExceptionHandlers.get(arg).put(argExceptionHandler.type(), argExceptionHandlerContext);
-                    }
-                });
-
-        return mappedArgExceptionHandlers;
-    }
-
-    private Arg getArg(@NonNull String arg) {
-        return args.entrySet().stream()
-                .filter(entry -> entry.getKey().matcher(arg).matches())
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(null);
-    }
-
-    private void executeArgExceptionHandlerMethod(@NonNull CS sender, @NonNull Throwable exception, @NonNull String arg, @NonNull Arg commandArg) {
-        final var exceptionHandlers = argExceptionHandlers.get(commandArg);
-
-        if (exceptionHandlers == null || exceptionHandlers.isEmpty()) {
-            // we do not have any exception handler mapped for this argument
-            throw new RuntimeException(exception);
-        } else {
-            final var optionalExceptionHandlerContext = exceptionHandlers.entrySet().stream()
-                    .filter(entry -> entry.getKey().isAssignableFrom(exception.getClass()))
-                    .map(Map.Entry::getValue)
-                    .findAny();
-
-            // we may or may not have an exception handler mapped for this execution context
-            if (optionalExceptionHandlerContext.isEmpty()) {
-                // if we don't have an exception handler mapped, call the base exception handler for this command
-                onCommandError(sender, commandArg, exception);
-
-                return;
+            method.parameters.forEach {
+                if (commandSenderClass.isAssignableFrom(it.type)) {
+                    commandSenderIndex = method.parameters.indexOf(it)
+                } else if (String::class.java.isAssignableFrom(it.type)) {
+                    executedArgIndex = method.parameters.indexOf(it)
+                } else if (Arg::class.java.isAssignableFrom(it.type)) {
+                    commandArgIndex = method.parameters.indexOf(it)
+                } else if (Array<String>::class.java.isAssignableFrom(it.type)) {
+                    valuesIndex = method.parameters.indexOf(it)
+                }
             }
 
-            final var exceptionHandlerContext = optionalExceptionHandlerContext.get();
+            vitalCommandArg to ArgHandlerContext(
+                method,
+                commandSenderIndex,
+                executedArgIndex,
+                commandArgIndex,
+                valuesIndex
+            )
+        }
+
+    private fun getMappedArgExceptionHandlers(): Map<Arg, Map<Class<out Throwable>, ArgExceptionHandlerContext>> {
+        val mappedArgExceptionHandlers =
+            mutableMapOf<Arg, MutableMap<Class<out Throwable>, ArgExceptionHandlerContext>>()
+
+        javaClass.methods
+            .filter { it.isAnnotationPresent(ArgExceptionHandler::class.java) }
+            .forEach { method ->
+                val argExceptionHandler = method.getAnnotation(ArgExceptionHandler::class.java)!!
+                val arg = getArg(argExceptionHandler.value)
+                    ?: throw RuntimeException("Exception handler mapping failed, arg '${argExceptionHandler.value}' does not exist")
+
+                var commandSenderIndex: Int? = null
+                var executedArgIndex: Int? = null
+                var commandArgIndex: Int? = null
+                var exceptionIndex: Int? = null
+
+                method.parameters.forEach {
+                    if (commandSenderClass.isAssignableFrom(it.type)) {
+                        commandSenderIndex = method.parameters.indexOf(it)
+                    } else if (String::class.java.isAssignableFrom(it.type)) {
+                        executedArgIndex = method.parameters.indexOf(it)
+                    } else if (Arg::class.java.isAssignableFrom(it.type)) {
+                        commandArgIndex = method.parameters.indexOf(it)
+                    } else if (Exception::class.java.isAssignableFrom(it.type)) {
+                        exceptionIndex = method.parameters.indexOf(it)
+                    }
+                }
+
+                val argExceptionHandlerContext = ArgExceptionHandlerContext(
+                    method,
+                    commandSenderIndex,
+                    executedArgIndex,
+                    commandArgIndex,
+                    exceptionIndex
+                )
+                if (!mappedArgExceptionHandlers.containsKey(arg)) {
+                    mappedArgExceptionHandlers[arg] =
+                        mutableMapOf(argExceptionHandler.type.java to argExceptionHandlerContext)
+                } else {
+                    mappedArgExceptionHandlers[arg]!![argExceptionHandler.type.java] = argExceptionHandlerContext
+                }
+            }
+
+        return mappedArgExceptionHandlers
+            .map { it.key to it.value.toMap() }
+            .toMap()
+    }
+
+    private fun getArg(arg: String) = args.entries
+        .filter { it.key.matcher(arg).matches() }
+        .map { it.value }
+        .firstOrNull()
+
+    private fun executeArgExceptionHandlerMethod(sender: CS, exception: Throwable, arg: String, commandArg: Arg) {
+        val exceptionHandlers = argExceptionHandlers[commandArg]
+
+        if (exceptionHandlers.isNullOrEmpty()) {
+            // we do not have any exception handler mapped for this argument
+            throw RuntimeException(exception)
+        } else {
+            val exceptionHandlerContext = exceptionHandlers.entries
+                .filter {
+                    it.key.isAssignableFrom(
+                        exception.javaClass
+                    )
+                }
+                .map { it.value }
+                .firstOrNull()
+
+            // we may or may not have an exception handler mapped for this execution context
+            if (exceptionHandlerContext == null) {
+                // if we don't have an exception handler mapped, call the base exception handler for this command
+                onCommandError(sender, commandArg, exception)
+
+                return
+            }
 
             // if we do have an exception, prepare for parameter injection...
-            final var injectableParameters = new HashMap<Integer, Object>();
+            val injectableParameters = mutableMapOf<Int, Any>()
 
             if (exceptionHandlerContext.commandSenderIndex != null) {
-                injectableParameters.put(exceptionHandlerContext.commandSenderIndex, sender);
+                injectableParameters[exceptionHandlerContext.commandSenderIndex] = sender
             }
 
             if (exceptionHandlerContext.executedArgIndex != null) {
-                injectableParameters.put(exceptionHandlerContext.executedArgIndex, arg);
+                injectableParameters[exceptionHandlerContext.executedArgIndex] = arg
             }
 
             if (exceptionHandlerContext.argIndex != null) {
-                injectableParameters.put(exceptionHandlerContext.argIndex, commandArg);
+                injectableParameters[exceptionHandlerContext.argIndex] = commandArg
             }
 
             if (exceptionHandlerContext.exceptionIndex != null) {
-                injectableParameters.put(exceptionHandlerContext.exceptionIndex, exception);
+                injectableParameters[exceptionHandlerContext.exceptionIndex] = exception
             }
 
             try {
-                final var sortedParameters = injectableParameters.entrySet().stream().sorted(Map.Entry.comparingByKey())
-                        .map(Map.Entry::getValue)
-                        .toArray();
+                val sortedParameters =
+                    injectableParameters.entries
+                        .sortedBy { it.key }
+                        .map { it.value }
+                        .toTypedArray()
 
-                exceptionHandlerContext.handlerMethod.invoke(this, sortedParameters);
-            } catch (Exception e) {
-                log.error("Error while executing exception handler method using context {}", exceptionHandlerContext, e);
+                exceptionHandlerContext.handlerMethod.invoke(this, *sortedParameters)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                throw RuntimeException("Error while executing exception handler method using context $exceptionHandlerContext")
             }
         }
     }
 
-    @NonNull
-    private ReturnState executeArgHandlerMethod(@NonNull CS sender, @NonNull String arg, @NonNull Arg commandArg, @NonNull String[] values) throws InvocationTargetException, IllegalAccessException {
-        final var argHandlerContext = argHandlers.get(commandArg);
+    @Throws(InvocationTargetException::class, IllegalAccessException::class)
+    private fun executeArgHandlerMethod(sender: CS, arg: String, commandArg: Arg, values: Array<String>): ReturnState {
+        val argHandlerContext = argHandlers[commandArg]
+            ?: throw RuntimeException("No handler method exists for arg '$arg'")
 
-        if (argHandlerContext == null) {
-            throw new IllegalArgumentException("No handler method exists for arg '" + arg + "'");
-        }
-
-        final var injectableParameters = new HashMap<Integer, Object>();
+        val injectableParameters = mutableMapOf<Int, Any>()
 
         if (argHandlerContext.commandSenderIndex != null) {
-            injectableParameters.put(argHandlerContext.commandSenderIndex, sender);
+            injectableParameters[argHandlerContext.commandSenderIndex] = sender
         }
 
         if (argHandlerContext.executedArgIndex != null) {
-            injectableParameters.put(argHandlerContext.executedArgIndex, arg);
+            injectableParameters[argHandlerContext.executedArgIndex] = arg
         }
 
         if (argHandlerContext.commandArgIndex != null) {
-            injectableParameters.put(argHandlerContext.commandArgIndex, commandArg);
+            injectableParameters[argHandlerContext.commandArgIndex] = commandArg
         }
 
         if (argHandlerContext.valuesIndex != null) {
-            injectableParameters.put(argHandlerContext.valuesIndex, values);
+            injectableParameters[argHandlerContext.valuesIndex] = values
         }
 
-        final var sortedParameters = injectableParameters.entrySet().stream().sorted(Map.Entry.comparingByKey())
-                .map(Map.Entry::getValue)
-                .toArray();
+        val sortedParameters =
+            injectableParameters.entries
+                .sortedBy { it.key }
+                .map { it.value }
+                .toTypedArray()
 
-        return (ReturnState) argHandlerContext.handlerMethod.invoke(this, sortedParameters);
+        return argHandlerContext.handlerMethod.invoke(this, *sortedParameters) as ReturnState
     }
 
-    @NonNull
-    protected final List<String> handleTabComplete(@NonNull CS sender, @NonNull String[] args) {
-        final var tabCompleted = new ArrayList<String>();
+    protected fun handleTabComplete(sender: CS, args: Array<String>): List<String> {
+        val tabCompleted = ArrayList<String>()
 
-        for (var arg : this.args.values()) {
+        this.args.values.forEach {
             // Split the value of the command argument into individual parts.
-            final var originalArgs = arg.value().split(" ");
+            val originalArgs = it.value.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
             // Clone the originalArgs to avoid modification.
-            final var editedArgs = originalArgs.clone();
+            val editedArgs = originalArgs.clone()
 
             // Check if the originalArgs length is greater than or equal to the provided args length
             // or if the last element of originalArgs ends with "%*".
-            if (originalArgs.length >= args.length || originalArgs[originalArgs.length - 1].endsWith("%*")) {
-                for (var i = 0; i < args.length; i++) {
+            if (originalArgs.size >= args.size || originalArgs[originalArgs.size - 1].endsWith("%*")) {
+                args.indices.forEach {
                     // Determine the original argument at the current index.
-                    final var originalArg = i >= originalArgs.length ? originalArgs[originalArgs.length - 1] : originalArgs[i];
+                    val originalArg =
+                        if (it >= originalArgs.size) {
+                            originalArgs[originalArgs.size - 1]
+                        } else {
+                            originalArgs[it]
+                        }
 
                     if (!originalArg.startsWith("%") && !(originalArg.endsWith("%") || originalArg.endsWith("%*"))) {
-                        continue;
+                        return@forEach
                     }
 
                     // Replace the edited argument at the corresponding index with the provided argument.
-                    editedArgs[i >= editedArgs.length ? editedArgs.length - 1 : i] = args[i];
+                    editedArgs[
+                        when (it >= editedArgs.size) {
+                            true -> editedArgs.size - 1
+                            false -> it
+                        }
+                    ] = args[it]
                 }
 
                 // Determine the final argument from originalArgs and args.
-                final var finalArg = originalArgs[args.length - 1 >= originalArgs.length ? originalArgs.length - 1 : args.length - 1];
+                val finalArg =
+                    originalArgs[
+                        when (args.size - 1 >= originalArgs.size) {
+                            true -> originalArgs.size - 1
+                            false -> args.size - 1
+                        }
+                    ]
 
                 // Check if the joined editedArgs start with the joined provided args.
-                if (!String.join(" ", editedArgs).startsWith(String.join(" ", args))) {
-                    continue;
+                if (!editedArgs.joinToString(" ").startsWith(args.joinToString(" "))) {
+                    return@forEach
                 }
 
                 if (finalArg.startsWith("%") && finalArg.endsWith("%*")) {
                     // Add the final argument with "%" and "%*" removed to the tabCompleted list.
-                    tabCompleted.add(finalArg.replace("%", "").replace("%*", ""));
+                    tabCompleted.add(finalArg.replace("%", "").replace("%*", ""))
 
-                    break;
+                    return@forEach
                 }
 
-                final var commandArgType = Arg.Type.getTypeByPlaceholder(finalArg);
+                val commandArgType = Type.getTypeByPlaceholder(finalArg)
 
                 if (commandArgType != null) {
-                    commandArgType.getConsumer().accept(new Arg.Type.TabContext(
+                    commandArgType.action(
+                        TabContext(
                             tabCompleted,
                             getAllPlayerNames()
-                    ));
+                        )
+                    )
                 } else if (finalArg.startsWith("%") && (finalArg.endsWith("%") || finalArg.endsWith("%*"))) {
-                    tabCompleted.add(finalArg.replace("%", "").replace("%*", ""));
+                    tabCompleted.add(finalArg.replace("%", "").replace("%*", ""))
                 } else {
-                    tabCompleted.add(finalArg);
+                    tabCompleted.add(finalArg)
                 }
             }
         }
 
-        final var formattedArgs = String.join(" ", Stream.of(args)
-                .map(arg -> "?")
-                .toList());
-        final var commandTabCompleted = onCommandTabComplete(sender, formattedArgs);
+        val formattedArgs = args.joinToString(" ") { "?" }
+        val commandTabCompleted = onCommandTabComplete(sender, formattedArgs)
 
         // when our OWN implementation is not empty, clear all of Vital's defaults.
-        if (!commandTabCompleted.isEmpty()) {
-            tabCompleted.clear();
+        if (commandTabCompleted.isNotEmpty()) {
+            tabCompleted.clear()
         }
 
         // finally add further tab-completed suggestions implemented by the developer.
-        tabCompleted.addAll(commandTabCompleted);
+        tabCompleted.addAll(commandTabCompleted)
 
-        return tabCompleted;
+        return tabCompleted
     }
 
-    public abstract boolean isPlayer(@NonNull CS commandSender);
+    abstract fun isPlayer(commandSender: CS): Boolean
 
-    public abstract boolean hasPermission(@NonNull CS commandSender, @NonNull String permission);
+    abstract fun hasPermission(commandSender: CS, permission: String): Boolean
 
-    public abstract List<String> getAllPlayerNames();
+    abstract fun getAllPlayerNames(): List<String>
 
-    public final void execute(@NonNull CS sender, @NonNull String[] args) {
+    fun execute(sender: CS, args: Array<String>) {
         // Check if the command requires a player sender.
         if (requiresPlayer) {
             // Check if the sender is not a Player.
             if (!isPlayer(sender)) {
                 // Execute the onCommandRequiresPlayer method and return true.
-                onCommandRequiresPlayer(sender, String.join(" ", args), null);
+                onCommandRequiresPlayer(sender, args.joinToString(" "), null)
 
-                return;
+                return
             }
         }
 
         // Check if a permission is required and if the sender has it.
-        if (!permission.isBlank() && !hasPermission(sender, permission)) {
+        if (permission.isNotBlank() && !hasPermission(sender, permission)) {
             // Execute the onCommandRequiresPermission method and return true.
-            onCommandRequiresPermission(sender, String.join(" ", args), null);
+            onCommandRequiresPermission(sender, args.joinToString(" "), null)
 
-            return;
+            return
         }
 
         // the arguments the player has typed in chat, joined to one single string separated by spaces
-        final var joinedPlayerArgs = String.join(" ", args);
-        final var executingArg = getArg(joinedPlayerArgs);
-        ReturnState commandReturnState;
+        val joinedPlayerArgs = args.joinToString(" ")
+        val executingArg = getArg(joinedPlayerArgs)
 
         // if the player has not put in any arguments, we may execute the base command handler method
-        if (executingArg == null && joinedPlayerArgs.isBlank()) {
+        val commandReturnState = if (executingArg == null && joinedPlayerArgs.isBlank()) {
             try {
-                commandReturnState = onBaseCommand(sender);
-            } catch (Exception e) {
-                onCommandError(sender, null, e);
+                onBaseCommand(sender)
+            } catch (e: Exception) {
+                onCommandError(sender, null, e)
 
-                return;
+                return
             }
         } else if (executingArg != null) {
-            final var values = new ArrayList<String>();
+            val values = ArrayList<String>()
 
-            for (var commandArg : executingArg.value().split(" ")) {
-                for (var userArg : args) {
-                    if (!userArg.equalsIgnoreCase(commandArg)) {
+            executingArg.value.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.forEach { commandArg ->
+                args.forEach {
+                    if (!it.equals(commandArg, ignoreCase = true)) {
                         // we have a custom arg
-                        values.add(userArg);
+                        values.add(it)
                     }
                 }
             }
 
             try {
-                commandReturnState = executeArgHandlerMethod(sender, joinedPlayerArgs, executingArg, values.toArray(String[]::new));
-            } catch (Exception e) {
-                if (e instanceof InvocationTargetException invocationTargetException) {
-                    executeArgExceptionHandlerMethod(sender, invocationTargetException.getTargetException(), joinedPlayerArgs, executingArg);
+                executeArgHandlerMethod(
+                    sender,
+                    joinedPlayerArgs,
+                    executingArg,
+                    values.toTypedArray()
+                )
+            } catch (e: Exception) {
+                if (e is InvocationTargetException) {
+                    executeArgExceptionHandlerMethod(sender, e.targetException, joinedPlayerArgs, executingArg)
                 } else {
-                    executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, executingArg);
+                    executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, executingArg)
                 }
 
-                return;
+                return
             }
         } else {
             // we have neither executed the base command argument by passing an empty value, or any mapped argument
-            commandReturnState = ReturnState.INVALID_ARGS;
+            ReturnState.INVALID_ARGS
         }
 
-        final String joinedArgs = String.join(" ", args);
+        val joinedArgs = args.joinToString(" ")
 
         // Handle the command return state.
-        switch (commandReturnState) {
-            case INVALID_ARGS -> onCommandInvalidArgs(sender, joinedArgs);
-            case NO_PERMISSION -> onCommandRequiresPermission(sender, joinedArgs, executingArg);
+        when (commandReturnState) {
+            ReturnState.SUCCESS -> {}
+            ReturnState.INVALID_ARGS -> onCommandInvalidArgs(sender, joinedArgs)
+            ReturnState.NO_PERMISSION -> onCommandRequiresPermission(sender, joinedArgs, executingArg)
         }
     }
 
     /**
      * called when an exception occurs during command execution, that is either thrown on the base command, or not handled by any arg exception handler
      */
-    protected void onCommandError(@NonNull CS sender, Arg arg, @NonNull Throwable e) {
-
+    protected open fun onCommandError(sender: CS, arg: Arg?, e: Throwable) {
     }
 
     /**
@@ -426,21 +422,19 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
      * @param sender the sender
      * @return the status of this command execution
      */
-    @NonNull
-    protected ReturnState onBaseCommand(@NonNull CS sender) {
-        return ReturnState.INVALID_ARGS;
+    protected open fun onBaseCommand(sender: CS): ReturnState {
+        return ReturnState.INVALID_ARGS
     }
 
     /**
      * Called upon requesting any tab-completion content.
      *
-     * @param sender The {@link CS} that sent the command.
+     * @param sender The [CS] that sent the command.
      * @param args   The arguments used in chat.
-     * @return A {@link List} of strings to show to the player as tab-completion suggestions.
+     * @return A [List] of strings to show to the player as tab-completion suggestions.
      */
-    @NonNull
-    protected List<String> onCommandTabComplete(@NonNull CS sender, @NonNull String args) {
-        return List.of();
+    protected open fun onCommandTabComplete(sender: CS, args: String): List<String> {
+        return listOf()
     }
 
     /**
@@ -448,8 +442,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
      *
      * @param sender The CommandSender
      */
-    protected void onCommandInvalidArgs(@NonNull CS sender, @NonNull String args) {
-
+    protected open fun onCommandInvalidArgs(sender: CS, args: String) {
     }
 
     /**
@@ -457,8 +450,7 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
      *
      * @param sender The CommandSender
      */
-    protected void onCommandRequiresPermission(@NonNull CS sender, @NonNull String args, Arg arg) {
-
+    protected open fun onCommandRequiresPermission(sender: CS, args: String, arg: Arg?) {
     }
 
     /**
@@ -466,17 +458,16 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
      *
      * @param sender The CommandSender
      */
-    protected void onCommandRequiresPlayer(@NonNull CS sender, @NonNull String args, Arg arg) {
-
+    protected open fun onCommandRequiresPlayer(sender: CS, args: String, arg: Arg?) {
     }
 
     /**
-     * Enum representing possible return states for {@link VitalCommand}.
+     * Enum representing possible return states for [VitalCommand].
      * Defines different states that a command execution can result in.
      *
      * @author xRa1ny
      */
-    public enum ReturnState {
+    enum class ReturnState {
         /**
          * Indicates that the command was executed with invalid arguments.
          */
@@ -494,291 +485,241 @@ public abstract class VitalCommand<P, CS> implements RequiresAnnotation<VitalCom
     }
 
     /**
-     * Annotation used to provide metadata for {@link VitalCommand}.
+     * Annotation used to provide metadata for [VitalCommand].
      *
      * @author xRa1ny
      * @apiNote If combined with the :vital-core-processor and :vital-commands-processor dependency as annotation processor, can automatically define all commands in plugin.yml during compile-time.
      */
     @Component
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    public @interface Info {
+    @Retention(AnnotationRetention.RUNTIME)
+    @Target(AnnotationTarget.CLASS)
+    annotation class Info(
         /**
          * Defines the name of this command, excluding the slash /.
          *
          * @return The name of the command.
          */
-        @NonNull
-        String name();
-
+        val name: String,
         /**
          * Defines the description of this command.
          *
          * @return The description of this command.
          */
-        @NonNull
-        String description() default "A Vital Command";
-
+        val description: String = "A Vital Command",
         /**
          * The aliases of this command.
          *
          * @return The aliases of this command.
          */
-        @NonNull
-        String[] aliases() default {};
-
+        val aliases: Array<String> = [],
         /**
          * The usages message of this command.
          *
          * @return The usages message of this command.
          */
-        @NonNull
-        String usage() default "";
-
+        val usage: String = "",
         /**
          * Defines the permission required to run this command.
          *
          * @return The required permission (default is an empty string).
          */
-        @NonNull
-        String permission() default "";
-
+        val permission: String = "",
         /**
          * Defines if this command can only be executed by a player.
          *
          * @return True if the command requires a player; false otherwise (default is true).
          */
-        boolean requiresPlayer() default true;
-    }
+        val requiresPlayer: Boolean = true
+    )
 
     /**
-     * Annotation used to define arguments for {@link VitalCommand}.
-     * Arguments may be placeholders that can be used within methods annotated with {@link ArgHandler}.
+     * Annotation used to define arguments for [VitalCommand].
+     * Arguments may be placeholders that can be used within methods annotated with [ArgHandler].
      * For example, "%PLAYER%" will be replaced with all player names on the server.
      *
      * @author xRa1ny
      */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    public @interface Arg {
+    @Retention(AnnotationRetention.RUNTIME)
+    @Target(AnnotationTarget.CLASS)
+    annotation class Arg(
         /**
          * Placeholder value for the command argument.
          *
          * @return The value of the command argument.
          * @see Type
          */
-        @NonNull
-        String value();
-
+        val value: String,
         /**
          * Optional permission node associated with the command argument.
          * Defines the required permission to use this argument in a command.
          *
          * @return The permission node (default is an empty string).
          */
-        @NonNull
-        String permission() default "";
-
+        val permission: String = "",
         /**
          * Flag indicating if this argument is specific to players.
          *
          * @return True if the argument is for players only; false otherwise (default is false).
          * @apiNote If set to true, the argument is only applicable to player senders.
          */
-        boolean player() default false;
-
+        val player: Boolean = false
+    ) {
         /**
-         * Patterns used by {@link Arg} implementations that will be replaced during tab-completion, automatically.
+         * Patterns used by [Arg] implementations that will be replaced during tab-completion, automatically.
          */
-        @Getter
-        @RequiredArgsConstructor
-        enum Type {
-            PLAYER("%PLAYER%", context -> {
-                context.playerNames.stream()
-                        // Check if the player name is already in the tabCompleted list.
-                        .filter(Predicate.not(context.tabCompleted::contains))
-                        .forEach(context.tabCompleted::add);
+        enum class Type(
+            val placeholder: String,
+            val action: (TabContext) -> Unit
+        ) {
+            PLAYER("%PLAYER%", { context ->
+                context.playerNames // Check if the player name is already in the tabCompleted list.
+                    .filter { it !in context.tabCompleted }
+                    .forEach { context.tabCompleted.add(it) }
             }),
-            BOOLEAN("%BOOLEAN%", context -> {
-                context.tabCompleted.add("true");
-                context.tabCompleted.add("false");
+            BOOLEAN("%BOOLEAN%", {
+                it.tabCompleted.add("true")
+                it.tabCompleted.add("false")
             }),
-            NUMBER("%NUMBER%", context -> {
-                context.tabCompleted.add("0");
+            NUMBER("%NUMBER%", {
+                it.tabCompleted.add("0")
             }),
-            MATERIAL("%MATERIAL%", context -> {
-                Arrays.stream(Material.values())
-                        .map(Material::name)
-                        .forEach(context.tabCompleted::add);
-            });
+            MATERIAL(
+                "%MATERIAL%", { context ->
+                    Material.entries
+                        .map { it.name }
+                        .forEach { context.tabCompleted.add(it) }
+                });
 
-            private final String placeholder;
-            private final Consumer<TabContext> consumer;
-
-            public static Type getTypeByPlaceholder(String placeholder) {
-                return Arrays.stream(Type.values())
-                        .filter(type -> type.placeholder.equals(placeholder))
-                        .findFirst()
-                        .orElse(null);
-            }
-
-            /**
-             * Defines the context during tab completion conversion of the above placeholder types
-             */
-            public record TabContext(
-                    List<String> tabCompleted,
-                    List<String> playerNames
-            ) {
+            companion object {
+                fun getTypeByPlaceholder(placeholder: String) = entries.firstOrNull { it.placeholder == placeholder }
             }
         }
     }
 
     /**
-     * Annotation used to specify methods as handlers for {@link Arg}.
+     * Annotation used to specify methods as handlers for [Arg].
      * Handlers are responsible for processing specific command argument values.
      * This annotation helps map methods to their corresponding command argument values.
      *
      * @author xRa1ny
      */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
-    public @interface ArgHandler {
+    @Retention(AnnotationRetention.RUNTIME)
+    @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
+    annotation class ArgHandler(
         /**
          * Array of command argument values that this handler method processes.
          * Each value corresponds to a specific command argument.
          *
          * @return An array of command argument values.
          */
-        @NonNull
-        Arg value();
-    }
+        val value: Arg
+    )
 
     /**
      * Decorator annotation for marking exception handling methods for registered commands beans
      */
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface ArgExceptionHandler {
+    @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class ArgExceptionHandler(
         /**
          * Defines the command arg this exception handling method should be mapped to
          */
-        @NonNull
-        String value();
-
+        val value: String,
         /**
          * Defines the exception type this exception handler should manage
          */
-        @NonNull
-        Class<? extends Throwable> type();
-    }
+        val type: KClass<out Throwable>
+    )
 
-    public record ArgHandlerContext(
-            @NonNull
-            Method handlerMethod,
+    data class TabContext(
+        val tabCompleted: MutableList<String>,
+        val playerNames: List<String>
+    )
 
-            Integer commandSenderIndex,
-            Integer executedArgIndex,
-            Integer commandArgIndex,
-            Integer valuesIndex
-    ) {
-    }
+    class ArgHandlerContext(
+        val handlerMethod: Method,
+        val commandSenderIndex: Int?,
+        val executedArgIndex: Int?,
+        val commandArgIndex: Int?,
+        val valuesIndex: Int?
+    )
 
-    public record ArgExceptionHandlerContext(
-            @NonNull
-            Method handlerMethod,
+    class ArgExceptionHandlerContext(
+        val handlerMethod: Method,
+        val commandSenderIndex: Int?,
+        val executedArgIndex: Int?,
+        val argIndex: Int?,
+        val exceptionIndex: Int?
+    )
 
-            Integer commandSenderIndex,
-            Integer executedArgIndex,
-            Integer argIndex,
-            Integer exceptionIndex
-    ) {
-    }
-
-    public static abstract class Spigot extends VitalCommand<JavaPlugin, org.bukkit.command.CommandSender> implements VitalPluginCommand.Spigot {
-        public Spigot(@NonNull JavaPlugin plugin) {
-            super(plugin, org.bukkit.command.CommandSender.class);
+    abstract class Spigot(plugin: SpigotPlugin) :
+        VitalCommand<SpigotPlugin, SpigotCommandSender>(plugin, SpigotCommandSender::class.java),
+        VitalPluginCommand.Spigot {
+        @PostConstruct
+        fun init() {
+            plugin.getCommand(name)!!.setExecutor(this)
         }
+
+        override fun onCommand(
+            sender: SpigotCommandSender,
+            command: Command,
+            label: String,
+            args: Array<String>
+        ): Boolean {
+            execute(sender, args)
+
+            return true
+        }
+
+        override fun onTabComplete(
+            sender: SpigotCommandSender,
+            command: Command,
+            label: String,
+            args: Array<String>
+        ) = handleTabComplete(sender, args)
+
+        override fun isPlayer(commandSender: SpigotCommandSender) = commandSender is Player
+
+        override fun hasPermission(commandSender: SpigotCommandSender, permission: String) =
+            commandSender.hasPermission(permission)
+
+        override fun getAllPlayerNames() = Bukkit.getOnlinePlayers()
+            .map { it.name }
+    }
+
+    abstract class Bungee(plugin: BungeePlugin) :
+        VitalCommand<BungeePlugin, BungeeCommandSender>(plugin, BungeeCommandSender::class.java) {
+        private var command: VitalPluginCommand.Bungee? = null
 
         @PostConstruct
-        public final void init() {
-            getPlugin().getCommand(getName()).setExecutor(this);
+        fun init() {
+            setupCommand()
+            plugin.proxy.pluginManager.registerCommand(plugin, command)
         }
 
-        @Override
-        public final boolean onCommand(@NonNull org.bukkit.command.CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-            execute(sender, args);
-
-            return true;
-        }
-
-        @Override
-        public final List<String> onTabComplete(@NonNull org.bukkit.command.CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-            return handleTabComplete(sender, args);
-        }
-
-        @Override
-        public final boolean isPlayer(@NonNull org.bukkit.command.CommandSender sender) {
-            return sender instanceof Player;
-        }
-
-        @Override
-        public final boolean hasPermission(@NonNull org.bukkit.command.CommandSender sender, @NonNull String permission) {
-            return sender.hasPermission(permission);
-        }
-
-        @Override
-        public List<String> getAllPlayerNames() {
-            return Bukkit.getOnlinePlayers().stream()
-                    .map(Player::getName)
-                    .toList();
-        }
-    }
-
-    public static abstract class Bungee extends VitalCommand<Plugin, net.md_5.bungee.api.CommandSender> {
-        private VitalPluginCommand.Bungee command;
-
-        public Bungee(@NonNull Plugin plugin) {
-            super(plugin, net.md_5.bungee.api.CommandSender.class);
-
-            setupCommand();
-        }
-
-        private void setupCommand() {
+        private fun setupCommand() {
             // wrap a custom bungeecord command class, since in bungeecord, command classes MUST BE EXTENDED FROM.
             // extending is not possible here since the VitalCommand object MUST BE A class, and classes CANNOT HAVE MULTIPLE EXTEND STATEMENTS...
-            this.command = new VitalPluginCommand.Bungee(getName()) {
-                @Override
-                public void execute(net.md_5.bungee.api.CommandSender sender, String[] args) {
-                    Bungee.this.execute(sender, args);
+            this.command = object : VitalPluginCommand.Bungee(name) {
+                override fun execute(sender: BungeeCommandSender, args: Array<String>) {
+                    this@Bungee.execute(sender, args)
                 }
 
-                @Override
-                public Iterable<String> onTabComplete(net.md_5.bungee.api.CommandSender sender, String[] args) {
-                    return Bungee.this.handleTabComplete(sender, args);
+                override fun onTabComplete(
+                    sender: BungeeCommandSender,
+                    args: Array<String>
+                ): Iterable<String> {
+                    return this@Bungee.handleTabComplete(sender, args)
                 }
-            };
+            }
         }
 
-        @PostConstruct
-        public final void init() {
-            getPlugin().getProxy().getPluginManager().registerCommand(getPlugin(), command);
-        }
+        override fun isPlayer(commandSender: BungeeCommandSender) = commandSender is ProxiedPlayer
 
-        @Override
-        public final boolean isPlayer(@NonNull net.md_5.bungee.api.CommandSender sender) {
-            return sender instanceof ProxiedPlayer;
-        }
+        override fun hasPermission(commandSender: BungeeCommandSender, permission: String) =
+            commandSender.hasPermission(permission)
 
-        @Override
-        public final boolean hasPermission(@NonNull net.md_5.bungee.api.CommandSender sender, @NonNull String permission) {
-            return sender.hasPermission(permission);
-        }
-
-        @Override
-        public List<String> getAllPlayerNames() {
-            return ProxyServer.getInstance().getPlayers().stream()
-                    .map(ProxiedPlayer::getName)
-                    .toList();
-        }
+        override fun getAllPlayerNames() = ProxyServer.getInstance().players
+            .map { it.name }
     }
 }

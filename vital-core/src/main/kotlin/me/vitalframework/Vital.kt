@@ -4,14 +4,13 @@ import net.md_5.bungee.api.scheduler.ScheduledTask
 import org.bukkit.command.CommandSender
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.plugin.Plugin
+import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.Banner
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.core.env.Environment
@@ -25,7 +24,7 @@ typealias SpigotEventHandler = EventHandler
 typealias BungeeEventHandler = net.md_5.bungee.event.EventHandler
 typealias SpigotCommandSender = CommandSender
 typealias BungeeCommandSender = net.md_5.bungee.api.CommandSender
-typealias SpigotPlugin = Plugin
+typealias SpigotPlugin = JavaPlugin
 typealias BungeePlugin = net.md_5.bungee.api.plugin.Plugin
 typealias SpigotListener = Listener
 typealias BungeeListener = net.md_5.bungee.api.plugin.Listener
@@ -139,5 +138,5 @@ object Vital {
         val springConfigLocations: Array<String> = ["classpath:application.properties"],
     )
 
-    fun <T : Any> T.log(): Logger = LoggerFactory.getLogger(this::class.java)
+    fun <T : Any> T.logger(): Logger = LoggerFactory.getLogger(this::class.java)
 }

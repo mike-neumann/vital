@@ -1,107 +1,103 @@
-package me.vitalframework.configs.processor;
+package me.vitalframework.configs.processor
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import me.vitalframework.configs.VitalConfig;
+import me.vitalframework.configs.VitalConfig.Companion.injectField
+import me.vitalframework.configs.VitalConfig.FileProcessor
+import java.io.File
+import java.io.FileReader
+import java.io.FileWriter
+import java.util.*
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.*;
+class VitalPropertiesConfigFileProcessor(
+    override val file: File
+) : FileProcessor {
+    val properties = Properties()
 
-@RequiredArgsConstructor
-@Getter
-public class VitalPropertiesConfigFileProcessor implements VitalConfig.FileProcessor {
-    @NonNull
-    private final File file;
+    @Throws(Exception::class)
+    override fun load(type: Class<*>): Map<String, String> {
+        properties.load(FileReader(file))
 
-    @NonNull
-    private final Properties properties = new Properties();
-
-    @Override
-    public Map<String, String> load(@NonNull Class<?> type) throws Exception {
-        properties.load(new FileReader(file));
-
-        return Map.ofEntries(properties.entrySet().toArray(Map.Entry[]::new));
+        return mapOf(*properties.entries.map { (key, value) -> key.toString() to value.toString() }.toTypedArray())
     }
 
-    @Override
-    public String read(@NonNull String key) {
-        return properties.getProperty(key);
+    override fun read(key: String): String? {
+        return properties.getProperty(key)
     }
 
-    @Override
-    public Object read(@NonNull String key, @NonNull Object def) {
-        return properties.getProperty(key, String.valueOf(def));
+    override fun read(key: String, def: Any): Any? {
+        return properties.getProperty(key, def.toString())
     }
 
-    @Override
-    public void write(@NonNull Map<String, ?> serializedContentMap) {
-        serializedContentMap.forEach(this::write);
+    override fun write(serializedContentMap: Map<String, *>) {
+        serializedContentMap.forEach { (key, value) ->
+            this.write(key, value!!)
+        }
     }
 
-    @Override
-    public void write(@NonNull Object object) {
-        write(serialize(object));
+    override fun write(`object`: Any) {
+        write(serialize(`object`))
     }
 
-    @Override
-    public void write(@NonNull String key, @NonNull Object value) {
-        properties.setProperty(key, String.valueOf(value));
+    override fun write(key: String, value: Any) {
+        properties.setProperty(key, value.toString())
     }
 
-    @Override
-    public void save(@NonNull Map<String, ?> serializedContentMap) throws Exception {
-        serializedContentMap.entrySet().stream()
-                .map((entry) -> Map.entry(entry.getKey(), String.valueOf(entry.getValue())))
-                .forEach((entry) -> properties.setProperty(entry.getKey(), entry.getValue()));
+    @Throws(Exception::class)
+    override fun save(serializedContentMap: Map<String, *>) {
+        serializedContentMap.entries
+            .map { (key, value) -> key to value.toString() }
+            .forEach { (key, value) ->
+                properties.setProperty(key, value)
+            }
 
-        properties.store(new FileWriter(file), null);
+        properties.store(FileWriter(file), null)
     }
 
-    @Override
-    public Map<String, String> serialize(@NonNull Object object) {
-        final var stringObjectMap = new HashMap<String, String>();
+    override fun serialize(`object`: Any): Map<String, String> {
+        val stringObjectMap = mutableMapOf<String, String>()
 
-        getPropertyFieldsFromType(object.getClass()).stream()
-                .filter(field -> String.class.isAssignableFrom(field.getType()))
-                .map(field -> {
-                    try {
-                        // else use default snakeyaml mapping.
-                        return new AbstractMap.SimpleEntry<>(field.getName(), field.get(object));
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException("error while serializing properties config field %s"
-                                .formatted(field.getName()));
-                    }
-                })
-                .forEach((entry) -> stringObjectMap.put(entry.getKey(), (String) entry.getValue()));
+        getPropertyFieldsFromType(`object`.javaClass)
+            .filter { String::class.java.isAssignableFrom(it.type) }
+            .map {
+                try {
+                    // else use default snakeyaml mapping.
+                    return@map it.name to it[`object`]
+                } catch (e: IllegalAccessException) {
+                    e.printStackTrace()
+                    throw RuntimeException("error while serializing properties config field '${it.name}'")
+                }
+            }
+            .forEach { (key, value) ->
+                stringObjectMap[key] = value as String
+            }
 
-        return stringObjectMap;
+        return stringObjectMap
     }
 
-    @Override
-    public Object deserialize(@NonNull Map<String, ?> serializedContentMap, @NonNull Class<Object> type) throws Exception {
+    @Throws(Exception::class)
+    override fun deserialize(serializedContentMap: Map<String, *>, type: Class<*>): Any? {
         try {
-            final var defaultConstructor = type.getConstructor();
-            final var object = defaultConstructor.newInstance();
+            val defaultConstructor = type.getConstructor()
+            val `object` = defaultConstructor.newInstance()
 
             // default constructor was found, inject field properties...
             serializedContentMap
-                    .forEach((key, value) -> {
-                        final var optionalField = Optional.ofNullable(getFieldByProperty(type, key));
+                .forEach { (key, value) ->
+                    getFieldByProperty(type, key)?.let {
+                        injectField(
+                            `object`,
+                            it,
+                            value
+                        )
+                    }
+                }
 
-                        optionalField.ifPresent(field -> VitalConfig.injectField(object, field, value));
-                    });
-
-            return object;
-        } catch (NoSuchMethodException e) {
+            return `object`
+        } catch (e: NoSuchMethodException) {
             // default constructor not found, attempt to get constructor matching properties...
-            final var constructor = type.getConstructor(getPropertyFieldsFromType(type).stream().map(Object::getClass).toArray(Class[]::new));
+            val constructor = type.getConstructor(*getPropertyFieldsFromType(type).map { it.javaClass }.toTypedArray())
 
             // constructor found, create new instance with this constructor...
-            return constructor.newInstance(serializedContentMap.values());
+            return constructor.newInstance(serializedContentMap.values)
         }
     }
 }

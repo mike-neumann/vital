@@ -1,5 +1,7 @@
 package me.vitalframework.utils
 
+import me.vitalframework.BungeeCommandSender
+import me.vitalframework.SpigotCommandSender
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer
@@ -9,7 +11,6 @@ import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import org.bukkit.*
-import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.CreativeCategory
@@ -132,14 +133,14 @@ interface VitalUtils<CS, P : CS> {
     }
 
 
-    object Spigot : VitalUtils<CommandSender, Player> {
+    object Spigot : VitalUtils<SpigotCommandSender, Player> {
         override fun broadcastAction(playerPredicate: (Player) -> Boolean, action: (Player) -> Unit) {
             Bukkit.getOnlinePlayers().stream()
                 .filter(playerPredicate)
                 .forEach(action)
         }
 
-        override fun sendMessage(sender: CommandSender, message: String) {
+        override fun sendMessage(sender: SpigotCommandSender, message: String) {
             // must be used since, both version (paper and spigot) support the bungeeapi implementations...
             sender.spigot().sendMessage(
                 *BungeeComponentSerializer.get().serialize(
@@ -234,10 +235,10 @@ interface VitalUtils<CS, P : CS> {
         override fun broadcastPersistentTitle(
             title: String?,
             subtitle: String?,
-            fade: @Range(from = 0, to = 72000) Int,
+            fadeIn: @Range(from = 0, to = 72000) Int,
             playerPredicate: (Player) -> Boolean,
         ) {
-            broadcastAction { sendPersistentTitle(it, title, subtitle, fade) }
+            broadcastAction { sendPersistentTitle(it, title, subtitle, fadeIn) }
         }
 
         /**
@@ -600,14 +601,14 @@ interface VitalUtils<CS, P : CS> {
         }
     }
 
-    object Bungee : VitalUtils<net.md_5.bungee.api.CommandSender, ProxiedPlayer> {
+    object Bungee : VitalUtils<BungeeCommandSender, ProxiedPlayer> {
         override fun broadcastAction(playerPredicate: (ProxiedPlayer) -> Boolean, action: (ProxiedPlayer) -> Unit) {
             ProxyServer.getInstance().players
                 .filter(playerPredicate)
                 .forEach(action)
         }
 
-        override fun sendMessage(sender: net.md_5.bungee.api.CommandSender, message: String) {
+        override fun sendMessage(sender: BungeeCommandSender, message: String) {
             sender.sendMessage(
                 *BungeeComponentSerializer.get().serialize(
                     MiniMessage.miniMessage()
@@ -675,8 +676,8 @@ interface VitalUtils<CS, P : CS> {
             sendTitle(player, title, subtitle, fadeIn, 72000,  /* 1h */0)
         }
 
-        override fun sendActionBar(proxiedPlayer: ProxiedPlayer, message: String) {
-            proxiedPlayer.sendMessage(
+        override fun sendActionBar(player: ProxiedPlayer, message: String) {
+            player.sendMessage(
                 ChatMessageType.ACTION_BAR,
                 TextComponent.fromLegacy(
                     LegacyComponentSerializer.legacySection()
