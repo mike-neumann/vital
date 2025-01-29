@@ -3,7 +3,6 @@ package me.vitalframework.commands
 import jakarta.annotation.PostConstruct
 import me.vitalframework.*
 import me.vitalframework.commands.VitalCommand.Arg.Type
-import me.vitalframework.commands.crossplatform.VitalPluginCommand
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -76,6 +75,11 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
                     commandArgIndex = method.parameters.indexOf(it)
                 } else if (Array<String>::class.java.isAssignableFrom(it.type)) {
                     valuesIndex = method.parameters.indexOf(it)
+                } else {
+                    // the user has defined parameters that don't align with the arg handler context
+                    throw RuntimeException(
+
+                    )
                 }
             }
 

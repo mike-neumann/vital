@@ -1,0 +1,3 @@
+testYamlObject: !TestYamlObject
+  testYamlObjectString: testYamlObjectString
+testYamlString: testYamlString

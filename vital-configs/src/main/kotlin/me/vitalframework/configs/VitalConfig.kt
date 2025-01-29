@@ -119,7 +119,7 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
     /**
      * Describes an object which is capable of processing the contents of a given config file.
      */
-    interface FileProcessor<T> {
+    interface FileProcessor<out T> {
         val file: File
 
         /**
@@ -136,12 +136,12 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
         /**
          * Reads a config value by the specified key, if that value was not found, returns a default value.
          */
-        fun read(key: String, def: T): T?
+        fun read(key: String, def: @UnsafeVariance T): T?
 
         /**
          * Writes the given serialized content to this config.
          */
-        fun write(serializedContent: Map<String, T>)
+        fun write(serializedContent: Map<String, @UnsafeVariance T>)
 
         /**
          * Writes the given object to this config.
@@ -152,14 +152,14 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
          * Writes the given value to this config.
          */
         @Throws(Exception::class)
-        fun write(key: String, value: T)
+        fun write(key: String, value: @UnsafeVariance T)
 
         /**
          * Saves the given serialized content to this config.
          */
         // must use star-projection here, default map impl does not support contravariance
         @Throws(Exception::class)
-        fun save(serializedContent: Map<String, T>)
+        fun save(serializedContent: Map<String, @UnsafeVariance T>)
 
         /**
          * Serializes the given object for config usage.
@@ -176,7 +176,7 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
          * @throws Exception If any error occurs while deserializing.
          */
         @Throws(Exception::class)
-        fun deserialize(serializedContent: Map<String, T>, type: Class<*>): Any?
+        fun deserialize(serializedContent: Map<String, @UnsafeVariance T>, type: Class<*>): Any?
 
         /**
          * Gets all property fields of the given type.

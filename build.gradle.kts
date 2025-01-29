@@ -20,17 +20,12 @@ subprojects {
     }
 
     dependencies {
-        annotationProcessor("org.projectlombok:lombok:1.18.32")
-
         compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
         compileOnly("com.mojang:brigadier:1.2.9")
-
-        compileOnly("org.projectlombok:lombok:1.18.32")
         compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
-
         api("org.springframework.boot:spring-boot-starter:3.3.1")
-        api("org.reflections:reflections:0.10.2")
-        api("org.projectlombok:lombok:1.18.32")
+        testApi("org.springframework.boot:spring-boot-starter-test:3.3.1")
+        testApi("org.junit.jupiter:junit-jupiter-api:5.11.4")
     }
 
     java {
@@ -65,5 +60,9 @@ subprojects {
             "implSpec:a:Implementation Requirements:",
             "implNote:a:Implementation Note:"
         )
+    }
+
+    tasks.test {
+        useJUnitPlatform()
     }
 }

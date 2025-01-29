@@ -2,10 +2,8 @@ package me.vitalframework.processor
 
 import me.vitalframework.Vital
 import me.vitalframework.VitalPluginEnvironment
-import org.apache.commons.io.IOUtils
 import java.io.IOException
 import java.io.InputStreamReader
-import java.util.Map
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.annotation.processing.SupportedAnnotationTypes
@@ -27,7 +25,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
             return true
         }
 
-        var classNameVitalPluginInfoEntry: MutableMap.MutableEntry<String, Vital.Info>? = null
+        var classNameVitalPluginInfoEntry: Pair<String, Vital.Info>? = null
 
         roundEnv.getElementsAnnotatedWith(Vital.Info::class.java)
             .filter { it.kind == ElementKind.CLASS }
@@ -44,7 +42,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
 
                 val className = typeElement.qualifiedName.toString()
 
-                classNameVitalPluginInfoEntry = Map.entry(className, it.getAnnotation(Vital.Info::class.java))
+                classNameVitalPluginInfoEntry = className to it.getAnnotation(Vital.Info::class.java)
             }
 
         // If scan could not resolve the main class, cancel automatic `plugin.yml` creation.
@@ -57,8 +55,8 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
             return false
         }
 
-        val className = classNameVitalPluginInfoEntry.key
-        val vitalPluginInfo = classNameVitalPluginInfoEntry.value
+        val className = classNameVitalPluginInfoEntry!!.first
+        val vitalPluginInfo = classNameVitalPluginInfoEntry!!.second
 
         // finally generate the `plugin.yml`.
         generatePluginYml(
@@ -129,7 +127,8 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
             val resource = VitalPluginInfoAnnotationProcessor::class.java.getResourceAsStream("/Main.java")!!
 
             javaFileObject.openWriter().use {
-                val template = IOUtils.toString(InputStreamReader(resource))
+                val template = InputStreamReader(resource).readText()
+
                 it.write(
                     template.replace("{packageName}", packageName)
                         .replace("{springConfigLocations}", "\"" + springConfigLocations.joinToString(",") + "\"")

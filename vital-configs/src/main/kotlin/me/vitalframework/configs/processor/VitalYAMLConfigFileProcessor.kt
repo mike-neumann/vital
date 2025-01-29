@@ -1,6 +1,5 @@
 package me.vitalframework.configs.processor
 
-import lombok.Getter
 import me.vitalframework.configs.VitalConfig
 import me.vitalframework.configs.VitalConfig.Companion.injectField
 import me.vitalframework.configs.VitalConfig.FileProcessor
@@ -15,7 +14,6 @@ import java.io.FileReader
 import java.io.FileWriter
 import java.lang.reflect.Constructor
 
-@Getter
 class VitalYAMLConfigFileProcessor(
     override val file: File,
 ) : FileProcessor<Any> {
@@ -64,11 +62,11 @@ class VitalYAMLConfigFileProcessor(
     }
 
     @Throws(Exception::class)
-    override fun load(type: Class<*>): Map<String, Any> {
+    override fun load(clazz: Class<*>): Map<String, Any> {
         data.clear()
 
         // add type descriptors for complex types...
-        addTypeDescriptors(type)
+        addTypeDescriptors(clazz)
 
         val data = yaml.load<Map<String, Any>>(FileReader(file))
 

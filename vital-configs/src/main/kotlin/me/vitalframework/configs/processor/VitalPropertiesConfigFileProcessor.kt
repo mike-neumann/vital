@@ -13,7 +13,7 @@ class VitalPropertiesConfigFileProcessor(
     val properties = Properties()
 
     @Throws(Exception::class)
-    override fun load(type: Class<*>): Map<String, String> {
+    override fun load(clazz: Class<*>): Map<String, String> {
         properties.load(FileReader(file))
 
         return mapOf(*properties.entries.map { (key, value) -> key.toString() to value.toString() }.toTypedArray())
