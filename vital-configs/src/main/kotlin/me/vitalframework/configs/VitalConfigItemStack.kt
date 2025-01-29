@@ -13,26 +13,26 @@ class VitalConfigItemStack {
     companion object {
         fun of(itemStack: ItemStack): VitalConfigItemStack {
             val itemMeta = itemStack.itemMeta
-            val vitalConfigItemStack = VitalConfigItemStack()
+            val vitalConfigItemStack = VitalConfigItemStack().apply {
+                type = itemStack.type
 
-            vitalConfigItemStack.type = itemStack.type
-
-            if (itemMeta!!.displayName != null) {
-                vitalConfigItemStack.displayName = itemMeta.displayName
-            } else {
-                vitalConfigItemStack.displayName = itemStack.type.name
-            }
-
-            vitalConfigItemStack.lore =
-                if (!itemMeta.hasLore()) {
-                    mutableListOf<String>()
+                if (itemMeta!!.displayName != null) {
+                    displayName = itemMeta.displayName
                 } else {
-                    itemMeta.lore!!.toMutableList()
+                    displayName = itemStack.type.name
                 }
 
-            vitalConfigItemStack.enchantments =
-                mutableMapOf(*itemMeta.enchants.entries.map { it.key.key.key to it.value }.toTypedArray())
-            vitalConfigItemStack.itemFlags = itemMeta.itemFlags.toMutableList()
+                lore =
+                    if (!itemMeta.hasLore()) {
+                        mutableListOf<String>()
+                    } else {
+                        itemMeta.lore!!.toMutableList()
+                    }
+
+                enchantments =
+                    mutableMapOf(*itemMeta.enchants.entries.map { it.key.key.key to it.value }.toTypedArray())
+                itemFlags = itemMeta.itemFlags.toMutableList()
+            }
 
             return vitalConfigItemStack
         }
@@ -47,9 +47,7 @@ class VitalConfigItemStack {
     @VitalConfig.Property(String::class)
     var lore = mutableListOf<String>()
 
-    @VitalConfig.Property(
-        String::class, Int::class
-    )
+    @VitalConfig.Property(String::class, Int::class)
     var enchantments = mutableMapOf<String, Int>()
 
     @VitalConfig.Property(ItemFlag::class)
@@ -57,18 +55,16 @@ class VitalConfigItemStack {
 
     fun toItemStack(): ItemStack {
         val itemStack = ItemStack(type!!)
-        val itemMeta = itemStack.itemMeta
+        itemStack.itemMeta!!.apply {
+            setDisplayName(displayName)
+            lore = this@VitalConfigItemStack.lore
+            enchantments.forEach { (key, level) ->
+                addEnchant(Registry.ENCHANTMENT.get(NamespacedKey.minecraft(key))!!, level, true)
+            }
+            addItemFlags(*itemFlags.toTypedArray())
 
-        itemMeta!!.setDisplayName(displayName)
-        itemMeta.lore = lore
-        enchantments.forEach { (key: String?, level: Int?) ->
-            itemMeta.addEnchant(
-                Registry.ENCHANTMENT.get(NamespacedKey.minecraft(key!!))!!, level!!, true
-            )
+            itemStack.itemMeta = this
         }
-        itemMeta.addItemFlags(*itemFlags.toTypedArray())
-
-        itemStack.itemMeta = itemMeta
 
         return itemStack
     }

@@ -6,79 +6,111 @@ import org.junit.jupiter.api.assertThrows
 
 class VitalCommandsTest {
     @Test
-    fun `arg handler parameter injection should fail`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(Arg("testArg"))
-            fun onTestArg(i: Int) = ReturnState.SUCCESS
-        }
-        val sender = VitalTestCommand.Player()
-
-        testCommand.execute(sender, arrayOf("testArg"))
-    }
-
-    @Test
-    fun `arg handler parameter injection should work`() {
-        assertDoesNotThrow {
-            val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
+    fun `arg handler parameter mapping should fail`() {
+        assertThrows<VitalCommandException.InvalidArgHandlerSignature> {
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
-                fun onTestArg() {
-
-                }
+                fun onTestArg(i: Int) = ReturnState.SUCCESS
             }
         }
     }
 
     @Test
-    fun `arg exception handler parameter injection should fail`() {
-        TODO()
+    fun `arg handler parameter mapping should work`() {
+        assertDoesNotThrow {
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(Arg("testArg"))
+                fun onTestArg() = ReturnState.SUCCESS
+            }
+        }
     }
 
     @Test
-    fun `arg exception handler parameter injection should work`() {
-        TODO()
+    fun `arg exception handler parameter mapping should fail`() {
+        assertThrows<VitalCommandException.InvalidArgExceptionHandlerSignature> {
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(Arg("testArg"))
+                fun onTestArg() = ReturnState.SUCCESS
+
+                @ArgExceptionHandler("testArg", type = RuntimeException::class)
+                fun onTestArgException(i: Int) = ReturnState.SUCCESS
+            }
+        }
+    }
+
+    @Test
+    fun `arg exception handler parameter mapping should work`() {
+        assertDoesNotThrow {
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(Arg("testArg"))
+                fun onTestArg() = ReturnState.SUCCESS
+
+                @ArgExceptionHandler("testArg", type = RuntimeException::class)
+                fun onTestArgException() = ReturnState.SUCCESS
+            }
+        }
     }
 
     @Test
     fun `base command should be executed`() {
-        assertDoesNotThrow {
-            val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
                 override fun onBaseCommand(sender: CommandSender): ReturnState {
                     sender.sendMessage("onBaseCommand")
                     return ReturnState.SUCCESS
                 }
             }
-            val sender = VitalTestCommand.Player()
+        val sender = VitalTestCommand.Player()
 
-            testCommand.execute(sender, arrayOf(""))
+        testCommand.execute(sender, arrayOf(""))
 
-            assert(sender.messages.size == 1)
-            assert(sender.messages.first() == "onBaseCommand")
-        }
+        assert(sender.messages.size == 1)
+        assert(sender.messages.first() == "onBaseCommand")
     }
 
     @Test
     fun `command arg should be executed`() {
-        assertDoesNotThrow {
-            val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg(sender: CommandSender): ReturnState {
                     sender.sendMessage("onTestArg")
                     return ReturnState.SUCCESS
                 }
             }
-            val sender = VitalTestCommand.Player()
+        val sender = VitalTestCommand.Player()
 
-            testCommand.execute(sender, arrayOf("testArg"))
+        testCommand.execute(sender, arrayOf("testArg"))
 
-            assert(sender.messages.size == 1)
-            assert(sender.messages.first() == "onTestArg")
-        }
+        assert(sender.messages.size == 1)
+        assert(sender.messages.first() == "onTestArg")
     }
 
     @Test
     fun `arg exception handler mapping should fail`() {
-        assertThrows<RuntimeException> {
-            @VitalCommand.Info("testCommand") object : VitalTestCommand() {
+        assertThrows<VitalCommandException.UnmappedArgExceptionHandlerArg> {
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgExceptionHandler("testArg", type = Exception::class)
+                fun onTestArgException() = ReturnState.SUCCESS
+            }
+        }
+    }
+
+    @Test
+    fun `arg exception handler mapping should work`() {
+        assertDoesNotThrow {
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(Arg("testArg"))
+                fun onTestArg() = ReturnState.SUCCESS
+
                 @ArgExceptionHandler("testArg", type = Exception::class)
                 fun onTestArgException() = ReturnState.SUCCESS
             }
@@ -87,8 +119,9 @@ class VitalCommandsTest {
 
     @Test
     fun `arg exception handler should not be executed`() {
-        assertDoesNotThrow {
-            val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg(sender: CommandSender) = ReturnState.SUCCESS
 
@@ -98,18 +131,18 @@ class VitalCommandsTest {
                     return ReturnState.SUCCESS
                 }
             }
-            val sender = VitalTestCommand.Player()
+        val sender = VitalTestCommand.Player()
 
-            testCommand.execute(sender, arrayOf("testArg"))
+        testCommand.execute(sender, arrayOf("testArg"))
 
-            assert(sender.messages.isEmpty())
-        }
+        assert(sender.messages.isEmpty())
     }
 
     @Test
     fun `arg exception handler should be executed`() {
-        assertDoesNotThrow {
-            val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg(): ReturnState {
                     throw RuntimeException("test exception")
@@ -121,12 +154,11 @@ class VitalCommandsTest {
                     return ReturnState.SUCCESS
                 }
             }
-            val sender = VitalTestCommand.Player()
+        val sender = VitalTestCommand.Player()
 
-            testCommand.execute(sender, arrayOf("testArg"))
+        testCommand.execute(sender, arrayOf("testArg"))
 
-            assert(sender.messages.size == 1)
-            assert(sender.messages.first() == "onTestArgException")
-        }
+        assert(sender.messages.size == 1)
+        assert(sender.messages.first() == "onTestArgException")
     }
 }

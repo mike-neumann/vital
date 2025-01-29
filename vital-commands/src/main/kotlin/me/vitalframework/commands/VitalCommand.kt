@@ -77,9 +77,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
                     valuesIndex = method.parameters.indexOf(it)
                 } else {
                     // the user has defined parameters that don't align with the arg handler context
-                    throw RuntimeException(
-
-                    )
+                    throw VitalCommandException.InvalidArgHandlerSignature(method, it)
                 }
             }
 
@@ -101,7 +99,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
             .forEach { method ->
                 val argExceptionHandler = method.getAnnotation(ArgExceptionHandler::class.java)!!
                 val arg = getArg(argExceptionHandler.value)
-                    ?: throw RuntimeException("Exception handler mapping failed, arg '${argExceptionHandler.value}' does not exist")
+                    ?: throw VitalCommandException.UnmappedArgExceptionHandlerArg(argExceptionHandler.value)
 
                 var commandSenderIndex: Int? = null
                 var executedArgIndex: Int? = null
@@ -117,6 +115,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
                         commandArgIndex = method.parameters.indexOf(it)
                     } else if (Exception::class.java.isAssignableFrom(it.type)) {
                         exceptionIndex = method.parameters.indexOf(it)
+                    } else {
+                        // our arg handler has an invalid signature
+                        throw VitalCommandException.InvalidArgExceptionHandlerSignature(method, it)
                     }
                 }
 
@@ -197,8 +198,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
 
                 exceptionHandlerContext.handlerMethod.invoke(this, *sortedParameters)
             } catch (e: Exception) {
-                e.printStackTrace()
-                throw RuntimeException("Error while executing exception handler method using context '$exceptionHandlerContext'")
+                throw VitalCommandException.ExecuteArgExceptionHandler(exceptionHandlerContext, e)
             }
         }
     }
@@ -206,7 +206,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     @Throws(InvocationTargetException::class, IllegalAccessException::class)
     private fun executeArgHandlerMethod(sender: CS, arg: String, commandArg: Arg, values: Array<String>): ReturnState {
         val argHandlerContext = argHandlers[commandArg]
-            ?: throw RuntimeException("No handler method exists for arg '$arg'")
+            ?: throw VitalCommandException.UnmappedArgHandler(arg)
 
         val injectableParameters = mutableMapOf<Int, Any>()
 
@@ -629,7 +629,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         val playerNames: List<String>,
     )
 
-    class ArgHandlerContext(
+    data class ArgHandlerContext(
         val handlerMethod: Method,
         val commandSenderIndex: Int?,
         val executedArgIndex: Int?,
@@ -637,7 +637,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         val valuesIndex: Int?,
     )
 
-    class ArgExceptionHandlerContext(
+    data class ArgExceptionHandlerContext(
         val handlerMethod: Method,
         val commandSenderIndex: Int?,
         val executedArgIndex: Int?,

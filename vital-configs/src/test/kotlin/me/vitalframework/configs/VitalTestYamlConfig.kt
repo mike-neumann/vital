@@ -1,8 +1,8 @@
 package me.vitalframework.configs
 
-import me.vitalframework.configs.processor.VitalYAMLConfigFileProcessor
+import me.vitalframework.configs.processor.VitalYAMLConfigProcessor
 
-@VitalConfig.Info("test.yaml", VitalYAMLConfigFileProcessor::class)
+@VitalConfig.Info("test.yaml", VitalYAMLConfigProcessor::class)
 class VitalTestYamlConfig : VitalConfig() {
     @Property(String::class)
     lateinit var testYamlString: String

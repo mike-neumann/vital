@@ -10,14 +10,14 @@ import org.bukkit.WorldCreator
 class VitalConfigLocation {
     companion object {
         fun of(location: Location): VitalConfigLocation {
-            val vitalConfigLocation = VitalConfigLocation()
-
-            vitalConfigLocation.world = location.world!!.name
-            vitalConfigLocation.x = location.x
-            vitalConfigLocation.y = location.y
-            vitalConfigLocation.z = location.z
-            vitalConfigLocation.pitch = location.pitch
-            vitalConfigLocation.yaw = location.yaw
+            val vitalConfigLocation = VitalConfigLocation().apply {
+                world = location.world!!.name
+                x = location.x
+                y = location.y
+                z = location.z
+                pitch = location.pitch
+                yaw = location.yaw
+            }
 
             return vitalConfigLocation
         }
