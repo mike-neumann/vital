@@ -5,6 +5,7 @@ import eu.cloudnetservice.driver.registry.ServiceRegistry
 import eu.cloudnetservice.driver.service.ServiceInfoSnapshot
 import eu.cloudnetservice.modules.bridge.BridgeDocProperties
 import eu.cloudnetservice.modules.bridge.player.PlayerManager
+import eu.cloudnetservice.modules.bridge.player.executor.PlayerExecutor
 import me.vitalframework.cloudnet4.driver.CloudNet4Driver
 import java.util.*
 
@@ -18,12 +19,12 @@ object CloudNet4Bridge {
     /**
      * Gets the player executor of the given player uuid.
      */
-    fun getPlayerExecutor(playerUniqueId: UUID) = playerManager.playerExecutor(playerUniqueId)
+    fun getPlayerExecutor(playerUniqueId: UUID): PlayerExecutor = playerManager.playerExecutor(playerUniqueId)
 
     /**
      * Checks if the given cloudnet service is a proxy.
      */
-    fun isProxy(serviceInfoSnapshot: ServiceInfoSnapshot) =
+    fun isProxy(serviceInfoSnapshot: ServiceInfoSnapshot): Boolean =
         when (serviceInfoSnapshot.configuration().processConfig().environment()) {
             "JAVA_PROXY", "PE_PROXY", "BUNGEECORD", "VELOCITY", "WATERDOG_PE" -> true
             else -> false
@@ -32,7 +33,7 @@ object CloudNet4Bridge {
     /**
      * Gets the cloudnet service the given player uuid is currently connected to.
      */
-    fun getCloudServer(playerUniqueId: UUID) = CloudNet4Driver.getCloudServers {
+    fun getCloudServer(playerUniqueId: UUID): ServiceInfoSnapshot? = CloudNet4Driver.getCloudServers {
         it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf())
             .map { it.uniqueId }
             .any { it == playerUniqueId }
@@ -41,7 +42,7 @@ object CloudNet4Bridge {
     /**
      * Gets the non-proxy cloudnet service the given player uuid is currently connected to.
      */
-    fun getNonProxyCloudServer(playerUniqueId: UUID) = CloudNet4Driver.getCloudServers {
+    fun getNonProxyCloudServer(playerUniqueId: UUID): ServiceInfoSnapshot? = CloudNet4Driver.getCloudServers {
         it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf())
             .map { it.uniqueId }
             .any { it == playerUniqueId } && !isProxy(it)
@@ -57,7 +58,7 @@ object CloudNet4Bridge {
     /**
      * Gets the player count of all cloudnet services by the given task name.
      */
-    fun getPlayerCount(taskName: String) = CloudNet4Driver.getCloudServers(taskName)
+    fun getPlayerCount(taskName: String): Int = CloudNet4Driver.getCloudServers(taskName)
         .map { it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf()).size }
         .reduce { a, b -> Integer.sum(a, b) }
 

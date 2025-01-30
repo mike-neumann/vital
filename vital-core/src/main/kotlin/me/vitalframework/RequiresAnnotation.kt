@@ -5,10 +5,8 @@ package me.vitalframework
  */
 @JvmDefaultWithCompatibility
 interface RequiresAnnotation<T : Annotation> {
-    fun getRequiredAnnotation(): T {
-        return javaClass.getAnnotation(requiredAnnotationType())
+    fun getRequiredAnnotation(): T = javaClass.getAnnotation(requiredAnnotationType())
             ?: throw RuntimeException("${javaClass.getSimpleName()} must be annotated with '@${requiredAnnotationType().getSimpleName()}'")
-    }
 
     /**
      * Specifies the class type of the required annotation.

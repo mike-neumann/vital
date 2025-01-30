@@ -84,5 +84,5 @@ class VitalPerPlayerScoreboard(
         player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
     }
 
-    private fun applyLines(player: SpigotPlayer) = lines.map { it.apply(player) }
+    private fun applyLines(player: SpigotPlayer): List<String> = lines.map { it.apply(player) }
 }

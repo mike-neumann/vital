@@ -21,32 +21,30 @@ abstract class VitalRepository<ID, T : VitalEntity<ID>> {
     /**
      * Checks if the specified entity is saved on this repository.
      */
-    fun exists(entity: T) = entities.contains(entity)
+    fun exists(entity: T): Boolean = entities.contains(entity)
 
     /**
      * Checks if an entity is saved by the specified id.
      */
-    fun exists(id: ID) = entities.any { it.id == id }
+    fun exists(id: ID): Boolean = entities.any { it.id == id }
 
     /**
      * Gets all saved entities on this repository.
      */
-    fun getAll() = entities
+    fun getAll(): List<T> = entities
 
     /**
      * Gets a saved entity by its id.
      */
-    fun get(id: ID) = entities.find { it.id == id }
+    fun get(id: ID): T? = entities.find { it.id == id }
 
     /**
      * Gets a random entity, matching the given predicate.
      */
     @JvmOverloads
-    fun getRandom(predicate: (T) -> Boolean = { true }): T? {
-        return entities
+    fun getRandom(predicate: (T) -> Boolean = { true }): T? = entities
             .filter(predicate)
             .randomOrNull()
-    }
 
 
     /**

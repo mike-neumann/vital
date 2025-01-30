@@ -50,8 +50,6 @@ class VitalGradlePlugin : Plugin<Project> {
         }
     }
 
-    private fun hasDependency(dependencyNotation: String): Boolean {
-        return target.configurations.flatMap { it.allDependencies }
+    private fun hasDependency(dependencyNotation: String): Boolean = target.configurations.flatMap { it.allDependencies }
             .any { "${it.group}:${it.name}:${it.version}".startsWith(dependencyNotation) }
-    }
 }

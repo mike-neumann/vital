@@ -21,12 +21,12 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
         interval = info.interval
     }
 
-    override fun requiredAnnotationType() = Info::class.java
+    override fun requiredAnnotationType(): Class<Info> = Info::class.java
 
     /**
      * Checks if this repeatable task is currently running.
      */
-    fun isRunning() = runnable != null && task != null
+    fun isRunning(): Boolean = runnable != null && task != null
 
     /**
      * Starts this repeatable task. If it's already running, this method has no effect.

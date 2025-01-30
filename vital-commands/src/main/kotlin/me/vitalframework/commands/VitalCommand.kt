@@ -40,9 +40,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         argExceptionHandlers = getMappedArgExceptionHandlers()
     }
 
-    override fun requiredAnnotationType() = Info::class.java
+    override fun requiredAnnotationType(): Class<Info> = Info::class.java
 
-    private fun getMappedArgs() = javaClass.methods
+    private fun getMappedArgs(): Map<Pattern, Arg> = javaClass.methods
         .filter { it.isAnnotationPresent(ArgHandler::class.java) }
         .map { it.getAnnotation(ArgHandler::class.java) }
         .associate {
@@ -53,7 +53,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
             ) to it.value
         }
 
-    private fun getMappedArgHandlers() = javaClass.methods
+    private fun getMappedArgHandlers(): Map<Arg, ArgHandlerContext> = javaClass.methods
         .filter { ReturnState::class.java.isAssignableFrom(it.returnType) }
         .filter { it.isAnnotationPresent(ArgHandler::class.java) }
         .associate { method ->
@@ -141,7 +141,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
             .toMap()
     }
 
-    private fun getArg(arg: String) = args.entries
+    private fun getArg(arg: String): Arg? = args.entries
         .filter { it.key.matcher(arg).matches() }
         .map { it.value }
         .firstOrNull()
@@ -321,9 +321,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     }
 
     abstract fun isPlayer(commandSender: CS): Boolean
-
     abstract fun hasPermission(commandSender: CS, permission: String): Boolean
-
     abstract fun getAllPlayerNames(): List<String>
 
     fun execute(sender: CS, args: Array<String>) {

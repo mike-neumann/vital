@@ -40,9 +40,9 @@ class VitalGlobalHologramService(
         )
     }
 
-    fun getAllGlobalHolograms() = globalHologramRepository.getAll()
-    fun getGlobalHologram(uniqueId: UUID) = globalHologramRepository.get(uniqueId)
-    fun getGlobalHologram(name: String) = globalHologramRepository.get(name)
+    fun getAllGlobalHolograms(): List<VitalGlobalHologram> = globalHologramRepository.getAll()
+    fun getGlobalHologram(uniqueId: UUID): VitalGlobalHologram? = globalHologramRepository.get(uniqueId)
+    fun getGlobalHologram(name: String): VitalGlobalHologram? = globalHologramRepository.get(name)
 
     fun removeGlobalHologram(globalHologram: VitalGlobalHologram) {
         if (!globalHologramRepository.exists(globalHologram)) {

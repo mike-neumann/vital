@@ -39,7 +39,7 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
         }
     }
 
-    override fun requiredAnnotationType() = Info::class.java
+    override fun requiredAnnotationType(): Class<Info> = Info::class.java
 
     fun save(writeToFile: Boolean = true) {
         try {

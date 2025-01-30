@@ -38,7 +38,7 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
         this.initialCooldown = info.cooldown
     }
 
-    override fun requiredAnnotationType() = Info::class.java
+    override fun requiredAnnotationType(): Class<Info> = Info::class.java
 
     fun handleInteraction(e: PlayerInteractEvent) {
         if (!playerCooldown.containsKey(e.player)) {
@@ -89,7 +89,7 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
         return uuid == otherUuid
     }
 
-    override fun toString() = super.toString().replace("$type x $amount", "$type x 1");
+    override fun toString(): String = super.toString().replace("$type x $amount", "$type x 1");
 
     open fun onLeftClick(e: PlayerInteractEvent) {}
     open fun onRightClick(e: PlayerInteractEvent) {}

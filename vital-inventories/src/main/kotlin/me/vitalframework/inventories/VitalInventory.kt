@@ -26,7 +26,7 @@ open class VitalInventory(
         name = info.name
     }
 
-    override fun requiredAnnotationType() = Info::class.java
+    override fun requiredAnnotationType(): Class<Info> = Info::class.java
 
     @JvmOverloads
     fun setItem(slot: Int, itemStack: ItemStack, player: SpigotPlayer, action: (InventoryClickEvent) -> Unit = {}) {

@@ -25,9 +25,8 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
         interval = info.interval
     }
 
-    override fun requiredAnnotationType() = Info::class.java
-
-    fun isRunning() = runnable != null && task != null
+    override fun requiredAnnotationType(): Class<Info> = Info::class.java
+    fun isRunning(): Boolean = runnable != null && task != null
 
     fun start() {
         if (isRunning()) {
