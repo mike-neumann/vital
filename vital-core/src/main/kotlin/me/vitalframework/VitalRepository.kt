@@ -43,8 +43,8 @@ abstract class VitalRepository<ID, T : VitalEntity<ID>> {
      */
     @JvmOverloads
     fun getRandom(predicate: (T) -> Boolean = { true }): T? = entities
-            .filter(predicate)
-            .randomOrNull()
+        .filter(predicate)
+        .randomOrNull()
 
 
     /**
