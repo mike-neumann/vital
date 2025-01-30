@@ -4,7 +4,10 @@ import java.lang.reflect.Method
 import java.lang.reflect.Parameter
 
 abstract class VitalCommandException(message: String, cause: Throwable? = null) : RuntimeException(message) {
-    class ExecuteArgExceptionHandler(argExceptionHandlerContext: VitalCommand.ArgExceptionHandlerContext, cause: Throwable) : VitalCommandException(
+    class ExecuteArgExceptionHandler(
+        argExceptionHandlerContext: VitalCommand.ArgExceptionHandlerContext,
+        cause: Throwable
+    ) : VitalCommandException(
         "Error while executing arg exception handler method using context '$argExceptionHandlerContext'",
         cause
     )
