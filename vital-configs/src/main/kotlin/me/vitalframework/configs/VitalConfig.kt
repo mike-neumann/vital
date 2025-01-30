@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
     val log = logger()
     val fileName: String
-    val processor: Processor<Any>
+    val processor: Processor<*, Any>
 
     init {
         val info = getRequiredAnnotation()
@@ -46,6 +46,7 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
             if (writeToFile) {
                 val file = Path(fileName)
 
+                // create file is not already exists
                 if (!file.exists()) {
                     if (file.parent != null) {
                         file.parent.createDirectories()
@@ -53,7 +54,7 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
 
                     try {
                         file.createFile()
-                        log.info("{} config file created", file.name)
+                        log.debug("{} config file created", file.name)
                     } catch (e: IOException) {
                         throw VitalConfigException.CreateFile(file.name, e)
                     }
@@ -67,11 +68,9 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
     }
 
     fun load(inputStream: InputStream) {
-        injectFields(processor.load(inputStream, javaClass))
-    }
+        val serializedContent = processor.load(inputStream, javaClass)
 
-    private fun injectFields(serializedContentMap: Map<String, *>) {
-        serializedContentMap
+        serializedContent
             .forEach { (key, value) ->
                 VitalConfigUtils.getFieldByProperty(javaClass, key)?.let {
                     VitalConfigUtils.injectField(this@VitalConfig, it, value)
@@ -93,7 +92,7 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
         /**
          * Defines the file processor used by this config.
          */
-        val processor: KClass<out Processor<Any>>,
+        val processor: KClass<out Processor<*, Any>>,
     )
 
     /**
@@ -109,10 +108,9 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
         vararg val value: KClass<*>,
     )
 
-    /**
-     * Describes an object which is capable of processing the contents of a given config file.
-     */
-    interface Processor<out T> {
+    interface Processor<S, out T> {
+        val data: S
+
         fun load(inputStream: InputStream, clazz: Class<*>): Map<String, T>
         fun read(key: String): T?
         fun read(key: String, def: @UnsafeVariance T): T?

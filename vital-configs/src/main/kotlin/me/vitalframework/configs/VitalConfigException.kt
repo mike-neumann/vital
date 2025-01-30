@@ -8,7 +8,7 @@ abstract class VitalConfigException(message: String, cause: Throwable? = null) :
         cause
     )
 
-    class InjectFields(fileName: String, processor: Class<out VitalConfig.Processor<*>>, cause: Throwable) :
+    class InjectFields(fileName: String, processor: Class<out VitalConfig.Processor<*, *>>, cause: Throwable) :
         VitalConfigException(
             "error while injecting fields for config '$fileName' with processor '${processor.simpleName}'",
             cause
@@ -21,7 +21,7 @@ abstract class VitalConfigException(message: String, cause: Throwable? = null) :
 
     class CreateFileProcessor(
         fileName: String,
-        processor: Class<out VitalConfig.Processor<*>>,
+        processor: Class<out VitalConfig.Processor<*, *>>,
         cause: Throwable,
     ) : VitalConfigException(
         "error while creating config file processor '${processor.simpleName}' for config '$fileName'",

@@ -135,7 +135,7 @@ interface VitalUtils<CS, P : CS> {
 
     object Spigot : VitalUtils<SpigotCommandSender, SpigotPlayer> {
         override fun broadcastAction(playerPredicate: (SpigotPlayer) -> Boolean, action: (SpigotPlayer) -> Unit) {
-            Bukkit.getOnlinePlayers().stream()
+            Bukkit.getOnlinePlayers()
                 .filter(playerPredicate)
                 .forEach(action)
         }
