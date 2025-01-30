@@ -79,9 +79,7 @@ interface StatsCommand<CS> {
         }
 
         @ArgHandler(Arg("tps"))
-        fun onTps(sender: SpigotCommandSender): ReturnState {
-            return handleOnHealthTps(sender)
-        }
+        fun onTps(sender: SpigotCommandSender): ReturnState = handleOnHealthTps(sender)
     }
 
     @RequiresBungee

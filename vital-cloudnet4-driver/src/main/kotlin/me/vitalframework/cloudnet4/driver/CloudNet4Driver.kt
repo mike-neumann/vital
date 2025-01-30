@@ -6,6 +6,7 @@ import eu.cloudnetservice.driver.provider.CloudServiceProvider
 import eu.cloudnetservice.driver.provider.ServiceTaskProvider
 import eu.cloudnetservice.driver.service.ServiceConfiguration
 import eu.cloudnetservice.driver.service.ServiceInfoSnapshot
+import eu.cloudnetservice.driver.service.ServiceTask
 
 /**
  * Utility class to interact with the cloudnet v4 driver module more easily.
@@ -18,24 +19,25 @@ object CloudNet4Driver {
     val cloudServiceFactory = InjectionLayer.ext().instance(CloudServiceFactory::class.java)!!
 
     @JvmOverloads
-    inline fun getCloudServers(predicate: (ServiceInfoSnapshot) -> Boolean = { true }) =
+    inline fun getCloudServers(predicate: (ServiceInfoSnapshot) -> Boolean = { true }): List<ServiceInfoSnapshot> =
         cloudServiceProvider.runningServices()
             .filter(predicate)
 
     /**
      * Gets all cloudnet services by the given task name.
      */
-    fun getCloudServers(taskName: String) = cloudServiceProvider.servicesByTask(taskName)
+    fun getCloudServers(taskName: String): List<ServiceInfoSnapshot> =
+        cloudServiceProvider.servicesByTask(taskName).toList()
 
     /**
      * Gets the cloud server by the given name; or null;
      */
-    fun getCloudServer(serverName: String) = cloudServiceProvider.serviceByName(serverName)
+    fun getCloudServer(serverName: String): ServiceInfoSnapshot? = cloudServiceProvider.serviceByName(serverName)
 
     /**
      * Gets the task of the given server task name.
      */
-    fun getServerTask(taskName: String) = serviceTaskProvider.serviceTask(taskName)
+    fun getServerTask(taskName: String): ServiceTask? = serviceTaskProvider.serviceTask(taskName)
 
     /**
      * Attempts to start a server with the given name, e.g: Lobby-1.

@@ -15,11 +15,11 @@ class VitalInventoryService {
         vitalInventory.open(player)
     }
 
-    fun getInventories(vitalInventoryClass: Class<VitalInventory>) =
+    fun getInventories(vitalInventoryClass: Class<VitalInventory>): List<VitalInventory> =
         try {
-            context.getBeansOfType(vitalInventoryClass).values
+            context.getBeansOfType(vitalInventoryClass).values.toList()
         } catch (e: Exception) {
-            mutableListOf()
+            listOf()
         }
 
     fun getInventories() = getInventories(VitalInventory::class.java)

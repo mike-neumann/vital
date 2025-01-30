@@ -65,7 +65,7 @@ class VitalScoreboardTeam internal constructor(
     }
 
     fun setOption(option: Team.Option, status: OptionStatus) {
-        options.put(option, status)
+        options[option] = status
     }
 
     fun addPlayer(player: SpigotPlayer) {
