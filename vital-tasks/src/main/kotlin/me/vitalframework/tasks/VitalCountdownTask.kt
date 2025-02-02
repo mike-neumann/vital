@@ -5,9 +5,8 @@ import net.md_5.bungee.api.ProxyServer
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
-abstract class VitalCountdownTask<P, R : Runnable, T>(
-    val plugin: P,
-) : RequiresAnnotation<VitalCountdownTask.Info> {
+abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) :
+    RequiresAnnotation<VitalCountdownTask.Info> {
     val initialCountdown: Long
     var countdown: Long
     var interval: Long
@@ -16,6 +15,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
         private set
     var task: T? = null
         private set
+    val running: Boolean get() = runnable != null && task != null
 
     init {
         val info = getRequiredAnnotation()
@@ -25,11 +25,10 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
         interval = info.interval
     }
 
-    override fun requiredAnnotationType(): Class<Info> = Info::class.java
-    fun isRunning(): Boolean = runnable != null && task != null
+    override fun requiredAnnotationType() = Info::class.java
 
     fun start() {
-        if (isRunning()) {
+        if (running) {
             return
         }
 
@@ -39,7 +38,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     }
 
     fun stop() {
-        if (!isRunning()) {
+        if (!running) {
             return
         }
 
@@ -93,14 +92,10 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     @Component
     @Target(AnnotationTarget.TYPE)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Info(
-        val countdown: Long,
-        val interval: Long = 1_000L,
-    )
+    annotation class Info(val countdown: Long, val interval: Long = 1_000L)
 
-    open class Spigot(
-        plugin: SpigotPlugin,
-    ) : VitalCountdownTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
+    open class Spigot(plugin: SpigotPlugin) :
+        VitalCountdownTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
         override fun createRunnable() = object : SpigotRunnable() {
             override fun run() {
                 handleTick()
@@ -118,15 +113,18 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
         }
     }
 
-    open class Bungee(
-        plugin: BungeePlugin,
-    ) : VitalCountdownTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
-        override fun createRunnable(): BungeeRunnable = BungeeRunnable {
-            handleTick()
-        }
+    open class Bungee(plugin: BungeePlugin) :
+        VitalCountdownTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
+        override fun createRunnable() = BungeeRunnable { handleTick() }
 
         override fun createTask() =
-            ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, interval, TimeUnit.MILLISECONDS)
+            ProxyServer.getInstance().scheduler.schedule(
+                plugin,
+                runnable,
+                0L,
+                interval,
+                TimeUnit.MILLISECONDS
+            )!!
 
         override fun cancelRunnable() {
             task?.cancel()

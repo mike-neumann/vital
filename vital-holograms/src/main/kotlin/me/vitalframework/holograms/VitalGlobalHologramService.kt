@@ -9,14 +9,8 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class VitalGlobalHologramService(
-    val globalHologramRepository: VitalGlobalHologramRepository,
-) {
-    fun createGlobalHologram(
-        name: String,
-        lines: List<String>,
-        location: Location,
-    ) {
+class VitalGlobalHologramService(val globalHologramRepository: VitalGlobalHologramRepository) {
+    fun createGlobalHologram(name: String, lines: List<String>, location: Location) {
         // now we can actually spawn the hologram.
         val armorStand = location.world!!.spawn(location, ArmorStand::class.java) {
             it.isVisible = false
@@ -25,7 +19,8 @@ class VitalGlobalHologramService(
         val lineArmorStandUniqueIds = lines.reversed().mapIndexed { i, line ->
             // convert the minimessage formatted line into a legacy section formatted line.
             val formattedLine =
-                LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(line))
+                LegacyComponentSerializer.legacySection()
+                    .serialize(MiniMessage.miniMessage().deserialize(line))
 
             location.world!!.spawn(location.clone().add(0.0, .25 * i, 0.0), ArmorStand::class.java) {
                 it.isVisible = false
@@ -36,24 +31,33 @@ class VitalGlobalHologramService(
         }
 
         globalHologramRepository.save(
-            VitalGlobalHologram(UUID.randomUUID(), name, lines, location, armorStand.uniqueId, lineArmorStandUniqueIds)
+            VitalGlobalHologram(
+                UUID.randomUUID(),
+                name,
+                lines,
+                location,
+                armorStand.uniqueId,
+                lineArmorStandUniqueIds
+            )
         )
     }
 
-    fun getAllGlobalHolograms(): List<VitalGlobalHologram> = globalHologramRepository.getAll()
-    fun getGlobalHologram(uniqueId: UUID): VitalGlobalHologram? = globalHologramRepository.get(uniqueId)
-    fun getGlobalHologram(name: String): VitalGlobalHologram? = globalHologramRepository.get(name)
+    fun getAllGlobalHolograms() = globalHologramRepository.entities
+    fun getGlobalHologram(uniqueId: UUID) = globalHologramRepository.get(uniqueId)
+    fun getGlobalHologram(name: String) = globalHologramRepository.get(name)
 
     fun removeGlobalHologram(globalHologram: VitalGlobalHologram) {
         if (!globalHologramRepository.exists(globalHologram)) {
             return
         }
-
         val armorStand = Bukkit.getEntity(globalHologram.armorStandUniqueId)!!
         val lineArmorStands = globalHologram.lineArmorStandUniqueIds.map { Bukkit.getEntity(it)!! }
 
         armorStand.remove()
-        lineArmorStands.forEach { it.remove() }
+
+        for (lineArmorStand in lineArmorStands) {
+            lineArmorStand.remove()
+        }
 
         globalHologramRepository.delete(globalHologram)
     }

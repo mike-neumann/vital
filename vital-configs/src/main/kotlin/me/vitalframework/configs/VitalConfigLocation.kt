@@ -1,25 +1,16 @@
 package me.vitalframework.configs
 
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.WorldCreator
+import org.bukkit.*
 
-/**
- * Wrapper class to store location data to a config file.
- */
 class VitalConfigLocation {
     companion object {
-        fun of(location: Location): VitalConfigLocation {
-            val vitalConfigLocation = VitalConfigLocation().apply {
-                world = location.world!!.name
-                x = location.x
-                y = location.y
-                z = location.z
-                pitch = location.pitch
-                yaw = location.yaw
-            }
-
-            return vitalConfigLocation
+        fun of(location: Location) = VitalConfigLocation().apply {
+            world = location.world!!.name
+            x = location.x
+            y = location.y
+            z = location.z
+            pitch = location.pitch
+            yaw = location.yaw
         }
     }
 

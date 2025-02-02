@@ -11,28 +11,26 @@ import org.springframework.stereotype.Component
 import java.io.PrintStream
 import java.util.*
 
-/**
- * The main instance of the Vital-Framework.
- */
 object Vital {
     lateinit var context: ConfigurableApplicationContext
 
     fun <T : Any> run(plugin: T) {
-        val pluginClassLoader: ClassLoader = plugin::class.java.getClassLoader()
-
+        val pluginClassLoader = plugin::class.java.getClassLoader()
         // needed or else spring startup fails
         Thread.currentThread().contextClassLoader = pluginClassLoader
-
         val loader = DefaultResourceLoader(pluginClassLoader)
         val builder = SpringApplicationBuilder()
-        val pluginConfiguration = Class.forName(plugin::class.java.getPackageName() + ".PluginConfiguration")
+        val pluginConfiguration =
+            Class.forName(plugin::class.java.getPackageName() + ".PluginConfiguration")
 
         try {
-            val properties = Properties()
+            val properties = Properties().apply {
+                load(pluginClassLoader.getResourceAsStream("application.properties"))
+            }
 
-            properties.load(pluginClassLoader.getResourceAsStream("application.properties"))
-
-            properties.forEach { (key: Any?, value: Any?) -> System.setProperty(key.toString(), value.toString()) }
+            for ((key, value) in properties) {
+                System.setProperty(key.toString(), value.toString())
+            }
         } catch (ignored: Exception) {
             // if we haven't defined an application.properties file, we may skip this step
         }
@@ -68,47 +66,22 @@ object Vital {
         }
     }
 
-    /**
-     * Specifies metadata for the projects plugin implementations.
-     */
     @ConditionalOnBean(name = ["plugin"])
     @Component
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(
-        /**
-         * Defines the name of this plugin.
-         */
         val name: String,
-
-        /**
-         * Defines the description of this plugin.
-         */
         val description: String = "A Vital Plugin",
-
-        /**
-         * Defines the api version this plugin uses.
-         */
         val apiVersion: String = "1.20",
-
-        /**
-         * Defines the version of this plugin.
-         */
         val version: String = "1.0",
-
-        /**
-         * The author/s of this plugin.
-         */
         val authors: String = "",
-
-        /**
-         * Defines this vital plugin instance environment for automatic plugin yml generation.
-         */
-        val environment: VitalPluginEnvironment,
-
-        /**
-         * Defines the locations where spring should look for configuration files.
-         */
+        val environment: PluginEnvironment,
         val springConfigLocations: Array<String> = ["classpath:application.properties"],
-    )
+    ) {
+        enum class PluginEnvironment(val ymlFileName: String) {
+            SPIGOT("plugin.yml"),
+            BUNGEE("bungee.yml")
+        }
+    }
 }

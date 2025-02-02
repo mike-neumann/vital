@@ -8,9 +8,6 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
-/**
- * A listener class that manages VitalPlayer instances when players join and leave the server.
- */
 interface VitalPlayerListener {
     val playerService: VitalPlayerService
     val playerType: Class<VitalPlayer<*>>
@@ -20,7 +17,6 @@ interface VitalPlayerListener {
     abstract class Spigot(
         plugin: SpigotPlugin,
         override val playerService: VitalPlayerService,
-
         @Value("\${vital.players.type:me.vitalframework.players.VitalPlayer.Spigot}")
         override val playerType: Class<VitalPlayer<*>>,
     ) : VitalPlayerListener, VitalListener.Spigot(plugin) {
@@ -42,7 +38,6 @@ interface VitalPlayerListener {
     abstract class Bungee(
         plugin: BungeePlugin,
         override val playerService: VitalPlayerService,
-
         @Value("\${vital.players.type:me.vitalframework.players.VitalPlayer.Bungee}")
         override val playerType: Class<VitalPlayer<*>>,
     ) : VitalPlayerListener, VitalListener.Bungee(plugin) {

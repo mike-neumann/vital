@@ -23,9 +23,14 @@ subprojects {
         compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
         compileOnly("com.mojang:brigadier:1.2.9")
         compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
+
         api("org.springframework.boot:spring-boot-starter:3.3.1")
+
         testApi("org.springframework.boot:spring-boot-starter-test:3.3.1")
         testApi("org.junit.jupiter:junit-jupiter-api:5.11.4")
+        testApi("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
+        testApi("com.mojang:brigadier:1.2.9")
+        testApi("net.md-5:bungeecord-api:1.20-R0.2")
     }
 
     java {

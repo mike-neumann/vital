@@ -5,19 +5,17 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
 @Service
-class VitalItemService(
-    val items: List<VitalItem>,
-) {
+class VitalItemService(val items: List<VitalItem>) {
     fun handleInteraction(e: PlayerInteractEvent) {
         items.firstOrNull { it == e.item }?.handleInteraction(e)
     }
 
     @Scheduled(fixedRate = 50)
     fun handleCooldown() {
-        items.forEach { item ->
+        for (item in items) {
             item.playerCooldown
                 .filter { it.value > 0 }
-                .forEach { (player, cooldown) ->
+                .forEach { (player, _) ->
                     item.playerCooldown[player] = item.playerCooldown[player]!! - 50
 
                     item.onCooldownTick(player)

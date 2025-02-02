@@ -1,7 +1,10 @@
 package me.vitalframework.commands
 
 abstract class VitalTestCommand :
-    VitalCommand<VitalTestCommand.Plugin, VitalTestCommand.CommandSender>(Plugin(), CommandSender::class.java) {
+    VitalCommand<VitalTestCommand.Plugin, VitalTestCommand.CommandSender>(
+        Plugin(),
+        CommandSender::class.java
+    ) {
     class Plugin
     class Player : CommandSender()
     open class CommandSender {
@@ -14,5 +17,5 @@ abstract class VitalTestCommand :
 
     override fun isPlayer(commandSender: CommandSender) = commandSender is Player
     override fun hasPermission(commandSender: CommandSender, permission: String) = true
-    override fun getAllPlayerNames() = listOf("")
+    override fun getAllPlayerNames() = listOf("xRa1ny")
 }

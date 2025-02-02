@@ -1,29 +1,29 @@
 package me.vitalframework.statistics
 
 import me.vitalframework.logger
-import me.vitalframework.statistics.config.VitalStatisticsConfig
 import org.springframework.stereotype.Service
 
 @Service
-class VitalStatisticsService(
-    val statisticsConfig: VitalStatisticsConfig,
-) {
+class VitalStatisticsService(val statisticsConfig: VitalStatisticsConfig) {
     private val log = logger()
     var lastTickTime = 0L
+        private set
     var lastSecondTime = 0L
+        private set
     var ticks = 0
+        private set
     var tps = 0
-    val lastTps = mutableMapOf<Long, Int>()
-    val lastUnhealthyTps = mutableMapOf<Long, Int>()
+        private set
+    private val _lastTps = mutableMapOf<Long, Int>()
+    val lastTps: Map<Long, Int> get() = _lastTps
+    private val _lastUnhealthyTps = mutableMapOf<Long, Int>()
+    val lastUnhealthyTps: Map<Long, Int> get() = _lastUnhealthyTps
 
     fun handleTick() {
         val currentTimeMillis = System.currentTimeMillis();
 
         if (currentTimeMillis - lastTickTime >= statisticsConfig.maxTaskInactiveTolerance) {
-            log.warn(
-                "vital-statistics has detected increased scheduler inconsistency of {} millis",
-                currentTimeMillis - lastTickTime
-            )
+            log.warn("vital-statistics has detected increased scheduler inconsistency of ${currentTimeMillis - lastTickTime} millis")
             log.warn("This could indicate bad server-performance / health")
         }
 
@@ -32,17 +32,17 @@ class VitalStatisticsService(
             lastSecondTime = System.currentTimeMillis()
             tps = ticks
             ticks = 0
-            lastTps[lastSecondTime] = tps
+            _lastTps[lastSecondTime] = tps
 
-            if (lastTps.size > statisticsConfig.maxTpsTaskCache) {
-                lastTps.remove(lastTps.keys.first())
+            if (_lastTps.size > statisticsConfig.maxTpsTaskCache) {
+                _lastTps.remove(_lastTps.keys.first())
             }
 
             if (tps < statisticsConfig.minTps) {
-                lastUnhealthyTps[System.currentTimeMillis()] = tps
+                _lastUnhealthyTps[System.currentTimeMillis()] = tps
 
-                if (lastUnhealthyTps.size > statisticsConfig.maxTpsTaskCache) {
-                    lastUnhealthyTps.remove(lastUnhealthyTps.keys.first())
+                if (_lastUnhealthyTps.size > statisticsConfig.maxTpsTaskCache) {
+                    _lastUnhealthyTps.remove(_lastUnhealthyTps.keys.first())
                 }
             }
         }

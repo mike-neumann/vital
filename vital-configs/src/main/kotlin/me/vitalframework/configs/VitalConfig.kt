@@ -17,19 +17,16 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
         val info = getRequiredAnnotation()
 
         fileName = info.name
-        processor =
-            try {
-                info.processor.java.getDeclaredConstructor().newInstance()
-            } catch (e: Exception) {
-                throw VitalConfigException.CreateFileProcessor(info.name, info.processor.java, e)
-            }
-
+        processor = try {
+            info.processor.java.getDeclaredConstructor().newInstance()
+        } catch (e: Exception) {
+            throw VitalConfigException.CreateFileProcessor(info.name, info.processor.java, e)
+        }
         val file = Path(fileName)
-        val inputStream =
-            when (file.exists()) {
-                true -> file.inputStream()
-                else -> "".byteInputStream()
-            }
+        val inputStream = when {
+            file.exists() -> file.inputStream()
+            else -> "".byteInputStream()
+        }
 
         try {
             // after everything has worked without problem, inject field of our config with the values now retrievable...
@@ -39,13 +36,12 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
         }
     }
 
-    override fun requiredAnnotationType(): Class<Info> = Info::class.java
+    override fun requiredAnnotationType() = Info::class.java
 
     fun save(writeToFile: Boolean = true) {
         try {
             if (writeToFile) {
                 val file = Path(fileName)
-
                 // create file is not already exists
                 if (!file.exists()) {
                     if (file.parent != null) {
@@ -70,43 +66,21 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
     fun load(inputStream: InputStream) {
         val serializedContent = processor.load(inputStream, javaClass)
 
-        serializedContent
-            .forEach { (key, value) ->
-                VitalConfigUtils.getFieldByProperty(javaClass, key)?.let {
-                    VitalConfigUtils.injectField(this@VitalConfig, it, value)
-                }
+        for ((key, value) in serializedContent) {
+            VitalConfigUtils.getFieldByProperty(javaClass, key)?.let {
+                VitalConfigUtils.injectField(this, it, value)
             }
+        }
     }
 
-    /**
-     * Defines meta-information for the annotated config.
-     */
     @Component
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Info(
-        /**
-         * Defines the file name (including extension) for the annotated config.
-         */
-        val name: String,
-        /**
-         * Defines the file processor used by this config.
-         */
-        val processor: KClass<out Processor<*, Any>>,
-    )
+    annotation class Info(val name: String, val processor: KClass<out Processor<*, Any>>)
 
-    /**
-     * Defines a field within a config extending class to be a key.
-     */
     @Target(AnnotationTarget.FIELD)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Property(
-        /**
-         * Defines the class types this annotated field manages.
-         * When annotating a list or map, specify their generic types.
-         */
-        vararg val value: KClass<*>,
-    )
+    annotation class Property(vararg val value: KClass<*>)
 
     interface Processor<S, out T> {
         val data: S

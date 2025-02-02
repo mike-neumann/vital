@@ -8,16 +8,11 @@ import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.scoreboard.Team
 import org.bukkit.scoreboard.Team.OptionStatus
 
-/**
- * Represents a team within a scoreboard in the Vital plugin framework.
- * This class manages team properties, members, and updates.
- */
-class VitalScoreboardTeam internal constructor(
-    val name: String,
-    scoreboard: Scoreboard,
-) {
-    val players = mutableListOf<SpigotPlayer>()
-    val options = mutableMapOf<Team.Option, OptionStatus>()
+class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Scoreboard) {
+    private val _players = mutableListOf<SpigotPlayer>()
+    val players: List<SpigotPlayer> get() = _players
+    private val _options = mutableMapOf<Team.Option, OptionStatus>()
+    val options: Map<Team.Option, OptionStatus> get() = _options
     val bukkitTeam: Team = scoreboard.registerNewTeam(
         PlainTextComponentSerializer.plainText()
             .serialize(
@@ -30,59 +25,55 @@ class VitalScoreboardTeam internal constructor(
     var friendlyFire = false
     var canSeeFriendlyInvisibles = false
 
-    /**
-     * Updates the properties and members of this scoreboard team.
-     */
     fun update() {
         bukkitTeam.displayName = name
         bukkitTeam.setAllowFriendlyFire(friendlyFire)
         bukkitTeam.setCanSeeFriendlyInvisibles(canSeeFriendlyInvisibles)
 
-        prefix?.let {
+        if (prefix != null) {
             bukkitTeam.prefix =
-                LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(it))
+                LegacyComponentSerializer.legacySection()
+                    .serialize(MiniMessage.miniMessage().deserialize(prefix!!))
         }
 
-        suffix?.let {
+        if (suffix != null) {
             bukkitTeam.suffix =
-                LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(it))
+                LegacyComponentSerializer.legacySection()
+                    .serialize(MiniMessage.miniMessage().deserialize(suffix!!))
         }
-
         // Update all options
-        options.forEach { (option, status) ->
+        for ((option, status) in _options) {
             bukkitTeam.setOption(option, status)
         }
-
         // Clear all members
-        bukkitTeam.entries.forEach {
-            bukkitTeam.removeEntry(it)
+        for (entry in bukkitTeam.entries) {
+            bukkitTeam.removeEntry(entry)
         }
-
         // Add new members
-        players.forEach {
-            bukkitTeam.addPlayer(it)
+        for (player in _players) {
+            bukkitTeam.addPlayer(player)
         }
     }
 
     fun setOption(option: Team.Option, status: OptionStatus) {
-        options[option] = status
+        _options[option] = status
     }
 
     fun addPlayer(player: SpigotPlayer) {
-        if (player in players) {
+        if (player in _players) {
             return
         }
 
-        players.add(player)
+        _players.add(player)
         update()
     }
 
     fun removePlayer(player: SpigotPlayer) {
-        if (player !in players) {
+        if (player !in _players) {
             return
         }
 
-        players.remove(player)
+        _players.remove(player)
         update()
     }
 }

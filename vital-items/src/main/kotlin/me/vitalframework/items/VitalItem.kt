@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
+    val initialCooldown: Int
     val playerCooldown = mutableMapOf<SpigotPlayer, Int>()
-    var initialCooldown = 0
 
     init {
         val info = getRequiredAnnotation();
@@ -38,7 +38,7 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
         this.initialCooldown = info.cooldown
     }
 
-    override fun requiredAnnotationType(): Class<Info> = Info::class.java
+    override fun requiredAnnotationType() = Info::class.java
 
     fun handleInteraction(e: PlayerInteractEvent) {
         if (!playerCooldown.containsKey(e.player)) {
@@ -49,7 +49,6 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
             onCooldown(e)
             return
         }
-
         val action = e.action
 
         when (action) {
@@ -69,10 +68,14 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
             return other == this
         }
 
-        if (!other.itemMeta!!.persistentDataContainer.has(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING)) {
-            return toString() == other.toString().replace("${other.type} x ${other.amount}", "${other.type} x 1")
+        if (!other.itemMeta!!.persistentDataContainer.has(
+                VitalNamespacedKey.ITEM_UUID,
+                PersistentDataType.STRING
+            )
+        ) {
+            return toString() == other.toString()
+                .replace("${other.type} x ${other.amount}", "${other.type} x 1")
         }
-
         val uuid = UUID.fromString(
             itemMeta!!.persistentDataContainer.get(
                 VitalNamespacedKey.ITEM_UUID,
@@ -89,7 +92,7 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
         return uuid == otherUuid
     }
 
-    override fun toString(): String = super.toString().replace("$type x $amount", "$type x 1");
+    override fun toString() = super.toString().replace("$type x $amount", "$type x 1");
 
     open fun onLeftClick(e: PlayerInteractEvent) {}
     open fun onRightClick(e: PlayerInteractEvent) {}
@@ -97,10 +100,6 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
     open fun onCooldownExpire(e: SpigotPlayer) {}
     open fun onCooldownTick(e: SpigotPlayer) {}
 
-
-    /**
-     * Annotation to provide information about an item that can be interacted with in the game.
-     */
     @Component
     @Target(AnnotationTarget.TYPE)
     @Retention(AnnotationRetention.RUNTIME)

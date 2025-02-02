@@ -1,6 +1,5 @@
 package me.vitalframework
 
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -11,27 +10,25 @@ class VitalGradlePlugin : Plugin<Project> {
         this.target = target
 
         target.afterEvaluate {
-            requirePlugin("com.github.johnrengelman.shadow", "8.1.1")
-
+            requirePlugin(SHADOW_PLUGIN_ID, SHADOW_PLUGIN_EXAMPLE_VERSION)
             // not every module requires the core module
-            if (hasDependency("me.vitalframework:vital-core")) {
+            if (hasDependency(VITAL_CORE_DEPENDENCY)) {
                 try {
                     // attempt to register annotation processor for kotlin
-                    target.dependencies.add("kapt", "me.vitalframework:vital-core-processor:1.0")
-                } catch (ignored: Exception) {
+                    target.dependencies.add("kapt", "$VITAL_CORE_PROCESSOR_DEPENDENCY:1.0")
+                } catch (e: Exception) {
                     // kapt not found, register default
-                    target.dependencies.add("annotationProcessor", "me.vitalframework:vital-core-processor:1.0")
+                    target.dependencies.add("annotationProcessor", "$VITAL_CORE_PROCESSOR_DEPENDENCY:1.0")
                 }
             }
-
             // if vital-commands is used, also add processor for module
-            if (hasDependency("me.vitalframework:vital-commands")) {
+            if (hasDependency(VITAL_COMMANDS_DEPENDENCY)) {
                 try {
                     // attempt to register annotation processor for kotlin
-                    target.dependencies.add("kapt", "me.vitalframework:vital-commands-processor:1.0")
-                } catch (ignored: Exception) {
+                    target.dependencies.add("kapt", "$VITAL_COMMANDS_PROCESSOR_DEPENDENCY:1.0")
+                } catch (e: Exception) {
                     // kapt not found, register default
-                    target.dependencies.add("annotationProcessor", "me.vitalframework:vital-commands-processor:1.0")
+                    target.dependencies.add("annotationProcessor", "$VITAL_COMMANDS_PROCESSOR_DEPENDENCY:1.0")
                 }
             }
 
@@ -41,16 +38,25 @@ class VitalGradlePlugin : Plugin<Project> {
         }
     }
 
-    private fun requirePlugin(pluginNotation: String, exampleVersion: String) {
+    private fun requirePlugin(id: String, exampleVersion: String) {
         try {
             // this will fail when plugins are not detected on classpath
-            target.plugins.apply(pluginNotation)
+            target.plugins.apply(id)
         } catch (e: Exception) {
-            throw GradleException("could not find plugin '$pluginNotation' please declare it in 'plugins {}' block, e.g: 'id(\"$pluginNotation\") version \"$exampleVersion\"'")
+            throw VitalGradlePluginException.PluginNotFound(id, exampleVersion)
         }
     }
 
-    private fun hasDependency(dependencyNotation: String): Boolean =
+    private fun hasDependency(dependencyNotation: String) =
         target.configurations.flatMap { it.allDependencies }
             .any { "${it.group}:${it.name}:${it.version}".startsWith(dependencyNotation) }
+
+    companion object {
+        const val SHADOW_PLUGIN_ID = "com.github.johnrengelman.shadow"
+        const val SHADOW_PLUGIN_EXAMPLE_VERSION = "8.1.1"
+        const val VITAL_COMMANDS_DEPENDENCY = "me.vitalframework:vital-commands"
+        const val VITAL_COMMANDS_PROCESSOR_DEPENDENCY = "me.vitalframework:vital-commands-processor"
+        const val VITAL_CORE_DEPENDENCY = "me.vitalframework:vital-core"
+        const val VITAL_CORE_PROCESSOR_DEPENDENCY = "me.vitalframework:vital-core-processor"
+    }
 }

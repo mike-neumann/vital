@@ -1,14 +1,9 @@
 package me.vitalframework.configs
 
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
-import org.bukkit.Registry
+import org.bukkit.*
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
-/**
- * Wrapper class to store itemstack data in a config file.
- */
 class VitalConfigItemStack {
     companion object {
         fun of(itemStack: ItemStack): VitalConfigItemStack {
@@ -16,18 +11,15 @@ class VitalConfigItemStack {
             val vitalConfigItemStack = VitalConfigItemStack().apply {
                 type = itemStack.type
 
-                if (itemMeta!!.displayName != null) {
-                    displayName = itemMeta.displayName
-                } else {
-                    displayName = itemStack.type.name
+                displayName = when {
+                    itemMeta!!.displayName != null -> itemMeta.displayName
+                    else -> itemStack.type.name
                 }
 
-                lore =
-                    if (!itemMeta.hasLore()) {
-                        mutableListOf<String>()
-                    } else {
-                        itemMeta.lore!!.toMutableList()
-                    }
+                lore = when {
+                    !itemMeta.hasLore() -> mutableListOf<String>()
+                    else -> itemMeta.lore!!.toMutableList()
+                }
 
                 enchantments =
                     mutableMapOf(*itemMeta.enchants.entries.map { it.key.key.key to it.value }.toTypedArray())
@@ -55,12 +47,15 @@ class VitalConfigItemStack {
 
     fun toItemStack(): ItemStack {
         val itemStack = ItemStack(type!!)
+
         itemStack.itemMeta!!.apply {
             setDisplayName(displayName)
             lore = this@VitalConfigItemStack.lore
-            enchantments.forEach { (key, level) ->
+
+            for ((key, level) in enchantments) {
                 addEnchant(Registry.ENCHANTMENT.get(NamespacedKey.minecraft(key))!!, level, true)
             }
+
             addItemFlags(*itemFlags.toTypedArray())
 
             itemStack.itemMeta = this

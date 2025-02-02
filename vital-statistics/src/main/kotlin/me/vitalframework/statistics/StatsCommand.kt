@@ -2,7 +2,6 @@ package me.vitalframework.statistics
 
 import me.vitalframework.*
 import me.vitalframework.commands.VitalCommand
-import me.vitalframework.statistics.config.VitalStatisticsConfig
 import me.vitalframework.utils.VitalUtils
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
@@ -18,11 +17,7 @@ interface StatsCommand<CS> {
 
     fun handleOnCommand(sender: CS) {
         val serverStatus =
-            when (statisticsService.tps >= statisticsConfig.minTps) {
-                true -> "<green>HEALTHY</green>"
-                false -> "<red>UNHEALTHY</yellow>"
-            }
-
+            if (statisticsService.tps >= statisticsConfig.minTps) "<green>HEALTHY</green>" else "<red>UNHEALTHY</yellow>"
         val ramUsageInGigaBytes =
             (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024f / 1024 / 1024
         val vitalModuleNames = Vital.context.getBeansOfType(VitalSubModule::class.java)
@@ -32,7 +27,7 @@ interface StatsCommand<CS> {
         sendMessage(sender, "RAM usage: <yellow>$ramUsageInGigaBytes GB")
         sendMessage(sender, "Vital modules: <yellow>${vitalModuleNames.size}")
 
-        vitalModuleNames.forEach { (name, module) ->
+        for ((name, _) in vitalModuleNames) {
             sendMessage(sender, " - <yellow>$name")
         }
     }
@@ -44,7 +39,7 @@ interface StatsCommand<CS> {
             "TPS reports: <yellow>${statisticsService.lastTps.size} of ${statisticsConfig.maxTpsTaskCache}"
         )
 
-        statisticsService.lastTps.forEach { (time, tps) ->
+        for ((time, tps) in statisticsService.lastTps) {
             sendMessage(sender, " - <yellow>${SimpleDateFormat("HH:mm:ss").format(Date(time))}, $tps TPS")
         }
 
@@ -53,7 +48,7 @@ interface StatsCommand<CS> {
             "Bad TPS reports: <yellow>${statisticsService.lastUnhealthyTps.size} of ${statisticsConfig.maxTpsTaskCache}"
         )
 
-        statisticsService.lastUnhealthyTps.forEach { (time, tps) ->
+        for ((time, tps) in statisticsService.lastUnhealthyTps) {
             sendMessage(sender, " - <yellow>${SimpleDateFormat("HH:mm:ss").format(Date(time))}, $tps TPS")
         }
 
@@ -79,7 +74,7 @@ interface StatsCommand<CS> {
         }
 
         @ArgHandler(Arg("tps"))
-        fun onTps(sender: SpigotCommandSender): ReturnState = handleOnHealthTps(sender)
+        fun onTps(sender: SpigotCommandSender) = handleOnHealthTps(sender)
     }
 
     @RequiresBungee
@@ -93,15 +88,16 @@ interface StatsCommand<CS> {
         }
 
         override fun onBaseCommand(sender: BungeeCommandSender): ReturnState {
-            VitalUtils.Bungee.sendMessage(sender, "Bungee version: <yellow>${ProxyServer.getInstance().version}")
+            VitalUtils.Bungee.sendMessage(
+                sender,
+                "Bungee version: <yellow>${ProxyServer.getInstance().version}"
+            )
             handleOnCommand(sender)
 
             return ReturnState.SUCCESS
         }
 
         @ArgHandler(Arg("tps"))
-        fun onTps(sender: BungeeCommandSender): ReturnState {
-            return handleOnHealthTps(sender)
-        }
+        fun onTps(sender: BungeeCommandSender) = handleOnHealthTps(sender)
     }
 }

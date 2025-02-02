@@ -22,7 +22,6 @@ open class VitalYamlConfigTest {
         val testYamlConfig = VitalTestYamlConfig().apply {
             load(ResourceUtils.getFile("classpath:test.yaml").inputStream())
         }
-
         // test that the file has been loaded successfully
         assert(testYamlConfig.testYamlString == "testYamlString")
         assert(testYamlConfig.testYamlObject.testYamlObjectString == "testYamlObjectString")

@@ -1,36 +1,33 @@
 package me.vitalframework.processor
 
 import me.vitalframework.Vital
-import me.vitalframework.VitalPluginEnvironment
 import java.io.IOException
 import java.io.InputStreamReader
-import javax.annotation.processing.AbstractProcessor
-import javax.annotation.processing.RoundEnvironment
-import javax.annotation.processing.SupportedAnnotationTypes
-import javax.annotation.processing.SupportedSourceVersion
+import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
-import javax.tools.Diagnostic
 import javax.tools.StandardLocation
 
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 @SupportedAnnotationTypes("*")
 class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
     private var ran = false
-    lateinit var pluginEnvironment: VitalPluginEnvironment
+    lateinit var pluginEnvironment: Vital.Info.PluginEnvironment
 
-    override fun process(annotations: MutableSet<out TypeElement?>, roundEnv: RoundEnvironment): Boolean {
+    override fun process(
+        annotations: MutableSet<out TypeElement?>,
+        roundEnv: RoundEnvironment,
+    ): Boolean {
         if (ran) {
             return true
         }
-
         var classNameVitalPluginInfoEntry: Pair<String, Vital.Info>? = null
 
         roundEnv.getElementsAnnotatedWith(Vital.Info::class.java)
             .filter { it.kind == ElementKind.CLASS }
-            .forEach {
-                val typeElement = it as TypeElement
+            .forEach { element ->
+                val typeElement = element as TypeElement
                 val typeMirror = typeElement.superclass
                 val typeMirrorName = typeMirror.toString()
                 val spigotPluginMirror = "org.bukkit.plugin.java.JavaPlugin"
@@ -39,43 +36,34 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
                 if (typeMirrorName != spigotPluginMirror && typeMirrorName != bungeecordPluginMirror) {
                     return@forEach
                 }
-
                 val className = typeElement.qualifiedName.toString()
 
-                classNameVitalPluginInfoEntry = className to it.getAnnotation(Vital.Info::class.java)
+                classNameVitalPluginInfoEntry =
+                    className to element.getAnnotation(Vital.Info::class.java)
             }
-
         // If scan could not resolve the main class, cancel automatic `plugin.yml` creation.
         if (classNameVitalPluginInfoEntry == null) {
-            processingEnv.messager.printMessage(
-                Diagnostic.Kind.ERROR,
-                "No Main Plugin Class Found! Main Plugin Class Must Be Annotated With @Vital.Info"
-            )
-
-            return false
+            throw VitalPluginInfoAnnotationProcessingException.NoMainClass()
         }
-
-        val className = classNameVitalPluginInfoEntry!!.first
-        val vitalPluginInfo = classNameVitalPluginInfoEntry!!.second
-
+        val className = classNameVitalPluginInfoEntry.first
+        val pluginInfo = classNameVitalPluginInfoEntry.second
         // finally generate the `plugin.yml`.
         generatePluginYml(
             className,
-            vitalPluginInfo.name,
-            vitalPluginInfo.apiVersion,
-            vitalPluginInfo.version,
-            vitalPluginInfo.environment
+            pluginInfo.name,
+            pluginInfo.apiVersion,
+            pluginInfo.version,
+            pluginInfo.environment
         )
-
         val packageNames =
-            mutableListOf(*className.split("[.]".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
+            mutableListOf(*className.split("[.]".toRegex()).dropLastWhile { it.isEmpty() }
+                .toTypedArray())
 
         packageNames.removeLast()
-
         // now we have the package name without the class at the end
         val packageName = packageNames.joinToString(".")
 
-        generatePluginConfigurationClass(packageName, vitalPluginInfo.springConfigLocations)
+        generatePluginConfigurationClass(packageName, pluginInfo.springConfigLocations)
 
         ran = true
 
@@ -87,7 +75,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         name: String,
         apiVersion: String,
         version: String,
-        environment: VitalPluginEnvironment,
+        environment: Vital.Info.PluginEnvironment,
     ) {
         // append basic plugin meta information to plugin info holder.
         VitalPluginInfoHolder.PLUGIN_INFO.append("main: ").append(className)
@@ -108,15 +96,16 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         } catch (e: ClassNotFoundException) {
             try {
                 // If we couldn't find the dependency, attempt to create the `plugin.yml` ourselves.
-                val pluginYmlFileObject =
-                    processingEnv.filer.createResource(StandardLocation.CLASS_OUTPUT, "", environment.ymlFileName)
+                val pluginYmlFileObject = processingEnv.filer.createResource(
+                    StandardLocation.CLASS_OUTPUT,
+                    "",
+                    environment.ymlFileName
+                )
 
-                pluginYmlFileObject.openWriter().use { pluginYmlWriter ->
-                    pluginYmlWriter.write(VitalPluginInfoHolder.PLUGIN_INFO.toString())
-                }
-            } catch (ex: IOException) {
-                ex.printStackTrace()
-                throw RuntimeException("Error while generating plugin yml\nIf this error persists, please open an issue on Vital's GitHub page!")
+                pluginYmlFileObject.openWriter()
+                    .use { it.write(VitalPluginInfoHolder.PLUGIN_INFO.toString()) }
+            } catch (e: IOException) {
+                throw VitalPluginInfoAnnotationProcessingException.GeneratePluginYml(e)
             }
         }
     }
@@ -126,18 +115,20 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
             val javaFileObject = processingEnv.filer.createSourceFile("$packageName.PluginConfiguration")
             val resource = VitalPluginInfoAnnotationProcessor::class.java.getResourceAsStream("/Main.java")!!
 
-            javaFileObject.openWriter().use {
+            javaFileObject.openWriter().use { writer ->
                 val template = InputStreamReader(resource).readText()
 
-                it.write(
+                writer.write(
                     template.replace("{packageName}", packageName)
-                        .replace("{springConfigLocations}", "\"" + springConfigLocations.joinToString(",") + "\"")
+                        .replace(
+                            "{springConfigLocations}",
+                            "\"" + springConfigLocations.joinToString(",") + "\""
+                        )
                         .replace("{scans}", "\"" + packageName + "\"")
                 )
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-            throw RuntimeException("Error while generating PluginConfiguration class")
+            throw VitalPluginInfoAnnotationProcessingException.GeneratePluginConfigurationClass(e)
         }
     }
 }

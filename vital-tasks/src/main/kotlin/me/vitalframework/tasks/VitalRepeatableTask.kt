@@ -5,15 +5,15 @@ import net.md_5.bungee.api.ProxyServer
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
-abstract class VitalRepeatableTask<P, R : Runnable, T>(
-    val plugin: P,
-) : RequiresAnnotation<VitalRepeatableTask.Info> {
+abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) :
+    RequiresAnnotation<VitalRepeatableTask.Info> {
     var interval: Long
     var allowTick = true
     var runnable: R? = null
         private set
     var task: T? = null
         private set
+    val running: Boolean get() = runnable != null && task != null
 
     init {
         val info = getRequiredAnnotation()
@@ -21,18 +21,10 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
         interval = info.interval
     }
 
-    override fun requiredAnnotationType(): Class<Info> = Info::class.java
+    override fun requiredAnnotationType() = Info::class.java
 
-    /**
-     * Checks if this repeatable task is currently running.
-     */
-    fun isRunning(): Boolean = runnable != null && task != null
-
-    /**
-     * Starts this repeatable task. If it's already running, this method has no effect.
-     */
     fun start() {
-        if (isRunning()) {
+        if (running) {
             return
         }
 
@@ -41,11 +33,8 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
         task = createTask()
     }
 
-    /**
-     * Stops this repeatable task. If it's not running, this method has no effect.
-     */
     fun stop() {
-        if (!isRunning()) {
+        if (!running) {
             return
         }
 
@@ -73,19 +62,13 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     fun onTick() {}
     fun onStop() {}
 
-    /**
-     * Annotation used to provide information about the interval of a repeatable task.
-     */
     @Component
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.TYPE)
-    annotation class Info(
-        val interval: Long,
-    )
+    annotation class Info(val interval: Long)
 
-    open class Spigot(
-        plugin: SpigotPlugin,
-    ) : VitalRepeatableTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
+    open class Spigot(plugin: SpigotPlugin) :
+        VitalRepeatableTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
         override fun createRunnable() = object : SpigotRunnable() {
             override fun run() {
                 handleTick()
@@ -103,15 +86,18 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
         }
     }
 
-    class Bungee(
-        plugin: BungeePlugin,
-    ) : VitalRepeatableTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
-        override fun createRunnable(): BungeeRunnable = BungeeRunnable {
-            handleTick()
-        }
+    class Bungee(plugin: BungeePlugin) :
+        VitalRepeatableTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
+        override fun createRunnable() = BungeeRunnable { handleTick() }
 
         override fun createTask() =
-            ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, interval, TimeUnit.MILLISECONDS)!!
+            ProxyServer.getInstance().scheduler.schedule(
+                plugin,
+                runnable,
+                0L,
+                interval,
+                TimeUnit.MILLISECONDS
+            )!!
 
         override fun cancelRunnable() {
             task?.cancel()

@@ -7,43 +7,30 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
 import java.util.function.Function
 
-/**
- * Represents a per-player scoreboard that can have individual contents for each player.
- * This class allows you to manage player-specific scoreboards with customizable titles and lines.
- */
-class VitalPerPlayerScoreboard(
-    val title: String,
-    vararg var lines: Function<SpigotPlayer, String>,
-) : VitalScoreboard {
-    val vitalScoreboardContentMap = mutableMapOf<SpigotPlayer, VitalScoreboardContent>()
+class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<SpigotPlayer, String>) :
+    VitalScoreboard {
+    private val _scoreboardContent = mutableMapOf<SpigotPlayer, VitalScoreboardContent>()
+    val scoreboardContent: Map<SpigotPlayer, VitalScoreboardContent> get() = _scoreboardContent
 
-    /**
-     * updates the users specified scoreboard
-     *
-     * @param player the player
-     */
     fun update(player: SpigotPlayer) {
-        if (!vitalScoreboardContentMap.containsKey(player)) {
+        if (!_scoreboardContent.containsKey(player)) {
             return
         }
 
         player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
         updateContent(player)
-
-        val scoreboard = vitalScoreboardContentMap[player]!!
+        val scoreboard = _scoreboardContent[player]!!
 
         player.scoreboard = scoreboard.bukkitScoreboard
     }
 
     private fun updateContent(player: SpigotPlayer) {
-        if (!vitalScoreboardContentMap.containsKey(player)) {
+        if (!_scoreboardContent.containsKey(player)) {
             return
         }
-
-        val scoreboard = vitalScoreboardContentMap[player]!!
+        val scoreboard = _scoreboardContent[player]!!
 
         scoreboard.update()
-
         val objective = scoreboard.bukkitScoreboard.getObjective(
             PlainTextComponentSerializer.plainText()
                 .serialize(
@@ -53,36 +40,36 @@ class VitalPerPlayerScoreboard(
         )
         val lines = applyLines(player)
 
-        lines.indices.forEach {
+        for (lineIndex in lines.indices) {
             val score = objective!!.getScore(
                 LegacyComponentSerializer.legacySection()
                     .serialize(
                         MiniMessage.miniMessage()
-                            .deserialize(lines[it])
-                    ) + "\u00A7".repeat(it)
+                            .deserialize(lines[lineIndex])
+                    ) + "\u00A7".repeat(lineIndex)
             )
 
-            score.score = lines.size - it
+            score.score = lines.size - lineIndex
         }
     }
 
     fun addPlayer(player: SpigotPlayer) {
-        if (vitalScoreboardContentMap.containsKey(player)) {
+        if (_scoreboardContent.containsKey(player)) {
             return
         }
 
-        vitalScoreboardContentMap.put(player, VitalScoreboardContent(title))
+        _scoreboardContent.put(player, VitalScoreboardContent(title))
         update(player)
     }
 
     fun removePlayer(player: SpigotPlayer) {
-        if (!vitalScoreboardContentMap.containsKey(player)) {
+        if (!_scoreboardContent.containsKey(player)) {
             return
         }
 
-        vitalScoreboardContentMap.remove(player)
+        _scoreboardContent.remove(player)
         player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
     }
 
-    private fun applyLines(player: SpigotPlayer): List<String> = lines.map { it.apply(player) }
+    private fun applyLines(player: SpigotPlayer) = lines.map { it.apply(player) }
 }

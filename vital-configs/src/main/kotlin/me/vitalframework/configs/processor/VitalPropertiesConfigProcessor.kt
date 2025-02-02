@@ -1,7 +1,6 @@
 package me.vitalframework.configs.processor
 
 import me.vitalframework.configs.VitalConfig.Processor
-import me.vitalframework.configs.VitalConfigException
 import me.vitalframework.configs.VitalConfigUtils
 import java.io.InputStream
 import java.io.StringWriter
@@ -21,8 +20,8 @@ class VitalPropertiesConfigProcessor : Processor<Properties, String> {
     override fun read(key: String, def: String): String? = data.getProperty(key, def)
 
     override fun write(serializedContent: Map<String, String>) {
-        serializedContent.forEach { (key, value) ->
-            this.write(key, value)
+        for ((key, value) in serializedContent) {
+            write(key, value)
         }
     }
 
@@ -35,10 +34,9 @@ class VitalPropertiesConfigProcessor : Processor<Properties, String> {
     }
 
     override fun save(serializedContent: Map<String, String>): String {
-        serializedContent.entries.forEach { (key, value) ->
+        for ((key, value) in serializedContent.entries) {
             data.setProperty(key, value)
         }
-
         val stringWriter = StringWriter()
 
         data.store(stringWriter, null)
@@ -48,41 +46,31 @@ class VitalPropertiesConfigProcessor : Processor<Properties, String> {
 
     override fun serialize(instance: Any) = VitalConfigUtils.getPropertyFieldsFromType(instance.javaClass)
         .filter { String::class.java.isAssignableFrom(it.type) }
-        .map {
-            try {
-                // else use default snakeyaml mapping.
-                return@map it.name to it[instance] as String
-            } catch (e: IllegalAccessException) {
-                throw VitalConfigException.SerializeField(it, e)
+        .associate { it.name to VitalConfigUtils.readField(instance, it) as String }
+
+    override fun deserialize(serializedContent: Map<String, String>, type: Class<*>): Any? = try {
+        val defaultConstructor = type.getConstructor()
+        val instance = defaultConstructor.newInstance()
+        // default constructor was found, inject field properties...
+        for ((key, value) in serializedContent) {
+            VitalConfigUtils.getFieldByProperty(type, key)?.let {
+                VitalConfigUtils.injectField(
+                    instance,
+                    it,
+                    value
+                )
             }
         }
-        .toMap()
 
-    override fun deserialize(serializedContent: Map<String, String>, type: Class<*>): Any? =
-        try {
-            val defaultConstructor = type.getConstructor()
-            val instance = defaultConstructor.newInstance()
-
-            // default constructor was found, inject field properties...
-            serializedContent
-                .forEach { (key, value) ->
-                    VitalConfigUtils.getFieldByProperty(type, key)?.let {
-                        VitalConfigUtils.injectField(
-                            instance,
-                            it,
-                            value
-                        )
-                    }
-                }
-
-            instance
-        } catch (e: NoSuchMethodException) {
-            // default constructor not found, attempt to get constructor matching properties...
-            val constructor = type.getConstructor(*VitalConfigUtils.getPropertyFieldsFromType(type).map { it.javaClass }
-                .toTypedArray())
-
-            // constructor found, create new instance with this constructor...
-            constructor.newInstance(serializedContent.values)
-        }
-
+        instance
+    } catch (e: NoSuchMethodException) {
+        // default constructor not found, attempt to get constructor matching properties...
+        val constructor = type.getConstructor(
+            *VitalConfigUtils.getPropertyFieldsFromType(type)
+                .map { it.javaClass }
+                .toTypedArray()
+        )
+        // constructor found, create new instance with this constructor...
+        constructor.newInstance(serializedContent.values)
+    }
 }

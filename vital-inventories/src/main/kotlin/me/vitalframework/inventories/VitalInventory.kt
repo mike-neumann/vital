@@ -10,14 +10,17 @@ import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Range
 import org.springframework.stereotype.Component
 
-open class VitalInventory(
-    val previousInventory: VitalInventory?,
-) : RequiresAnnotation<VitalInventory.Info> {
-    private val size: Int
-    private val name: String
-    private val playerInventories = mutableMapOf<SpigotPlayer, Inventory>()
-    private val items = mutableMapOf<Int, ItemStack>()
-    private val actions = mutableMapOf<Pair<SpigotPlayer, Int>, (InventoryClickEvent) -> Unit>()
+typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
+
+open class VitalInventory(val previousInventory: VitalInventory?) : RequiresAnnotation<VitalInventory.Info> {
+    val size: Int
+    val name: String
+    private val _playerInventories = mutableMapOf<SpigotPlayer, Inventory>()
+    private val _items = mutableMapOf<Int, ItemStack>()
+    private val _actions = mutableMapOf<Pair<SpigotPlayer, Int>, InventoryItemClickAction>()
+    val playerInventories: Map<SpigotPlayer, Inventory> get() = _playerInventories
+    val items: Map<Int, ItemStack> get() = _items
+    val actions: Map<Pair<SpigotPlayer, Int>, InventoryItemClickAction> get() = _actions
 
     init {
         val info = getRequiredAnnotation()
@@ -26,38 +29,43 @@ open class VitalInventory(
         name = info.name
     }
 
-    override fun requiredAnnotationType(): Class<Info> = Info::class.java
+    override fun requiredAnnotationType() = Info::class.java
 
     @JvmOverloads
-    fun setItem(slot: Int, itemStack: ItemStack, player: SpigotPlayer, action: (InventoryClickEvent) -> Unit = {}) {
-        items.put(slot, itemStack)
-        actions.put(player to slot, action)
+    fun setItem(
+        slot: Int,
+        itemStack: ItemStack,
+        player: SpigotPlayer,
+        action: InventoryItemClickAction = {},
+    ) {
+        _items.put(slot, itemStack)
+        _actions.put(player to slot, action)
     }
 
-    fun hasInventoryOpen(player: SpigotPlayer) = playerInventories.containsKey(player)
+    fun hasInventoryOpen(player: SpigotPlayer) = _playerInventories.containsKey(player)
 
     fun update() {
         onUpdate()
 
-        playerInventories.forEach { (player, inventory) ->
+        for ((player, _) in _playerInventories) {
             update(player)
         }
     }
 
     open fun update(player: SpigotPlayer) {
-        val inventory: Inventory = playerInventories[player]!!
+        val inventory = _playerInventories[player]!!
 
         onUpdate(player)
 
-        items.forEach { (i, itemStack) ->
-            inventory.setItem(i, itemStack)
+        for ((i, item) in _items) {
+            inventory.setItem(i, item)
         }
     }
 
     open fun open(player: SpigotPlayer) {
         val inventory = Bukkit.createInventory(player, size, name)
 
-        playerInventories.put(player, inventory)
+        _playerInventories.put(player, inventory)
 
         onOpen(player)
         update(player)
@@ -65,60 +73,25 @@ open class VitalInventory(
     }
 
     fun click(e: InventoryClickEvent) {
-        val action = actions[e.whoClicked to e.slot]
-
-        action?.invoke(e)
+        _actions[e.whoClicked to e.slot]?.invoke(e)
     }
 
     fun close(player: SpigotPlayer) {
-        playerInventories.remove(player)
+        _playerInventories.remove(player)
         onClose(player)
     }
 
-    /**
-     * used for when this inventory is opened for any player
-     */
-    fun onOpen(player: SpigotPlayer) {
-    }
+    fun onOpen(player: SpigotPlayer) {}
+    fun onUpdate() {}
+    fun onUpdate(player: SpigotPlayer) {}
+    fun onClose(player: SpigotPlayer) {}
 
-    /**
-     * used for when setting static items (non player information)
-     */
-    fun onUpdate() {
-    }
-
-    /**
-     * used for when needing to set items that hold player specific information
-     */
-    fun onUpdate(player: SpigotPlayer) {
-    }
-
-    /**
-     * used for when this inventory is closed for an opened player
-     */
-    fun onClose(player: SpigotPlayer) {
-    }
-
-    /**
-     * Annotation used to provide information about an inventory.
-     */
     @Component
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.CLASS)
     annotation class Info(
-        /**
-         * The title of this inventory menu.
-         */
         val name: String,
-        /**
-         * The size in slots of this inventory menu. Default is 9 (one row).
-         */
         val size: @Range(from = 9, to = 54) Int = 9,
-        /**
-         * The material used as the background of this inventory menu. Default is AIR.
-         *
-         * @return The background material.
-         */
         val background: Material = Material.AIR,
     )
 }

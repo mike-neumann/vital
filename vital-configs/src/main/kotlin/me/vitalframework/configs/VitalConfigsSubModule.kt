@@ -6,5 +6,4 @@ import org.yaml.snakeyaml.constructor.Constructor
 
 @Component("vital-configs")
 class VitalConfigsSubModule : VitalSubModule()
-
 typealias SnakeYamlConstructor = Constructor

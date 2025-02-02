@@ -1,17 +1,11 @@
 package me.vitalframework.inventories
 
-import me.vitalframework.SpigotEventHandler
-import me.vitalframework.SpigotPlayer
-import me.vitalframework.SpigotPlugin
+import me.vitalframework.*
 import me.vitalframework.Vital.context
-import me.vitalframework.VitalListener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.springframework.stereotype.Component
 
-/**
- * Listener for handling VitalInventoryMenu related events.
- */
 @Component
 class VitalInventoryListener(plugin: SpigotPlugin) : VitalListener.Spigot(plugin) {
     @SpigotEventHandler
@@ -27,7 +21,6 @@ class VitalInventoryListener(plugin: SpigotPlugin) : VitalListener.Spigot(plugin
 //                vitalInventory.close(player);
 //                vitalInventory.getPreviousInventory().open(player);
 //            }
-
             return
         }
 
