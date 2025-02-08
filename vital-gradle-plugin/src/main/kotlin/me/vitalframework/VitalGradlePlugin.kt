@@ -11,15 +11,14 @@ class VitalGradlePlugin : Plugin<Project> {
 
         target.afterEvaluate {
             requirePlugin(SHADOW_PLUGIN_ID, SHADOW_PLUGIN_EXAMPLE_VERSION)
-            // not every module requires the core module
-            if (hasDependency(VITAL_CORE_DEPENDENCY)) {
-                try {
-                    // attempt to register annotation processor for kotlin
-                    target.dependencies.add("kapt", "$VITAL_CORE_PROCESSOR_DEPENDENCY:1.0")
-                } catch (e: Exception) {
-                    // kapt not found, register default
-                    target.dependencies.add("annotationProcessor", "$VITAL_CORE_PROCESSOR_DEPENDENCY:1.0")
-                }
+            target.dependencies.add("implementation", "$VITAL_CORE_DEPENDENCY:1.0")
+
+            try {
+                // attempt to register annotation processor for kotlin
+                target.dependencies.add("kapt", "$VITAL_CORE_PROCESSOR_DEPENDENCY:1.0")
+            } catch (e: Exception) {
+                // kapt not found, register default
+                target.dependencies.add("annotationProcessor", "$VITAL_CORE_PROCESSOR_DEPENDENCY:1.0")
             }
             // if vital-commands is used, also add processor for module
             if (hasDependency(VITAL_COMMANDS_DEPENDENCY)) {
