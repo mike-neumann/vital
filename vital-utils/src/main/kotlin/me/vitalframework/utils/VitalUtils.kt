@@ -239,7 +239,7 @@ interface VitalUtils<CS, P : CS> {
         fun teleport(
             player: SpigotPlayer,
             location: Location,
-            potionEffectType: PotionEffectType = PotionEffectType.SLOW,
+            potionEffectType: PotionEffectType = PotionEffectType.SLOWNESS,
         ) {
             player.removePotionEffect(potionEffectType)
             player.addPotionEffect(PotionEffect(potionEffectType, 2, Int.Companion.MAX_VALUE))
@@ -248,7 +248,7 @@ interface VitalUtils<CS, P : CS> {
         }
 
         fun teleport(player: SpigotPlayer, to: Entity) {
-            teleport(player, to.location, PotionEffectType.SLOW)
+            teleport(player, to.location, PotionEffectType.SLOWNESS)
         }
 
         fun canBePlacedInMidAir(material: Material) =

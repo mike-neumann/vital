@@ -29,7 +29,7 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
         val meta = itemStack.itemMeta!!
 
         if (info.enchanted) {
-            meta.addEnchant(Enchantment.LUCK, 1, true)
+            meta.addEnchant(Enchantment.FORTUNE, 1, true)
         }
 
         itemMeta = meta
