@@ -20,17 +20,17 @@ subprojects {
     }
 
     dependencies {
-        compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
-        compileOnly("com.mojang:brigadier:1.2.9")
-        compileOnly("net.md-5:bungeecord-api:1.20-R0.2")
+        compileOnly("org.spigotmc:spigot-api:${properties["spigotApiVersion"]}")
+        compileOnly("com.mojang:brigadier:${properties["brigadierVersion"]}")
+        compileOnly("net.md-5:bungeecord-api:${properties["bungeeApiVersion"]}")
 
-        api("org.springframework.boot:spring-boot-starter:3.3.1")
+        api("org.springframework.boot:spring-boot-starter:${properties["springBootVersion"]}")
 
-        testApi("org.springframework.boot:spring-boot-starter-test:3.3.1")
-        testApi("org.junit.jupiter:junit-jupiter-api:5.11.4")
-        testApi("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
-        testApi("com.mojang:brigadier:1.2.9")
-        testApi("net.md-5:bungeecord-api:1.20-R0.2")
+        testApi("org.springframework.boot:spring-boot-starter-test:${properties["springBootVersion"]}")
+        testApi("org.junit.jupiter:junit-jupiter-api:${properties["junitVersion"]}")
+        testApi("org.spigotmc:spigot-api:${properties["spigotApiVersion"]}")
+        testApi("com.mojang:brigadier:${properties["brigadierVersion"]}")
+        testApi("net.md-5:bungeecord-api:${properties["bungeeApiVersion"]}")
     }
 
     java {
