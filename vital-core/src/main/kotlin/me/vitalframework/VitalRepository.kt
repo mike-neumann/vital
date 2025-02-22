@@ -1,6 +1,6 @@
 package me.vitalframework
 
-abstract class VitalRepository<ID, T : VitalEntity<ID>> {
+abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     private val _entities = mutableListOf<T>()
     val entities: List<T> get() = _entities
 

@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-class VitalGlobalHologramRepository : VitalRepository<UUID, VitalGlobalHologram>() {
+class VitalGlobalHologramRepository : VitalRepository<VitalGlobalHologram, UUID>() {
     fun get(name: String) = entities.find { it.name === name }
 }

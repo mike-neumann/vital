@@ -1,7 +1,9 @@
 package me.vitalframework.players
 
+import org.springframework.stereotype.Service
 import java.util.*
 
+@Service
 class VitalPlayerService(val playerRepository: VitalPlayerRepository) {
     fun <T : VitalPlayer<*>> createPlayer(player: Any, playerUniqueId: UUID, playerClass: Class<T>) {
         // Retrieve the VitalPlayer associated with the joining player, if it exists.
@@ -22,4 +24,6 @@ class VitalPlayerService(val playerRepository: VitalPlayerRepository) {
         // Unregister the VitalPlayer from VitalUserManagement.
         playerRepository.delete(vitalPlayer)
     }
+
+    inline fun <reified T : VitalPlayer<*>> getPlayer(id: UUID) = playerRepository.get(id) as T?
 }
