@@ -16,8 +16,6 @@ object Vital {
 
     fun <T : Any> run(plugin: T) {
         val pluginClassLoader = plugin::class.java.getClassLoader()
-        // needed or else spring startup fails
-        Thread.currentThread().contextClassLoader = pluginClassLoader
         val loader = DefaultResourceLoader(pluginClassLoader)
         val builder = SpringApplicationBuilder()
         val pluginConfiguration =

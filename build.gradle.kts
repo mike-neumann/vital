@@ -1,7 +1,7 @@
 plugins {
     `java-library`
     `maven-publish`
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm")
 }
 
 subprojects {

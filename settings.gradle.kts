@@ -17,3 +17,11 @@ include("vital-scoreboards")
 include("vital-statistics")
 include("vital-tasks")
 include("vital-utils")
+
+pluginManagement {
+    plugins {
+        val kotlinVersion: String by settings
+
+        kotlin("jvm") version kotlinVersion
+    }
+}

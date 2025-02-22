@@ -14,4 +14,5 @@ gradlePlugin {
 
 dependencies {
     api(project(":vital-core"))
+    api("io.spring.gradle:dependency-management-plugin:${properties["dependencyManagementPluginVersion"]}")
 }
