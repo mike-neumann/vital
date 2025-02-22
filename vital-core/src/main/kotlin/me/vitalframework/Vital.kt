@@ -75,7 +75,7 @@ object Vital {
         val description: String = "A Vital Plugin",
         val apiVersion: String = "1.20",
         val version: String = "1.0",
-        val authors: String = "",
+        val author: Array<String> = [],
         val environment: PluginEnvironment,
         val springConfigLocations: Array<String> = ["classpath:application.properties"],
     ) {

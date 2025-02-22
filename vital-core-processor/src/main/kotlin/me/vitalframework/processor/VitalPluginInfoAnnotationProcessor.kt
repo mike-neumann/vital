@@ -15,10 +15,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
     private var ran = false
     lateinit var pluginEnvironment: Vital.Info.PluginEnvironment
 
-    override fun process(
-        annotations: MutableSet<out TypeElement?>,
-        roundEnv: RoundEnvironment,
-    ): Boolean {
+    override fun process(annotations: MutableSet<out TypeElement?>, roundEnv: RoundEnvironment): Boolean {
         if (ran) {
             return true
         }
@@ -47,17 +44,30 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         }
         val className = classNameVitalPluginInfoEntry.first
         val pluginInfo = classNameVitalPluginInfoEntry.second
+
+        pluginEnvironment = pluginInfo.environment
         // finally generate the `plugin.yml`.
-        generatePluginYml(
-            className,
-            pluginInfo.name,
-            pluginInfo.apiVersion,
-            pluginInfo.version,
-            pluginInfo.environment
-        )
-        val packageNames =
-            mutableListOf(*className.split("[.]".toRegex()).dropLastWhile { it.isEmpty() }
-                .toTypedArray())
+        when (pluginInfo.environment) {
+            Vital.Info.PluginEnvironment.SPIGOT -> setupSpigotPluginYml(
+                className,
+                pluginInfo.name,
+                pluginInfo.description,
+                pluginInfo.version,
+                pluginInfo.apiVersion,
+                pluginInfo.author
+            )
+
+            Vital.Info.PluginEnvironment.BUNGEE -> setupBungeePluginYml(
+                pluginInfo.name,
+                className,
+                pluginInfo.version,
+                pluginInfo.author
+            )
+        }
+
+        generatePluginYml(pluginInfo.environment)
+        val packageNames = mutableListOf(*className.split("[.]".toRegex()).dropLastWhile { it.isEmpty() }
+            .toTypedArray())
 
         packageNames.removeLast()
         // now we have the package name without the class at the end
@@ -70,36 +80,42 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         return true
     }
 
-    fun generatePluginYml(
+    fun setupBungeePluginYml(name: String, className: String, version: String, author: Array<String>) {
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("name: $name")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("main: $className")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("version: $version")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("author: ${author.contentToString()}")
+    }
+
+    fun setupSpigotPluginYml(
         className: String,
         name: String,
-        apiVersion: String,
+        description: String,
         version: String,
-        environment: Vital.Info.PluginEnvironment,
+        apiVersion: String,
+        author: Array<String>,
     ) {
         // append basic plugin meta information to plugin info holder.
-        VitalPluginInfoHolder.PLUGIN_INFO.append("main: ").append(className)
-        VitalPluginInfoHolder.PLUGIN_INFO.append("\n")
-        VitalPluginInfoHolder.PLUGIN_INFO.append("name: ").append(name)
-        VitalPluginInfoHolder.PLUGIN_INFO.append("\n")
-        VitalPluginInfoHolder.PLUGIN_INFO.append("api-version: ").append(apiVersion)
-        VitalPluginInfoHolder.PLUGIN_INFO.append("\n")
-        VitalPluginInfoHolder.PLUGIN_INFO.append("version: ").append(version)
-        VitalPluginInfoHolder.PLUGIN_INFO.append("\n")
-        VitalPluginInfoHolder.PLUGIN_INFO.append("\n")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("main: $className")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("name: $name")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("version: $version")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("description: $description")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("api-version: $apiVersion")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("author: ${author.contentToString()}")
+    }
 
+    fun generatePluginYml(pluginEnvironment: Vital.Info.PluginEnvironment) {
         try {
             // Scan for the `vital-commands-processor` dependency.
             Class.forName("me.vitalframework.commands.processor.VitalCommandInfoAnnotationProcessor")
-            pluginEnvironment = environment
             // if found, leave `plugin.yml` creation to `vital-commands-processor`.
-        } catch (e: ClassNotFoundException) {
+        } catch (_: ClassNotFoundException) {
             try {
                 // If we couldn't find the dependency, attempt to create the `plugin.yml` ourselves.
                 val pluginYmlFileObject = processingEnv.filer.createResource(
                     StandardLocation.CLASS_OUTPUT,
                     "",
-                    environment.ymlFileName
+                    pluginEnvironment.ymlFileName
                 )
 
                 pluginYmlFileObject.openWriter()

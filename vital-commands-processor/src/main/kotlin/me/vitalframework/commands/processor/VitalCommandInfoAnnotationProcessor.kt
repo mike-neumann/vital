@@ -64,26 +64,16 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
                     pluginEnvironment.ymlFileName
                 )
             // append all necessary meta-information for all commands to the content builder.
-            VitalPluginInfoHolder.PLUGIN_INFO.append("commands:")
-            VitalPluginInfoHolder.PLUGIN_INFO.append("\n")
+            VitalPluginInfoHolder.PLUGIN_INFO.appendLine("commands:")
 
             for (commandInfo in commandInfoList) {
-                VitalPluginInfoHolder.PLUGIN_INFO.append("  ").append(commandInfo.name).append(":")
-                VitalPluginInfoHolder.PLUGIN_INFO.append("\n")
-                VitalPluginInfoHolder.PLUGIN_INFO.append("    description: ").append(commandInfo.description)
-                VitalPluginInfoHolder.PLUGIN_INFO.append("\n")
-                VitalPluginInfoHolder.PLUGIN_INFO.append("    permission: ").append(commandInfo.permission)
-                VitalPluginInfoHolder.PLUGIN_INFO.append("\n")
-                VitalPluginInfoHolder.PLUGIN_INFO.append("    usage: ").append(commandInfo.usage)
-                VitalPluginInfoHolder.PLUGIN_INFO.append("\n")
+                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("  ${commandInfo.name}:")
+                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    description: ${commandInfo.description}")
+                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    permission: ${commandInfo.permission}")
+                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    usage: ${commandInfo.usage}")
 
                 if (commandInfo.aliases.isNotEmpty()) {
-                    VitalPluginInfoHolder.PLUGIN_INFO.append("    aliases: ")
-                    VitalPluginInfoHolder.PLUGIN_INFO.append("\n")
-
-                    for (alias in commandInfo.aliases) {
-                        VitalPluginInfoHolder.PLUGIN_INFO.append("      - ").append(alias)
-                    }
+                    VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    aliases: ${commandInfo.aliases.contentToString()}")
                 }
             }
 
