@@ -26,6 +26,8 @@ class VitalGradlePlugin : Plugin<Project> {
         }
 
         target.tasks.named("build") { it.dependsOn(target.tasks.named("shadowJar")) }
+        // spring's bootJar task should not be enabled, since our server manages its own runtime main class.
+        target.tasks.named("bootJar") { it.enabled = false }
     }
 
     private fun applyPlugin(project: Project, id: String, exampleVersion: String) {
