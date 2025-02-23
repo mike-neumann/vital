@@ -14,5 +14,8 @@ gradlePlugin {
 
 dependencies {
     api(project(":vital-core"))
-    api("io.spring.gradle:dependency-management-plugin:${properties["dependencyManagementPluginVersion"]}")
+    api("org.jetbrains.kotlin.plugin.spring:org.jetbrains.kotlin.plugin.spring.gradle.plugin:${project.extra["kotlinSpringPluginVersion"]}")
+    api("io.spring.gradle:dependency-management-plugin:${project.extra["dependencyManagementPluginVersion"]}")
+    api("org.springframework.boot:org.springframework.boot.gradle.plugin:${project.extra["springBootPluginVersion"]}")
+    api("com.gradleup.shadow:shadow-gradle-plugin:${project.extra["shadowVersion"]}")
 }

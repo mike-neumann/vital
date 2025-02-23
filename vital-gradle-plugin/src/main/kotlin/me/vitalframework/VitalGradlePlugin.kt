@@ -7,6 +7,8 @@ import org.gradle.api.plugins.PluginAware
 class VitalGradlePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         // needs to be applied before dependency resolution takes place.
+        applyPlugin(target, PLUGIN_SPRING_BOOT_ID, PLUGIN_SPRING_BOOT_EXAMPLE_VERSION)
+        applyPlugin(target, PLUGIN_KOTLIN_SPRING_ID, PLUGIN_KOTLIN_SPRING_EXAMPLE_VERSION)
         applyPlugin(target, PLUGIN_DEPENDENCY_MANAGEMENT_ID, PLUGIN_DEPENDENCY_MANAGEMENT_EXAMPLE_VERSION)
         applyPlugin(target, PLUGIN_SHADOW_ID, PLUGIN_SHADOW_PLUGIN_EXAMPLE_VERSION)
 
@@ -54,6 +56,10 @@ class VitalGradlePlugin : Plugin<Project> {
     }
 
     companion object {
+        const val PLUGIN_SPRING_BOOT_ID = "org.springframework.boot"
+        const val PLUGIN_SPRING_BOOT_EXAMPLE_VERSION = "3.2.2"
+        const val PLUGIN_KOTLIN_SPRING_ID = "org.jetbrains.kotlin.plugin.spring"
+        const val PLUGIN_KOTLIN_SPRING_EXAMPLE_VERSION = "2.1.0"
         const val PLUGIN_DEPENDENCY_MANAGEMENT_ID = "io.spring.dependency-management"
         const val PLUGIN_DEPENDENCY_MANAGEMENT_EXAMPLE_VERSION = "1.1.7"
         const val PLUGIN_SHADOW_ID = "com.gradleup.shadow"

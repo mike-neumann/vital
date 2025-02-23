@@ -1,3 +1,3 @@
 dependencies {
-    api("eu.cloudnetservice.cloudnet:driver:${properties["cloudnetDriverVersion"]}")
+    api("eu.cloudnetservice.cloudnet:driver:${project.extra["cloudnetDriverVersion"]}")
 }

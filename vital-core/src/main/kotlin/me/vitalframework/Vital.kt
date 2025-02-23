@@ -5,9 +5,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.core.env.Environment
-import org.springframework.core.env.StandardEnvironment
 import org.springframework.core.io.DefaultResourceLoader
 import org.springframework.stereotype.Component
+import org.springframework.util.ClassUtils
 import java.io.PrintStream
 import java.util.*
 
@@ -15,11 +15,7 @@ object Vital {
     lateinit var context: ConfigurableApplicationContext
 
     fun <T : Any> run(plugin: T) {
-        val pluginClassLoader = plugin::class.java.getClassLoader()
-        val loader = DefaultResourceLoader(pluginClassLoader)
-        val builder = SpringApplicationBuilder()
-        val pluginConfiguration =
-            Class.forName(plugin::class.java.getPackageName() + ".PluginConfiguration")
+        val pluginClassLoader = plugin::class.java.classLoader
 
         try {
             val properties = Properties().apply {
@@ -29,21 +25,24 @@ object Vital {
             for ((key, value) in properties) {
                 System.setProperty(key.toString(), value.toString())
             }
-        } catch (ignored: Exception) {
+        } catch (_: Exception) {
             // if we haven't defined an application.properties file, we may skip this step
         }
 
-        context = builder.sources(pluginConfiguration)
-            .initializers({
-                // here we register the plugin instance as a bean so we can inject it elsewhere
-                it.beanFactory.registerSingleton("plugin", plugin)
-                it.classLoader = pluginClassLoader
-                it.environment = StandardEnvironment()
-            })
-            .resourceLoader(loader)
-            .banner(VitalBanner())
-            .logStartupInfo(false)
-            .run()
+        Thread.currentThread().contextClassLoader = pluginClassLoader
+        ClassUtils.overrideThreadContextClassLoader(pluginClassLoader)
+
+        context =
+            SpringApplicationBuilder(Class.forName("${plugin::class.java.packageName}.PluginConfiguration"))
+                .initializers({
+                    // here we register the plugin instance as a bean so we can inject it elsewhere
+                    it.classLoader = pluginClassLoader
+                    it.beanFactory.registerSingleton("plugin", plugin)
+                })
+                .resourceLoader(DefaultResourceLoader(pluginClassLoader))
+                .banner(VitalBanner())
+                .logStartupInfo(false)
+                .run()
     }
 
     class VitalBanner : Banner {

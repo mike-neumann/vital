@@ -176,19 +176,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         // if we do have an exception, prepare for parameter injection...
         val injectableParameters = mutableMapOf<Int, Any>()
 
-        when {
-            exceptionHandlerContext.commandSenderIndex != null -> injectableParameters[exceptionHandlerContext.commandSenderIndex] =
-                sender
-
-            exceptionHandlerContext.executedArgIndex != null -> injectableParameters[exceptionHandlerContext.executedArgIndex] =
-                arg
-
-            exceptionHandlerContext.argIndex != null -> injectableParameters[exceptionHandlerContext.argIndex] =
-                commandArg
-
-            exceptionHandlerContext.exceptionIndex != null -> injectableParameters[exceptionHandlerContext.exceptionIndex] =
-                exception
-        }
+        exceptionHandlerContext.commandSenderIndex?.let { injectableParameters[it] = sender }
+        exceptionHandlerContext.executedArgIndex?.let { injectableParameters[it] = arg }
+        exceptionHandlerContext.argIndex?.let { injectableParameters[it] = commandArg }
+        exceptionHandlerContext.exceptionIndex?.let { injectableParameters[it] = exception }
 
         try {
             val sortedParameters = injectableParameters.entries
@@ -212,19 +203,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
             ?: throw VitalCommandException.UnmappedArgHandler(arg)
         val injectableParameters = mutableMapOf<Int, Any>()
 
-        when {
-            argHandlerContext.commandSenderIndex != null -> injectableParameters[argHandlerContext.commandSenderIndex] =
-                sender
-
-            argHandlerContext.executedArgIndex != null -> injectableParameters[argHandlerContext.executedArgIndex] =
-                arg
-
-            argHandlerContext.commandArgIndex != null -> injectableParameters[argHandlerContext.commandArgIndex] =
-                commandArg
-
-            argHandlerContext.valuesIndex != null -> injectableParameters[argHandlerContext.valuesIndex] =
-                values
-        }
+        argHandlerContext.commandSenderIndex?.let { injectableParameters[it] = sender }
+        argHandlerContext.executedArgIndex?.let { injectableParameters[it] = arg }
+        argHandlerContext.commandArgIndex?.let { injectableParameters[it] = commandArg }
+        argHandlerContext.valuesIndex?.let { injectableParameters[it] = values }
         val sortedParameters = injectableParameters.entries
             .sortedBy { it.key }
             .map { it.value }
@@ -276,10 +258,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
 
             when {
                 commandArgType != null -> commandArgType.action(
-                    TabCompletionContext(
-                        tabCompleted,
-                        getAllPlayerNames()
-                    )
+                    TabCompletionContext(tabCompleted, getAllPlayerNames())
                 )
 
                 finalArg.startsWith("%") && (finalArg.endsWith("%") || finalArg.endsWith("%*")) -> tabCompleted.add(
@@ -334,10 +313,13 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
 
             executingArg != null -> {
                 val values = ArrayList<String>()
+                val commandArgs = executingArg.value.split(" ".toRegex()).dropLastWhile { it.isEmpty() }
+                    .map { it.lowercase() }
 
-                for (commandArg in executingArg.value.split(" ".toRegex()).dropLastWhile { it.isEmpty() }) {
-                    args.filter { !it.equals(commandArg, ignoreCase = true) }
-                        .forEach { values.add(it) }
+                for (arg in args) {
+                    if (arg.lowercase() !in commandArgs) {
+                        values.add(arg)
+                    }
                 }
 
                 try {

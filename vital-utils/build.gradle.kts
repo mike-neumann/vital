@@ -1,7 +1,7 @@
 dependencies {
     api(project(":vital-core"))
-    api("net.kyori:adventure-platform-bungeecord:${properties["adventurePlatformBungeecordVersion"]}")
-    api("net.kyori:adventure-text-minimessage:${properties["adventureTextMinimessageVersion"]}")
-    api("net.kyori:adventure-text-serializer-legacy:${properties["adventureTextSerializerLegacyVersion"]}")
-    api("net.kyori:adventure-platform-bukkit:${properties["adventurePlatformBukkitVersion"]}")
+    api("net.kyori:adventure-platform-bungeecord:${project.extra["adventurePlatformBungeecordVersion"]}")
+    api("net.kyori:adventure-text-minimessage:${project.extra["adventureTextMinimessageVersion"]}")
+    api("net.kyori:adventure-text-serializer-legacy:${project.extra["adventureTextSerializerLegacyVersion"]}")
+    api("net.kyori:adventure-platform-bukkit:${project.extra["adventurePlatformBukkitVersion"]}")
 }

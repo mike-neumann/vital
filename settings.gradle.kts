@@ -18,9 +18,20 @@ include("vital-statistics")
 include("vital-tasks")
 include("vital-utils")
 
+gradle.beforeProject {
+    // plugins
+    extra["kotlinVersion"] = findProperty("kotlinVersion")
+    // dependencies
+    extra["spigotApiVersion"] = findProperty("spigotApiVersion")
+    extra["brigadierVersion"] = findProperty("brigadierVersion")
+    extra["bungeeApiVersion"] = findProperty("bungeeApiVersion")
+    extra["springBootVersion"] = findProperty("springBootVersion")
+    extra["junitVersion"] = findProperty("junitVersion")
+}
+
 pluginManagement {
     plugins {
-        val kotlinVersion: String by settings
+        val kotlinVersion: String by extra
 
         kotlin("jvm") version kotlinVersion
     }

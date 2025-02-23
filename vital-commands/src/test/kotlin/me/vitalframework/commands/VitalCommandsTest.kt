@@ -27,6 +27,23 @@ class VitalCommandsTest {
     }
 
     @Test
+    fun `arg handler parameter mapping with variables should work`() {
+        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
+            @ArgHandler(Arg("testArg %PLAYER%"))
+            fun onTestArg(sender: CommandSender, values: Array<String>): ReturnState {
+                sender.sendMessage(values.contentToString())
+                return ReturnState.SUCCESS
+            }
+        }
+        val sender = VitalTestCommand.Player()
+
+        testCommand.execute(sender, arrayOf("testArg", "xRa1ny"))
+        println(sender.messages)
+        assert(sender.messages.size == 1)
+        assert(sender.messages.component1() == "[xRa1ny]")
+    }
+
+    @Test
     fun `arg exception handler parameter mapping should fail`() {
         assertThrows<VitalCommandException.InvalidArgExceptionHandlerSignature> {
             @VitalCommand.Info("testCommand")
