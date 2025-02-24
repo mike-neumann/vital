@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class VitalMinigameService(val plugin: SpigotPlugin) {
-    var minigameState: VitalBaseMinigameState? = null
+    final var minigameState: VitalBaseMinigameState? = null
         private set
 
     fun <T : VitalBaseMinigameState> isMinigameState(type: Class<T>) =

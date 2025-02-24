@@ -1,16 +1,22 @@
 plugins {
+    kotlin("jvm")
+    kotlin("plugin.spring")
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
     `java-library`
     `maven-publish`
-    kotlin("jvm")
 }
 
 subprojects {
     group = "me.vitalframework"
     version = "1.0"
 
+    apply(plugin = "kotlin")
+    apply(plugin = "org.jetbrains.kotlin.plugin.spring")
+    apply(plugin = "org.springframework.boot")
+    apply(plugin = "io.spring.dependency-management")
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
-    apply(plugin = "kotlin")
 
     repositories {
         mavenLocal()
@@ -24,13 +30,18 @@ subprojects {
         compileOnly("com.mojang:brigadier:${project.extra["brigadierVersion"]}")
         compileOnly("net.md-5:bungeecord-api:${project.extra["bungeeApiVersion"]}")
 
-        api("org.springframework.boot:spring-boot-starter:${project.extra["springBootVersion"]}")
+        api("org.springframework.boot:spring-boot-starter:${project.extra["springBootPluginVersion"]}")
 
-        testApi("org.springframework.boot:spring-boot-starter-test:${project.extra["springBootVersion"]}")
+        testApi("org.springframework.boot:spring-boot-starter-test:${project.extra["springBootPluginVersion"]}")
         testApi("org.junit.jupiter:junit-jupiter-api:${project.extra["junitVersion"]}")
         testApi("org.spigotmc:spigot-api:${project.extra["spigotApiVersion"]}")
         testApi("com.mojang:brigadier:${project.extra["brigadierVersion"]}")
         testApi("net.md-5:bungeecord-api:${project.extra["bungeeApiVersion"]}")
+
+        configurations.all {
+            // org.apache.hc.client5.http.ssl.*
+            exclude(group = "org.apache.hc.client5", module = "httpclient5")
+        }
     }
 
     java {

@@ -25,5 +25,5 @@ class VitalPlayerService(val playerRepository: VitalPlayerRepository) {
         playerRepository.delete(vitalPlayer)
     }
 
-    inline fun <reified T : VitalPlayer<*>> getPlayer(id: UUID) = playerRepository.get(id) as T?
+    final inline fun <reified T : VitalPlayer<*>> getPlayer(id: UUID) = playerRepository.get(id) as T?
 }
