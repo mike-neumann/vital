@@ -20,9 +20,12 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     val name: String
     val permission: String
     val playerOnly: Boolean
-    val args: Map<Pattern, Arg>
-    val argHandlers: Map<Arg, ArgHandlerContext>
-    val argExceptionHandlers: Map<Arg, Map<Class<out Throwable>, ArgExceptionHandlerContext>>
+    private val _args: Map<Pattern, Arg>
+    val args get() = _args
+    private val _argHandlers: Map<Arg, ArgHandlerContext>
+    val argHandlers get() = _argHandlers
+    private val _argExceptionHandlers: Map<Arg, Map<Class<out Throwable>, ArgExceptionHandlerContext>>
+    val argExceptionHandlers get() = _argExceptionHandlers
 
     init {
         val vitalCommandInfo = getRequiredAnnotation()
@@ -30,9 +33,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         name = vitalCommandInfo.name
         permission = vitalCommandInfo.permission
         playerOnly = vitalCommandInfo.playerOnly
-        args = getMappedArgs()
-        argHandlers = getMappedArgHandlers()
-        argExceptionHandlers = getMappedArgExceptionHandlers()
+        _args = getMappedArgs()
+        _argHandlers = getMappedArgHandlers()
+        _argExceptionHandlers = getMappedArgExceptionHandlers()
     }
 
     override fun requiredAnnotationType() = Info::class.java
@@ -46,11 +49,11 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         .map { it.getAnnotation(ArgHandler::class.java) }
         .associate {
             Pattern.compile(
-                it.value.value
+                it.arg.value
                     .replace(" ".toRegex(), "[ ]")
                     .replace("%.+%[*]".toRegex(), "(.+)")
                     .replace("%.+%".toRegex(), "(\\\\S+)")
-            ) to it.value
+            ) to it.arg
         }
 
     private fun getMappedArgHandlers() = javaClass.methods
@@ -60,7 +63,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
             // now we have a viable method ready for handling incoming arguments
             // we just need to filter out the injectable parameters for our method
             // since we only support a handful of injectable params for handler methods...
-            val vitalCommandArg = method.getAnnotation(ArgHandler::class.java).value
+            val vitalCommandArg = method.getAnnotation(ArgHandler::class.java).arg
             var commandSenderIndex: Int? = null
             var executedArgIndex: Int? = null
             var commandArgIndex: Int? = null
@@ -80,7 +83,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
                     Array<String>::class.java.isAssignableFrom(parameter.type) -> valuesIndex =
                         method.parameters.indexOf(parameter)
 
-                    else -> throw VitalCommandException.InvalidArgHandlerSignature(method, parameter)
+                    else -> throw VitalCommandException.InvalidArgHandlerMethodSignature(method, parameter)
                 }
             }
 
@@ -101,8 +104,8 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
             .filter { it.isAnnotationPresent(ArgExceptionHandler::class.java) }
             .forEach { method ->
                 val argExceptionHandler = method.getAnnotation(ArgExceptionHandler::class.java)!!
-                val arg = getArg(argExceptionHandler.value)
-                    ?: throw VitalCommandException.UnmappedArgExceptionHandlerArg(argExceptionHandler.value)
+                val arg = getArg(argExceptionHandler.arg)
+                    ?: throw VitalCommandException.UnmappedArgExceptionHandlerArg(method, argExceptionHandler.arg)
                 var commandSenderIndex: Int? = null
                 var executedArgIndex: Int? = null
                 var commandArgIndex: Int? = null
@@ -122,13 +125,13 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
                         Exception::class.java.isAssignableFrom(parameter.type) -> exceptionIndex =
                             method.parameters.indexOf(parameter)
 
-                        else -> throw VitalCommandException.InvalidArgExceptionHandlerSignature(
+                        else -> throw VitalCommandException.InvalidArgExceptionHandlerMethodSignature(
                             method,
                             parameter
                         )
                     }
                 }
-                val argExceptionHandlerContext = ArgExceptionHandlerContext(
+                val context = ArgExceptionHandlerContext(
                     method,
                     commandSenderIndex,
                     executedArgIndex,
@@ -138,10 +141,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
 
                 if (!mappedArgExceptionHandlers.containsKey(arg)) {
                     mappedArgExceptionHandlers[arg] =
-                        mutableMapOf(argExceptionHandler.type.java to argExceptionHandlerContext)
+                        mutableMapOf(argExceptionHandler.type.java to context)
                 } else {
                     mappedArgExceptionHandlers[arg]!![argExceptionHandler.type.java] =
-                        argExceptionHandlerContext
+                        context
                 }
             }
 
@@ -150,7 +153,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
             .toMap()
     }
 
-    private fun getArg(arg: String) = args.entries
+    private fun getArg(arg: String) = _args.entries
         .filter { it.key.matcher(arg).matches() }
         .map { it.value }
         .firstOrNull()
@@ -161,14 +164,35 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         arg: String,
         commandArg: Arg,
     ) {
-        val exceptionHandlers = argExceptionHandlers[commandArg]
+        val exceptionHandlers = _argExceptionHandlers[commandArg]
 
         if (exceptionHandlers.isNullOrEmpty()) {
             // we do not have any exception handler mapped for this argument
-            throw RuntimeException(exception)
+            // try to find a global exception handler
+            val context = VitalCommandExceptionHandlerProcessor.getExceptionHandler(exception::class.java)
+                ?: throw RuntimeException(exception)
+            val injectableParameters = mutableMapOf<Int, Any>()
+
+            context.commandSenderIndex?.let { injectableParameters[it] = sender }
+            context.executedArgIndex?.let { injectableParameters[it] = arg }
+            context.commandArgIndex?.let { injectableParameters[it] = commandArg }
+            context.exceptionIndex?.let { injectableParameters[it] = exception }
+
+            val sortedParameters = injectableParameters.entries
+                .sortedBy { it.key }
+                .map { it.value }
+                .toTypedArray()
+
+            try {
+                context.handlerMethod.invoke(this, *sortedParameters)
+            } catch (e: Exception) {
+                throw VitalCommandException.ExecuteExceptionHandlerMethod(context.handlerMethod, context, e)
+            }
+
+            return
         }
         // we may or may not have an exception handler mapped for this execution context
-        val exceptionHandlerContext = exceptionHandlers.entries
+        val context = exceptionHandlers.entries
             .filter { it.key.isAssignableFrom(exception.javaClass) }
             .map { it.value }
             .firstOrNull()
@@ -176,20 +200,20 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         // if we do have an exception, prepare for parameter injection...
         val injectableParameters = mutableMapOf<Int, Any>()
 
-        exceptionHandlerContext.commandSenderIndex?.let { injectableParameters[it] = sender }
-        exceptionHandlerContext.executedArgIndex?.let { injectableParameters[it] = arg }
-        exceptionHandlerContext.argIndex?.let { injectableParameters[it] = commandArg }
-        exceptionHandlerContext.exceptionIndex?.let { injectableParameters[it] = exception }
+        context.commandSenderIndex?.let { injectableParameters[it] = sender }
+        context.executedArgIndex?.let { injectableParameters[it] = arg }
+        context.argIndex?.let { injectableParameters[it] = commandArg }
+        context.exceptionIndex?.let { injectableParameters[it] = exception }
+
+        val sortedParameters = injectableParameters.entries
+            .sortedBy { it.key }
+            .map { it.value }
+            .toTypedArray()
 
         try {
-            val sortedParameters = injectableParameters.entries
-                .sortedBy { it.key }
-                .map { it.value }
-                .toTypedArray()
-
-            exceptionHandlerContext.handlerMethod.invoke(this, *sortedParameters)
+            context.handlerMethod.invoke(this, *sortedParameters)
         } catch (e: Exception) {
-            throw VitalCommandException.ExecuteArgExceptionHandler(exceptionHandlerContext, e)
+            throw VitalCommandException.ExecuteArgExceptionHandlerMethod(context.handlerMethod, context, e)
         }
     }
 
@@ -199,7 +223,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         commandArg: Arg,
         values: Array<String>,
     ): ReturnState {
-        val argHandlerContext = argHandlers[commandArg]
+        val argHandlerContext = _argHandlers[commandArg]
             ?: throw VitalCommandException.UnmappedArgHandler(arg)
         val injectableParameters = mutableMapOf<Int, Any>()
 
@@ -218,7 +242,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     fun tabComplete(sender: CS, args: Array<String>): List<String> {
         val tabCompleted = ArrayList<String>()
 
-        for (arg in this.args.values) {
+        for (arg in this._args.values) {
             // Split the value of the command argument into individual parts.
             val originalArgs = arg.value.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
             // Clone the originalArgs to avoid modification.
@@ -405,12 +429,30 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     }
 
     @Retention(AnnotationRetention.RUNTIME)
-    @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
-    annotation class ArgHandler(val value: Arg)
+    @Target(AnnotationTarget.FUNCTION)
+    annotation class ArgHandler(val arg: Arg)
 
-    @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
+    @Target(AnnotationTarget.FUNCTION)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class ArgExceptionHandler(val value: String, val type: KClass<out Throwable>)
+    annotation class ArgExceptionHandler(val arg: String, val type: KClass<out Throwable>)
+
+    @Component
+    @Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE)
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class Advice(val commandSenderClass: KClass<Any>)
+
+    @Target(AnnotationTarget.FUNCTION)
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class ExceptionHandler(val type: KClass<out Throwable>)
+
+    data class ExceptionHandlerContext(
+        val handlerMethod: Method,
+        val commandSenderIndex: Int?,
+        val executedArgIndex: Int?,
+        val commandArgIndex: Int?,
+        val valuesIndex: Int?,
+        val exceptionIndex: Int?,
+    )
 
     data class TabCompletionContext(val completions: MutableList<String>, val playerNames: List<String>)
 
@@ -454,8 +496,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
             command: Command,
             label: String,
             args: Array<String>,
-        ) =
-            tabComplete(sender, args)
+        ) = tabComplete(sender, args)
 
         override fun isPlayer(commandSender: SpigotCommandSender) = commandSender is SpigotPlayer
 
