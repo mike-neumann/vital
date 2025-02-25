@@ -10,24 +10,28 @@ import org.springframework.stereotype.Component
 
 interface VitalPlayerListener {
     val playerService: VitalPlayerService
-    val playerType: Class<VitalPlayer<*>>
+    val playerClassName: String
 
     @RequiresSpigot
     @Component
-    abstract class Spigot(
+    class Spigot(
         plugin: SpigotPlugin,
         override val playerService: VitalPlayerService,
         @Value("\${vital.players.type:me.vitalframework.players.VitalPlayer.Spigot}")
-        override val playerType: Class<VitalPlayer<*>>,
+        override val playerClassName: String,
     ) : VitalPlayerListener, VitalListener.Spigot(plugin) {
         // should always be executed first.
-        @SpigotEventHandler(priority = SpigotEventPriority.LOW)
+        @SpigotEventHandler(priority = SpigotEventPriority.LOWEST)
         fun onPlayerJoin(e: PlayerJoinEvent) {
-            playerService.createPlayer(e.player, e.player.uniqueId, playerType)
+            playerService.createPlayer(
+                e.player,
+                e.player.uniqueId,
+                Class.forName(playerClassName) as Class<out VitalPlayer<*>>
+            )
         }
 
         // should always be executed last.
-        @SpigotEventHandler(priority = SpigotEventPriority.HIGH)
+        @SpigotEventHandler(priority = SpigotEventPriority.HIGHEST)
         fun onPlayerQuit(e: PlayerQuitEvent) {
             playerService.destroyPlayer(e.player.uniqueId)
         }
@@ -35,20 +39,24 @@ interface VitalPlayerListener {
 
     @RequiresBungee
     @Component
-    abstract class Bungee(
+    class Bungee(
         plugin: BungeePlugin,
         override val playerService: VitalPlayerService,
         @Value("\${vital.players.type:me.vitalframework.players.VitalPlayer.Bungee}")
-        override val playerType: Class<VitalPlayer<*>>,
+        override val playerClassName: String,
     ) : VitalPlayerListener, VitalListener.Bungee(plugin) {
         // should always be executed first.
-        @BungeeEventHandler(priority = BungeeEventPriority.LOW)
+        @BungeeEventHandler(priority = BungeeEventPriority.LOWEST)
         fun onPostLogin(e: PostLoginEvent) {
-            playerService.createPlayer(e.player, e.player.uniqueId, playerType)
+            playerService.createPlayer(
+                e.player,
+                e.player.uniqueId,
+                Class.forName(playerClassName) as Class<out VitalPlayer<*>>
+            )
         }
 
         // should always be executed last.
-        @BungeeEventHandler(priority = BungeeEventPriority.HIGH)
+        @BungeeEventHandler(priority = BungeeEventPriority.HIGHEST)
         fun onPlayerDisconnect(e: PlayerDisconnectEvent) {
             playerService.destroyPlayer(e.player.uniqueId)
         }
