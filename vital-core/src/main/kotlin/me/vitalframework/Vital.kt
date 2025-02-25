@@ -17,7 +17,7 @@ abstract class Vital {
             private set
     }
 
-    open fun <T : Any> run(plugin: T, configure: () -> SpringApplicationBuilder) {
+    open fun <T : Any> run(plugin: T, configure: (Class<*>) -> SpringApplicationBuilder) {
         val pluginClassLoader = plugin.javaClass.classLoader
 
         try {
@@ -32,8 +32,7 @@ abstract class Vital {
             // if we haven't defined an application.properties file, we may skip this step
         }
 
-        context = configure()
-            .sources(Class.forName("${plugin.javaClass.packageName}.PluginConfiguration"))
+        context = configure(Class.forName("${plugin.javaClass.packageName}.PluginConfiguration"))
             .initializers({
                 // here we register the plugin instance as a bean so we can inject it elsewhere
                 it.beanFactory.registerSingleton("plugin", plugin)
@@ -89,7 +88,7 @@ abstract class Vital {
                 Thread.currentThread().contextClassLoader = pluginClassLoader
                 ClassUtils.overrideThreadContextClassLoader(pluginClassLoader)
 
-                SpringApplicationBuilder()
+                SpringApplicationBuilder(it)
                     .initializers({
                         it.classLoader = pluginClassLoader
                     })
@@ -106,7 +105,7 @@ abstract class Vital {
                 Thread.currentThread().contextClassLoader = pluginClassLoader
                 ClassUtils.overrideThreadContextClassLoader(pluginClassLoader)
 
-                SpringApplicationBuilder()
+                SpringApplicationBuilder(it)
                     .initializers({
                         it.classLoader = pluginClassLoader
                     })

@@ -30,10 +30,7 @@ subprojects {
         compileOnly("com.mojang:brigadier:${project.extra["brigadierVersion"]}")
         compileOnly("net.md-5:bungeecord-api:${project.extra["bungeeApiVersion"]}")
 
-        api("org.springframework.boot:spring-boot-starter:${project.extra["springBootPluginVersion"]}") {
-            exclude(group = "org.apache.hc.client5")
-        }
-        api("org.apache.httpcomponents.client5:httpclient5:5.4.2")
+        api("org.springframework.boot:spring-boot-starter:${project.extra["springBootPluginVersion"]}")
 
         testApi("org.springframework.boot:spring-boot-starter-test:${project.extra["springBootPluginVersion"]}")
         testApi("org.junit.jupiter:junit-jupiter-api:${project.extra["junitVersion"]}")
