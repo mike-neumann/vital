@@ -1,5 +1,6 @@
 package me.vitalframework
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.PluginAware
@@ -11,6 +12,11 @@ class VitalGradlePlugin : Plugin<Project> {
         applyPlugin(target, PLUGIN_KOTLIN_SPRING_ID, PLUGIN_KOTLIN_SPRING_EXAMPLE_VERSION)
         applyPlugin(target, PLUGIN_DEPENDENCY_MANAGEMENT_ID, PLUGIN_DEPENDENCY_MANAGEMENT_EXAMPLE_VERSION)
         applyPlugin(target, PLUGIN_SHADOW_ID, PLUGIN_SHADOW_PLUGIN_EXAMPLE_VERSION)
+
+//        target.tasks.named("shadowJar", ShadowJar::class.java) {
+//            // shaded away any jackson package so that the runtime doesn't override any
+//            it.relocate("org.apache.hc", "shaded.org.apache.hc")
+//        }
 
         applyDependency(target, "implementation", "$DEPENDENCY_VITAL_CORE:1.0")
         applyDependency(

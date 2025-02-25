@@ -1,7 +1,6 @@
 package me.vitalframework.inventories
 
 import me.vitalframework.*
-import me.vitalframework.Vital.context
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.springframework.stereotype.Component
@@ -12,7 +11,7 @@ class VitalInventoryListener(plugin: SpigotPlugin) : VitalListener.Spigot(plugin
     fun onPlayerClickInInventory(e: InventoryClickEvent) {
         val clickedInventory = e.clickedInventory
         val player = e.whoClicked as SpigotPlayer
-        val vitalInventory = context.getBeansOfType(VitalInventory::class.java).values
+        val vitalInventory = Vital.context.getBeansOfType(VitalInventory::class.java).values
             .firstOrNull { it.hasInventoryOpen(player) }
 
         if (clickedInventory == null) {
@@ -35,7 +34,7 @@ class VitalInventoryListener(plugin: SpigotPlugin) : VitalListener.Spigot(plugin
     @SpigotEventHandler
     fun onPlayerCloseInventory(e: InventoryCloseEvent) {
         val player = e.player as SpigotPlayer
-        val vitalInventory = context.getBeansOfType(VitalInventory::class.java).values
+        val vitalInventory = Vital.context.getBeansOfType(VitalInventory::class.java).values
             .firstOrNull { it.hasInventoryOpen(player) }
 
         vitalInventory?.close(player)

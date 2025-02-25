@@ -11,10 +11,13 @@ import org.springframework.util.ClassUtils
 import java.io.PrintStream
 import java.util.*
 
-object Vital {
-    lateinit var context: ConfigurableApplicationContext
+abstract class Vital {
+    companion object {
+        lateinit var context: ConfigurableApplicationContext
+            private set
+    }
 
-    fun <T : Any> run(plugin: T) {
+    open fun <T : Any> run(plugin: T, configure: () -> SpringApplicationBuilder) {
         val pluginClassLoader = plugin.javaClass.classLoader
 
         try {
@@ -29,20 +32,15 @@ object Vital {
             // if we haven't defined an application.properties file, we may skip this step
         }
 
-        Thread.currentThread().contextClassLoader = pluginClassLoader
-        ClassUtils.overrideThreadContextClassLoader(pluginClassLoader)
-
-        context =
-            SpringApplicationBuilder(Class.forName("${plugin.javaClass.packageName}.PluginConfiguration"))
-                .initializers({
-                    // here we register the plugin instance as a bean so we can inject it elsewhere
-                    it.classLoader = pluginClassLoader
-                    it.beanFactory.registerSingleton("plugin", plugin)
-                })
-                .resourceLoader(DefaultResourceLoader(pluginClassLoader))
-                .banner(VitalBanner())
-                .logStartupInfo(false)
-                .run()
+        context = configure()
+            .sources(Class.forName("${plugin.javaClass.packageName}.PluginConfiguration"))
+            .initializers({
+                // here we register the plugin instance as a bean so we can inject it elsewhere
+                it.beanFactory.registerSingleton("plugin", plugin)
+            })
+            .banner(VitalBanner())
+            .logStartupInfo(false)
+            .run()
     }
 
     class VitalBanner : Banner {
@@ -79,6 +77,41 @@ object Vital {
         enum class PluginEnvironment(val ymlFileName: String) {
             SPIGOT("plugin.yml"),
             BUNGEE("bungee.yml")
+        }
+    }
+
+    object Spigot : Vital() {
+        fun <T : Any> run(plugin: T) {
+            run(plugin) {
+                // spigot needs specific class loader configurations
+                val pluginClassLoader = plugin.javaClass.classLoader
+
+                Thread.currentThread().contextClassLoader = pluginClassLoader
+                ClassUtils.overrideThreadContextClassLoader(pluginClassLoader)
+
+                SpringApplicationBuilder()
+                    .initializers({
+                        it.classLoader = pluginClassLoader
+                    })
+                    .resourceLoader(DefaultResourceLoader(pluginClassLoader))
+            }
+        }
+    }
+
+    object Bungee : Vital() {
+        fun <T : Any> run(plugin: T) {
+            run(plugin) {
+                val pluginClassLoader = plugin.javaClass.classLoader
+
+                Thread.currentThread().contextClassLoader = pluginClassLoader
+                ClassUtils.overrideThreadContextClassLoader(pluginClassLoader)
+
+                SpringApplicationBuilder()
+                    .initializers({
+                        it.classLoader = pluginClassLoader
+                    })
+                    .resourceLoader(DefaultResourceLoader(pluginClassLoader))
+            }
         }
     }
 }
