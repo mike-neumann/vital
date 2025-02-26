@@ -16,7 +16,7 @@ interface VitalPlayerListener {
 
     fun <T : Any> createPlayer(player: T, playerUniqueId: UUID) {
         @Suppress("UNCHECKED_CAST")
-        playerService.createPlayer(player, playerUniqueId, Class.forName(playerClassName) as Class<out VitalPlayer<UUID>>)
+        playerService.createPlayer(player, playerUniqueId, Class.forName(playerClassName) as Class<out VitalPlayer<*>>)
     }
 
     fun destroyPlayer(playerUniqueId: UUID) {

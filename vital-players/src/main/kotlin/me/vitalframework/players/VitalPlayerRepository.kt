@@ -5,4 +5,4 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-class VitalPlayerRepository : VitalRepository<VitalPlayer<UUID>, UUID>()
+class VitalPlayerRepository : VitalRepository<VitalPlayer<*>, UUID>()

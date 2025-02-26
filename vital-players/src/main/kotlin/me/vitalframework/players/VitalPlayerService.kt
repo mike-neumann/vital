@@ -5,7 +5,7 @@ import java.util.*
 
 @Service
 class VitalPlayerService(private val playerRepository: VitalPlayerRepository) {
-    fun <T : VitalPlayer<UUID>> createPlayer(player: Any, playerUniqueId: UUID, playerClass: Class<T>) {
+    fun <T : VitalPlayer<*>> createPlayer(player: Any, playerUniqueId: UUID, playerClass: Class<T>) {
         // Retrieve the VitalPlayer associated with the joining player, if it exists.
         playerRepository.get(playerUniqueId)?.let { return }
         // Create a new VitalPlayer for the joining player.
@@ -26,6 +26,6 @@ class VitalPlayerService(private val playerRepository: VitalPlayerRepository) {
     }
 
     // TODO: playerRepository.entities returns null when running paper???????? -> should be impossible
-    fun <T : VitalPlayer<UUID>> getPlayers() = playerRepository.entities as List<T>
-    fun <T : VitalPlayer<UUID>> getPlayer(id: UUID) = playerRepository.get(id) as T?
+    fun <T : VitalPlayer<*>> getPlayers() = playerRepository.entities as List<T>
+    fun <T : VitalPlayer<*>> getPlayer(id: UUID) = playerRepository.get(id) as T?
 }
