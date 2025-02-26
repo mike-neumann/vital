@@ -56,7 +56,7 @@ interface VitalPlayerListener {
         // should always be executed first.
         @BungeeEventHandler(priority = BungeeEventPriority.LOWEST)
         fun onPostLogin(e: PostLoginEvent) {
-            createPlayer(e.player as ProxiedPlayer, e.player.uniqueId)
+            createPlayer(e.player, e.player.uniqueId)
         }
 
         // should always be executed last.

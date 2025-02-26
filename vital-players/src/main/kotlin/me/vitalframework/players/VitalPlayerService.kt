@@ -5,7 +5,7 @@ import java.util.*
 
 @Service
 class VitalPlayerService(private val playerRepository: VitalPlayerRepository) {
-    fun <T : VitalPlayer<*>> createPlayer(player: Any, playerUniqueId: UUID, playerClass: Class<T>) {
+    fun <T : Any> createPlayer(player: T, playerUniqueId: UUID, playerClass: Class<out VitalPlayer<*>>) {
         // Retrieve the VitalPlayer associated with the joining player, if it exists.
         playerRepository.get(playerUniqueId)?.let { return }
         // Create a new VitalPlayer for the joining player.
