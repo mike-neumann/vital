@@ -1,6 +1,7 @@
 package me.vitalframework.players
 
 import me.vitalframework.*
+import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.event.PlayerDisconnectEvent
 import net.md_5.bungee.api.event.PostLoginEvent
 import org.bukkit.event.player.PlayerJoinEvent
@@ -55,7 +56,7 @@ interface VitalPlayerListener {
         // should always be executed first.
         @BungeeEventHandler(priority = BungeeEventPriority.LOWEST)
         fun onPostLogin(e: PostLoginEvent) {
-            createPlayer(e.player, e.player.uniqueId)
+            createPlayer(e.player as ProxiedPlayer, e.player.uniqueId)
         }
 
         // should always be executed last.
