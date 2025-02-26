@@ -1,7 +1,6 @@
 package me.vitalframework.players
 
 import me.vitalframework.*
-import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.event.PlayerDisconnectEvent
 import net.md_5.bungee.api.event.PostLoginEvent
 import org.bukkit.event.player.PlayerJoinEvent
@@ -13,11 +12,16 @@ import java.util.*
 @Component
 interface VitalPlayerListener {
     val playerService: VitalPlayerService
-    val playerClassName: String
+    val vitalPlayerClassName: String
 
-    fun <T : Any> createPlayer(player: T, playerUniqueId: UUID) {
+    fun <T : Any> createPlayer(player: T, playerUniqueId: UUID, playerClass: Class<T>) {
         @Suppress("UNCHECKED_CAST")
-        playerService.createPlayer(player, playerUniqueId, Class.forName(playerClassName) as Class<out VitalPlayer<*>>)
+        playerService.createPlayer(
+            player,
+            playerUniqueId,
+            playerClass,
+            Class.forName(vitalPlayerClassName) as Class<out VitalPlayer<*>>
+        )
     }
 
     fun destroyPlayer(playerUniqueId: UUID) {
@@ -30,12 +34,12 @@ interface VitalPlayerListener {
         plugin: SpigotPlugin,
         override val playerService: VitalPlayerService,
         @Value("\${vital.players.player-class-name:me.vitalframework.players.VitalPlayer.Spigot}")
-        override val playerClassName: String,
+        override val vitalPlayerClassName: String,
     ) : VitalPlayerListener, VitalListener.Spigot(plugin) {
         // should always be executed first.
         @SpigotEventHandler(priority = SpigotEventPriority.LOWEST)
         fun onPlayerJoin(e: PlayerJoinEvent) {
-            createPlayer(e.player, e.player.uniqueId)
+            createPlayer(e.player, e.player.uniqueId, SpigotPlayer::class.java)
         }
 
         // should always be executed last.
@@ -51,12 +55,12 @@ interface VitalPlayerListener {
         plugin: BungeePlugin,
         override val playerService: VitalPlayerService,
         @Value("\${vital.players.player-class-name:me.vitalframework.players.VitalPlayer.Bungee}")
-        override val playerClassName: String,
+        override val vitalPlayerClassName: String,
     ) : VitalPlayerListener, VitalListener.Bungee(plugin) {
         // should always be executed first.
         @BungeeEventHandler(priority = BungeeEventPriority.LOWEST)
         fun onPostLogin(e: PostLoginEvent) {
-            createPlayer(e.player, e.player.uniqueId)
+            createPlayer(e.player, e.player.uniqueId, BungeePlayer::class.java)
         }
 
         // should always be executed last.
