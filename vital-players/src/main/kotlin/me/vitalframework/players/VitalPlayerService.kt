@@ -11,7 +11,7 @@ class VitalPlayerService(private val playerRepository: VitalPlayerRepository) {
         // Create a new VitalPlayer for the joining player.
         try {
             // Register the VitalPlayer with VitalUserManagement.
-            playerRepository.save(playerClass.getDeclaredConstructor(player::class.java).newInstance(player))
+            playerRepository.save(playerClass.getDeclaredConstructor(player.javaClass).newInstance(player))
         } catch (e: Exception) {
             throw VitalPlayerException.Create(playerClass, playerUniqueId, e)
         }
