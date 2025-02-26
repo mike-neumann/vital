@@ -62,7 +62,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
 
             try {
                 context.handlerMethod.invoke(
-                    this,
+                    context.adviceInstance,
                     *VitalCommandUtils.getInjectableExceptionHandlerMethodParameters(
                         context,
                         sender,
@@ -328,6 +328,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     annotation class ExceptionHandler(val type: KClass<out Throwable>)
 
     data class ExceptionHandlerContext(
+        val adviceInstance: Any,
         val handlerMethod: Method,
         val commandSenderIndex: Int?,
         val executedArgIndex: Int?,

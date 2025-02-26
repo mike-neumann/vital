@@ -165,7 +165,7 @@ object VitalCommandUtils {
         )
     }
 
-    fun getExceptionHandlerContext(commandSenderClass: Class<*>, method: Method) = let {
+    fun getExceptionHandlerContext(adviceInstance: Any, commandSenderClass: Class<*>, method: Method) = let {
         var commandSenderIndex: Int? = null
         var executedArgIndex: Int? = null
         var commandArgIndex: Int? = null
@@ -197,6 +197,7 @@ object VitalCommandUtils {
         }
 
         VitalCommand.ExceptionHandlerContext(
+            adviceInstance,
             method,
             commandSenderIndex,
             executedArgIndex,

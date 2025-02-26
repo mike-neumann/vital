@@ -1,7 +1,6 @@
 package me.vitalframework.commands
 
 import jakarta.annotation.PostConstruct
-import me.vitalframework.commands.VitalCommand.Arg
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
@@ -15,16 +14,21 @@ class VitalCommandExceptionHandlerProcessor(applicationContext: ApplicationConte
         for (command in commands) {
             // get all advices for the command sender of the command.
             advices
-                .filter { it::class.java.getAnnotation(VitalCommand.Advice::class.java).commandSenderClass == command.commandSenderClass }
-                .forEach { advice ->
-                    advice::class.java.methods
+                .filter {
+                    command.commandSenderClass.isAssignableFrom(it::class.java.getAnnotation(VitalCommand.Advice::class.java).commandSenderClass.java)
+                }
+                .forEach { adviceInstance ->
+                    val advice = adviceInstance.javaClass.getAnnotation(VitalCommand.Advice::class.java)!!
+
+                    adviceInstance::class.java.methods
                         .filter { it.isAnnotationPresent(VitalCommand.ExceptionHandler::class.java) }
                         .forEach { method ->
                             val annotation = method.getAnnotation(VitalCommand.ExceptionHandler::class.java)!!
 
                             EXCEPTION_HANDLERS[annotation.type.java] =
                                 VitalCommandUtils.getExceptionHandlerContext(
-                                    command.commandSenderClass.javaClass,
+                                    adviceInstance,
+                                    advice.commandSenderClass.java,
                                     method
                                 )
                         }
