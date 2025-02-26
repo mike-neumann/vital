@@ -321,7 +321,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     @Component
     @Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Advice(val commandSenderClass: KClass<Any>)
+    annotation class Advice(val commandSenderClass: KClass<out Any>)
 
     @Target(AnnotationTarget.FUNCTION)
     @Retention(AnnotationRetention.RUNTIME)
