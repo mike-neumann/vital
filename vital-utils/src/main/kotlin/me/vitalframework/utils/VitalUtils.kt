@@ -27,7 +27,7 @@ interface VitalUtils<CS, P : CS> {
                         <$color>[$text]
                     </click>
                 </hover>
-            """.trimIndent()
+            """.trimIndent().lines().joinToString("")
 
         fun chatRunCommandButton(color: String, text: String, command: String) =
             chatButton(color, command, text, command, ClickEvent.Action.RUN_COMMAND)

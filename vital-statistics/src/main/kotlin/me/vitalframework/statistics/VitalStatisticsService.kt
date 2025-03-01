@@ -6,13 +6,13 @@ import org.springframework.stereotype.Service
 @Service
 class VitalStatisticsService(val statisticsConfig: VitalStatisticsConfig) {
     private val log = logger()
-    var lastTickTime = 0L
+    final var lastTickTime = 0L
         private set
-    var lastSecondTime = 0L
+    final var lastSecondTime = 0L
         private set
-    var ticks = 0
+    final var ticks = 0
         private set
-    var tps = 0
+    final var tps = 0
         private set
     private val _lastTps = mutableMapOf<Long, Int>()
     val lastTps: Map<Long, Int> get() = _lastTps

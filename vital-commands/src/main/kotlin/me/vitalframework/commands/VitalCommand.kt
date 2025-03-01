@@ -20,9 +20,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     val name: String
     val permission: String
     val playerOnly: Boolean
-    val args: Map<Pattern, Arg>
-    val argHandlers: Map<Arg, ArgHandlerContext>
-    val argExceptionHandlers: Map<Arg, Map<Class<out Throwable>, ArgExceptionHandlerContext>>
+    private val args: Map<Pattern, Arg>
+    private val argHandlers: Map<Arg, ArgHandlerContext>
+    private val argExceptionHandlers: Map<Arg, Map<Class<out Throwable>, ArgExceptionHandlerContext>>
 
     init {
         val vitalCommandInfo = getRequiredAnnotation()
@@ -30,9 +30,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         name = vitalCommandInfo.name
         permission = vitalCommandInfo.permission
         playerOnly = vitalCommandInfo.playerOnly
-        args = getMappedArgs()
-        argHandlers = getMappedArgHandlers()
-        argExceptionHandlers = getMappedArgExceptionHandlers()
+        args = VitalCommandUtils.getMappedArgs(this)
+        argHandlers = VitalCommandUtils.getMappedArgHandlers(this)
+        argExceptionHandlers = VitalCommandUtils.getMappedArgExceptionHandlers(this)
     }
 
     override fun requiredAnnotationType() = Info::class.java
@@ -41,178 +41,84 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     abstract fun hasPermission(commandSender: CS, permission: String): Boolean
     abstract fun getAllPlayerNames(): List<String>
 
-    private fun getMappedArgs() = javaClass.methods
-        .filter { it.isAnnotationPresent(ArgHandler::class.java) }
-        .map { it.getAnnotation(ArgHandler::class.java) }
-        .associate {
-            Pattern.compile(
-                it.value.value
-                    .replace(" ".toRegex(), "[ ]")
-                    .replace("%.+%[*]".toRegex(), "(.+)")
-                    .replace("%.+%".toRegex(), "(\\\\S+)")
-            ) to it.value
-        }
-
-    private fun getMappedArgHandlers() = javaClass.methods
-        .filter { ReturnState::class.java.isAssignableFrom(it.returnType) }
-        .filter { it.isAnnotationPresent(ArgHandler::class.java) }
-        .associate { method ->
-            // now we have a viable method ready for handling incoming arguments
-            // we just need to filter out the injectable parameters for our method
-            // since we only support a handful of injectable params for handler methods...
-            val vitalCommandArg = method.getAnnotation(ArgHandler::class.java).value
-            var commandSenderIndex: Int? = null
-            var executedArgIndex: Int? = null
-            var commandArgIndex: Int? = null
-            var valuesIndex: Int? = null
-
-            for (parameter in method.parameters) {
-                when {
-                    commandSenderClass.isAssignableFrom(parameter.type) -> commandSenderIndex =
-                        method.parameters.indexOf(parameter)
-
-                    String::class.java.isAssignableFrom(parameter.type) -> executedArgIndex =
-                        method.parameters.indexOf(parameter)
-
-                    Arg::class.java.isAssignableFrom(parameter.type) -> commandArgIndex =
-                        method.parameters.indexOf(parameter)
-
-                    Array<String>::class.java.isAssignableFrom(parameter.type) -> valuesIndex =
-                        method.parameters.indexOf(parameter)
-
-                    else -> throw VitalCommandException.InvalidArgHandlerSignature(method, parameter)
-                }
-            }
-
-            vitalCommandArg to ArgHandlerContext(
-                method,
-                commandSenderIndex,
-                executedArgIndex,
-                commandArgIndex,
-                valuesIndex
-            )
-        }
-
-    private fun getMappedArgExceptionHandlers(): Map<Arg, Map<Class<out Throwable>, ArgExceptionHandlerContext>> {
-        val mappedArgExceptionHandlers =
-            mutableMapOf<Arg, MutableMap<Class<out Throwable>, ArgExceptionHandlerContext>>()
-
-        javaClass.methods
-            .filter { it.isAnnotationPresent(ArgExceptionHandler::class.java) }
-            .forEach { method ->
-                val argExceptionHandler = method.getAnnotation(ArgExceptionHandler::class.java)!!
-                val arg = getArg(argExceptionHandler.value)
-                    ?: throw VitalCommandException.UnmappedArgExceptionHandlerArg(argExceptionHandler.value)
-                var commandSenderIndex: Int? = null
-                var executedArgIndex: Int? = null
-                var commandArgIndex: Int? = null
-                var exceptionIndex: Int? = null
-
-                for (parameter in method.parameters) {
-                    when {
-                        commandSenderClass.isAssignableFrom(parameter.type) -> commandSenderIndex =
-                            method.parameters.indexOf(parameter)
-
-                        String::class.java.isAssignableFrom(parameter.type) -> executedArgIndex =
-                            method.parameters.indexOf(parameter)
-
-                        Arg::class.java.isAssignableFrom(parameter.type) -> commandArgIndex =
-                            method.parameters.indexOf(parameter)
-
-                        Exception::class.java.isAssignableFrom(parameter.type) -> exceptionIndex =
-                            method.parameters.indexOf(parameter)
-
-                        else -> throw VitalCommandException.InvalidArgExceptionHandlerSignature(
-                            method,
-                            parameter
-                        )
-                    }
-                }
-                val argExceptionHandlerContext = ArgExceptionHandlerContext(
-                    method,
-                    commandSenderIndex,
-                    executedArgIndex,
-                    commandArgIndex,
-                    exceptionIndex
-                )
-
-                if (!mappedArgExceptionHandlers.containsKey(arg)) {
-                    mappedArgExceptionHandlers[arg] =
-                        mutableMapOf(argExceptionHandler.type.java to argExceptionHandlerContext)
-                } else {
-                    mappedArgExceptionHandlers[arg]!![argExceptionHandler.type.java] =
-                        argExceptionHandlerContext
-                }
-            }
-
-        return mappedArgExceptionHandlers
-            .map { it.key to it.value.toMap() }
-            .toMap()
-    }
-
-    private fun getArg(arg: String) = args.entries
-        .filter { it.key.matcher(arg).matches() }
+    internal fun getArg(executedArg: String) = args.entries
+        .filter { it.key.matcher(executedArg).matches() }
         .map { it.value }
         .firstOrNull()
 
     private fun executeArgExceptionHandlerMethod(
         sender: CS,
         exception: Throwable,
-        arg: String,
+        executedArg: String,
         commandArg: Arg,
     ) {
         val exceptionHandlers = argExceptionHandlers[commandArg]
 
         if (exceptionHandlers.isNullOrEmpty()) {
             // we do not have any exception handler mapped for this argument
-            throw RuntimeException(exception)
+            // try to find a global exception handler
+            val context = VitalCommandExceptionHandlerProcessor.getExceptionHandler(exception::class.java)
+                ?: throw RuntimeException(exception)
+
+            try {
+                context.handlerMethod.invoke(
+                    context.adviceInstance,
+                    *VitalCommandUtils.getInjectableExceptionHandlerMethodParameters(
+                        context,
+                        sender,
+                        executedArg,
+                        commandArg,
+                        exception
+                    )
+                )
+            } catch (e: Exception) {
+                throw VitalCommandException.ExecuteExceptionHandlerMethod(context.handlerMethod, context, e)
+            }
+
+            return
         }
         // we may or may not have an exception handler mapped for this execution context
-        val exceptionHandlerContext = exceptionHandlers.entries
+        val context = exceptionHandlers.entries
             .filter { it.key.isAssignableFrom(exception.javaClass) }
             .map { it.value }
             .firstOrNull()
             ?: let { return onCommandError(sender, commandArg, exception) }
-        // if we do have an exception, prepare for parameter injection...
-        val injectableParameters = mutableMapOf<Int, Any>()
-
-        exceptionHandlerContext.commandSenderIndex?.let { injectableParameters[it] = sender }
-        exceptionHandlerContext.executedArgIndex?.let { injectableParameters[it] = arg }
-        exceptionHandlerContext.argIndex?.let { injectableParameters[it] = commandArg }
-        exceptionHandlerContext.exceptionIndex?.let { injectableParameters[it] = exception }
 
         try {
-            val sortedParameters = injectableParameters.entries
-                .sortedBy { it.key }
-                .map { it.value }
-                .toTypedArray()
-
-            exceptionHandlerContext.handlerMethod.invoke(this, *sortedParameters)
+            context.handlerMethod.invoke(
+                this,
+                *VitalCommandUtils.getInjectableArgExceptionHandlerMethodParameters(
+                    context,
+                    sender,
+                    executedArg,
+                    commandArg,
+                    exception
+                )
+            )
         } catch (e: Exception) {
-            throw VitalCommandException.ExecuteArgExceptionHandler(exceptionHandlerContext, e)
+            throw VitalCommandException.ExecuteArgExceptionHandlerMethod(context.handlerMethod, context, e)
         }
     }
 
     private fun executeArgHandlerMethod(
         sender: CS,
-        arg: String,
+        executedArg: String,
         commandArg: Arg,
         values: Array<String>,
     ): ReturnState {
         val argHandlerContext = argHandlers[commandArg]
-            ?: throw VitalCommandException.UnmappedArgHandler(arg)
-        val injectableParameters = mutableMapOf<Int, Any>()
+            ?: throw VitalCommandException.UnmappedArgHandler(executedArg)
 
-        argHandlerContext.commandSenderIndex?.let { injectableParameters[it] = sender }
-        argHandlerContext.executedArgIndex?.let { injectableParameters[it] = arg }
-        argHandlerContext.commandArgIndex?.let { injectableParameters[it] = commandArg }
-        argHandlerContext.valuesIndex?.let { injectableParameters[it] = values }
-        val sortedParameters = injectableParameters.entries
-            .sortedBy { it.key }
-            .map { it.value }
-            .toTypedArray()
-
-        return argHandlerContext.handlerMethod.invoke(this, *sortedParameters) as ReturnState
+        return argHandlerContext.handlerMethod.invoke(
+            this,
+            *VitalCommandUtils.getInjectableArgHandlerMethodParameters(
+                argHandlerContext,
+                sender,
+                executedArg,
+                commandArg,
+                values
+            )
+        ) as ReturnState
     }
 
     fun tabComplete(sender: CS, args: Array<String>): List<String> {
@@ -352,12 +258,12 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         }
     }
 
-    protected open fun onCommandError(sender: CS, arg: Arg?, e: Throwable) {}
+    protected open fun onCommandError(sender: CS, commandArg: Arg?, e: Throwable) {}
     protected open fun onBaseCommand(sender: CS) = ReturnState.INVALID_ARGS
     protected open fun onCommandTabComplete(sender: CS, args: String) = listOf<String>()
     protected open fun onCommandInvalidArgs(sender: CS, args: String) {}
-    protected open fun onCommandRequiresPermission(sender: CS, args: String, arg: Arg?) {}
-    protected open fun onCommandRequiresPlayer(sender: CS, args: String, arg: Arg?) {}
+    protected open fun onCommandRequiresPermission(sender: CS, args: String, commandArg: Arg?) {}
+    protected open fun onCommandRequiresPlayer(sender: CS, args: String, commandArg: Arg?) {}
 
     enum class ReturnState {
         INVALID_ARGS, SUCCESS, NO_PERMISSION
@@ -405,12 +311,31 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     }
 
     @Retention(AnnotationRetention.RUNTIME)
-    @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
-    annotation class ArgHandler(val value: Arg)
+    @Target(AnnotationTarget.FUNCTION)
+    annotation class ArgHandler(val arg: Arg)
 
-    @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
+    @Target(AnnotationTarget.FUNCTION)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class ArgExceptionHandler(val value: String, val type: KClass<out Throwable>)
+    annotation class ArgExceptionHandler(val arg: String, val type: KClass<out Throwable>)
+
+    @Component
+    @Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE)
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class Advice(val commandSenderClass: KClass<out Any>)
+
+    @Target(AnnotationTarget.FUNCTION)
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class ExceptionHandler(val type: KClass<out Throwable>)
+
+    data class ExceptionHandlerContext(
+        val adviceInstance: Any,
+        val handlerMethod: Method,
+        val commandSenderIndex: Int?,
+        val executedArgIndex: Int?,
+        val commandArgIndex: Int?,
+        val valuesIndex: Int?,
+        val exceptionIndex: Int?,
+    )
 
     data class TabCompletionContext(val completions: MutableList<String>, val playerNames: List<String>)
 
@@ -454,8 +379,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
             command: Command,
             label: String,
             args: Array<String>,
-        ) =
-            tabComplete(sender, args)
+        ) = tabComplete(sender, args)
 
         override fun isPlayer(commandSender: SpigotCommandSender) = commandSender is SpigotPlayer
 

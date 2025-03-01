@@ -73,7 +73,7 @@ interface StatsCommand<CS> {
             return ReturnState.SUCCESS
         }
 
-        @ArgHandler(Arg("tps"))
+        @ArgHandler(arg = Arg("tps"))
         fun onTps(sender: SpigotCommandSender) = handleOnHealthTps(sender)
     }
 
@@ -97,7 +97,7 @@ interface StatsCommand<CS> {
             return ReturnState.SUCCESS
         }
 
-        @ArgHandler(Arg("tps"))
+        @ArgHandler(arg = Arg("tps"))
         fun onTps(sender: BungeeCommandSender) = handleOnHealthTps(sender)
     }
 }

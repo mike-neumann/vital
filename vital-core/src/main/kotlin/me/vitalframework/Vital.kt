@@ -13,9 +13,10 @@ import java.util.*
 
 object Vital {
     lateinit var context: ConfigurableApplicationContext
+        private set
 
     fun <T : Any> run(plugin: T) {
-        val pluginClassLoader = plugin::class.java.classLoader
+        val pluginClassLoader = plugin.javaClass.classLoader
 
         try {
             val properties = Properties().apply {
@@ -33,11 +34,11 @@ object Vital {
         ClassUtils.overrideThreadContextClassLoader(pluginClassLoader)
 
         context =
-            SpringApplicationBuilder(Class.forName("${plugin::class.java.packageName}.PluginConfiguration"))
+            SpringApplicationBuilder(Class.forName("${plugin.javaClass.packageName}.PluginConfiguration"))
                 .initializers({
                     // here we register the plugin instance as a bean so we can inject it elsewhere
-                    it.classLoader = pluginClassLoader
                     it.beanFactory.registerSingleton("plugin", plugin)
+                    it.classLoader = pluginClassLoader
                 })
                 .resourceLoader(DefaultResourceLoader(pluginClassLoader))
                 .banner(VitalBanner())
