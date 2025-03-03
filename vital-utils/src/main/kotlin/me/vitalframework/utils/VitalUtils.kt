@@ -20,25 +20,26 @@ import kotlin.math.min
 
 interface VitalUtils<CS, P : CS> {
     companion object {
-        fun chatButton(color: String, hover: String, text: String, click: String, action: ClickEvent.Action) =
-            """
-                <hover:show_text:'$hover'>
-                    <click:${action.name.lowercase(Locale.getDefault())}:'$click'>
-                        <$color>[$text]
-                    </click>
-                </hover>
-            """.trimIndent().lines().joinToString("")
+        fun chatButton(
+            color: String? = null,
+            hover: String,
+            text: String,
+            click: String,
+            action: ClickEvent.Action,
+        ) =
+            "<hover:show_text:'$hover'><click:${action.name.lowercase()}:'$click'>${color?.let { "<$it>" } ?: ""}$text</click></hover>"
 
-        fun chatRunCommandButton(color: String, text: String, command: String) =
+        fun chatRunCommandButton(color: String? = null, text: String, command: String) =
             chatButton(color, command, text, command, ClickEvent.Action.RUN_COMMAND)
 
-        fun chatSuggestCommandButton(color: String, text: String, command: String) =
+        fun chatSuggestCommandButton(color: String? = null, text: String, command: String) =
             chatButton(color, command, text, command, ClickEvent.Action.SUGGEST_COMMAND)
 
         fun chatRunCommandYesButton(command: String) = chatRunCommandButton("green", "YES", command)
         fun chatRunCommandNoButton(command: String) = chatRunCommandButton("red", "NO", command)
         fun chatRunCommandOkButton(command: String) = chatRunCommandButton("green", "OK", command)
-        fun chatRunCommandXButton(command: String) = chatRunCommandButton("red", "X", command)
+        fun chatRunCommandXButton(command: String) = chatRunCommandButton("red", "✕", command)
+        fun chatRunCommandCheckmarkButton(command: String) = chatRunCommandButton("green", "✓", command)
     }
 
     fun broadcastAction(playerPredicate: (P) -> Boolean = { true }, action: (P) -> Unit)
