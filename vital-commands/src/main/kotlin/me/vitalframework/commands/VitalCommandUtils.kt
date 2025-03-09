@@ -11,8 +11,8 @@ object VitalCommandUtils {
             Pattern.compile(
                 it.arg.value
                     .replace(" ".toRegex(), "[ ]")
-                    .replace("%.+%[*]".toRegex(), "(.+)")
-                    .replace("%.+%".toRegex(), "(\\\\S+)")
+                    .replace("%\\S*%\\*".toRegex(), "(.+)")
+                    .replace("%\\S*%(?!\\*)".toRegex(), "(\\\\S+)")
             ) to it.arg
         }
 
