@@ -5,7 +5,7 @@ plugins {
 
 gradlePlugin {
     plugins {
-        create("me.vitalframework.vital-gradle-plugin") {
+        create("vital-gradle-plugin") {
             id = "me.vitalframework.vital-gradle-plugin"
             implementationClass = "me.vitalframework.VitalGradlePlugin"
         }
@@ -14,8 +14,8 @@ gradlePlugin {
 
 dependencies {
     api(project(":vital-core"))
-    api("org.jetbrains.kotlin.plugin.spring:org.jetbrains.kotlin.plugin.spring.gradle.plugin:${project.extra["kotlinSpringPluginVersion"]}")
-    api("io.spring.gradle:dependency-management-plugin:${project.extra["dependencyManagementPluginVersion"]}")
-    api("org.springframework.boot:org.springframework.boot.gradle.plugin:${project.extra["springBootPluginVersion"]}")
-    api("com.gradleup.shadow:shadow-gradle-plugin:${project.extra["shadowVersion"]}")
+    api("org.jetbrains.kotlin.plugin.spring:org.jetbrains.kotlin.plugin.spring.gradle.plugin:${findProperty("kotlinSpringPluginVersion")}")
+    api("io.spring.gradle:dependency-management-plugin:${findProperty("dependencyManagementPluginVersion")}")
+    api("org.springframework.boot:org.springframework.boot.gradle.plugin:${findProperty("springBootPluginVersion")}")
+    api("com.gradleup.shadow:shadow-gradle-plugin:${findProperty("shadowVersion")}")
 }

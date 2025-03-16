@@ -19,26 +19,21 @@ include("vital-tasks")
 include("vital-utils")
 
 gradle.beforeProject {
-    // plugins
+    // needed to pass plugin versions down from gradle.properties dynamically
     extra["kotlinVersion"] = findProperty("kotlinVersion")
-    extra["springBootPluginVersion"] = findProperty("springBootPluginVersion")
+    extra["springBootVersion"] = findProperty("springBootVersion")
     extra["springDependencyManagementVersion"] = findProperty("springDependencyManagementVersion")
-    // dependencies
-    extra["spigotApiVersion"] = findProperty("spigotApiVersion")
-    extra["brigadierVersion"] = findProperty("brigadierVersion")
-    extra["bungeeApiVersion"] = findProperty("bungeeApiVersion")
-    extra["junitVersion"] = findProperty("junitVersion")
 }
 
 pluginManagement {
     plugins {
         val kotlinVersion: String by extra
-        val springBootPluginVersion: String by extra
+        val springBootVersion: String by extra
         val springDependencyManagementVersion: String by extra
 
         kotlin("jvm") version kotlinVersion
         kotlin("plugin.spring") version kotlinVersion
-        id("org.springframework.boot") version springBootPluginVersion
+        id("org.springframework.boot") version springBootVersion
         id("io.spring.dependency-management") version springDependencyManagementVersion
     }
 }

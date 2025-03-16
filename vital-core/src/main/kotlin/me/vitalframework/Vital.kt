@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.core.env.Environment
-import org.springframework.core.io.DefaultResourceLoader
+import org.springframework.core.env.StandardEnvironment
 import org.springframework.stereotype.Component
 import org.springframework.util.ClassUtils
 import java.io.PrintStream
@@ -17,18 +17,15 @@ object Vital {
 
     fun <T : Any> run(plugin: T) {
         val pluginClassLoader = plugin.javaClass.classLoader
+        // load application.properties and profile based ones if they exist
+        val applicationProperties = pluginClassLoader.getResourceAsStream("application.properties")?.let { Properties().apply { load(it) } }
 
-        try {
-            val properties = Properties().apply {
-                load(pluginClassLoader.getResourceAsStream("application.properties"))
-            }
+        applicationProperties?.forEach { (key, value) -> System.setProperty(key.toString(), value.toString()) }
+        val profileApplicationProperties = System.getProperty("spring.profiles.active")?.split(",")
+            ?.map { pluginClassLoader.getResourceAsStream("application-${it}.properties") }
+            ?.map { it?.let { Properties().apply { load(it) } } }
 
-            for ((key, value) in properties) {
-                System.setProperty(key.toString(), value.toString())
-            }
-        } catch (_: Exception) {
-            // if we haven't defined an application.properties file, we may skip this step
-        }
+        profileApplicationProperties?.forEach { it?.forEach { (key, value) -> System.setProperty(key.toString(), value.toString()) } }
 
         Thread.currentThread().contextClassLoader = pluginClassLoader
         ClassUtils.overrideThreadContextClassLoader(pluginClassLoader)
@@ -38,11 +35,10 @@ object Vital {
                 .initializers({
                     // here we register the plugin instance as a bean so we can inject it elsewhere
                     it.beanFactory.registerSingleton("plugin", plugin)
-                    it.classLoader = pluginClassLoader
                 })
-                .resourceLoader(DefaultResourceLoader(pluginClassLoader))
+                // so system property resolution takes place
+                .environment(StandardEnvironment())
                 .banner(VitalBanner())
-                .logStartupInfo(false)
                 .run()
     }
 

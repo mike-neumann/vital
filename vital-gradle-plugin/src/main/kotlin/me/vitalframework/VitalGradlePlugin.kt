@@ -1,5 +1,7 @@
 package me.vitalframework
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.PluginAware
@@ -28,13 +30,29 @@ class VitalGradlePlugin : Plugin<Project> {
         target.tasks.named("build") { it.dependsOn(target.tasks.named("shadowJar")) }
         // spring's bootJar task should not be enabled, since our server manages its own runtime main class.
         target.tasks.named("bootJar") { it.enabled = false }
+        target.tasks.named("shadowJar", ShadowJar::class.java) {
+            it.mergeServiceFiles()
+            it.mergeGroovyExtensionModules()
+//            TODO: currently does not work with logger factories on paper...
+//            appendTransform(it, "META-INF/spring.factories")
+//            appendTransform(it, "META-INF/spring.handlers")
+//            appendTransform(it, "META-INF/spring.schemas")
+//            appendTransform(it, "META-INF/spring.tooling")
+//            appendTransform(it, "META-INF/web-fragment.xml")
+//            appendTransform(it, "META-INF/web-fragment.xml")
+            appendTransform(it, "META-INF/spring/aot.factories")
+            appendTransform(it, "META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports")
+        }
     }
+
+    private fun appendTransform(shadowJar: ShadowJar, resource: String) =
+        shadowJar.transform(AppendingTransformer::class.java) { it.resource.set(resource) }
 
     private fun applyPlugin(project: Project, id: String, exampleVersion: String = "+") {
         try {
             // this will fail when plugins are not detected on classpath
             (project as PluginAware).plugins.apply(id)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             throw VitalGradlePluginException.PluginNotFound(id, exampleVersion)
         }
     }
@@ -49,12 +67,10 @@ class VitalGradlePlugin : Plugin<Project> {
         dependencyNotation: String,
         fallbackConfigurationName: String = configurationName,
         fallbackDependencyNotation: String = dependencyNotation,
-    ) {
-        try {
-            project.dependencies.add(configurationName, dependencyNotation)
-        } catch (e: Exception) {
-            project.dependencies.add(fallbackConfigurationName, fallbackDependencyNotation)
-        }
+    ) = try {
+        project.dependencies.add(configurationName, dependencyNotation)
+    } catch (_: Exception) {
+        project.dependencies.add(fallbackConfigurationName, fallbackDependencyNotation)
     }
 
     object Plugin {

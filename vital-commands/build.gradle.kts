@@ -1,4 +1,4 @@
 dependencies {
     api(project(":vital-core"))
-    api("org.reflections:reflections:${project.extra["reflectionsVersion"]}")
+    api("org.reflections:reflections:${findProperty("reflectionsVersion")}")
 }

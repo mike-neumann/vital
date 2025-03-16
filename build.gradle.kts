@@ -2,7 +2,6 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
     id("org.springframework.boot")
-    id("io.spring.dependency-management")
     `java-library`
     `maven-publish`
 }
@@ -14,7 +13,6 @@ subprojects {
     apply(plugin = "kotlin")
     apply(plugin = "org.jetbrains.kotlin.plugin.spring")
     apply(plugin = "org.springframework.boot")
-    apply(plugin = "io.spring.dependency-management")
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
 
@@ -26,27 +24,22 @@ subprojects {
     }
 
     dependencies {
-        compileOnly("org.spigotmc:spigot-api:${project.extra["spigotApiVersion"]}")
-        compileOnly("com.mojang:brigadier:${project.extra["brigadierVersion"]}")
-        compileOnly("net.md-5:bungeecord-api:${project.extra["bungeeApiVersion"]}")
+        compileOnly("org.spigotmc:spigot-api:${findProperty("spigotApiVersion")}")
+        compileOnly("com.mojang:brigadier:${findProperty("brigadierVersion")}")
+        compileOnly("net.md-5:bungeecord-api:${findProperty("bungeeApiVersion")}")
 
-        api("org.springframework.boot:spring-boot-starter:${project.extra["springBootPluginVersion"]}")
+        api("org.springframework.boot:spring-boot-starter:${findProperty("springBootVersion")}")
 
-        testApi("org.springframework.boot:spring-boot-starter-test:${project.extra["springBootPluginVersion"]}")
-        testApi("org.junit.jupiter:junit-jupiter-api:${project.extra["junitVersion"]}")
-        testApi("org.spigotmc:spigot-api:${project.extra["spigotApiVersion"]}")
-        testApi("com.mojang:brigadier:${project.extra["brigadierVersion"]}")
-        testApi("net.md-5:bungeecord-api:${project.extra["bungeeApiVersion"]}")
+        testApi("org.springframework.boot:spring-boot-starter-test:${findProperty("springBootVersion")}")
+        testApi("org.junit.jupiter:junit-jupiter-api:${findProperty("junitVersion")}")
+        testApi("org.spigotmc:spigot-api:${findProperty("spigotApiVersion")}")
+        testApi("com.mojang:brigadier:${findProperty("brigadierVersion")}")
+        testApi("net.md-5:bungeecord-api:${findProperty("bungeeApiVersion")}")
     }
 
     java {
         withSourcesJar()
         withJavadocJar()
-    }
-
-    tasks.compileKotlin {
-        // so default impls of interfaces work across multiplatform compiled kotlin code (kotlin >> java)
-        compilerOptions.freeCompilerArgs.add("-Xjvm-default=all")
     }
 
     kotlin {
@@ -63,6 +56,11 @@ subprojects {
                 from(components["java"])
             }
         }
+    }
+
+    tasks.compileKotlin {
+        // so default impls of interfaces work across multiplatform compiled kotlin code (kotlin >> java)
+        compilerOptions.freeCompilerArgs.add("-Xjvm-default=all")
     }
 
     tasks.javadoc {
