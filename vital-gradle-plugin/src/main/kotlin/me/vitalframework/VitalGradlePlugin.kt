@@ -4,6 +4,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.PluginAware
 
 class VitalGradlePlugin : Plugin<Project> {
@@ -31,6 +32,8 @@ class VitalGradlePlugin : Plugin<Project> {
         // spring's bootJar task should not be enabled, since our server manages its own runtime main class.
         target.tasks.named("bootJar") { it.enabled = false }
         target.tasks.named("shadowJar", ShadowJar::class.java) {
+            // TODO: this excludes most of the other files and does not merge them... fix this later
+            it.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             it.mergeServiceFiles()
             it.mergeGroovyExtensionModules()
 //            TODO: currently does not work with logger factories on paper...
