@@ -2,7 +2,8 @@ package me.vitalframework.statistics
 
 import me.vitalframework.*
 import me.vitalframework.commands.VitalCommand
-import me.vitalframework.utils.VitalUtils
+import me.vitalframework.utils.VitalUtils.Bungee.sendFormattedMessage
+import me.vitalframework.utils.VitalUtils.Spigot.sendFormattedMessage
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
 import org.springframework.core.SpringVersion
@@ -16,10 +17,8 @@ interface StatsCommand<CS> {
     fun sendMessage(sender: CS, message: String)
 
     fun handleOnCommand(sender: CS) {
-        val serverStatus =
-            if (statisticsService.tps >= statisticsConfig.minTps) "<green>HEALTHY</green>" else "<red>UNHEALTHY</yellow>"
-        val ramUsageInGigaBytes =
-            (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024f / 1024 / 1024
+        val serverStatus = if (statisticsService.tps >= statisticsConfig.minTps) "<green>HEALTHY</green>" else "<red>UNHEALTHY</yellow>"
+        val ramUsageInGigaBytes = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024f / 1024 / 1024
         val vitalModuleNames = Vital.context.getBeansOfType(VitalSubModule::class.java)
 
         sendMessage(sender, "Spring version: <yellow>${SpringVersion.getVersion()}")
@@ -62,12 +61,12 @@ interface StatsCommand<CS> {
         override val statisticsConfig: VitalStatisticsConfig,
     ) : VitalCommand.Spigot(plugin), StatsCommand<SpigotCommandSender> {
         override fun sendMessage(sender: SpigotCommandSender, message: String) {
-            VitalUtils.Spigot.sendMessage(sender, message)
+            sender.sendFormattedMessage(message)
         }
 
         override fun onBaseCommand(sender: SpigotCommandSender): ReturnState {
-            VitalUtils.Spigot.sendMessage(sender, "MC Version: <yellow>${Bukkit.getVersion()}")
-            VitalUtils.Spigot.sendMessage(sender, "Bukkit Version: <yellow>${Bukkit.getBukkitVersion()}")
+            sender.sendFormattedMessage("MC Version: <yellow>${Bukkit.getVersion()}")
+            sender.sendFormattedMessage("Bukkit Version: <yellow>${Bukkit.getBukkitVersion()}")
             handleOnCommand(sender)
 
             return ReturnState.SUCCESS
@@ -84,14 +83,11 @@ interface StatsCommand<CS> {
         override val statisticsConfig: VitalStatisticsConfig,
     ) : VitalCommand.Bungee(plugin), StatsCommand<BungeeCommandSender> {
         override fun sendMessage(sender: BungeeCommandSender, message: String) {
-            VitalUtils.Bungee.sendMessage(sender, message)
+            sender.sendFormattedMessage(message)
         }
 
         override fun onBaseCommand(sender: BungeeCommandSender): ReturnState {
-            VitalUtils.Bungee.sendMessage(
-                sender,
-                "Bungee version: <yellow>${ProxyServer.getInstance().version}"
-            )
+            sender.sendFormattedMessage("Bungee version: <yellow>${ProxyServer.getInstance().version}")
             handleOnCommand(sender)
 
             return ReturnState.SUCCESS
