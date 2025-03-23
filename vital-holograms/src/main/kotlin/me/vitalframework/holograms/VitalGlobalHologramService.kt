@@ -18,9 +18,7 @@ class VitalGlobalHologramService(val globalHologramRepository: VitalGlobalHologr
         }
         val lineArmorStandUniqueIds = lines.reversed().mapIndexed { i, line ->
             // convert the minimessage formatted line into a legacy section formatted line.
-            val formattedLine =
-                LegacyComponentSerializer.legacySection()
-                    .serialize(MiniMessage.miniMessage().deserialize(line))
+            val formattedLine = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(line))
 
             location.world!!.spawn(location.clone().add(0.0, .25 * i, 0.0), ArmorStand::class.java) {
                 it.isVisible = false
@@ -31,14 +29,7 @@ class VitalGlobalHologramService(val globalHologramRepository: VitalGlobalHologr
         }
 
         globalHologramRepository.save(
-            VitalGlobalHologram(
-                UUID.randomUUID(),
-                name,
-                lines,
-                location,
-                armorStand.uniqueId,
-                lineArmorStandUniqueIds
-            )
+            VitalGlobalHologram(UUID.randomUUID(), name, lines, location, armorStand.uniqueId, lineArmorStandUniqueIds)
         )
     }
 
@@ -47,9 +38,7 @@ class VitalGlobalHologramService(val globalHologramRepository: VitalGlobalHologr
     fun getGlobalHologram(name: String) = globalHologramRepository.get(name)
 
     fun removeGlobalHologram(globalHologram: VitalGlobalHologram) {
-        if (!globalHologramRepository.exists(globalHologram)) {
-            return
-        }
+        if (!globalHologramRepository.exists(globalHologram)) return
         val armorStand = Bukkit.getEntity(globalHologram.armorStandUniqueId)!!
         val lineArmorStands = globalHologram.lineArmorStandUniqueIds.map { Bukkit.getEntity(it)!! }
 

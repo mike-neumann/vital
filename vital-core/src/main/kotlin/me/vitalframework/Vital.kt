@@ -30,16 +30,13 @@ object Vital {
         Thread.currentThread().contextClassLoader = pluginClassLoader
         ClassUtils.overrideThreadContextClassLoader(pluginClassLoader)
 
-        context =
-            SpringApplicationBuilder(Class.forName("${plugin.javaClass.packageName}.PluginConfiguration"))
-                .initializers({
-                    // here we register the plugin instance as a bean so we can inject it elsewhere
-                    it.beanFactory.registerSingleton("plugin", plugin)
-                })
-                // so system property resolution takes place
-                .environment(StandardEnvironment())
-                .banner(VitalBanner())
-                .run()
+        context = SpringApplicationBuilder(Class.forName("${plugin.javaClass.packageName}.PluginConfiguration"))
+            // here we register the plugin instance as a bean so we can inject it elsewhere
+            .initializers({ it.beanFactory.registerSingleton("plugin", plugin) })
+            // so system property resolution takes place
+            .environment(StandardEnvironment())
+            .banner(VitalBanner())
+            .run()
     }
 
     class VitalBanner : Banner {

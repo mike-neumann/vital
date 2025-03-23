@@ -16,25 +16,18 @@ abstract class VitalPagedInventory(previousInventory: VitalInventory?) : VitalIn
     val pageContentAmount: Int get() = (toSlot + 1 /* since content is INCLUSIVE to the SLOT itself */) - fromSlot
 
     init {
-        val info = javaClass.getAnnotation<Info>(Info::class.java)
+        val info = javaClass.getAnnotation(Info::class.java)
 
         fromSlot = info.fromSlot
         toSlot = info.toSlot
     }
 
-    fun updateMaxPage(totalContent: Int) {
-        maxPage = ceil(totalContent.toDouble() / pageContentAmount).toLong()
-    }
+    fun updateMaxPage(totalContent: Int) = run { maxPage = ceil(totalContent.toDouble() / pageContentAmount).toLong() }
 
     fun setPage(page: Long, player: SpigotPlayer) {
         var page = page
-        if (page <= 0) {
-            page = 1
-        }
-
-        if (page >= maxPage) {
-            page = maxPage
-        }
+        if (page <= 0) page = 1
+        if (page >= maxPage) page = maxPage
 
         this.page = page
         onPageChange(page, player)
@@ -43,15 +36,10 @@ abstract class VitalPagedInventory(previousInventory: VitalInventory?) : VitalIn
 
     protected fun <T> sliceForPage(list: List<T>): List<T> {
         val startIndex = (pageContentAmount * (page - 1)).toInt()
-
-        if (startIndex >= list.size || startIndex < 0) {
-            return mutableListOf()
-        }
         val endIndex = startIndex + pageContentAmount
 
-        if (endIndex >= list.size) {
-            return list.subList(startIndex, list.size)
-        }
+        if (startIndex >= list.size || startIndex < 0) return mutableListOf()
+        if (endIndex >= list.size) return list.subList(startIndex, list.size)
 
         return list.subList(startIndex, endIndex)
     }
@@ -70,8 +58,5 @@ abstract class VitalPagedInventory(previousInventory: VitalInventory?) : VitalIn
 
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Info(
-        val fromSlot: @Range(from = 0, to = 9) Int = 0,
-        val toSlot: @Range(from = 0, to = 9) Int = 0,
-    )
+    annotation class Info(val fromSlot: @Range(from = 0, to = 9) Int = 0, val toSlot: @Range(from = 0, to = 9) Int = 0)
 }

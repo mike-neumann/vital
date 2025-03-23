@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-open class VitalStatisticsConfig {
+class VitalStatisticsConfig {
     @Value("\${plugin.min-tps:16}")
     var minTps = 0
 

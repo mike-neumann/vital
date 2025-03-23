@@ -17,12 +17,11 @@ class VitalConfigItemStack {
                 }
 
                 lore = when {
-                    !itemMeta.hasLore() -> mutableListOf<String>()
+                    !itemMeta.hasLore() -> mutableListOf()
                     else -> itemMeta.lore!!.toMutableList()
                 }
 
-                enchantments =
-                    mutableMapOf(*itemMeta.enchants.entries.map { it.key.key.key to it.value }.toTypedArray())
+                enchantments = mutableMapOf(*itemMeta.enchants.entries.map { it.key.key.key to it.value }.toTypedArray())
                 itemFlags = itemMeta.itemFlags.toMutableList()
             }
 
@@ -45,22 +44,17 @@ class VitalConfigItemStack {
     @VitalConfig.Property(ItemFlag::class)
     var itemFlags = mutableListOf<ItemFlag>()
 
-    fun toItemStack(): ItemStack {
-        val itemStack = ItemStack(type!!)
-
-        itemStack.itemMeta!!.apply {
-            setDisplayName(displayName)
+    fun toItemStack() = ItemStack(type!!).apply {
+        itemMeta!!.apply {
+            setDisplayName(this@VitalConfigItemStack.displayName)
             lore = this@VitalConfigItemStack.lore
 
-            for ((key, level) in enchantments) {
+            for ((key, level) in this@VitalConfigItemStack.enchantments) {
                 addEnchant(Registry.ENCHANTMENT.get(NamespacedKey.minecraft(key))!!, level, true)
             }
 
-            addItemFlags(*itemFlags.toTypedArray())
-
-            itemStack.itemMeta = this
+            addItemFlags(*this@VitalConfigItemStack.itemFlags.toTypedArray())
+            itemMeta = this
         }
-
-        return itemStack
     }
 }

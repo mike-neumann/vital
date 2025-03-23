@@ -15,9 +15,7 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
     private var ran = false
 
     override fun process(annotations: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
-        if (ran) {
-            return true
-        }
+        if (ran) return true
         // Make sure the basic processor runs before this one.
         val pluginInfoAnnotationProcessor = VitalPluginInfoAnnotationProcessor().apply {
             init(processingEnv)
@@ -28,20 +26,13 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
         for (element in roundEnv.getElementsAnnotatedWith(VitalCommand.Info::class.java)) {
             val commandInfo = element.getAnnotation(VitalCommand.Info::class.java)
 
-            if (commandInfo !in commandInfoList) {
-                commandInfoList.add(commandInfo!!)
-            }
+            if (commandInfo !in commandInfoList) commandInfoList.add(commandInfo!!)
         }
 
-        for (clazz in Reflections("me.vitalframework").getTypesAnnotatedWith(
-            VitalCommand.Info::class.java,
-            true
-        )) {
+        for (clazz in Reflections("me.vitalframework").getTypesAnnotatedWith(VitalCommand.Info::class.java, true)) {
             val commandInfo = clazz.getDeclaredAnnotation(VitalCommand.Info::class.java)
 
-            if (!commandInfoList.contains(commandInfo)) {
-                commandInfoList.add(commandInfo!!)
-            }
+            if (!commandInfoList.contains(commandInfo)) commandInfoList.add(commandInfo!!)
         }
 
         generatePluginYmlCommands(commandInfoList, pluginInfoAnnotationProcessor.pluginEnvironment)
@@ -51,30 +42,20 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
         return true
     }
 
-    private fun generatePluginYmlCommands(
-        commandInfoList: MutableList<VitalCommand.Info>,
-        pluginEnvironment: Vital.Info.PluginEnvironment,
-    ) {
+    private fun generatePluginYmlCommands(commandInfos: MutableList<VitalCommand.Info>, pluginEnvironment: Vital.Info.PluginEnvironment) {
         try {
             // Create the new `plugin.yml` file resource as the basic processor left it uncreated.
-            val pluginYmlFileObject =
-                processingEnv.filer.createResource(
-                    StandardLocation.CLASS_OUTPUT,
-                    "",
-                    pluginEnvironment.ymlFileName
-                )
+            val pluginYmlFileObject = processingEnv.filer.createResource(StandardLocation.CLASS_OUTPUT, "", pluginEnvironment.ymlFileName)
             // append all necessary meta-information for all commands to the content builder.
             VitalPluginInfoHolder.PLUGIN_INFO.appendLine("commands:")
 
-            for (commandInfo in commandInfoList) {
+            for (commandInfo in commandInfos) {
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("  ${commandInfo.name}:")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    description: ${commandInfo.description}")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    permission: ${commandInfo.permission}")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    usage: ${commandInfo.usage}")
 
-                if (commandInfo.aliases.isNotEmpty()) {
-                    VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    aliases: ${commandInfo.aliases.contentToString()}")
-                }
+                if (commandInfo.aliases.isNotEmpty()) VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    aliases: ${commandInfo.aliases.contentToString()}")
             }
 
             pluginYmlFileObject.openWriter().use { it.write(VitalPluginInfoHolder.PLUGIN_INFO.toString()) }

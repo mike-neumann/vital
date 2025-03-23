@@ -19,13 +19,13 @@ object VitalCommandUtils {
     fun getMappedArgHandlers(command: VitalCommand<*, *>) = command.javaClass.methods
         .filter { VitalCommand.ReturnState::class.java.isAssignableFrom(it.returnType) }
         .filter { it.isAnnotationPresent(VitalCommand.ArgHandler::class.java) }
-        .associate { method ->
+        .associate {
             // now we have a viable method ready for handling incoming arguments
             // we just need to filter out the injectable parameters for our method
             // since we only support a handful of injectable params for handler methods...
-            val vitalCommandArg = method.getAnnotation(VitalCommand.ArgHandler::class.java).arg
+            val vitalCommandArg = it.getAnnotation(VitalCommand.ArgHandler::class.java).arg
 
-            vitalCommandArg to getArgHandlerContext(command.commandSenderClass, method)
+            vitalCommandArg to getArgHandlerContext(command.commandSenderClass, it)
         }
 
     fun getInjectableArgHandlerMethodParameters(
@@ -42,10 +42,7 @@ object VitalCommandUtils {
         context.commandArgIndex?.let { injectableParameters[it] = commandArg }
         context.valuesIndex?.let { injectableParameters[it] = values }
 
-        injectableParameters.entries
-            .sortedBy { it.key }
-            .map { it.value }
-            .toTypedArray()
+        injectableParameters.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
     }
 
     fun getMappedArgExceptionHandlers(command: VitalCommand<*, *>) = let {
@@ -54,27 +51,20 @@ object VitalCommandUtils {
 
         command.javaClass.methods
             .filter { it.isAnnotationPresent(VitalCommand.ArgExceptionHandler::class.java) }
-            .forEach { method ->
-                val argExceptionHandler = method.getAnnotation(VitalCommand.ArgExceptionHandler::class.java)!!
+            .forEach {
+                val argExceptionHandler = it.getAnnotation(VitalCommand.ArgExceptionHandler::class.java)!!
                 val arg = command.getArg(argExceptionHandler.arg)
-                    ?: throw VitalCommandException.UnmappedArgExceptionHandlerArg(
-                        method,
-                        argExceptionHandler.arg
-                    )
-                val context = getArgExceptionHandlerContext(command.commandSenderClass, method)
+                    ?: throw VitalCommandException.UnmappedArgExceptionHandlerArg(it, argExceptionHandler.arg)
+                val context = getArgExceptionHandlerContext(command.commandSenderClass, it)
 
                 if (!mappedArgExceptionHandlers.containsKey(arg)) {
-                    mappedArgExceptionHandlers[arg] =
-                        mutableMapOf(argExceptionHandler.type.java to context)
+                    mappedArgExceptionHandlers[arg] = mutableMapOf(argExceptionHandler.type.java to context)
                 } else {
-                    mappedArgExceptionHandlers[arg]!![argExceptionHandler.type.java] =
-                        context
+                    mappedArgExceptionHandlers[arg]!![argExceptionHandler.type.java] = context
                 }
             }
 
-        mappedArgExceptionHandlers
-            .map { it.key to it.value.toMap() }
-            .toMap()
+        mappedArgExceptionHandlers.map { it.key to it.value.toMap() }.toMap()
     }
 
     fun getInjectableArgExceptionHandlerMethodParameters(
@@ -90,10 +80,7 @@ object VitalCommandUtils {
         context.executedArgIndex?.let { injectableParameters[it] = executedArg }
         context.argIndex?.let { injectableParameters[it] = commandArg }
         context.exceptionIndex?.let { injectableParameters[it] = exception }
-        injectableParameters.entries
-            .sortedBy { it.key }
-            .map { it.value }
-            .toTypedArray()
+        injectableParameters.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
     }
 
     fun getArgHandlerContext(commandSenderClass: Class<*>, method: Method) = let {
@@ -104,29 +91,15 @@ object VitalCommandUtils {
 
         for (parameter in method.parameters) {
             when {
-                commandSenderClass.isAssignableFrom(parameter.type) -> commandSenderIndex =
-                    method.parameters.indexOf(parameter)
-
-                String::class.java.isAssignableFrom(parameter.type) -> executedArgIndex =
-                    method.parameters.indexOf(parameter)
-
-                VitalCommand.Arg::class.java.isAssignableFrom(parameter.type) -> commandArgIndex =
-                    method.parameters.indexOf(parameter)
-
-                Array<String>::class.java.isAssignableFrom(parameter.type) -> valuesIndex =
-                    method.parameters.indexOf(parameter)
-
+                commandSenderClass.isAssignableFrom(parameter.type) -> commandSenderIndex = method.parameters.indexOf(parameter)
+                String::class.java.isAssignableFrom(parameter.type) -> executedArgIndex = method.parameters.indexOf(parameter)
+                VitalCommand.Arg::class.java.isAssignableFrom(parameter.type) -> commandArgIndex = method.parameters.indexOf(parameter)
+                Array<String>::class.java.isAssignableFrom(parameter.type) -> valuesIndex = method.parameters.indexOf(parameter)
                 else -> throw VitalCommandException.InvalidArgHandlerMethodSignature(method, parameter)
             }
         }
 
-        VitalCommand.ArgHandlerContext(
-            method,
-            commandSenderIndex,
-            executedArgIndex,
-            commandArgIndex,
-            valuesIndex
-        )
+        VitalCommand.ArgHandlerContext(method, commandSenderIndex, executedArgIndex, commandArgIndex, valuesIndex)
     }
 
     fun getArgExceptionHandlerContext(commandSenderClass: Class<*>, method: Method) = let {
@@ -137,32 +110,15 @@ object VitalCommandUtils {
 
         for (parameter in method.parameters) {
             when {
-                commandSenderClass.isAssignableFrom(parameter.type) -> commandSenderIndex =
-                    method.parameters.indexOf(parameter)
-
-                String::class.java.isAssignableFrom(parameter.type) -> executedArgIndex =
-                    method.parameters.indexOf(parameter)
-
-                VitalCommand.Arg::class.java.isAssignableFrom(parameter.type) -> commandArgIndex =
-                    method.parameters.indexOf(parameter)
-
-                Exception::class.java.isAssignableFrom(parameter.type) -> exceptionIndex =
-                    method.parameters.indexOf(parameter)
-
-                else -> throw VitalCommandException.InvalidArgExceptionHandlerMethodSignature(
-                    method,
-                    parameter
-                )
+                commandSenderClass.isAssignableFrom(parameter.type) -> commandSenderIndex = method.parameters.indexOf(parameter)
+                String::class.java.isAssignableFrom(parameter.type) -> executedArgIndex = method.parameters.indexOf(parameter)
+                VitalCommand.Arg::class.java.isAssignableFrom(parameter.type) -> commandArgIndex = method.parameters.indexOf(parameter)
+                Exception::class.java.isAssignableFrom(parameter.type) -> exceptionIndex = method.parameters.indexOf(parameter)
+                else -> throw VitalCommandException.InvalidArgExceptionHandlerMethodSignature(method, parameter)
             }
         }
 
-        VitalCommand.ArgExceptionHandlerContext(
-            method,
-            commandSenderIndex,
-            executedArgIndex,
-            commandArgIndex,
-            exceptionIndex
-        )
+        VitalCommand.ArgExceptionHandlerContext(method, commandSenderIndex, executedArgIndex, commandArgIndex, exceptionIndex)
     }
 
     fun getExceptionHandlerContext(adviceInstance: Any, commandSenderClass: Class<*>, method: Method) = let {
@@ -174,25 +130,12 @@ object VitalCommandUtils {
 
         for (parameter in method.parameters) {
             when {
-                commandSenderClass.isAssignableFrom(parameter.type) -> commandSenderIndex =
-                    method.parameters.indexOf(parameter)
-
-                String::class.java.isAssignableFrom(parameter.type) -> executedArgIndex =
-                    method.parameters.indexOf(parameter)
-
-                VitalCommand.Arg::class.java.isAssignableFrom(parameter.type) -> commandArgIndex =
-                    method.parameters.indexOf(parameter)
-
-                Array<String>::class.java.isAssignableFrom(parameter.type) -> valuesIndex =
-                    method.parameters.indexOf(parameter)
-
-                Throwable::class.java.isAssignableFrom(parameter.type) -> exceptionIndex =
-                    method.parameters.indexOf(parameter)
-
-                else -> throw VitalCommandException.InvalidExceptionHandlerMethodSignature(
-                    method,
-                    parameter
-                )
+                commandSenderClass.isAssignableFrom(parameter.type) -> commandSenderIndex = method.parameters.indexOf(parameter)
+                String::class.java.isAssignableFrom(parameter.type) -> executedArgIndex = method.parameters.indexOf(parameter)
+                VitalCommand.Arg::class.java.isAssignableFrom(parameter.type) -> commandArgIndex = method.parameters.indexOf(parameter)
+                Array<String>::class.java.isAssignableFrom(parameter.type) -> valuesIndex = method.parameters.indexOf(parameter)
+                Throwable::class.java.isAssignableFrom(parameter.type) -> exceptionIndex = method.parameters.indexOf(parameter)
+                else -> throw VitalCommandException.InvalidExceptionHandlerMethodSignature(method, parameter)
             }
         }
 
@@ -220,9 +163,6 @@ object VitalCommandUtils {
         context.executedArgIndex?.let { injectableParameters[it] = executedArg }
         context.commandArgIndex?.let { injectableParameters[it] = commandArg }
         context.exceptionIndex?.let { injectableParameters[it] = exception }
-        injectableParameters.entries
-            .sortedBy { it.key }
-            .map { it.value }
-            .toTypedArray()
+        injectableParameters.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
     }
 }

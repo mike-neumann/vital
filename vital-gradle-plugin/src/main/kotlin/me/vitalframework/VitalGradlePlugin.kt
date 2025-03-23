@@ -5,25 +5,24 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransfor
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.plugins.PluginAware
 
 class VitalGradlePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         // needs to be applied before dependency resolution takes place.
-        applyPlugin(target, Plugin.SPRING_BOOT_ID)
-        applyPlugin(target, Plugin.KOTLIN_SPRING_ID)
-        applyPlugin(target, Plugin.DEPENDENCY_MANAGEMENT_ID)
-        applyPlugin(target, Plugin.SHADOW_ID)
+        target.applyPlugin(Plugin.SPRING_BOOT_ID)
+        target.applyPlugin(Plugin.KOTLIN_SPRING_ID)
+        target.applyPlugin(Plugin.DEPENDENCY_MANAGEMENT_ID)
+        target.applyPlugin(Plugin.SHADOW_ID)
 
-        applyDependency(target, "implementation", "${Dependency.VITAL_CORE}:+")
-        applyDependency(
-            target, "kapt", "${Dependency.VITAL_CORE_PROCESSOR}:+",
+        target.applyDependency("implementation", "${Dependency.VITAL_CORE}:+")
+        target.applyDependency(
+            "kapt", "${Dependency.VITAL_CORE_PROCESSOR}:+",
             "annotationProcessor", "${Dependency.VITAL_CORE_PROCESSOR}:+"
         )
 
-        if (hasDependency(target, Dependency.VITAL_COMMANDS)) {
-            applyDependency(
-                target, "kapt", "${Dependency.VITAL_COMMANDS_PROCESSOR}:+",
+        if (target.hasDependency(Dependency.VITAL_COMMANDS)) {
+            target.applyDependency(
+                "kapt", "${Dependency.VITAL_COMMANDS_PROCESSOR}:+",
                 "annotationProcessor", "${Dependency.VITAL_COMMANDS_PROCESSOR}:+"
             )
         }
@@ -43,37 +42,31 @@ class VitalGradlePlugin : Plugin<Project> {
 //            appendTransform(it, "META-INF/spring.tooling")
 //            appendTransform(it, "META-INF/web-fragment.xml")
 //            appendTransform(it, "META-INF/web-fragment.xml")
-            appendTransform(it, "META-INF/spring/aot.factories")
-            appendTransform(it, "META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports")
+            it.appendTransform("META-INF/spring/aot.factories")
+            it.appendTransform("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports")
         }
     }
 
-    private fun appendTransform(shadowJar: ShadowJar, resource: String) =
-        shadowJar.transform(AppendingTransformer::class.java) { it.resource.set(resource) }
-
-    private fun applyPlugin(project: Project, id: String, exampleVersion: String = "+") {
-        try {
-            // this will fail when plugins are not detected on classpath
-            (project as PluginAware).plugins.apply(id)
-        } catch (_: Exception) {
-            throw VitalGradlePluginException.PluginNotFound(id, exampleVersion)
-        }
+    private fun ShadowJar.appendTransform(resource: String) = transform(AppendingTransformer::class.java) { it.resource.set(resource) }
+    private fun Project.applyPlugin(id: String, exampleVersion: String = "+") = try {
+        // this will fail when plugins are not detected on classpath
+        plugins.apply(id)
+    } catch (_: Exception) {
+        throw VitalGradlePluginException.PluginNotFound(id, exampleVersion)
     }
 
-    private fun hasDependency(project: Project, dependencyNotation: String) =
-        project.configurations.flatMap { it.allDependencies }
-            .any { "${it.group}:${it.name}:${it.version}".startsWith(dependencyNotation) }
+    private fun Project.hasDependency(dependencyNotation: String) = configurations.flatMap { it.allDependencies }
+        .any { "${it.group}:${it.name}:${it.version}".startsWith(dependencyNotation) }
 
-    private fun applyDependency(
-        project: Project,
+    private fun Project.applyDependency(
         configurationName: String,
         dependencyNotation: String,
         fallbackConfigurationName: String = configurationName,
         fallbackDependencyNotation: String = dependencyNotation,
     ) = try {
-        project.dependencies.add(configurationName, dependencyNotation)
+        dependencies.add(configurationName, dependencyNotation)
     } catch (_: Exception) {
-        project.dependencies.add(fallbackConfigurationName, fallbackDependencyNotation)
+        dependencies.add(fallbackConfigurationName, fallbackDependencyNotation)
     }
 
     object Plugin {

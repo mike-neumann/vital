@@ -34,16 +34,12 @@ class VitalStatisticsService(val statisticsConfig: VitalStatisticsConfig) {
             ticks = 0
             _lastTps[lastSecondTime] = tps
 
-            if (_lastTps.size > statisticsConfig.maxTpsTaskCache) {
-                _lastTps.remove(_lastTps.keys.first())
-            }
+            if (_lastTps.size > statisticsConfig.maxTpsTaskCache) _lastTps.remove(_lastTps.keys.first())
 
             if (tps < statisticsConfig.minTps) {
                 _lastUnhealthyTps[System.currentTimeMillis()] = tps
 
-                if (_lastUnhealthyTps.size > statisticsConfig.maxTpsTaskCache) {
-                    _lastUnhealthyTps.remove(_lastUnhealthyTps.keys.first())
-                }
+                if (_lastUnhealthyTps.size > statisticsConfig.maxTpsTaskCache) _lastUnhealthyTps.remove(_lastUnhealthyTps.keys.first())
             }
         }
 

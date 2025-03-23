@@ -60,15 +60,12 @@ interface StatsCommand<CS> {
         override val statisticsService: VitalStatisticsService,
         override val statisticsConfig: VitalStatisticsConfig,
     ) : VitalCommand.Spigot(plugin), StatsCommand<SpigotCommandSender> {
-        override fun sendMessage(sender: SpigotCommandSender, message: String) {
-            sender.sendFormattedMessage(message)
-        }
+        override fun sendMessage(sender: SpigotCommandSender, message: String) = sender.sendFormattedMessage(message)
 
         override fun onBaseCommand(sender: SpigotCommandSender): ReturnState {
             sender.sendFormattedMessage("MC Version: <yellow>${Bukkit.getVersion()}")
             sender.sendFormattedMessage("Bukkit Version: <yellow>${Bukkit.getBukkitVersion()}")
             handleOnCommand(sender)
-
             return ReturnState.SUCCESS
         }
 
@@ -82,14 +79,11 @@ interface StatsCommand<CS> {
         override val statisticsService: VitalStatisticsService,
         override val statisticsConfig: VitalStatisticsConfig,
     ) : VitalCommand.Bungee(plugin), StatsCommand<BungeeCommandSender> {
-        override fun sendMessage(sender: BungeeCommandSender, message: String) {
-            sender.sendFormattedMessage(message)
-        }
+        override fun sendMessage(sender: BungeeCommandSender, message: String) = sender.sendFormattedMessage(message)
 
         override fun onBaseCommand(sender: BungeeCommandSender): ReturnState {
             sender.sendFormattedMessage("Bungee version: <yellow>${ProxyServer.getInstance().version}")
             handleOnCommand(sender)
-
             return ReturnState.SUCCESS
         }
 

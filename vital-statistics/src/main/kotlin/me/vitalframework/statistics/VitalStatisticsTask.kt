@@ -12,17 +12,13 @@ interface VitalStatisticsTask {
     @Component
     class Spigot(override val statisticsService: VitalStatisticsService) : VitalStatisticsTask {
         @Scheduled(fixedRate = 50)
-        fun handleTask() {
-            statisticsService.handleTick()
-        }
+        fun handleTask() = statisticsService.handleTick()
     }
 
     @RequiresBungee
     @Component
     class Bungee(override val statisticsService: VitalStatisticsService) : VitalStatisticsTask {
         @Scheduled(fixedRate = 50)
-        fun handleTask() {
-            statisticsService.handleTick()
-        }
+        fun handleTask() = statisticsService.handleTick()
     }
 }

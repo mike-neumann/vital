@@ -11,8 +11,7 @@ class VitalInventoryListener(plugin: SpigotPlugin) : VitalListener.Spigot(plugin
     fun onPlayerClickInInventory(e: InventoryClickEvent) {
         val clickedInventory = e.clickedInventory
         val player = e.whoClicked as SpigotPlayer
-        val vitalInventory = Vital.context.getBeansOfType(VitalInventory::class.java).values
-            .firstOrNull { it.hasInventoryOpen(player) }
+        val vitalInventory = Vital.context.getBeansOfType(VitalInventory::class.java).values.firstOrNull { it.hasInventoryOpen(player) }
 
         if (clickedInventory == null) {
             // TODO: navigate to previous menu, currently still buggy
@@ -23,9 +22,7 @@ class VitalInventoryListener(plugin: SpigotPlugin) : VitalListener.Spigot(plugin
             return
         }
 
-        if (vitalInventory == null || e.currentItem == null) {
-            return
-        }
+        if (vitalInventory == null || e.currentItem == null) return
 
         vitalInventory.click(e)
         e.isCancelled = true
@@ -34,8 +31,7 @@ class VitalInventoryListener(plugin: SpigotPlugin) : VitalListener.Spigot(plugin
     @SpigotEventHandler
     fun onPlayerCloseInventory(e: InventoryCloseEvent) {
         val player = e.player as SpigotPlayer
-        val vitalInventory = Vital.context.getBeansOfType(VitalInventory::class.java).values
-            .firstOrNull { it.hasInventoryOpen(player) }
+        val vitalInventory = Vital.context.getBeansOfType(VitalInventory::class.java).values.firstOrNull { it.hasInventoryOpen(player) }
 
         vitalInventory?.close(player)
     }

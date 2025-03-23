@@ -14,11 +14,7 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
     private val _options = mutableMapOf<Team.Option, OptionStatus>()
     val options: Map<Team.Option, OptionStatus> get() = _options
     val bukkitTeam: Team = scoreboard.registerNewTeam(
-        PlainTextComponentSerializer.plainText()
-            .serialize(
-                LegacyComponentSerializer.legacySection()
-                    .deserialize(name)
-            )
+        PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(name))
     )
     var prefix: String? = null
     var suffix: String? = null
@@ -30,17 +26,10 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
         bukkitTeam.setAllowFriendlyFire(friendlyFire)
         bukkitTeam.setCanSeeFriendlyInvisibles(canSeeFriendlyInvisibles)
 
-        if (prefix != null) {
-            bukkitTeam.prefix =
-                LegacyComponentSerializer.legacySection()
-                    .serialize(MiniMessage.miniMessage().deserialize(prefix!!))
-        }
-
-        if (suffix != null) {
-            bukkitTeam.suffix =
-                LegacyComponentSerializer.legacySection()
-                    .serialize(MiniMessage.miniMessage().deserialize(suffix!!))
-        }
+        if (prefix != null) bukkitTeam.prefix =
+            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(prefix!!))
+        if (suffix != null) bukkitTeam.suffix =
+            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(suffix!!))
         // Update all options
         for ((option, status) in _options) {
             bukkitTeam.setOption(option, status)
@@ -55,23 +44,17 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
         }
     }
 
-    fun setOption(option: Team.Option, status: OptionStatus) {
-        _options[option] = status
-    }
+    fun setOption(option: Team.Option, status: OptionStatus) = run { _options[option] = status }
 
     fun addPlayer(player: SpigotPlayer) {
-        if (player in _players) {
-            return
-        }
+        if (player in _players) return
 
         _players.add(player)
         update()
     }
 
     fun removePlayer(player: SpigotPlayer) {
-        if (player !in _players) {
-            return
-        }
+        if (player !in _players) return
 
         _players.remove(player)
         update()

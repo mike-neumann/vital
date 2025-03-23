@@ -22,25 +22,19 @@ class VitalCommandExceptionHandlerProcessor(applicationContext: ApplicationConte
 
                     adviceInstance::class.java.methods
                         .filter { it.isAnnotationPresent(VitalCommand.ExceptionHandler::class.java) }
-                        .forEach { method ->
-                            val annotation = method.getAnnotation(VitalCommand.ExceptionHandler::class.java)!!
+                        .forEach {
+                            val annotation = it.getAnnotation(VitalCommand.ExceptionHandler::class.java)!!
 
                             EXCEPTION_HANDLERS[annotation.type.java] =
-                                VitalCommandUtils.getExceptionHandlerContext(
-                                    adviceInstance,
-                                    advice.commandSenderClass.java,
-                                    method
-                                )
+                                VitalCommandUtils.getExceptionHandlerContext(adviceInstance, advice.commandSenderClass.java, it)
                         }
                 }
         }
     }
 
     companion object {
-        private val EXCEPTION_HANDLERS =
-            mutableMapOf<Class<out Throwable>, VitalCommand.ExceptionHandlerContext>()
+        private val EXCEPTION_HANDLERS = mutableMapOf<Class<out Throwable>, VitalCommand.ExceptionHandlerContext>()
 
-        fun getExceptionHandler(type: Class<out Throwable>) =
-            EXCEPTION_HANDLERS.entries.find { type.isAssignableFrom(it.key) }?.value
+        fun getExceptionHandler(type: Class<out Throwable>) = EXCEPTION_HANDLERS.entries.find { type.isAssignableFrom(it.key) }?.value
     }
 }

@@ -24,9 +24,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) :
     override fun requiredAnnotationType() = Info::class.java
 
     fun start() {
-        if (running) {
-            return
-        }
+        if (running) return
 
         onStart()
         runnable = createRunnable()
@@ -34,9 +32,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) :
     }
 
     fun stop() {
-        if (!running) {
-            return
-        }
+        if (!running) return
 
         onStop()
         cancelRunnable()
@@ -46,9 +42,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) :
     }
 
     fun handleTick() {
-        if (!allowTick) {
-            return
-        }
+        if (!allowTick) return
 
         onTick()
     }
@@ -67,44 +61,21 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) :
     @Target(AnnotationTarget.TYPE)
     annotation class Info(val interval: Long)
 
-    open class Spigot(plugin: SpigotPlugin) :
-        VitalRepeatableTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
+    open class Spigot(plugin: SpigotPlugin) : VitalRepeatableTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
         override fun createRunnable() = object : SpigotRunnable() {
-            override fun run() {
-                handleTick()
-            }
+            override fun run() = handleTick()
         }
 
         override fun createTask() = runnable!!.runTaskTimer(plugin, 0L, (interval / 1000L) * 20L)
-
-        override fun cancelRunnable() {
-            runnable?.cancel()
-        }
-
-        override fun cancelTask() {
-            task?.cancel()
-        }
+        override fun cancelRunnable(): Unit = run { runnable?.cancel() }
+        override fun cancelTask(): Unit = run { task?.cancel() }
     }
 
     class Bungee(plugin: BungeePlugin) :
         VitalRepeatableTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
         override fun createRunnable() = BungeeRunnable { handleTick() }
-
-        override fun createTask() =
-            ProxyServer.getInstance().scheduler.schedule(
-                plugin,
-                runnable,
-                0L,
-                interval,
-                TimeUnit.MILLISECONDS
-            )!!
-
-        override fun cancelRunnable() {
-            task?.cancel()
-        }
-
-        override fun cancelTask() {
-            task?.cancel()
-        }
+        override fun createTask() = ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, interval, TimeUnit.MILLISECONDS)!!
+        override fun cancelRunnable(): Unit = run { task?.cancel() }
+        override fun cancelTask(): Unit = run { task?.cancel() }
     }
 }

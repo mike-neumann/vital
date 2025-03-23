@@ -6,7 +6,5 @@ abstract class VitalSubModule {
     private val log = logger()
 
     @PostConstruct
-    fun init() {
-        log.info("Using {}", javaClass.getSimpleName())
-    }
+    fun init() = log.info("Using {}", javaClass.getSimpleName())
 }

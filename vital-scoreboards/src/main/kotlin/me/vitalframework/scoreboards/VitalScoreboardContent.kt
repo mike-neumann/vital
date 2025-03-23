@@ -19,28 +19,15 @@ class VitalScoreboardContent internal constructor(title: String) {
 
     fun update() {
         val objective = bukkitScoreboard.getObjective(
-            PlainTextComponentSerializer.plainText()
-                .serialize(
-                    LegacyComponentSerializer.legacySection()
-                        .deserialize(title)
-                )
+            PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(title))
+        ) ?: bukkitScoreboard.registerNewObjective(
+            PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
+            Criteria.DUMMY,
+            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
         )
-            ?: let {
-                bukkitScoreboard.registerNewObjective(
-                    PlainTextComponentSerializer.plainText()
-                        .serialize(
-                            LegacyComponentSerializer.legacySection()
-                                .deserialize(title)
-                        ),
-                    Criteria.DUMMY,
-                    LegacyComponentSerializer.legacySection()
-                        .serialize(MiniMessage.miniMessage().deserialize(title))
-                )
-            }
 
         objective.displaySlot = DisplaySlot.SIDEBAR
-        objective.displayName =
-            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
+        objective.displayName = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
         // Reset scores for existing entries
         for (entry in bukkitScoreboard.entries) {
             bukkitScoreboard.resetScores(entry)
@@ -52,18 +39,14 @@ class VitalScoreboardContent internal constructor(title: String) {
     }
 
     fun addTeam(team: VitalScoreboardTeam) {
-        if (team in _teams) {
-            return
-        }
+        if (team in _teams) return
 
         _teams.add(team)
         update()
     }
 
     fun removeTeam(team: VitalScoreboardTeam) {
-        if (team !in _teams) {
-            return
-        }
+        if (team !in _teams) return
 
         _teams.remove(team)
         update()

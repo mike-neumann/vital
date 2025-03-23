@@ -28,9 +28,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) :
     override fun requiredAnnotationType() = Info::class.java
 
     fun start() {
-        if (running) {
-            return
-        }
+        if (running) return
 
         onStart()
         runnable = createRunnable()
@@ -38,9 +36,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) :
     }
 
     fun stop() {
-        if (!running) {
-            return
-        }
+        if (!running) return
 
         onStop()
         cancelRunnable()
@@ -62,10 +58,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) :
     }
 
     fun handleTick() {
-        if (!allowTick) {
-            return
-        }
-
+        if (!allowTick) return
         if (countdown <= 0) {
             stop()
             onExpire()
@@ -94,44 +87,20 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) :
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(val countdown: Long, val interval: Long = 1_000L)
 
-    open class Spigot(plugin: SpigotPlugin) :
-        VitalCountdownTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
+    open class Spigot(plugin: SpigotPlugin) : VitalCountdownTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
         override fun createRunnable() = object : SpigotRunnable() {
-            override fun run() {
-                handleTick()
-            }
+            override fun run() = handleTick()
         }
 
         override fun createTask() = runnable!!.runTaskTimer(plugin, 0L, ((interval / 1000.0) * 20L).toLong())
-
-        override fun cancelRunnable() {
-            runnable?.cancel()
-        }
-
-        override fun cancelTask() {
-            task?.cancel()
-        }
+        override fun cancelRunnable(): Unit = run { runnable?.cancel() }
+        override fun cancelTask(): Unit = run { task?.cancel() }
     }
 
-    open class Bungee(plugin: BungeePlugin) :
-        VitalCountdownTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
+    open class Bungee(plugin: BungeePlugin) : VitalCountdownTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
         override fun createRunnable() = BungeeRunnable { handleTick() }
-
-        override fun createTask() =
-            ProxyServer.getInstance().scheduler.schedule(
-                plugin,
-                runnable,
-                0L,
-                interval,
-                TimeUnit.MILLISECONDS
-            )!!
-
-        override fun cancelRunnable() {
-            task?.cancel()
-        }
-
-        override fun cancelTask() {
-            task?.cancel()
-        }
+        override fun createTask() = ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, interval, TimeUnit.MILLISECONDS)!!
+        override fun cancelRunnable(): Unit = run { task?.cancel() }
+        override fun cancelTask(): Unit = run { task?.cancel() }
     }
 }

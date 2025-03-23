@@ -24,17 +24,11 @@ inline fun itemBuilder(init: VitalItemStackBuilder.() -> Unit): ItemStack {
     val itemStackBuilder = VitalItemStackBuilder().apply { init() }
 
     return ItemStack(itemStackBuilder.type, itemStackBuilder.amount).apply {
-        if (type == Material.AIR) {
-            return this
-        }
+        if (type == Material.AIR) return this
         // since we know we have an item which is not of type AIR, we now have a persistent data container
         itemMeta = itemMeta!!.apply {
             // each item MUST have a unique identifier, used in interactive items.
-            persistentDataContainer.set(
-                VitalNamespacedKey.ITEM_UUID,
-                PersistentDataType.STRING,
-                UUID.randomUUID().toString()
-            )
+            persistentDataContainer.set(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING, UUID.randomUUID().toString())
 
             if (itemStackBuilder.name != null) {
                 setDisplayName(

@@ -5,9 +5,7 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     val entities: List<T> get() = _entities
 
     fun save(entity: T) {
-        if (exists(entity)) {
-            return
-        }
+        if (exists(entity)) return
 
         _entities.add(entity)
         onSave(entity)
@@ -18,14 +16,10 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     fun get(id: ID) = _entities.find { it.id == id }
 
     @JvmOverloads
-    fun getRandom(predicate: (T) -> Boolean = { true }) = _entities
-        .filter(predicate)
-        .randomOrNull()
+    fun getRandom(predicate: (T) -> Boolean = { true }) = _entities.filter(predicate).randomOrNull()
 
     fun delete(entity: T) {
-        if (!exists(entity)) {
-            return
-        }
+        if (!exists(entity)) return
 
         _entities.remove(entity)
         onDelete(entity)

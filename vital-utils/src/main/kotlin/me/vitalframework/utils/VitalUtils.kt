@@ -55,13 +55,10 @@ interface VitalUtils<CS, P : CS> {
         stay: @Range(from = 0, to = 72000) Int,
         fadeOut: @Range(from = 0, to = 72000) Int,
         playerPredicate: (P) -> Boolean = { true },
-    ) {
-        broadcastAction(playerPredicate) { it.sendFormattedTitle(title, subtitle, fadeIn, stay, fadeOut) }
-    }
+    ) = broadcastAction(playerPredicate) { it.sendFormattedTitle(title, subtitle, fadeIn, stay, fadeOut) }
 
-    fun broadcastFormattedTitle(title: String?, subtitle: String?, playerPredicate: (P) -> Boolean = { true }) {
+    fun broadcastFormattedTitle(title: String?, subtitle: String?, playerPredicate: (P) -> Boolean = { true }) =
         broadcastAction(playerPredicate) { it.sendFormattedTitle(title, subtitle) }
-    }
 
     fun P.sendPersistentFormattedTitle(title: String?, subtitle: String?, fadeIn: @Range(from = 0, to = 72000) Int)
 
@@ -70,52 +67,36 @@ interface VitalUtils<CS, P : CS> {
         subtitle: String?,
         fadeIn: @Range(from = 0, to = 72000) Int,
         playerPredicate: (P) -> Boolean = { true },
-    ) {
-        broadcastAction(playerPredicate) { it.sendPersistentFormattedTitle(title, subtitle, fadeIn) }
-    }
+    ) = broadcastAction(playerPredicate) { it.sendPersistentFormattedTitle(title, subtitle, fadeIn) }
 
     fun P.sendFormattedActionBar(message: String)
 
-    fun broadcastFormattedActionBar(message: String, playerPredicate: (P) -> Boolean = { true }) {
+    fun broadcastFormattedActionBar(message: String, playerPredicate: (P) -> Boolean = { true }) =
         broadcastAction(playerPredicate) { it.sendFormattedActionBar(message) }
-    }
 
     object Spigot : VitalUtils<SpigotCommandSender, SpigotPlayer> {
-        override fun broadcastAction(playerPredicate: (SpigotPlayer) -> Boolean, action: (SpigotPlayer) -> Unit) {
-            Bukkit.getOnlinePlayers()
-                .filter(playerPredicate)
-                .forEach(action)
-        }
+        override fun broadcastAction(playerPredicate: (SpigotPlayer) -> Boolean, action: (SpigotPlayer) -> Unit) = Bukkit.getOnlinePlayers()
+            .filter(playerPredicate)
+            .forEach(action)
 
-        override fun SpigotCommandSender.sendFormattedMessage(message: String) {
+        override fun SpigotCommandSender.sendFormattedMessage(message: String) = spigot().sendMessage(
             // must be used since, both version (paper and spigot) support the bungeeapi implementations...
-            spigot().sendMessage(
-                *BungeeComponentSerializer.get().serialize(
-                    MiniMessage.miniMessage()
-                        .deserialize(message)
-                )
-            )
-        }
+            *BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message))
+        )
 
-        override fun broadcastFormattedMessage(message: String, playerPredicate: (SpigotPlayer) -> Boolean) {
-            // must be used since, both version (paper and spigot) support the bungeeapi implementations...
+        override fun broadcastFormattedMessage(message: String, playerPredicate: (SpigotPlayer) -> Boolean) =
             broadcastAction(playerPredicate) {
-                it.spigot().sendMessage(
-                    *BungeeComponentSerializer.get()
-                        .serialize(MiniMessage.miniMessage().deserialize(message))
-                )
+                // must be used since, both version (paper and spigot) support the bungeeapi implementations...
+                it.spigot().sendMessage(*BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message)))
             }
-        }
 
         @JvmOverloads
-        fun broadcastSound(sound: Sound, volume: Float, pitch: Float, playerPredicate: (SpigotPlayer) -> Boolean = { true }) {
+        fun broadcastSound(sound: Sound, volume: Float, pitch: Float, playerPredicate: (SpigotPlayer) -> Boolean = { true }) =
             broadcastAction(playerPredicate) { it.playSound(it, sound, volume, pitch) }
-        }
 
         @JvmOverloads
-        fun broadcastSound(sound: Sound, playerPredicate: (SpigotPlayer) -> Boolean = { true }) {
+        fun broadcastSound(sound: Sound, playerPredicate: (SpigotPlayer) -> Boolean = { true }) =
             broadcastSound(sound, 1f, 1f, playerPredicate)
-        }
 
         override fun SpigotPlayer.sendFormattedTitle(
             title: String?,
@@ -123,47 +104,38 @@ interface VitalUtils<CS, P : CS> {
             fadeIn: @Range(from = 0, to = 72000) Int,
             stay: @Range(from = 0, to = 72000) Int,
             fadeOut: @Range(from = 0, to = 72000) Int,
-        ) {
-            sendTitle(
-                if (title == null) "" else LegacyComponentSerializer.legacySection()
-                    .serialize(MiniMessage.miniMessage().deserialize(title)),
-                if (subtitle == null) "" else LegacyComponentSerializer.legacySection()
-                    .serialize(MiniMessage.miniMessage().deserialize(subtitle)),
-                fadeIn,
-                stay,
-                fadeOut
-            )
-        }
+        ) = sendTitle(
+            if (title == null) ""
+            else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)),
+            if (subtitle == null) ""
+            else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle)),
+            fadeIn,
+            stay,
+            fadeOut
+        )
 
-        override fun SpigotPlayer.sendFormattedTitle(title: String?, subtitle: String?) {
-            sendTitle(
-                if (title == null) "" else LegacyComponentSerializer.legacySection()
-                    .serialize(MiniMessage.miniMessage().deserialize(title)),
-                if (subtitle == null) "" else LegacyComponentSerializer.legacySection()
-                    .serialize(MiniMessage.miniMessage().deserialize(subtitle))
-            )
-        }
+        override fun SpigotPlayer.sendFormattedTitle(title: String?, subtitle: String?) = sendTitle(
+            if (title == null) ""
+            else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)),
+            if (subtitle == null) ""
+            else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle))
+        )
 
-        override fun broadcastFormattedTitle(title: String?, subtitle: String?, playerPredicate: (SpigotPlayer) -> Boolean) {
+        override fun broadcastFormattedTitle(title: String?, subtitle: String?, playerPredicate: (SpigotPlayer) -> Boolean) =
             broadcastAction { it.sendFormattedTitle(title, subtitle) }
-        }
 
         override fun SpigotPlayer.sendPersistentFormattedTitle(
             title: String?,
             subtitle: String?,
             fadeIn: @Range(from = 0, to = 72000) Int,
-        ) {
-            sendTitle(title, subtitle, fadeIn, 72000,  /* 1h */0)
-        }
+        ) = sendTitle(title, subtitle, fadeIn, 72000,  /* 1h */0)
 
         override fun broadcastPersistentFormattedTitle(
             title: String?,
             subtitle: String?,
             fadeIn: @Range(from = 0, to = 72000) Int,
             playerPredicate: (SpigotPlayer) -> Boolean,
-        ) {
-            broadcastAction { it.sendPersistentFormattedTitle(title, subtitle, fadeIn) }
-        }
+        ) = broadcastAction { it.sendPersistentFormattedTitle(title, subtitle, fadeIn) }
 
         @JvmOverloads
         fun broadcastPotionEffect(
@@ -171,35 +143,23 @@ interface VitalUtils<CS, P : CS> {
             duration: Int,
             amplifier: Int,
             playerPredicate: (SpigotPlayer) -> Boolean = { true },
-        ) {
-            broadcastAction(playerPredicate) { it.addPotionEffect(PotionEffect(potionEffectType, duration, amplifier)) }
-        }
+        ) = broadcastAction(playerPredicate) { it.addPotionEffect(PotionEffect(potionEffectType, duration, amplifier)) }
 
         @JvmOverloads
-        fun broadcastClearPotionEffect(potionEffectType: PotionEffectType, playerPredicate: (SpigotPlayer) -> Boolean = { true }) {
+        fun broadcastClearPotionEffect(potionEffectType: PotionEffectType, playerPredicate: (SpigotPlayer) -> Boolean = { true }) =
             broadcastAction(playerPredicate) { it.removePotionEffect(potionEffectType) }
-        }
 
         @JvmOverloads
-        fun broadcastClearPotionEffects(playerPredicate: (SpigotPlayer) -> Boolean = { true }) {
-            broadcastAction(playerPredicate) { player ->
-                player.activePotionEffects
-                    .map { it.type }
-                    .forEach { type: PotionEffectType -> player.removePotionEffect(type) }
-            }
+        fun broadcastClearPotionEffects(playerPredicate: (SpigotPlayer) -> Boolean = { true }) = broadcastAction(playerPredicate) {
+            it.activePotionEffects.map { it.type }.forEach { type: PotionEffectType -> it.removePotionEffect(type) }
         }
 
-        override fun SpigotPlayer.sendFormattedActionBar(message: String) {
-            spigot().sendMessage(
-                ChatMessageType.ACTION_BAR, *BungeeComponentSerializer.get().serialize(
-                    MiniMessage.miniMessage().deserialize(message)
-                )
-            )
-        }
+        override fun SpigotPlayer.sendFormattedActionBar(message: String) = spigot().sendMessage(
+            ChatMessageType.ACTION_BAR, *BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message))
+        )
 
-        override fun broadcastFormattedActionBar(message: String, playerPredicate: (SpigotPlayer) -> Boolean) {
+        override fun broadcastFormattedActionBar(message: String, playerPredicate: (SpigotPlayer) -> Boolean) =
             broadcastAction(playerPredicate) { it.sendFormattedActionBar(message) }
-        }
 
         @JvmOverloads
         fun SpigotPlayer.teleportWithEffect(location: Location, potionEffectType: PotionEffectType = PotionEffectType.SLOWNESS) {
@@ -209,71 +169,66 @@ interface VitalUtils<CS, P : CS> {
             removePotionEffect(potionEffectType)
         }
 
-        fun SpigotPlayer.teleportWithEffect(to: Entity) {
-            teleportWithEffect(to.location, PotionEffectType.SLOWNESS)
-        }
+        fun SpigotPlayer.teleportWithEffect(to: Entity) = teleportWithEffect(to.location, PotionEffectType.SLOWNESS)
 
-        fun canBePlacedInMidAir(material: Material) =
-            !material.hasGravity() &&
-                    !isVegetation(material) &&
-                    (material != Material.REDSTONE &&
-                            material != Material.REDSTONE_TORCH &&
-                            material != Material.REPEATER &&
-                            material != Material.COMPARATOR &&
-                            material != Material.LEVER &&
-                            material != Material.TRIPWIRE &&
-                            !material.name.contains("BUTTON") &&
-                            !material.name.contains("PRESSURE_PLATE") &&
-                            !material.name.contains("RAIL"))
+        fun canBePlacedInMidAir(material: Material) = !material.hasGravity() &&
+                !isVegetation(material) &&
+                (material != Material.REDSTONE &&
+                        material != Material.REDSTONE_TORCH &&
+                        material != Material.REPEATER &&
+                        material != Material.COMPARATOR &&
+                        material != Material.LEVER &&
+                        material != Material.TRIPWIRE &&
+                        !material.name.contains("BUTTON") &&
+                        !material.name.contains("PRESSURE_PLATE") &&
+                        !material.name.contains("RAIL"))
 
-        fun isVegetation(material: Material) =
-            material.name.contains("SAPLING") ||
-                    material.name.contains("FLOWER") ||
-                    material.name.contains("WHEAT") ||
-                    material.name.contains("SEEDS") ||
-                    material.name.contains("CROP") ||
-                    material.name.contains("KELP") ||
-                    material.name.contains("BUSH") ||
-                    material.name.contains("MUSHROOM") ||
-                    material.name.contains("CHORUS") ||
-                    material.name.contains("FERN") ||
-                    material.name.contains("POTTED") ||
-                    material.name.contains("ROSE") ||
-                    material.name.contains("POPPY") ||
-                    material == Material.MELON_STEM ||
-                    material == Material.PUMPKIN_STEM ||
-                    material == Material.BAMBOO ||
-                    material == Material.SUGAR_CANE ||
-                    material == Material.SEA_PICKLE ||
-                    material == Material.NETHER_WART ||
-                    material == Material.LILY_PAD ||
-                    material == Material.VINE ||
-                    material == Material.GLOW_LICHEN ||
-                    material == Material.SCULK_VEIN ||
-                    material == Material.CACTUS ||
-                    material == Material.LILAC ||
-                    material == Material.PEONY ||
-                    material == Material.TALL_GRASS ||
-                    material == Material.TALL_SEAGRASS ||
-                    material == Material.MANGROVE_PROPAGULE
+        fun isVegetation(material: Material) = material.name.contains("SAPLING") ||
+                material.name.contains("FLOWER") ||
+                material.name.contains("WHEAT") ||
+                material.name.contains("SEEDS") ||
+                material.name.contains("CROP") ||
+                material.name.contains("KELP") ||
+                material.name.contains("BUSH") ||
+                material.name.contains("MUSHROOM") ||
+                material.name.contains("CHORUS") ||
+                material.name.contains("FERN") ||
+                material.name.contains("POTTED") ||
+                material.name.contains("ROSE") ||
+                material.name.contains("POPPY") ||
+                material == Material.MELON_STEM ||
+                material == Material.PUMPKIN_STEM ||
+                material == Material.BAMBOO ||
+                material == Material.SUGAR_CANE ||
+                material == Material.SEA_PICKLE ||
+                material == Material.NETHER_WART ||
+                material == Material.LILY_PAD ||
+                material == Material.VINE ||
+                material == Material.GLOW_LICHEN ||
+                material == Material.SCULK_VEIN ||
+                material == Material.CACTUS ||
+                material == Material.LILAC ||
+                material == Material.PEONY ||
+                material == Material.TALL_GRASS ||
+                material == Material.TALL_SEAGRASS ||
+                material == Material.MANGROVE_PROPAGULE
 
-        fun isRedstoneMachine(material: Material) =
-            material.creativeCategory == CreativeCategory.REDSTONE &&
-                    (material == Material.REDSTONE_TORCH ||
-                            material.name.contains("PISTON") ||
-                            material.name.contains("BUTTON") ||
-                            material.name.contains("PRESSURE_PLATE") ||
-                            material.name.contains("DETECTOR") ||
-                            material.name.contains("LAMP") ||
-                            material == Material.COMPARATOR ||
-                            material == Material.REPEATER ||
-                            material == Material.REDSTONE ||
-                            material == Material.REDSTONE_WIRE ||
-                            material == Material.OBSERVER ||
-                            material == Material.DROPPER ||
-                            material == Material.DISPENSER ||
-                            material == Material.HOPPER ||
-                            material == Material.HOPPER_MINECART)
+        fun isRedstoneMachine(material: Material) = material.creativeCategory == CreativeCategory.REDSTONE &&
+                (material == Material.REDSTONE_TORCH ||
+                        material.name.contains("PISTON") ||
+                        material.name.contains("BUTTON") ||
+                        material.name.contains("PRESSURE_PLATE") ||
+                        material.name.contains("DETECTOR") ||
+                        material.name.contains("LAMP") ||
+                        material == Material.COMPARATOR ||
+                        material == Material.REPEATER ||
+                        material == Material.REDSTONE ||
+                        material == Material.REDSTONE_WIRE ||
+                        material == Material.OBSERVER ||
+                        material == Material.DROPPER ||
+                        material == Material.DISPENSER ||
+                        material == Material.HOPPER ||
+                        material == Material.HOPPER_MINECART)
 
         fun isInsideLocationArea(location1: Location, location2: Location, location: Location): Boolean {
             val ourMinX = min(location1.x, location2.x)
@@ -423,29 +378,17 @@ interface VitalUtils<CS, P : CS> {
             weatherDuration = 0
         }
 
-        fun cleanGameRules(worldName: String) {
-            val world = Bukkit.getWorld(worldName)
-                ?: throw RuntimeException("World $worldName does not exist")
-
-            world.cleanGameRules()
-        }
+        fun cleanGameRules(worldName: String) = Bukkit.getWorld(worldName)?.cleanGameRules()
+            ?: throw RuntimeException("World $worldName does not exist")
     }
 
     object Bungee : VitalUtils<BungeeCommandSender, BungeePlayer> {
-        override fun broadcastAction(playerPredicate: (BungeePlayer) -> Boolean, action: (BungeePlayer) -> Unit) {
-            ProxyServer.getInstance().players
-                .filter(playerPredicate)
-                .forEach(action)
-        }
+        override fun broadcastAction(playerPredicate: (BungeePlayer) -> Boolean, action: (BungeePlayer) -> Unit) =
+            ProxyServer.getInstance().players.filter(playerPredicate).forEach(action)
 
-        override fun BungeeCommandSender.sendFormattedMessage(message: String) {
-            sendMessage(
-                *BungeeComponentSerializer.get().serialize(
-                    MiniMessage.miniMessage()
-                        .deserialize(message)
-                )
-            )
-        }
+        override fun BungeeCommandSender.sendFormattedMessage(message: String) = sendMessage(
+            *BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message))
+        )
 
         override fun BungeePlayer.sendFormattedTitle(
             title: String?,
@@ -453,61 +396,50 @@ interface VitalUtils<CS, P : CS> {
             fadeIn: @Range(from = 0, to = 72000) Int,
             stay: @Range(from = 0, to = 72000) Int,
             fadeOut: @Range(from = 0, to = 72000) Int,
-        ) {
-            sendTitle(
-                ProxyServer.getInstance().createTitle()
-                    .title(
-                        TextComponent.fromLegacy(
-                            if (title == null) "" else LegacyComponentSerializer.legacySection()
-                                .serialize(MiniMessage.miniMessage().deserialize(title))
-                        )
+        ) = sendTitle(
+            ProxyServer.getInstance().createTitle()
+                .title(
+                    TextComponent.fromLegacy(
+                        if (title == null) ""
+                        else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
                     )
-                    .subTitle(
-                        TextComponent.fromLegacy(
-                            if (subtitle == null) "" else LegacyComponentSerializer.legacySection()
-                                .serialize(MiniMessage.miniMessage().deserialize(subtitle))
-                        )
+                )
+                .subTitle(
+                    TextComponent.fromLegacy(
+                        if (subtitle == null) ""
+                        else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle))
                     )
-                    .fadeIn(fadeIn)
-                    .stay(stay)
-                    .fadeOut(fadeOut)
-            )
-        }
+                )
+                .fadeIn(fadeIn)
+                .stay(stay)
+                .fadeOut(fadeOut)
+        )
 
-        override fun BungeePlayer.sendFormattedTitle(title: String?, subtitle: String?) {
-            sendTitle(
-                ProxyServer.getInstance().createTitle()
-                    .title(
-                        TextComponent.fromLegacy(
-                            if (title == null) "" else LegacyComponentSerializer.legacySection()
-                                .serialize(MiniMessage.miniMessage().deserialize(title))
-                        )
+        override fun BungeePlayer.sendFormattedTitle(title: String?, subtitle: String?) = sendTitle(
+            ProxyServer.getInstance().createTitle()
+                .title(
+                    TextComponent.fromLegacy(
+                        if (title == null) ""
+                        else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
                     )
-                    .subTitle(
-                        TextComponent.fromLegacy(
-                            if (subtitle == null) "" else LegacyComponentSerializer.legacySection()
-                                .serialize(MiniMessage.miniMessage().deserialize(subtitle))
-                        )
+                )
+                .subTitle(
+                    TextComponent.fromLegacy(
+                        if (subtitle == null) ""
+                        else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle))
                     )
-            )
-        }
+                )
+        )
 
         override fun BungeePlayer.sendPersistentFormattedTitle(
             title: String?,
             subtitle: String?,
             fadeIn: @Range(from = 0, to = 72000) Int,
-        ) {
-            sendFormattedTitle(title, subtitle, fadeIn, 72000,  /* 1h */0)
-        }
+        ) = sendFormattedTitle(title, subtitle, fadeIn, 72000,  /* 1h */0)
 
-        override fun BungeePlayer.sendFormattedActionBar(message: String) {
-            sendMessage(
-                ChatMessageType.ACTION_BAR,
-                TextComponent.fromLegacy(
-                    LegacyComponentSerializer.legacySection()
-                        .serialize(MiniMessage.miniMessage().deserialize(message))
-                )
-            )
-        }
+        override fun BungeePlayer.sendFormattedActionBar(message: String) = sendMessage(
+            ChatMessageType.ACTION_BAR,
+            TextComponent.fromLegacy(LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(message)))
+        )
     }
 }

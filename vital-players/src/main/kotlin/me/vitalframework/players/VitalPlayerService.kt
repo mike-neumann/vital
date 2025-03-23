@@ -5,22 +5,18 @@ import java.util.*
 
 @Service
 class VitalPlayerService(private val playerRepository: VitalPlayerRepository) {
-    fun <T : Any> createPlayer(player: T, playerUniqueId: UUID, playerClass: Class<T>, vitalPlayerClass: Class<out VitalPlayer<*>>) {
+    fun <T : Any> createPlayer(player: T, playerUniqueId: UUID, playerClass: Class<T>, vitalPlayerClass: Class<out VitalPlayer<*>>) = try {
         // Retrieve the VitalPlayer associated with the joining player, if it exists.
         playerRepository.get(playerUniqueId)?.let { return }
-        // Create a new VitalPlayer for the joining player.
-        try {
-            // Register the VitalPlayer with VitalUserManagement.
-            playerRepository.save(vitalPlayerClass.getDeclaredConstructor(playerClass).newInstance(playerClass.cast(player)))
-        } catch (e: Exception) {
-            throw VitalPlayerException.Create(vitalPlayerClass, playerUniqueId, e)
-        }
+        // Register the VitalPlayer with VitalUserManagement.
+        playerRepository.save(vitalPlayerClass.getDeclaredConstructor(playerClass).newInstance(playerClass.cast(player)))
+    } catch (e: Exception) {
+        throw VitalPlayerException.Create(vitalPlayerClass, playerUniqueId, e)
     }
 
     fun destroyPlayer(playerUniqueId: UUID) {
         // Retrieve the VitalPlayer associated with the leaving player.
-        val vitalPlayer = playerRepository.get(playerUniqueId)
-            ?: return
+        val vitalPlayer = playerRepository.get(playerUniqueId) ?: return
         // Unregister the VitalPlayer from VitalUserManagement.
         playerRepository.delete(vitalPlayer)
     }

@@ -29,10 +29,7 @@ class VitalGlobalScoreboard(title: String, vararg var lines: Supplier<String>) :
         scoreboardContent.update()
         val objective = scoreboardContent.bukkitScoreboard.getObjective(
             PlainTextComponentSerializer.plainText()
-                .serialize(
-                    LegacyComponentSerializer.legacySection()
-                        .deserialize(scoreboardContent.title)
-                )
+                .serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboardContent.title))
         )
 
         for (lineIndex in lines.indices) {
@@ -40,10 +37,7 @@ class VitalGlobalScoreboard(title: String, vararg var lines: Supplier<String>) :
             val line = lineSupplier.get()
             val score = objective!!.getScore(
                 LegacyComponentSerializer.legacySection()
-                    .serialize(
-                        MiniMessage.miniMessage()
-                            .deserialize(line)
-                    ) + "\u00A7".repeat(lineIndex)
+                    .serialize(MiniMessage.miniMessage().deserialize(line)) + "\u00A7".repeat(lineIndex)
             )
 
             score.score = lines.size - lineIndex
@@ -51,18 +45,14 @@ class VitalGlobalScoreboard(title: String, vararg var lines: Supplier<String>) :
     }
 
     fun addPlayer(player: SpigotPlayer) {
-        if (player in _players) {
-            return
-        }
+        if (player in _players) return
 
         _players.add(player)
         update()
     }
 
     fun removePlayer(player: SpigotPlayer) {
-        if (player !in _players) {
-            return
-        }
+        if (player !in _players) return
 
         _players.remove(player)
         player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard

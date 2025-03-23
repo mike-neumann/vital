@@ -3,18 +3,14 @@ package me.vitalframework.commands
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
 
-abstract class VitalCommandException(message: String, cause: Throwable? = null) :
-    RuntimeException(message, cause) {
-    class ExecuteArgExceptionHandlerMethod(
-        method: Method,
-        context: VitalCommand.ArgExceptionHandlerContext,
-        cause: Throwable,
-    ) : VitalCommandException(
-        "Error while executing arg exception handler method '${method.name}(${
-            method.parameters.joinToString(", ") { "${it.type.simpleName} ${it.name}" }
-        })' using context '$context'",
-        cause
-    )
+abstract class VitalCommandException(message: String, cause: Throwable? = null) : RuntimeException(message, cause) {
+    class ExecuteArgExceptionHandlerMethod(method: Method, context: VitalCommand.ArgExceptionHandlerContext, cause: Throwable) :
+        VitalCommandException(
+            "Error while executing arg exception handler method '${method.name}(${
+                method.parameters.joinToString(", ") { "${it.type.simpleName} ${it.name}" }
+            })' using context '$context'",
+            cause
+        )
 
     class UnmappedArgHandler(arg: String) : VitalCommandException("No arg handler method exists for arg '$arg'")
 
@@ -42,14 +38,11 @@ abstract class VitalCommandException(message: String, cause: Throwable? = null) 
         })' failed at '${parameter.type.simpleName} ${parameter.name}'"
     )
 
-    class ExecuteExceptionHandlerMethod(
-        method: Method,
-        context: VitalCommand.ExceptionHandlerContext,
-        cause: Throwable
-    ) : VitalCommandException(
-        "Error while executing exception handler method '${method.name}(${
-            method.parameters.joinToString(", ") { "${it.type.simpleName} ${it.name}" }
-        })' using context '$context'",
-        cause
-    )
+    class ExecuteExceptionHandlerMethod(method: Method, context: VitalCommand.ExceptionHandlerContext, cause: Throwable) :
+        VitalCommandException(
+            "Error while executing exception handler method '${method.name}(${
+                method.parameters.joinToString(", ") { "${it.type.simpleName} ${it.name}" }
+            })' using context '$context'",
+            cause
+        )
 }

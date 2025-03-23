@@ -11,26 +11,18 @@ class VitalPropertiesConfigProcessor : Processor<Properties, String> {
 
     override fun load(inputStream: InputStream, clazz: Class<*>): Map<String, String> {
         data.load(inputStream)
-
         return mapOf(*data.entries.map { (key, value) -> key.toString() to value.toString() }.toTypedArray())
     }
 
     override fun read(key: String): String? = data.getProperty(key)
-
     override fun read(key: String, def: String): String? = data.getProperty(key, def)
 
+    override fun write(instance: Any) = write(serialize(instance))
+    override fun write(key: String, value: String) = data.setProperty(key, value).let {}
     override fun write(serializedContent: Map<String, String>) {
         for ((key, value) in serializedContent) {
             write(key, value)
         }
-    }
-
-    override fun write(instance: Any) {
-        write(serialize(instance))
-    }
-
-    override fun write(key: String, value: String) {
-        data.setProperty(key, value)
     }
 
     override fun save(serializedContent: Map<String, String>): String {
@@ -53,23 +45,13 @@ class VitalPropertiesConfigProcessor : Processor<Properties, String> {
         val instance = defaultConstructor.newInstance()
         // default constructor was found, inject field properties...
         for ((key, value) in serializedContent) {
-            VitalConfigUtils.getFieldByProperty(type, key)?.let {
-                VitalConfigUtils.injectField(
-                    instance,
-                    it,
-                    value
-                )
-            }
+            VitalConfigUtils.getFieldByProperty(type, key)?.let { VitalConfigUtils.injectField(instance, it, value) }
         }
 
         instance
     } catch (e: NoSuchMethodException) {
         // default constructor not found, attempt to get constructor matching properties...
-        val constructor = type.getConstructor(
-            *VitalConfigUtils.getPropertyFieldsFromType(type)
-                .map { it.javaClass }
-                .toTypedArray()
-        )
+        val constructor = type.getConstructor(*VitalConfigUtils.getPropertyFieldsFromType(type).map { it.javaClass }.toTypedArray())
         // constructor found, create new instance with this constructor...
         constructor.newInstance(serializedContent.values)
     }

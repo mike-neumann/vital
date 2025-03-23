@@ -27,9 +27,7 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
 
     private fun addTypeDescriptors(type: Class<*>) {
         val rootTypeDescription = TypeDescription(type, "!${type.simpleName}")
-        val rootExcludes = VitalConfigUtils.getNonPropertyFieldsFromType(type)
-            .map { it.name }
-            .toTypedArray()
+        val rootExcludes = VitalConfigUtils.getNonPropertyFieldsFromType(type).map { it.name }.toTypedArray()
 
         rootTypeDescription.setExcludes(*rootExcludes)
         yaml.addTypeDescription(rootTypeDescription)
@@ -37,9 +35,7 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
         for (field in VitalConfigUtils.getPropertyFieldsFromType(type)) {
             val configProperty = field.getAnnotation(VitalConfig.Property::class.java)
             val typeDescription = TypeDescription(field.type, "!${field.type.simpleName}")
-            val excludes = VitalConfigUtils.getNonPropertyFieldsFromType(field.type)
-                .map { it.name }
-                .toTypedArray()
+            val excludes = VitalConfigUtils.getNonPropertyFieldsFromType(field.type).map { it.name }.toTypedArray()
 
             typeDescription.setExcludes(*excludes)
             yaml.addTypeDescription(typeDescription)
@@ -58,27 +54,16 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
         addTypeDescriptors(clazz)
         val data = yaml.load<Map<String, Any>>(inputStream)
 
-        if (data != null) {
-            this.data.putAll(data)
-        }
+        if (data != null) this.data.putAll(data)
 
         return this.data
     }
 
     override fun read(key: String) = data[key]
-
     override fun read(key: String, def: Any) = data.getOrDefault(key, def)
-
-    override fun write(serializedContent: Map<String, Any>) {
-        data.putAll(serializedContent)
-    }
-
-    override fun write(instance: Any) {
-    }
-
-    override fun write(key: String, value: Any) {
-        data[key] = serialize(value)
-    }
+    override fun write(serializedContent: Map<String, Any>) = data.putAll(serializedContent)
+    override fun write(instance: Any) = run {}
+    override fun write(key: String, value: Any) = run { data[key] = serialize(value) }
 
     override fun save(serializedContent: Map<String, Any>): String {
         data.putAll(serializedContent)
@@ -97,19 +82,13 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
         val instance = defaultConstructor.newInstance()
         // default constructor was found, inject field properties...
         for ((key, value) in serializedContent) {
-            VitalConfigUtils.getFieldByProperty(type, key)?.let {
-                VitalConfigUtils.injectField(instance, it, value)
-            }
+            VitalConfigUtils.getFieldByProperty(type, key)?.let { VitalConfigUtils.injectField(instance, it, value) }
         }
 
         instance
     } catch (e: NoSuchMethodException) {
         // default constructor not found, attempt to get constructor matching properties...
-        val constructor = type.getConstructor(
-            *VitalConfigUtils.getPropertyFieldsFromType(type)
-                .map { it.javaClass }
-                .toTypedArray()
-        )
+        val constructor = type.getConstructor(*VitalConfigUtils.getPropertyFieldsFromType(type).map { it.javaClass }.toTypedArray())
         // constructor found, create new instance with this constructor...
         constructor.newInstance(serializedContent.values)
     }

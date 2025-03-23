@@ -6,9 +6,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class VitalItemService(val items: List<VitalItem>) {
-    fun handleInteraction(e: PlayerInteractEvent) {
-        items.firstOrNull { it == e.item }?.handleInteraction(e)
-    }
+    fun handleInteraction(e: PlayerInteractEvent) = items.firstOrNull { it == e.item }?.handleInteraction(e)
 
     @Scheduled(fixedRate = 50)
     fun handleCooldown() {
@@ -17,12 +15,9 @@ class VitalItemService(val items: List<VitalItem>) {
                 .filter { it.value > 0 }
                 .forEach { (player, _) ->
                     item.playerCooldown[player] = item.playerCooldown[player]!! - 50
-
                     item.onCooldownTick(player)
 
-                    if (item.playerCooldown[player]!! <= 0) {
-                        item.onCooldownExpire(player)
-                    }
+                    if (item.playerCooldown[player]!! <= 0) item.onCooldownExpire(player)
                 }
         }
     }

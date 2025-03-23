@@ -32,14 +32,9 @@ open class VitalInventory(val previousInventory: VitalInventory?) : RequiresAnno
     override fun requiredAnnotationType() = Info::class.java
 
     @JvmOverloads
-    fun setItem(
-        slot: Int,
-        itemStack: ItemStack,
-        player: SpigotPlayer,
-        action: InventoryItemClickAction = {},
-    ) {
-        _items.put(slot, itemStack)
-        _actions.put(player to slot, action)
+    fun setItem(slot: Int, itemStack: ItemStack, player: SpigotPlayer, action: InventoryItemClickAction = {}) {
+        _items[slot] = itemStack
+        _actions[player to slot] = action
     }
 
     fun hasInventoryOpen(player: SpigotPlayer) = _playerInventories.containsKey(player)
@@ -65,16 +60,14 @@ open class VitalInventory(val previousInventory: VitalInventory?) : RequiresAnno
     open fun open(player: SpigotPlayer) {
         val inventory = Bukkit.createInventory(player, size, name)
 
-        _playerInventories.put(player, inventory)
+        _playerInventories[player] = inventory
 
         onOpen(player)
         update(player)
         player.openInventory(inventory)
     }
 
-    fun click(e: InventoryClickEvent) {
-        _actions[e.whoClicked to e.slot]?.invoke(e)
-    }
+    fun click(e: InventoryClickEvent) = _actions[e.whoClicked to e.slot]?.invoke(e)
 
     fun close(player: SpigotPlayer) {
         _playerInventories.remove(player)
@@ -89,9 +82,5 @@ open class VitalInventory(val previousInventory: VitalInventory?) : RequiresAnno
     @Component
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.CLASS)
-    annotation class Info(
-        val name: String,
-        val size: @Range(from = 9, to = 54) Int = 9,
-        val background: Material = Material.AIR,
-    )
+    annotation class Info(val name: String, val size: @Range(from = 9, to = 54) Int = 9, val background: Material = Material.AIR)
 }

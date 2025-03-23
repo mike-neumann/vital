@@ -7,15 +7,12 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
 import java.util.function.Function
 
-class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<SpigotPlayer, String>) :
-    VitalScoreboard {
+class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<SpigotPlayer, String>) : VitalScoreboard {
     private val _scoreboardContent = mutableMapOf<SpigotPlayer, VitalScoreboardContent>()
     val scoreboardContent: Map<SpigotPlayer, VitalScoreboardContent> get() = _scoreboardContent
 
     fun update(player: SpigotPlayer) {
-        if (!_scoreboardContent.containsKey(player)) {
-            return
-        }
+        if (!_scoreboardContent.containsKey(player)) return
 
         player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
         updateContent(player)
@@ -25,28 +22,19 @@ class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<Spi
     }
 
     private fun updateContent(player: SpigotPlayer) {
-        if (!_scoreboardContent.containsKey(player)) {
-            return
-        }
+        if (!_scoreboardContent.containsKey(player)) return
         val scoreboard = _scoreboardContent[player]!!
 
         scoreboard.update()
         val objective = scoreboard.bukkitScoreboard.getObjective(
-            PlainTextComponentSerializer.plainText()
-                .serialize(
-                    LegacyComponentSerializer.legacySection()
-                        .deserialize(scoreboard.title)
-                )
+            PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboard.title))
         )
         val lines = applyLines(player)
 
         for (lineIndex in lines.indices) {
             val score = objective!!.getScore(
                 LegacyComponentSerializer.legacySection()
-                    .serialize(
-                        MiniMessage.miniMessage()
-                            .deserialize(lines[lineIndex])
-                    ) + "\u00A7".repeat(lineIndex)
+                    .serialize(MiniMessage.miniMessage().deserialize(lines[lineIndex])) + "\u00A7".repeat(lineIndex)
             )
 
             score.score = lines.size - lineIndex
@@ -54,18 +42,14 @@ class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<Spi
     }
 
     fun addPlayer(player: SpigotPlayer) {
-        if (_scoreboardContent.containsKey(player)) {
-            return
-        }
+        if (_scoreboardContent.containsKey(player)) return
 
         _scoreboardContent.put(player, VitalScoreboardContent(title))
         update(player)
     }
 
     fun removePlayer(player: SpigotPlayer) {
-        if (!_scoreboardContent.containsKey(player)) {
-            return
-        }
+        if (!_scoreboardContent.containsKey(player)) return
 
         _scoreboardContent.remove(player)
         player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard

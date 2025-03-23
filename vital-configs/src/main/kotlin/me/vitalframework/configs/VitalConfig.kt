@@ -44,9 +44,7 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
                 val file = Path(fileName)
                 // create file is not already exists
                 if (!file.exists()) {
-                    if (file.parent != null) {
-                        file.parent.createDirectories()
-                    }
+                    if (file.parent != null) file.parent.createDirectories()
 
                     try {
                         file.createFile()
@@ -67,9 +65,7 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
         val serializedContent = processor.load(inputStream, javaClass)
 
         for ((key, value) in serializedContent) {
-            VitalConfigUtils.getFieldByProperty(javaClass, key)?.let {
-                VitalConfigUtils.injectField(this, it, value)
-            }
+            VitalConfigUtils.getFieldByProperty(javaClass, key)?.let { VitalConfigUtils.injectField(this, it, value) }
         }
     }
 

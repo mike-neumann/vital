@@ -6,11 +6,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class VitalInventoryService {
-    fun openInventory(player: SpigotPlayer, vitalInventoryClass: Class<VitalInventory>) {
-        val vitalInventory: VitalInventory = Vital.context.getBean(vitalInventoryClass)
-
-        vitalInventory.open(player)
-    }
+    fun openInventory(player: SpigotPlayer, vitalInventoryClass: Class<VitalInventory>) =
+        Vital.context.getBean(vitalInventoryClass).open(player)
 
     fun getInventories(vitalInventoryClass: Class<VitalInventory>) = try {
         Vital.context.getBeansOfType(vitalInventoryClass).values.toList()

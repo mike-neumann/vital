@@ -28,9 +28,7 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
         }
         val meta = itemStack.itemMeta!!
 
-        if (info.enchanted) {
-            meta.addEnchant(Enchantment.FORTUNE, 1, true)
-        }
+        if (info.enchanted) meta.addEnchant(Enchantment.FORTUNE, 1, true)
 
         itemMeta = meta
         type = itemStack.type
@@ -41,14 +39,8 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
     override fun requiredAnnotationType() = Info::class.java
 
     fun handleInteraction(e: PlayerInteractEvent) {
-        if (!playerCooldown.containsKey(e.player)) {
-            playerCooldown[e.player] = 0
-        }
-
-        if (playerCooldown[e.player]!! >= 1) {
-            onCooldown(e)
-            return
-        }
+        if (!playerCooldown.containsKey(e.player)) playerCooldown[e.player] = 0
+        if (playerCooldown[e.player]!! >= 1) return onCooldown(e)
         val action = e.action
 
         when (action) {
@@ -60,36 +52,14 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other !is ItemStack) {
-            return false
-        }
+        if (other !is ItemStack) return false
+        if (other.itemMeta == null) return other == this
+        if (!other.itemMeta!!.persistentDataContainer.has(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING))
+            return toString() == other.toString().replace("${other.type} x ${other.amount}", "${other.type} x 1")
+        val uuid = UUID.fromString(itemMeta!!.persistentDataContainer.get(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING))
+        val otherId = UUID.fromString(other.itemMeta!!.persistentDataContainer.get(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING))
 
-        if (other.itemMeta == null) {
-            return other == this
-        }
-
-        if (!other.itemMeta!!.persistentDataContainer.has(
-                VitalNamespacedKey.ITEM_UUID,
-                PersistentDataType.STRING
-            )
-        ) {
-            return toString() == other.toString()
-                .replace("${other.type} x ${other.amount}", "${other.type} x 1")
-        }
-        val uuid = UUID.fromString(
-            itemMeta!!.persistentDataContainer.get(
-                VitalNamespacedKey.ITEM_UUID,
-                PersistentDataType.STRING
-            )
-        )
-        val otherUuid = UUID.fromString(
-            other.itemMeta!!.persistentDataContainer.get(
-                VitalNamespacedKey.ITEM_UUID,
-                PersistentDataType.STRING
-            )
-        )
-
-        return uuid == otherUuid
+        return uuid == otherId
     }
 
     override fun toString() = super.toString().replace("$type x $amount", "$type x 1");
