@@ -90,11 +90,11 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         for (arg in this.args.values) {
             // Split the value of the command argument into individual parts.
             val originalArgs = arg.value.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            // Clone the originalArgs to avoid modification.
-            val editedArgs = originalArgs.clone()
             // Check if the originalArgs length is greater than or equal to the provided args length
             // or if the last element of originalArgs ends with "%*".
             if (originalArgs.size < args.size && !originalArgs[originalArgs.size - 1].endsWith("%*")) continue
+            // Clone the originalArgs to avoid modification.
+            val editedArgs = originalArgs.clone()
 
             for (argIndex in args.indices) {
                 // Determine the original argument at the current index.
@@ -104,10 +104,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
                 // Replace the edited argument at the corresponding index with the provided argument.
                 editedArgs[if (argIndex >= editedArgs.size) editedArgs.size - 1 else argIndex] = args[argIndex]
             }
-            // Determine the final argument from originalArgs and args.
-            val finalArg = originalArgs[if (args.size - 1 >= originalArgs.size) originalArgs.size - 1 else args.size - 1]
             // Check if the joined editedArgs start with the joined provided args.
             if (!editedArgs.joinToString(" ").startsWith(args.joinToString(" "))) continue
+            // Determine the final argument from originalArgs and args.
+            val finalArg = originalArgs[if (args.size - 1 >= originalArgs.size) originalArgs.size - 1 else args.size - 1]
 
             if (finalArg.startsWith("%") && finalArg.endsWith("%*")) {
                 // Add the final argument with "%" and "%*" removed to the tabCompleted list.
@@ -135,22 +135,12 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
     }
 
     fun execute(sender: CS, args: Array<String>) {
-        // Check if the command requires a player sender.
-        if (playerOnly) {
-            // Check if the sender is not a Player.
-            if (!isPlayer(sender)) {
-                // Execute the onCommandRequiresPlayer method and return true.
-                onCommandRequiresPlayer(sender, args.joinToString(" "), null)
-                return
-            }
-        }
-        // Check if a permission is required and if the sender has it.
-        if (permission.isNotBlank() && !hasPermission(sender, permission)) {
-            // Execute the onCommandRequiresPermission method and return true.
-            onCommandRequiresPermission(sender, args.joinToString(" "), null)
-            return
-        }
-        // the arguments the player has typed in chat, joined to one single string separated by spaces
+        if (playerOnly && !isPlayer(sender)) return onCommandRequiresPlayer(sender, args.joinToString(" "), null)
+        if (permission.isNotBlank() && !hasPermission(sender, permission)) return onCommandRequiresPermission(
+            sender,
+            args.joinToString(" "),
+            null
+        )
         val joinedPlayerArgs = args.joinToString(" ")
         val executingArg = getArg(joinedPlayerArgs)
         // if the player has not put in any arguments, we may execute the base command handler method
@@ -222,17 +212,13 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
     @Target(AnnotationTarget.CLASS)
     annotation class Arg(val value: String, val permission: String = "", val playerOnly: Boolean = false) {
         enum class Type(val placeholder: String, val action: (TabCompletionContext) -> Unit) {
-            PLAYER("%PLAYER%", { context ->
-                context.playerNames.filter { it !in context.completions }.forEach { context.completions.add(it) }
-            }),
-            BOOLEAN("%BOOLEAN%", {
-                it.completions.add("true")
-                it.completions.add("false")
-            }),
+            PLAYER(
+                "%PLAYER%",
+                { context -> context.playerNames.filter { it !in context.completions }.forEach { context.completions.add(it) } }
+            ),
+            BOOLEAN("%BOOLEAN%", { it.completions.addAll(arrayOf("true", "false")) }),
             NUMBER("%NUMBER%", { it.completions.add("0") }),
-            MATERIAL("%MATERIAL%", { context ->
-                Material.entries.map { it.name }.forEach { context.completions.add(it) }
-            });
+            MATERIAL("%MATERIAL%", { context -> Material.entries.map { it.name }.forEach { context.completions.add(it) } });
 
             companion object {
                 fun getTypeByPlaceholder(placeholder: String) = entries.firstOrNull { it.placeholder == placeholder }
@@ -290,10 +276,8 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         @PostConstruct
         fun init() = plugin.getCommand(name)!!.setExecutor(this)
 
-        override fun onCommand(sender: SpigotCommandSender, command: Command, label: String, args: Array<String>): Boolean {
-            execute(sender, args)
-            return true
-        }
+        override fun onCommand(sender: SpigotCommandSender, command: Command, label: String, args: Array<String>) =
+            execute(sender, args).let { true }
 
         override fun onTabComplete(sender: SpigotCommandSender, command: Command, label: String, args: Array<String>) =
             tabComplete(sender, args)

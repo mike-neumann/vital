@@ -13,13 +13,9 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
     override val data = mutableMapOf<String, Any>()
 
     init {
-        val loaderOptions = LoaderOptions().apply {
-            tagInspector = TagInspector { true }
-        }
+        val loaderOptions = LoaderOptions().apply { tagInspector = TagInspector { true } }
         val constructor = SnakeYamlConstructor(loaderOptions)
-        val dumperOptions = DumperOptions().apply {
-            defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
-        }
+        val dumperOptions = DumperOptions().apply { defaultFlowStyle = DumperOptions.FlowStyle.BLOCK }
         val representer = Representer(dumperOptions)
 
         yaml = Yaml(constructor, representer, dumperOptions, loaderOptions)

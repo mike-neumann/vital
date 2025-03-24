@@ -26,10 +26,10 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
         bukkitTeam.setAllowFriendlyFire(friendlyFire)
         bukkitTeam.setCanSeeFriendlyInvisibles(canSeeFriendlyInvisibles)
 
-        if (prefix != null) bukkitTeam.prefix =
-            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(prefix!!))
-        if (suffix != null) bukkitTeam.suffix =
-            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(suffix!!))
+        if (prefix != null)
+            bukkitTeam.prefix = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(prefix!!))
+        if (suffix != null)
+            bukkitTeam.suffix = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(suffix!!))
         // Update all options
         for ((option, status) in _options) {
             bukkitTeam.setOption(option, status)

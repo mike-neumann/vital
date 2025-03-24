@@ -13,7 +13,7 @@ abstract class VitalPagedInventory(previousInventory: VitalInventory?) : VitalIn
         private set
     var toSlot = 0
         private set
-    val pageContentAmount: Int get() = (toSlot + 1 /* since content is INCLUSIVE to the SLOT itself */) - fromSlot
+    val pageContentAmount get() = (toSlot + 1 /* since content is INCLUSIVE to the SLOT itself */) - fromSlot
 
     init {
         val info = javaClass.getAnnotation(Info::class.java)

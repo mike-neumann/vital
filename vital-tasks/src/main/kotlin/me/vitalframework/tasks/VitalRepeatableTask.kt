@@ -13,7 +13,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) :
         private set
     var task: T? = null
         private set
-    val running: Boolean get() = runnable != null && task != null
+    val running get() = runnable != null && task != null
 
     init {
         val info = getRequiredAnnotation()
