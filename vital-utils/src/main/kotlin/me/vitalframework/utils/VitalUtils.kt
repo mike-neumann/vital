@@ -378,6 +378,26 @@ interface VitalUtils<CS, P : CS> {
             weatherDuration = 0
         }
 
+        fun World.getRandomLocation() = getBlockAt(
+            (Int.MIN_VALUE..Int.MAX_VALUE).random(),
+            (Int.MIN_VALUE..Int.MAX_VALUE).random(),
+            (Int.MIN_VALUE..Int.MAX_VALUE).random()
+        ).location
+
+        fun Location.getHighestSafeLocation(startFromY: Int = 50) = let {
+            var safeY = startFromY
+            do {
+                safeY++
+            } while (world!!.getBlockAt(x.toInt(), safeY, z.toInt()).type != Material.AIR && world!!.getBlockAt(
+                    x.toInt(),
+                    safeY + 1,
+                    z.toInt()
+                ).type != Material.AIR
+            )
+
+            Location(world, x, safeY.toDouble(), z)
+        }
+
         fun cleanGameRules(worldName: String) = Bukkit.getWorld(worldName)?.cleanGameRules()
             ?: throw RuntimeException("World $worldName does not exist")
     }
