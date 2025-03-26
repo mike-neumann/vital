@@ -8,28 +8,28 @@ import org.gradle.api.Project
 class VitalGradlePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         // needs to be applied before dependency resolution takes place.
-        target.applyPlugin(Plugin.SPRING_BOOT_ID)
-        target.applyPlugin(Plugin.KOTLIN_SPRING_ID)
-        target.applyPlugin(Plugin.DEPENDENCY_MANAGEMENT_ID)
-        target.applyPlugin(Plugin.SHADOW_ID)
+        target.plugins.apply("org.springframework.boot")
+        target.plugins.apply("org.jetbrains.kotlin.plugin.spring")
+        target.plugins.apply("io.spring.dependency-management")
+        target.plugins.apply("com.gradleup.shadow")
 
-        target.applyDependency("implementation", "${Dependency.VITAL_CORE}:+")
+        target.applyDependency("implementation", "me.vitalframework:vital-core:${target.getProperty("vitalVersion")}")
         target.applyDependency(
-            "kapt", "${Dependency.VITAL_CORE_PROCESSOR}:+",
-            "annotationProcessor", "${Dependency.VITAL_CORE_PROCESSOR}:+"
+            "kapt", "me.vitalframework:vital-core-processor:${target.getProperty("vitalVersion")}",
+            "annotationProcessor", "me.vitalframework:vital-core-processor:${target.getProperty("vitalVersion")}"
         )
 
-        if (target.hasDependency(Dependency.VITAL_COMMANDS)) {
+        if (target.hasDependency("me.vitalframework:vital-commands")) {
             target.applyDependency(
-                "kapt", "${Dependency.VITAL_COMMANDS_PROCESSOR}:+",
-                "annotationProcessor", "${Dependency.VITAL_COMMANDS_PROCESSOR}:+"
+                "kapt", "me.vitalframework:vital-commands-processor:${target.getProperty("vitalVersion")}",
+                "annotationProcessor", "me.vitalframework:vital-commands-processor:${target.getProperty("vitalVersion")}"
             )
         }
 
         target.tasks.named("build") { it.dependsOn(target.tasks.named("shadowJar")) }
-        // spring's bootJar task should not be enabled, since our server manages its own runtime main class.
         target.tasks.named("bootJar") { it.enabled = false }
         target.tasks.named("shadowJar", ShadowJar::class.java) {
+            // service files are not automatically merged which can cause
             it.mergeServiceFiles()
             it.mergeGroovyExtensionModules()
 //            TODO: currently does not work with logger factories on paper...
@@ -41,16 +41,31 @@ class VitalGradlePlugin : Plugin<Project> {
 //            appendTransform(it, "META-INF/web-fragment.xml")
             it.appendTransform("META-INF/spring/aot.factories")
             it.appendTransform("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports")
+            it.exclude(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.md",
+                "META-INF/NOTICE.txt",
+                "META-INF/additional-spring-configuration-metadata.json",
+                "META-INF/license.txt",
+                "META-INF/notice.txt",
+                "META-INF/sisu/javax.inject.Named",
+                "META-INF/spring-configuration-metadata.json",
+                "META-INF/spring.factories",
+                "META-INF/spring.handlers",
+                "META-INF/spring.schemas",
+                "META-INF/spring.tooling",
+                "META-INF/web-fragment.xml",
+                "license.txt",
+                "notice.txt"
+            )
         }
     }
 
     private fun ShadowJar.appendTransform(resource: String) = transform(AppendingTransformer::class.java) { it.resource.set(resource) }
-    private fun Project.applyPlugin(id: String, exampleVersion: String = "+") = try {
-        // this will fail when plugins are not detected on classpath
-        plugins.apply(id)
-    } catch (_: Exception) {
-        throw VitalGradlePluginException.PluginNotFound(id, exampleVersion)
-    }
 
     private fun Project.hasDependency(dependencyNotation: String) = configurations.flatMap { it.allDependencies }
         .any { "${it.group}:${it.name}:${it.version}".startsWith(dependencyNotation) }
@@ -66,17 +81,6 @@ class VitalGradlePlugin : Plugin<Project> {
         dependencies.add(fallbackConfigurationName, fallbackDependencyNotation)
     }
 
-    object Plugin {
-        const val SPRING_BOOT_ID = "org.springframework.boot"
-        const val KOTLIN_SPRING_ID = "org.jetbrains.kotlin.plugin.spring"
-        const val DEPENDENCY_MANAGEMENT_ID = "io.spring.dependency-management"
-        const val SHADOW_ID = "com.gradleup.shadow"
-    }
-
-    object Dependency {
-        const val VITAL_COMMANDS = "me.vitalframework:vital-commands"
-        const val VITAL_COMMANDS_PROCESSOR = "me.vitalframework:vital-commands-processor"
-        const val VITAL_CORE = "me.vitalframework:vital-core"
-        const val VITAL_CORE_PROCESSOR = "me.vitalframework:vital-core-processor"
-    }
+    private fun Project.getProperty(propertyName: String) = findProperty(propertyName)
+        ?: throw IllegalStateException("property '$propertyName' not found")
 }
