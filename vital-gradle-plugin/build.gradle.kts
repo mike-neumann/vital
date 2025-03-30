@@ -14,8 +14,8 @@ gradlePlugin {
 
 dependencies {
     api(project(":vital-core"))
-    api("org.jetbrains.kotlin.plugin.spring:org.jetbrains.kotlin.plugin.spring.gradle.plugin:${findProperty("kotlinSpringPluginVersion")}")
+    api("org.jetbrains.kotlin.plugin.spring:org.jetbrains.kotlin.plugin.spring.gradle.plugin:${findProperty("kotlinVersion")}")
     api("io.spring.gradle:dependency-management-plugin:${findProperty("dependencyManagementPluginVersion")}")
-    api("org.springframework.boot:org.springframework.boot.gradle.plugin:${findProperty("springBootPluginVersion")}")
+    api("org.springframework.boot:org.springframework.boot.gradle.plugin:${findProperty("springBootVersion")}")
     api("com.gradleup.shadow:shadow-gradle-plugin:${findProperty("shadowVersion")}")
 }
