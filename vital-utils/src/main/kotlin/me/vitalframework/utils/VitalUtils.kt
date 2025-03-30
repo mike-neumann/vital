@@ -379,20 +379,26 @@ interface VitalUtils<CS, P : CS> {
         }
 
         fun World.getRandomLocation() = getBlockAt(
-            (Int.MIN_VALUE..Int.MAX_VALUE).random(),
-            (Int.MIN_VALUE..Int.MAX_VALUE).random(),
-            (Int.MIN_VALUE..Int.MAX_VALUE).random()
+            (-29_999_984..29_999_984).random(),
+            (-256..256).random(),
+            (-29_999_984..29_999_984).random()
         ).location
 
-        fun Location.getHighestSafeLocation(startFromY: Int = 50) = let {
-            var safeY = startFromY
+        fun Location.getHighestSafeLocationFromTop(startFrom: Int = 256) = let {
+            var y = startFrom
+            do {
+                y--
+            } while (world!!.getBlockAt(x.toInt(), y, z.toInt()).type == Material.AIR)
+
+            world!!.getBlockAt(x.toInt(), y + 2, z.toInt()).location
+        }
+
+        fun Location.getHighestSafeLocationFromBottom(startFrom: Int = 50) = let {
+            var safeY = startFrom
             do {
                 safeY++
-            } while (world!!.getBlockAt(x.toInt(), safeY, z.toInt()).type != Material.AIR && world!!.getBlockAt(
-                    x.toInt(),
-                    safeY + 1,
-                    z.toInt()
-                ).type != Material.AIR
+            } while (world!!.getBlockAt(x.toInt(), safeY, z.toInt()).type != Material.AIR &&
+                world!!.getBlockAt(x.toInt(), safeY + 1, z.toInt()).type != Material.AIR
             )
 
             Location(world, x, safeY.toDouble(), z)
