@@ -42,13 +42,14 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
     internal fun getArg(executedArg: String) = args.entries.filter { it.key.matcher(executedArg).matches() }.map { it.value }.firstOrNull()
 
     private fun executeArgExceptionHandlerMethod(sender: CS, exception: Throwable, executedArg: String, commandArg: Arg) {
-        val exceptionHandlers = argExceptionHandlers[commandArg]
-
-        if (exceptionHandlers.isNullOrEmpty()) {
+        val exceptionHandlers = argExceptionHandlers[commandArg] ?: emptyMap()
+        // we may or may not have an exception handler mapped for this execution context
+        val context = exceptionHandlers.entries.filter { it.key.isAssignableFrom(exception.javaClass) }.map { it.value }.firstOrNull()
+        if (context == null) {
             // we do not have any exception handler mapped for this argument
             // try to find a global exception handler
             val context = VitalCommandExceptionHandlerProcessor.getExceptionHandler(exception::class.java)
-                ?: throw RuntimeException(exception)
+                ?: return onCommandError(sender, commandArg, exception)
 
             try {
                 context.handlerMethod(
@@ -61,9 +62,6 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
 
             return
         }
-        // we may or may not have an exception handler mapped for this execution context
-        val context = exceptionHandlers.entries.filter { it.key.isAssignableFrom(exception.javaClass) }.map { it.value }.firstOrNull()
-            ?: return onCommandError(sender, commandArg, exception)
 
         try {
             context.handlerMethod(
