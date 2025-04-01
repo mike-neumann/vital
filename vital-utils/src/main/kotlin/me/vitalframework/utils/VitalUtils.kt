@@ -32,51 +32,50 @@ interface VitalUtils<CS, P : CS> {
         fun chatRunCommandCheckmarkButton(command: String) = chatRunCommandButton("<green><bold>✓</bold></green>", command)
     }
 
-    fun broadcastAction(playerPredicate: (P) -> Boolean = { true }, action: (P) -> Unit)
+    fun broadcastAction(predicate: (P) -> Boolean = { true }, action: (P) -> Unit)
     fun CS.sendFormattedMessage(message: String)
-    fun broadcastFormattedMessage(message: String, playerPredicate: (P) -> Boolean = { true }) {
-        broadcastAction(playerPredicate) { it.sendFormattedMessage(message) }
+    fun broadcastFormattedMessage(message: String, predicate: (P) -> Boolean = { true }) {
+        broadcastAction(predicate) { it.sendFormattedMessage(message) }
     }
 
     fun P.sendFormattedTitle(
-        title: String?,
-        subtitle: String?,
+        title: String = "",
+        subtitle: String = "",
         fadeIn: @Range(from = 0, to = 72000) Int,
         stay: @Range(from = 0, to = 72000) Int,
         fadeOut: @Range(from = 0, to = 72000) Int,
     )
 
-    fun P.sendFormattedTitle(title: String?, subtitle: String?)
+    fun P.sendFormattedTitle(title: String = "", subtitle: String = "")
+    fun broadcastFormattedTitle(title: String = "", subtitle: String = "", predicate: (P) -> Boolean) =
+        broadcastAction(predicate) { it.sendFormattedTitle(title, subtitle) }
 
     fun broadcastFormattedTitle(
-        title: String?,
-        subtitle: String?,
+        title: String = "",
+        subtitle: String = "",
         fadeIn: @Range(from = 0, to = 72000) Int,
         stay: @Range(from = 0, to = 72000) Int,
         fadeOut: @Range(from = 0, to = 72000) Int,
-        playerPredicate: (P) -> Boolean = { true },
-    ) = broadcastAction(playerPredicate) { it.sendFormattedTitle(title, subtitle, fadeIn, stay, fadeOut) }
+        predicate: (P) -> Boolean = { true },
+    ) = broadcastAction(predicate) { it.sendFormattedTitle(title, subtitle, fadeIn, stay, fadeOut) }
 
-    fun broadcastFormattedTitle(title: String?, subtitle: String?, playerPredicate: (P) -> Boolean = { true }) =
-        broadcastAction(playerPredicate) { it.sendFormattedTitle(title, subtitle) }
+    fun P.sendFormattedPersistentTitle(title: String = "", subtitle: String = "", fadeIn: @Range(from = 0, to = 72000) Int)
 
-    fun P.sendPersistentFormattedTitle(title: String?, subtitle: String?, fadeIn: @Range(from = 0, to = 72000) Int)
-
-    fun broadcastPersistentFormattedTitle(
-        title: String?,
-        subtitle: String?,
+    fun broadcastFormattedPersistentTitle(
+        title: String = "",
+        subtitle: String = "",
         fadeIn: @Range(from = 0, to = 72000) Int,
-        playerPredicate: (P) -> Boolean = { true },
-    ) = broadcastAction(playerPredicate) { it.sendPersistentFormattedTitle(title, subtitle, fadeIn) }
+        predicate: (P) -> Boolean = { true },
+    ) = broadcastAction(predicate) { it.sendFormattedPersistentTitle(title, subtitle, fadeIn) }
 
     fun P.sendFormattedActionBar(message: String)
 
-    fun broadcastFormattedActionBar(message: String, playerPredicate: (P) -> Boolean = { true }) =
-        broadcastAction(playerPredicate) { it.sendFormattedActionBar(message) }
+    fun broadcastFormattedActionBar(message: String, predicate: (P) -> Boolean = { true }) =
+        broadcastAction(predicate) { it.sendFormattedActionBar(message) }
 
     object Spigot : VitalUtils<SpigotCommandSender, SpigotPlayer> {
-        override fun broadcastAction(playerPredicate: (SpigotPlayer) -> Boolean, action: (SpigotPlayer) -> Unit) = Bukkit.getOnlinePlayers()
-            .filter(playerPredicate)
+        override fun broadcastAction(predicate: (SpigotPlayer) -> Boolean, action: (SpigotPlayer) -> Unit) = Bukkit.getOnlinePlayers()
+            .filter(predicate)
             .forEach(action)
 
         override fun SpigotCommandSender.sendFormattedMessage(message: String) = spigot().sendMessage(
@@ -84,58 +83,54 @@ interface VitalUtils<CS, P : CS> {
             *BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message))
         )
 
-        override fun broadcastFormattedMessage(message: String, playerPredicate: (SpigotPlayer) -> Boolean) =
-            broadcastAction(playerPredicate) {
+        override fun broadcastFormattedMessage(message: String, predicate: (SpigotPlayer) -> Boolean) =
+            broadcastAction(predicate) {
                 // must be used since, both version (paper and spigot) support the bungeeapi implementations...
                 it.spigot().sendMessage(*BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message)))
             }
 
         @JvmOverloads
-        fun broadcastSound(sound: Sound, volume: Float, pitch: Float, playerPredicate: (SpigotPlayer) -> Boolean = { true }) =
-            broadcastAction(playerPredicate) { it.playSound(it, sound, volume, pitch) }
+        fun broadcastSound(sound: Sound, volume: Float, pitch: Float, predicate: (SpigotPlayer) -> Boolean = { true }) =
+            broadcastAction(predicate) { it.playSound(it, sound, volume, pitch) }
 
         @JvmOverloads
-        fun broadcastSound(sound: Sound, playerPredicate: (SpigotPlayer) -> Boolean = { true }) =
-            broadcastSound(sound, 1f, 1f, playerPredicate)
+        fun broadcastSound(sound: Sound, predicate: (SpigotPlayer) -> Boolean = { true }) =
+            broadcastSound(sound, 1f, 1f, predicate)
 
         override fun SpigotPlayer.sendFormattedTitle(
-            title: String?,
-            subtitle: String?,
+            title: String,
+            subtitle: String,
             fadeIn: @Range(from = 0, to = 72000) Int,
             stay: @Range(from = 0, to = 72000) Int,
             fadeOut: @Range(from = 0, to = 72000) Int,
         ) = sendTitle(
-            if (title == null) ""
-            else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)),
-            if (subtitle == null) ""
-            else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle)),
+            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)),
+            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle)),
             fadeIn,
             stay,
             fadeOut
         )
 
-        override fun SpigotPlayer.sendFormattedTitle(title: String?, subtitle: String?) = sendTitle(
-            if (title == null) ""
-            else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)),
-            if (subtitle == null) ""
-            else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle))
+        override fun SpigotPlayer.sendFormattedTitle(title: String, subtitle: String) = sendTitle(
+            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)),
+            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle))
         )
 
-        override fun broadcastFormattedTitle(title: String?, subtitle: String?, playerPredicate: (SpigotPlayer) -> Boolean) =
+        override fun broadcastFormattedTitle(title: String, subtitle: String, predicate: (SpigotPlayer) -> Boolean) =
             broadcastAction { it.sendFormattedTitle(title, subtitle) }
 
-        override fun SpigotPlayer.sendPersistentFormattedTitle(
-            title: String?,
-            subtitle: String?,
+        override fun SpigotPlayer.sendFormattedPersistentTitle(
+            title: String,
+            subtitle: String,
             fadeIn: @Range(from = 0, to = 72000) Int,
         ) = sendTitle(title, subtitle, fadeIn, 72000,  /* 1h */0)
 
-        override fun broadcastPersistentFormattedTitle(
-            title: String?,
-            subtitle: String?,
+        override fun broadcastFormattedPersistentTitle(
+            title: String,
+            subtitle: String,
             fadeIn: @Range(from = 0, to = 72000) Int,
-            playerPredicate: (SpigotPlayer) -> Boolean,
-        ) = broadcastAction { it.sendPersistentFormattedTitle(title, subtitle, fadeIn) }
+            predicate: (SpigotPlayer) -> Boolean,
+        ) = broadcastAction { it.sendFormattedPersistentTitle(title, subtitle, fadeIn) }
 
         @JvmOverloads
         fun broadcastPotionEffect(
@@ -158,8 +153,8 @@ interface VitalUtils<CS, P : CS> {
             ChatMessageType.ACTION_BAR, *BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message))
         )
 
-        override fun broadcastFormattedActionBar(message: String, playerPredicate: (SpigotPlayer) -> Boolean) =
-            broadcastAction(playerPredicate) { it.sendFormattedActionBar(message) }
+        override fun broadcastFormattedActionBar(message: String, predicate: (SpigotPlayer) -> Boolean) =
+            broadcastAction(predicate) { it.sendFormattedActionBar(message) }
 
         @JvmOverloads
         fun SpigotPlayer.teleportWithEffect(location: Location, potionEffectType: PotionEffectType = PotionEffectType.SLOWNESS) {
@@ -409,16 +404,15 @@ interface VitalUtils<CS, P : CS> {
     }
 
     object Bungee : VitalUtils<BungeeCommandSender, BungeePlayer> {
-        override fun broadcastAction(playerPredicate: (BungeePlayer) -> Boolean, action: (BungeePlayer) -> Unit) =
-            ProxyServer.getInstance().players.filter(playerPredicate).forEach(action)
+        override fun broadcastAction(predicate: (BungeePlayer) -> Boolean, action: (BungeePlayer) -> Unit) =
+            ProxyServer.getInstance().players.filter(predicate).forEach(action)
 
-        override fun BungeeCommandSender.sendFormattedMessage(message: String) = sendMessage(
-            *BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message))
-        )
+        override fun BungeeCommandSender.sendFormattedMessage(message: String) =
+            sendMessage(*BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message)))
 
         override fun BungeePlayer.sendFormattedTitle(
-            title: String?,
-            subtitle: String?,
+            title: String,
+            subtitle: String,
             fadeIn: @Range(from = 0, to = 72000) Int,
             stay: @Range(from = 0, to = 72000) Int,
             fadeOut: @Range(from = 0, to = 72000) Int,
@@ -426,14 +420,12 @@ interface VitalUtils<CS, P : CS> {
             ProxyServer.getInstance().createTitle()
                 .title(
                     TextComponent.fromLegacy(
-                        if (title == null) ""
-                        else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
+                        LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
                     )
                 )
                 .subTitle(
                     TextComponent.fromLegacy(
-                        if (subtitle == null) ""
-                        else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle))
+                        LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle))
                     )
                 )
                 .fadeIn(fadeIn)
@@ -441,31 +433,30 @@ interface VitalUtils<CS, P : CS> {
                 .fadeOut(fadeOut)
         )
 
-        override fun BungeePlayer.sendFormattedTitle(title: String?, subtitle: String?) = sendTitle(
+        override fun BungeePlayer.sendFormattedTitle(title: String, subtitle: String) = sendTitle(
             ProxyServer.getInstance().createTitle()
                 .title(
                     TextComponent.fromLegacy(
-                        if (title == null) ""
-                        else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
+                        LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
                     )
                 )
                 .subTitle(
                     TextComponent.fromLegacy(
-                        if (subtitle == null) ""
-                        else LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle))
+                        LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle))
                     )
                 )
         )
 
-        override fun BungeePlayer.sendPersistentFormattedTitle(
-            title: String?,
-            subtitle: String?,
-            fadeIn: @Range(from = 0, to = 72000) Int,
-        ) = sendFormattedTitle(title, subtitle, fadeIn, 72000,  /* 1h */0)
+        override fun BungeePlayer.sendFormattedPersistentTitle(title: String, subtitle: String, fadeIn: @Range(from = 0, to = 72000) Int) =
+            sendFormattedTitle(title, subtitle, fadeIn, 72000,  /* 1h */0)
 
         override fun BungeePlayer.sendFormattedActionBar(message: String) = sendMessage(
             ChatMessageType.ACTION_BAR,
             TextComponent.fromLegacy(LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(message)))
         )
+
+        override fun broadcastFormattedTitle(title: String, subtitle: String, predicate: (BungeePlayer) -> Boolean) {
+            TODO("Not yet implemented")
+        }
     }
 }
