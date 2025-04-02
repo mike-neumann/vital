@@ -2,7 +2,6 @@ package me.vitalframework.commands
 
 import jakarta.annotation.PostConstruct
 import me.vitalframework.*
-import me.vitalframework.commands.VitalCommand.Arg.Type
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -82,56 +81,73 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         ) as ReturnState
     }
 
+    private fun getPartiallyMatchingArgs(arg: String) = args.filter { it.key.split(" ").any { it in arg.split(" ") } }.values
+
     fun tabComplete(sender: CS, args: Array<String>): List<String> {
+        val joinedArgs = args.joinToString(" ")
         val tabCompleted = mutableListOf<String>()
+        // we might have a direct hit
+        val commandArg = getArg(joinedArgs)
 
-        for (arg in this.args.values) {
-            // Split the value of the command argument into individual parts.
-            val originalArgs = arg.value.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            // Check if the originalArgs length is greater than or equal to the provided args length
-            // or if the last element of originalArgs ends with "%*".
-            if (originalArgs.size < args.size && !originalArgs[originalArgs.size - 1].endsWith("%*")) continue
-            // Clone the originalArgs to avoid modification.
-            val editedArgs = originalArgs.clone()
-
-            for (argIndex in args.indices) {
-                // Determine the original argument at the current index.
-                val originalArg = if (argIndex >= originalArgs.size) originalArgs[originalArgs.size - 1] else originalArgs[argIndex]
-
-                if (!originalArg.startsWith("%") && !(originalArg.endsWith("%") || originalArg.endsWith("%*"))) continue
-                // Replace the edited argument at the corresponding index with the provided argument.
-                editedArgs[if (argIndex >= editedArgs.size) editedArgs.size - 1 else argIndex] = args[argIndex]
-            }
-            // Check if the joined editedArgs start with the joined provided args.
-            if (!editedArgs.joinToString(" ").startsWith(args.joinToString(" "))) continue
-            // Determine the final argument from originalArgs and args.
-            val finalArg = originalArgs[if (args.size - 1 >= originalArgs.size) originalArgs.size - 1 else args.size - 1]
-
-            if (finalArg.startsWith("%") && finalArg.endsWith("%*")) {
-                // Add the final argument with "%" and "%*" removed to the tabCompleted list.
-                tabCompleted.add(finalArg.replace("%", "").replace("%*", ""))
-                continue
-            }
-            val commandArgType = Type.getTypeByPlaceholder(finalArg)
-
-            when {
-                commandArgType != null -> commandArgType.action(TabCompletionContext(tabCompleted, getAllPlayerNames()))
-                finalArg.startsWith("%") && (finalArg.endsWith("%") || finalArg.endsWith("%*")) -> tabCompleted.add(
-                    finalArg.replace("%", "").replace("%*", "")
-                )
-
-                else -> tabCompleted.add(finalArg)
-            }
+        if (commandArg != null) {
+            tabCompleted.add(commandArg.value.replace("%", ""))
+        } else {
+            // get all partially matching args if we don't have a direct hit
+            tabCompleted.addAll(getPartiallyMatchingArgs(joinedArgs).map { it.value.replace("%", "") })
         }
-        val formattedArgs = args.joinToString(" ") { "?" }
-        val commandTabCompleted = onCommandTabComplete(sender, formattedArgs)
-        // when our OWN implementation is not empty, clear all of Vital's defaults.
-        if (commandTabCompleted.isNotEmpty()) tabCompleted.clear()
-        // finally add further tab-completed suggestions implemented by the developer.
-        tabCompleted.addAll(commandTabCompleted)
+        tabCompleted.addAll(onCommandTabComplete(sender, tabCompleted.joinToString()))
         return tabCompleted
     }
-
+//      TODO: test new impl, also add "typed" singular arguments
+//    fun tabComplete(sender: CS, args: Array<String>): List<String> {
+//        val tabCompleted = mutableListOf<String>()
+//
+//        for (arg in this.args.values) {
+//            // Split the value of the command argument into individual parts.
+//            val originalArgs = arg.value.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+//            // Check if the originalArgs length is greater than or equal to the provided args length
+//            // or if the last element of originalArgs ends with "%*".
+//            if (originalArgs.size < args.size && !originalArgs[originalArgs.size - 1].endsWith("%*")) continue
+//            // Clone the originalArgs to avoid modification.
+//            val editedArgs = originalArgs.clone()
+//
+//            for (argIndex in args.indices) {
+//                // Determine the original argument at the current index.
+//                val originalArg = if (argIndex >= originalArgs.size) originalArgs[originalArgs.size - 1] else originalArgs[argIndex]
+//
+//                if (!originalArg.startsWith("%") && !(originalArg.endsWith("%") || originalArg.endsWith("%*"))) continue
+//                // Replace the edited argument at the corresponding index with the provided argument.
+//                editedArgs[if (argIndex >= editedArgs.size) editedArgs.size - 1 else argIndex] = args[argIndex]
+//            }
+//            // Check if the joined editedArgs start with the joined provided args.
+//            if (!editedArgs.joinToString(" ").startsWith(args.joinToString(" "))) continue
+//            // Determine the final argument from originalArgs and args.
+//            val finalArg = originalArgs[if (args.size - 1 >= originalArgs.size) originalArgs.size - 1 else args.size - 1]
+//
+//            if (finalArg.startsWith("%") && finalArg.endsWith("%*")) {
+//                // Add the final argument with "%" and "%*" removed to the tabCompleted list.
+//                tabCompleted.add(finalArg.replace("%", "").replace("%*", ""))
+//                continue
+//            }
+//            val commandArgType = Type.getTypeByPlaceholder(finalArg)
+//
+//            when {
+//                commandArgType != null -> commandArgType.action(TabCompletionContext(tabCompleted, getAllPlayerNames()))
+//                finalArg.startsWith("%") && (finalArg.endsWith("%") || finalArg.endsWith("%*")) -> tabCompleted.add(
+//                    finalArg.replace("%", "").replace("%*", "")
+//                )
+//
+//                else -> tabCompleted.add(finalArg)
+//            }
+//        }
+//        val formattedArgs = args.joinToString(" ") { "?" }
+//        val commandTabCompleted = onCommandTabComplete(sender, formattedArgs)
+//        // when our OWN implementation is not empty, clear all of Vital's defaults.
+//        if (commandTabCompleted.isNotEmpty()) tabCompleted.clear()
+//        // finally add further tab-completed suggestions implemented by the developer.
+//        tabCompleted.addAll(commandTabCompleted)
+//        return tabCompleted
+//    }
     fun execute(sender: CS, args: Array<String>) {
         if (playerOnly && !isPlayer(sender)) return onCommandRequiresPlayer(sender, args.joinToString(" "), null)
         if (permission.isNotBlank() && !hasPermission(sender, permission)) return onCommandRequiresPermission(
@@ -224,10 +240,12 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         }
     }
 
+    @Repeatable
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.FUNCTION)
     annotation class ArgHandler(val arg: Arg)
 
+    @Repeatable
     @Target(AnnotationTarget.FUNCTION)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class ArgExceptionHandler(val arg: String, val type: KClass<out Throwable>)
@@ -237,6 +255,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Advice(val commandSenderClass: KClass<out Any>)
 
+    @Repeatable
     @Target(AnnotationTarget.FUNCTION)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class ExceptionHandler(val type: KClass<out Throwable>)

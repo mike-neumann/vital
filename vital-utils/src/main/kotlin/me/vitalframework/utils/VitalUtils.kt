@@ -30,6 +30,8 @@ interface VitalUtils<CS, P : CS> {
         fun chatRunCommandOkButton(command: String) = chatRunCommandButton("<green><bold>OK</bold></green>", command)
         fun chatRunCommandXButton(command: String) = chatRunCommandButton("<red><bold>✕</bold></red>", command)
         fun chatRunCommandCheckmarkButton(command: String) = chatRunCommandButton("<green><bold>✓</bold></green>", command)
+        fun chatRunCommandAcceptButton(command: String) = chatRunCommandButton("<green><bold>ACCEPT</bold></green>", command)
+        fun chatRunCommandDeclineButton(command: String) = chatRunCommandButton("<red><bold>DECLINE</bold></red>", command)
     }
 
     fun broadcastAction(predicate: (P) -> Boolean = { true }, action: (P) -> Unit)

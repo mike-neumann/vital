@@ -4,11 +4,10 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     private val _entities = mutableListOf<T>()
     val entities: List<T> get() = _entities
 
-    fun save(entity: T) {
-        if (exists(entity)) return
+    fun save(entity: T) = let {
+        if (exists(entity)) delete(entity)
 
-        _entities.add(entity)
-        onSave(entity)
+        _entities.add(entity).also { onSave(entity) }.let { entity }
     }
 
     fun exists(entity: T) = _entities.contains(entity)
@@ -18,12 +17,7 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     @JvmOverloads
     fun getRandom(predicate: (T) -> Boolean = { true }) = _entities.filter(predicate).randomOrNull()
 
-    fun delete(entity: T) {
-        if (!exists(entity)) return
-
-        _entities.remove(entity)
-        onDelete(entity)
-    }
+    fun delete(entity: T) = run { _entities.remove(entity).also { onDelete(entity) } }
 
     protected open fun onSave(entity: T) {}
     protected open fun onDelete(entity: T) {}
