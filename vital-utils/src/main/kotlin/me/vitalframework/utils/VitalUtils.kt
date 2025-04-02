@@ -125,7 +125,13 @@ interface VitalUtils<CS, P : CS> {
             title: String,
             subtitle: String,
             fadeIn: @Range(from = 0, to = 72000) Int,
-        ) = sendTitle(title, subtitle, fadeIn, 72000,  /* 1h */0)
+        ) = sendTitle(
+            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)),
+            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle)),
+            fadeIn,
+            72000,  /* 1h */
+            0
+        )
 
         override fun broadcastFormattedPersistentTitle(
             title: String,

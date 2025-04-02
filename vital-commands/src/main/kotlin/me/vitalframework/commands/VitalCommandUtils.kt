@@ -10,9 +10,9 @@ object VitalCommandUtils {
         .associate {
             Pattern.compile(
                 it.arg.value
-                    .replace(" ".toRegex(), "[ ]")
-                    .replace("%\\S*%\\*".toRegex(), "(.+)")
-                    .replace("%\\S*%(?!\\*)".toRegex(), "(\\\\S+)")
+                    .replace(VitalCommand.SPACE_REGEX.toRegex(), VitalCommand.SPACE_REPLACEMENT)
+                    .replace(VitalCommand.VARARG_REGEX.toRegex(), VitalCommand.VARARG_REPLACEMENT)
+                    .replace(VitalCommand.ARG_REGEX.toRegex(), VitalCommand.ARG_REPLACEMENT)
             ) to it.arg
         }
 

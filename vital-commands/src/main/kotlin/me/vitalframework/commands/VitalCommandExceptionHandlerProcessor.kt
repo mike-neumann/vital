@@ -35,6 +35,6 @@ class VitalCommandExceptionHandlerProcessor(applicationContext: ApplicationConte
     companion object {
         private val EXCEPTION_HANDLERS = mutableMapOf<Class<out Throwable>, VitalCommand.ExceptionHandlerContext>()
 
-        fun getExceptionHandler(type: Class<out Throwable>) = EXCEPTION_HANDLERS.entries.find { type.isAssignableFrom(it.key) }?.value
+        fun getExceptionHandler(type: Class<out Throwable>) = EXCEPTION_HANDLERS.entries.find { it.key.isAssignableFrom(type) }?.value
     }
 }

@@ -47,7 +47,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         if (context == null) {
             // we do not have any exception handler mapped for this argument
             // try to find a global exception handler
-            val context = VitalCommandExceptionHandlerProcessor.getExceptionHandler(exception::class.java)
+            val context = VitalCommandExceptionHandlerProcessor.getExceptionHandler(exception.javaClass)
                 ?: return onCommandError(sender, commandArg, exception)
 
             try {
@@ -81,73 +81,55 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         ) as ReturnState
     }
 
-    private fun getPartiallyMatchingArgs(arg: String) = args.filter { it.key.split(" ").any { it in arg.split(" ") } }.values
+    private fun getPartiallyMatchingArgs(arg: String) =
+        arg.split(" ").mapNotNull { arg -> args.values.find { it.value.split(" ").any { it.startsWith(arg) } } }
 
     fun tabComplete(sender: CS, args: Array<String>): List<String> {
-        val joinedArgs = args.joinToString(" ")
         val tabCompleted = mutableListOf<String>()
-        // we might have a direct hit
-        val commandArg = getArg(joinedArgs)
 
-        if (commandArg != null) {
-            tabCompleted.add(commandArg.value.replace("%", ""))
-        } else {
-            // get all partially matching args if we don't have a direct hit
-            tabCompleted.addAll(getPartiallyMatchingArgs(joinedArgs).map { it.value.replace("%", "") })
+        for ((_, commandArg) in this.args) {
+            val splitCommandArg = commandArg.value.split(" ")
+            // the player has entered more arguments than the command arg supports, we can never have a hit here
+            if (args.size > splitCommandArg.size) continue
+            var commandArgMatches = true
+
+            for ((i, arg) in args.withIndex()) {
+                if (i > 0) {
+                    // we have previous entered arguments, check if they match with the command arg
+                    for (prevI in 0..i) {
+                        val matchableCommandArg =
+                            splitCommandArg[prevI].replace(VARARG_REGEX.toRegex(), args[prevI]).replace(ARG_REGEX.toRegex(), args[prevI])
+                                .lowercase()
+
+                        if (matchableCommandArg != args[prevI]) {
+                            commandArgMatches = false
+                            break
+                        }
+                    }
+
+                    if (!commandArgMatches) {
+                        // previous tokens do not match
+                        break
+                    }
+                }
+                val matchableCommandArg = splitCommandArg[i].replace(VARARG_REGEX.toRegex(), arg).replace(ARG_REGEX.toRegex(), arg)
+                if (!matchableCommandArg.startsWith(arg)) {
+                    commandArgMatches = false
+                    break
+                }
+
+                commandArgMatches = true
+            }
+
+            if (commandArgMatches) {
+                tabCompleted.add(splitCommandArg.subList(args.size - 1, splitCommandArg.size).joinToString(" "))
+            }
         }
-        tabCompleted.addAll(onCommandTabComplete(sender, tabCompleted.joinToString()))
+
+        tabCompleted.addAll(onCommandTabComplete(sender, args.joinToString(" ")))
         return tabCompleted
     }
-//      TODO: test new impl, also add "typed" singular arguments
-//    fun tabComplete(sender: CS, args: Array<String>): List<String> {
-//        val tabCompleted = mutableListOf<String>()
-//
-//        for (arg in this.args.values) {
-//            // Split the value of the command argument into individual parts.
-//            val originalArgs = arg.value.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-//            // Check if the originalArgs length is greater than or equal to the provided args length
-//            // or if the last element of originalArgs ends with "%*".
-//            if (originalArgs.size < args.size && !originalArgs[originalArgs.size - 1].endsWith("%*")) continue
-//            // Clone the originalArgs to avoid modification.
-//            val editedArgs = originalArgs.clone()
-//
-//            for (argIndex in args.indices) {
-//                // Determine the original argument at the current index.
-//                val originalArg = if (argIndex >= originalArgs.size) originalArgs[originalArgs.size - 1] else originalArgs[argIndex]
-//
-//                if (!originalArg.startsWith("%") && !(originalArg.endsWith("%") || originalArg.endsWith("%*"))) continue
-//                // Replace the edited argument at the corresponding index with the provided argument.
-//                editedArgs[if (argIndex >= editedArgs.size) editedArgs.size - 1 else argIndex] = args[argIndex]
-//            }
-//            // Check if the joined editedArgs start with the joined provided args.
-//            if (!editedArgs.joinToString(" ").startsWith(args.joinToString(" "))) continue
-//            // Determine the final argument from originalArgs and args.
-//            val finalArg = originalArgs[if (args.size - 1 >= originalArgs.size) originalArgs.size - 1 else args.size - 1]
-//
-//            if (finalArg.startsWith("%") && finalArg.endsWith("%*")) {
-//                // Add the final argument with "%" and "%*" removed to the tabCompleted list.
-//                tabCompleted.add(finalArg.replace("%", "").replace("%*", ""))
-//                continue
-//            }
-//            val commandArgType = Type.getTypeByPlaceholder(finalArg)
-//
-//            when {
-//                commandArgType != null -> commandArgType.action(TabCompletionContext(tabCompleted, getAllPlayerNames()))
-//                finalArg.startsWith("%") && (finalArg.endsWith("%") || finalArg.endsWith("%*")) -> tabCompleted.add(
-//                    finalArg.replace("%", "").replace("%*", "")
-//                )
-//
-//                else -> tabCompleted.add(finalArg)
-//            }
-//        }
-//        val formattedArgs = args.joinToString(" ") { "?" }
-//        val commandTabCompleted = onCommandTabComplete(sender, formattedArgs)
-//        // when our OWN implementation is not empty, clear all of Vital's defaults.
-//        if (commandTabCompleted.isNotEmpty()) tabCompleted.clear()
-//        // finally add further tab-completed suggestions implemented by the developer.
-//        tabCompleted.addAll(commandTabCompleted)
-//        return tabCompleted
-//    }
+
     fun execute(sender: CS, args: Array<String>) {
         if (playerOnly && !isPlayer(sender)) return onCommandRequiresPlayer(sender, args.joinToString(" "), null)
         if (permission.isNotBlank() && !hasPermission(sender, permission)) return onCommandRequiresPermission(
@@ -323,5 +305,14 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         override fun isPlayer(commandSender: BungeeCommandSender) = commandSender is BungeePlayer
         override fun hasPermission(commandSender: BungeeCommandSender, permission: String) = commandSender.hasPermission(permission)
         override fun getAllPlayerNames() = ProxyServer.getInstance().players.map { it.name }
+    }
+
+    companion object {
+        const val SPACE_REGEX = " "
+        const val VARARG_REGEX = "%\\S*%\\*"
+        const val ARG_REGEX = "%\\S*%(?!\\*)"
+        const val SPACE_REPLACEMENT = "[ ]"
+        const val VARARG_REPLACEMENT = "(.+)"
+        const val ARG_REPLACEMENT = "(\\\\S+)"
     }
 }
