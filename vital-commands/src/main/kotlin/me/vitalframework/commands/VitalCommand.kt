@@ -117,18 +117,20 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
                     commandArgMatches = false
                     break
                 }
-                val argType = Arg.Type.getTypeByPlaceholder(splitCommandArg[i])
 
-                argType?.action?.invoke(TabCompletionContext(tabCompleted, getAllPlayerNames()))
                 commandArgMatches = true
             }
 
             if (commandArgMatches) {
                 tabCompleted.add(splitCommandArg.subList(args.size - 1, splitCommandArg.size).joinToString(" "))
+                // only the last element should be converted to argument type check to avoid confusing tab completions
+                val argType = Arg.Type.getTypeByPlaceholder(splitCommandArg[args.size - 1])
+
+                argType?.action?.invoke(TabCompletionContext(tabCompleted, getAllPlayerNames()))
+                tabCompleted.addAll(onCommandTabComplete(sender, splitCommandArg.subList(0, args.size).joinToString(" ")))
             }
         }
 
-        tabCompleted.addAll(onCommandTabComplete(sender, args.joinToString(" ")))
         return tabCompleted
     }
 

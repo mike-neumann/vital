@@ -216,10 +216,9 @@ class VitalCommandsTest {
         }
         val sender = VitalTestCommand.Player()
         val tabCompletions = testCommand.tabComplete(sender, arrayOf(""))
-
         // 2 since we also have %PLAYER% in the completions
         assert(tabCompletions.size == 2)
-        assert(tabCompletions.component1() == "xRa1ny")
+        assert("xRa1ny" in tabCompletions)
     }
 
     @Test
@@ -230,11 +229,10 @@ class VitalCommandsTest {
         }
         val sender = VitalTestCommand.Player()
         val tabCompletions = testCommand.tabComplete(sender, arrayOf(""))
-
         // 3 since we also have %BOOLEAN% in the completions
         assert(tabCompletions.size == 3)
-        assert(tabCompletions.component1() == "true")
-        assert(tabCompletions.component2() == "false")
+        assert("true" in tabCompletions)
+        assert("false" in tabCompletions)
     }
 
     @Test
@@ -245,10 +243,9 @@ class VitalCommandsTest {
         }
         val sender = VitalTestCommand.Player()
         val tabCompletions = testCommand.tabComplete(sender, arrayOf(""))
-
-
+        // 2 since we also have %NUMBER% in the tab-completions
         assert(tabCompletions.size == 2)
-        assert(tabCompletions.component1() == "0")
+        assert("0" in tabCompletions)
     }
 
     @Test
@@ -259,9 +256,11 @@ class VitalCommandsTest {
         }
         val sender = VitalTestCommand.Player()
         val tabCompletions = testCommand.tabComplete(sender, arrayOf(""))
-
         // +1 since we also have %MATERIAL% in the completions
         assert(tabCompletions.size == Material.entries.size + 1)
-        tabCompletions.zip(Material.entries) { a, b -> assert(a == b.name) }
+
+        for (material in Material.entries) {
+            assert(material.name in tabCompletions)
+        }
     }
 }
