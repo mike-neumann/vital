@@ -150,7 +150,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
             }
 
             executingArg != null -> {
-                val values = ArrayList<String>()
+                val values = mutableListOf<String>()
                 val commandArgs = executingArg.value.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.map { it.lowercase() }
 
                 for (arg in args) {
@@ -311,8 +311,8 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         const val SPACE_REGEX = " "
         const val VARARG_REGEX = "%\\S*%\\*"
         const val ARG_REGEX = "%\\S*%(?!\\*)"
-        const val SPACE_REPLACEMENT = "[ ]"
-        const val VARARG_REPLACEMENT = "(.+)"
-        const val ARG_REPLACEMENT = "(\\\\S+)"
+        const val SPACE_REPLACEMENT = " "
+        const val VARARG_REPLACEMENT = ".+"
+        const val ARG_REPLACEMENT = "\\\\S+"
     }
 }

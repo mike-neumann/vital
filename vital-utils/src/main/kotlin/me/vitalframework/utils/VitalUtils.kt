@@ -284,7 +284,7 @@ interface VitalUtils<CS, P : CS> {
             val maxY = max(location1.y, location2.y)
             val minZ = min(location1.z, location2.z)
             val maxZ = max(location1.z, location2.z)
-            val circumference = ArrayList<Location>()
+            val circumference = mutableListOf<Location>()
 
             run {
                 var y = minY
@@ -341,7 +341,7 @@ interface VitalUtils<CS, P : CS> {
             val maxY = max(location1.y, location2.y)
             val minZ = min(location1.z, location2.z)
             val maxZ = max(location1.z, location2.z)
-            val volume = ArrayList<Location>()
+            val volume = mutableListOf<Location>()
             var x = minX
             while (x <= maxX) {
                 var y = minY
