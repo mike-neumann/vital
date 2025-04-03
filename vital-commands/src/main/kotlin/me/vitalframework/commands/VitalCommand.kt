@@ -81,9 +81,6 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         ) as ReturnState
     }
 
-    private fun getPartiallyMatchingArgs(arg: String) =
-        arg.split(" ").mapNotNull { arg -> args.values.find { it.value.split(" ").any { it.startsWith(arg) } } }
-
     fun tabComplete(sender: CS, args: Array<String>): List<String> {
         val tabCompleted = mutableListOf<String>()
 
@@ -93,31 +90,36 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
             if (args.size > splitCommandArg.size) continue
             var commandArgMatches = true
 
-            for ((i, arg) in args.withIndex()) {
+            for ((i, enteredArg) in args.withIndex()) {
                 if (i > 0) {
-                    // we have previous entered arguments, check if they match with the command arg
-                    for (prevI in 0..i) {
-                        val matchableCommandArg =
-                            splitCommandArg[prevI].replace(VARARG_REGEX.toRegex(), args[prevI]).replace(ARG_REGEX.toRegex(), args[prevI])
-                                .lowercase()
+                    // we have previous entered arguments, check if they match with the command arg, so we know we are on the right node
+                    for (prevI in 0..<i) {
+                        val previousEnteredArg = args[prevI]
+                        val previousCommandArg = splitCommandArg[prevI].replace(VARARG_REGEX.toRegex(), previousEnteredArg)
+                            .replace(ARG_REGEX.toRegex(), previousEnteredArg)
 
-                        if (matchableCommandArg != args[prevI]) {
+                        if (previousCommandArg != previousEnteredArg) {
+                            // our previously entered arg does not match with the registered command arg
                             commandArgMatches = false
                             break
                         }
                     }
 
                     if (!commandArgMatches) {
-                        // previous tokens do not match
+                        // any previous token do not match, we can stop right here
                         break
                     }
                 }
-                val matchableCommandArg = splitCommandArg[i].replace(VARARG_REGEX.toRegex(), arg).replace(ARG_REGEX.toRegex(), arg)
-                if (!matchableCommandArg.startsWith(arg)) {
+                val matchableCommandArg =
+                    splitCommandArg[i].replace(VARARG_REGEX.toRegex(), enteredArg).replace(ARG_REGEX.toRegex(), enteredArg)
+
+                if (!matchableCommandArg.startsWith(enteredArg)) {
                     commandArgMatches = false
                     break
                 }
+                val argType = Arg.Type.getTypeByPlaceholder(splitCommandArg[i])
 
+                argType?.action?.invoke(TabCompletionContext(tabCompleted, getAllPlayerNames()))
                 commandArgMatches = true
             }
 
