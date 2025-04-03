@@ -185,7 +185,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         }
     }
 
-    protected open fun onCommandError(sender: CS, commandArg: Arg?, e: Throwable) {}
+    protected open fun onCommandError(sender: CS, commandArg: Arg?, e: Throwable): Unit = run { throw e }
     protected open fun onBaseCommand(sender: CS) = ReturnState.INVALID_ARGS
     protected open fun onCommandTabComplete(sender: CS, args: String) = listOf<String>()
     protected open fun onCommandInvalidArgs(sender: CS, args: String) {}

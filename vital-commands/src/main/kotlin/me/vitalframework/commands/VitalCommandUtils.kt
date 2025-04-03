@@ -6,7 +6,8 @@ import java.util.regex.Pattern
 object VitalCommandUtils {
     fun getMappedArgs(command: VitalCommand<*, *>) = command.javaClass.methods
         .filter { it.isAnnotationPresent(VitalCommand.ArgHandler::class.java) }
-        .map { it.getAnnotation(VitalCommand.ArgHandler::class.java) }
+        .map { it.getAnnotationsByType(VitalCommand.ArgHandler::class.java).toList() }
+        .flatten()
         .associate {
             Pattern.compile(
                 it.arg.value
@@ -17,15 +18,16 @@ object VitalCommandUtils {
         }
 
     fun getMappedArgHandlers(command: VitalCommand<*, *>) = command.javaClass.methods
+        .asSequence()
         .filter { VitalCommand.ReturnState::class.java.isAssignableFrom(it.returnType) }
         .filter { it.isAnnotationPresent(VitalCommand.ArgHandler::class.java) }
-        .associate {
+        .map { method -> method.getAnnotationsByType(VitalCommand.ArgHandler::class.java).map { method to it } }
+        .flatten()
+        .associate { (method, argHandler) ->
             // now we have a viable method ready for handling incoming arguments
             // we just need to filter out the injectable parameters for our method
             // since we only support a handful of injectable params for handler methods...
-            val vitalCommandArg = it.getAnnotation(VitalCommand.ArgHandler::class.java).arg
-
-            vitalCommandArg to getArgHandlerContext(command.commandSenderClass, it)
+            argHandler.arg to getArgHandlerContext(command.commandSenderClass, method)
         }
 
     fun getInjectableArgHandlerMethodParameters(
@@ -51,11 +53,12 @@ object VitalCommandUtils {
 
         command.javaClass.methods
             .filter { it.isAnnotationPresent(VitalCommand.ArgExceptionHandler::class.java) }
-            .forEach {
-                val argExceptionHandler = it.getAnnotation(VitalCommand.ArgExceptionHandler::class.java)!!
+            .map { method -> method.getAnnotationsByType(VitalCommand.ArgExceptionHandler::class.java).map { method to it } }
+            .flatten()
+            .forEach { (method, argExceptionHandler) ->
                 val arg = command.getArg(argExceptionHandler.arg)
-                    ?: throw VitalCommandException.UnmappedArgExceptionHandlerArg(it, argExceptionHandler.arg)
-                val context = getArgExceptionHandlerContext(command.commandSenderClass, it)
+                    ?: throw VitalCommandException.UnmappedArgExceptionHandlerArg(method, argExceptionHandler.arg)
+                val context = getArgExceptionHandlerContext(command.commandSenderClass, method)
 
                 if (!mappedArgExceptionHandlers.containsKey(arg)) {
                     mappedArgExceptionHandlers[arg] = mutableMapOf(argExceptionHandler.type.java to context)
@@ -64,7 +67,7 @@ object VitalCommandUtils {
                 }
             }
 
-        mappedArgExceptionHandlers.map { it.key to it.value.toMap() }.toMap()
+        mappedArgExceptionHandlers
     }
 
     fun getInjectableArgExceptionHandlerMethodParameters(

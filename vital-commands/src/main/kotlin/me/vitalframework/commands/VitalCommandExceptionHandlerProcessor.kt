@@ -22,11 +22,11 @@ class VitalCommandExceptionHandlerProcessor(applicationContext: ApplicationConte
 
                     adviceInstance::class.java.methods
                         .filter { it.isAnnotationPresent(VitalCommand.ExceptionHandler::class.java) }
-                        .forEach {
-                            val annotation = it.getAnnotation(VitalCommand.ExceptionHandler::class.java)!!
-
-                            EXCEPTION_HANDLERS[annotation.type.java] =
-                                VitalCommandUtils.getExceptionHandlerContext(adviceInstance, advice.commandSenderClass.java, it)
+                        .map { method -> method.getAnnotationsByType(VitalCommand.ExceptionHandler::class.java).map { method to it } }
+                        .flatten()
+                        .forEach { (method, exceptionHandler) ->
+                            EXCEPTION_HANDLERS[exceptionHandler.type.java] =
+                                VitalCommandUtils.getExceptionHandlerContext(adviceInstance, advice.commandSenderClass.java, method)
                         }
                 }
         }
