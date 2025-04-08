@@ -71,7 +71,7 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
     open fun onCooldownTick(e: SpigotPlayer) {}
 
     @Component
-    @Target(AnnotationTarget.TYPE)
+    @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(
         val name: String,

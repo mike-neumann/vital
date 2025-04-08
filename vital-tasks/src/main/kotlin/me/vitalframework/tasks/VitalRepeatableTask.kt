@@ -57,8 +57,8 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) :
     fun onStop() {}
 
     @Component
+    @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
-    @Target(AnnotationTarget.TYPE)
     annotation class Info(val interval: Long)
 
     open class Spigot(plugin: SpigotPlugin) : VitalRepeatableTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {

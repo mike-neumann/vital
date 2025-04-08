@@ -237,7 +237,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
     annotation class ArgExceptionHandler(val arg: String, val type: KClass<out Throwable>)
 
     @Component
-    @Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE)
+    @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Advice(val commandSenderClass: KClass<out Any>)
 

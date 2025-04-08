@@ -83,7 +83,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) :
     fun onRestart() {}
 
     @Component
-    @Target(AnnotationTarget.TYPE)
+    @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(val countdown: Long, val interval: Long = 1_000L)
 
