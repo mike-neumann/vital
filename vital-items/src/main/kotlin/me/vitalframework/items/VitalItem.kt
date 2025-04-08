@@ -12,27 +12,27 @@ import org.bukkit.persistence.PersistentDataType
 import org.springframework.stereotype.Component
 import java.util.*
 
-open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
+open class VitalItem : RequiresAnnotation<VitalItem.Info> {
     val initialCooldown: Int
-    val playerCooldown = mutableMapOf<SpigotPlayer, Int>()
-
-    init {
-        val info = getRequiredAnnotation();
-        val itemStack = itemBuilder {
+    val itemStack: ItemStack by lazy {
+        itemBuilder {
+            val info = getRequiredAnnotation();
             type = info.type
             name = info.name
             amount = info.amount
             lore = info.lore.toMutableList()
             itemFlags = info.itemFlags.toMutableList()
             unbreakable = info.unbreakable
+
+            if (info.enchanted) {
+                enchantments[Enchantment.FORTUNE] = 1
+            }
         }
-        val meta = itemStack.itemMeta!!
+    }
+    val playerCooldown = mutableMapOf<SpigotPlayer, Int>()
 
-        if (info.enchanted) meta.addEnchant(Enchantment.FORTUNE, 1, true)
-
-        itemMeta = meta
-        type = itemStack.type
-        amount = itemStack.amount
+    init {
+        val info = getRequiredAnnotation();
         this.initialCooldown = info.cooldown
     }
 
@@ -56,13 +56,14 @@ open class VitalItem : ItemStack(), RequiresAnnotation<VitalItem.Info> {
         if (other.itemMeta == null) return other == this
         if (!other.itemMeta!!.persistentDataContainer.has(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING))
             return toString() == other.toString().replace("${other.type} x ${other.amount}", "${other.type} x 1")
-        val uuid = UUID.fromString(itemMeta!!.persistentDataContainer.get(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING))
+        val uuid =
+            UUID.fromString(itemStack.itemMeta!!.persistentDataContainer.get(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING))
         val otherId = UUID.fromString(other.itemMeta!!.persistentDataContainer.get(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING))
 
         return uuid == otherId
     }
 
-    override fun toString() = super.toString().replace("$type x $amount", "$type x 1");
+    override fun toString() = super.toString().replace("${itemStack.type} x ${itemStack.amount}", "${itemStack.type} x 1");
 
     open fun onLeftClick(e: PlayerInteractEvent) {}
     open fun onRightClick(e: PlayerInteractEvent) {}
