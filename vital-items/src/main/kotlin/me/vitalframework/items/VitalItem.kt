@@ -68,8 +68,8 @@ open class VitalItem : RequiresAnnotation<VitalItem.Info> {
     open fun onLeftClick(e: PlayerInteractEvent) {}
     open fun onRightClick(e: PlayerInteractEvent) {}
     open fun onCooldown(e: PlayerInteractEvent) {}
-    open fun onCooldownExpire(e: SpigotPlayer) {}
-    open fun onCooldownTick(e: SpigotPlayer) {}
+    open fun onCooldownExpire(player: SpigotPlayer) {}
+    open fun onCooldownTick(player: SpigotPlayer) {}
 
     @Component
     @Target(AnnotationTarget.CLASS)
