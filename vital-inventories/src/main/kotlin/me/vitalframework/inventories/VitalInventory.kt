@@ -74,10 +74,10 @@ open class VitalInventory(val previousInventory: VitalInventory?) : RequiresAnno
         onClose(player)
     }
 
-    fun onOpen(player: SpigotPlayer) {}
-    fun onUpdate() {}
-    fun onUpdate(player: SpigotPlayer) {}
-    fun onClose(player: SpigotPlayer) {}
+    open fun onOpen(player: SpigotPlayer) {}
+    open fun onUpdate() {}
+    open fun onUpdate(player: SpigotPlayer) {}
+    open fun onClose(player: SpigotPlayer) {}
 
     @Component
     @Retention(AnnotationRetention.RUNTIME)
