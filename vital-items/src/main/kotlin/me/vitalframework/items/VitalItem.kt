@@ -1,7 +1,7 @@
 package me.vitalframework.items
 
-import me.vitalframework.RequiresAnnotation
 import me.vitalframework.SpigotPlayer
+import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.block.Action
@@ -12,11 +12,11 @@ import org.bukkit.persistence.PersistentDataType
 import org.springframework.stereotype.Component
 import java.util.*
 
-open class VitalItem : RequiresAnnotation<VitalItem.Info> {
+open class VitalItem {
     val initialCooldown: Int
     val itemStack: ItemStack by lazy {
         itemBuilder {
-            val info = getRequiredAnnotation();
+            val info = this@VitalItem.getRequiredAnnotation<Info>();
             type = info.type
             name = info.name
             amount = info.amount
@@ -32,11 +32,9 @@ open class VitalItem : RequiresAnnotation<VitalItem.Info> {
     val playerCooldown = mutableMapOf<SpigotPlayer, Int>()
 
     init {
-        val info = getRequiredAnnotation();
+        val info = getRequiredAnnotation<Info>();
         this.initialCooldown = info.cooldown
     }
-
-    override fun requiredAnnotationType() = Info::class.java
 
     fun handleInteraction(e: PlayerInteractEvent) {
         if (!playerCooldown.containsKey(e.player)) playerCooldown[e.player] = 0

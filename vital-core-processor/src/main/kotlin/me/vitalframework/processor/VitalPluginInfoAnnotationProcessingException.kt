@@ -1,7 +1,7 @@
 package me.vitalframework.processor
 
 abstract class VitalPluginInfoAnnotationProcessingException(message: String, cause: Throwable? = null) : RuntimeException(message, cause) {
-    class NoMainClass() :
+    class NoMainClass :
         VitalPluginInfoAnnotationProcessingException("No Main Plugin Class Found! Main Plugin Class Must Be Annotated With '@Vital.Info'")
 
     class GeneratePluginYml(cause: Throwable) : VitalPluginInfoAnnotationProcessingException(

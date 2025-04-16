@@ -32,15 +32,15 @@ abstract class VitalCommandException(message: String, cause: Throwable? = null) 
         })', failed at '${parameter.type.simpleName} ${parameter.name}'",
     )
 
-    class InvalidExceptionHandlerMethodSignature(method: Method, parameter: Parameter) : VitalCommandException(
-        "Invalid exception handler method signature '${method.name}(${
+    class InvalidGlobalExceptionHandlerMethodSignature(method: Method, parameter: Parameter) : VitalCommandException(
+        "Invalid global exception handler method signature '${method.name}(${
             method.parameters.joinToString(", ") { "${it.type.simpleName} ${it.name}" }
         })' failed at '${parameter.type.simpleName} ${parameter.name}'"
     )
 
-    class ExecuteExceptionHandlerMethod(method: Method, context: VitalCommand.ExceptionHandlerContext, cause: Throwable) :
+    class ExecuteGlobalExceptionHandlerMethod(method: Method, context: VitalCommand.GlobalExceptionHandlerContext, cause: Throwable) :
         VitalCommandException(
-            "Error while executing exception handler method '${method.name}(${
+            "Error while executing global exception handler method '${method.name}(${
                 method.parameters.joinToString(", ") { "${it.type.simpleName} ${it.name}" }
             })' using context '$context'",
             cause

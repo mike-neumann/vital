@@ -9,7 +9,7 @@ class VitalCommandsTest {
         assertThrows<VitalCommandException.InvalidArgHandlerMethodSignature> {
             @VitalCommand.Info("testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("testArg"))
+                @ArgHandler(Arg("testArg"))
                 fun onTestArg(i: Int) = ReturnState.SUCCESS
             }
         }
@@ -20,7 +20,7 @@ class VitalCommandsTest {
         assertDoesNotThrow {
             @VitalCommand.Info("testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("testArg"))
+                @ArgHandler(Arg("testArg"))
                 fun onTestArg() = ReturnState.SUCCESS
             }
         }
@@ -29,7 +29,7 @@ class VitalCommandsTest {
     @Test
     fun `arg handler parameter mapping with variables should work`() {
         val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(arg = Arg("testArg %PLAYER%"))
+            @ArgHandler(Arg("testArg %PLAYER%"))
             fun onTestArg(sender: CommandSender, values: Array<String>): ReturnState {
                 sender.sendMessage(values.contentToString())
                 return ReturnState.SUCCESS
@@ -48,10 +48,10 @@ class VitalCommandsTest {
         assertThrows<VitalCommandException.InvalidArgExceptionHandlerMethodSignature> {
             @VitalCommand.Info("testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("testArg"))
+                @ArgHandler(Arg("testArg"))
                 fun onTestArg() = ReturnState.SUCCESS
 
-                @ArgExceptionHandler("testArg", type = RuntimeException::class)
+                @ArgExceptionHandler("testArg", RuntimeException::class)
                 fun onTestArgException(i: Int) = ReturnState.SUCCESS
             }
         }
@@ -62,10 +62,10 @@ class VitalCommandsTest {
         assertDoesNotThrow {
             @VitalCommand.Info("testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("testArg"))
+                @ArgHandler(Arg("testArg"))
                 fun onTestArg() = ReturnState.SUCCESS
 
-                @ArgExceptionHandler("testArg", type = RuntimeException::class)
+                @ArgExceptionHandler("testArg", RuntimeException::class)
                 fun onTestArgException() = ReturnState.SUCCESS
             }
         }
@@ -90,7 +90,7 @@ class VitalCommandsTest {
     @Test
     fun `command arg should be executed`() {
         val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(arg = Arg("testArg"))
+            @ArgHandler(Arg("testArg"))
             fun onTestArg(sender: CommandSender): ReturnState {
                 sender.sendMessage("onTestArg")
                 return ReturnState.SUCCESS
@@ -109,7 +109,7 @@ class VitalCommandsTest {
         assertThrows<VitalCommandException.UnmappedArgExceptionHandlerArg> {
             @VitalCommand.Info("testCommand")
             object : VitalTestCommand() {
-                @ArgExceptionHandler("testArg", type = Exception::class)
+                @ArgExceptionHandler("testArg", Exception::class)
                 fun onTestArgException() = ReturnState.SUCCESS
             }
         }
@@ -120,7 +120,7 @@ class VitalCommandsTest {
         assertDoesNotThrow {
             @VitalCommand.Info("testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("testArg"))
+                @ArgHandler(Arg("testArg"))
                 fun onTestArg() = ReturnState.SUCCESS
 
                 @ArgExceptionHandler("testArg", type = Exception::class)
@@ -132,7 +132,7 @@ class VitalCommandsTest {
     @Test
     fun `arg exception handler should not be executed`() {
         val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(arg = Arg("testArg"))
+            @ArgHandler(Arg("testArg"))
             fun onTestArg(sender: CommandSender) = ReturnState.SUCCESS
 
             @ArgExceptionHandler("testArg", type = Exception::class)

@@ -1,7 +1,7 @@
 package me.vitalframework.inventories
 
-import me.vitalframework.RequiresAnnotation
 import me.vitalframework.SpigotPlayer
+import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 
 typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
 
-open class VitalInventory(val previousInventory: VitalInventory?) : RequiresAnnotation<VitalInventory.Info> {
+open class VitalInventory(val previousInventory: VitalInventory?) {
     val size: Int
     val name: String
     private val _playerInventories = mutableMapOf<SpigotPlayer, Inventory>()
@@ -23,13 +23,11 @@ open class VitalInventory(val previousInventory: VitalInventory?) : RequiresAnno
     val actions: Map<Pair<SpigotPlayer, Int>, InventoryItemClickAction> get() = _actions
 
     init {
-        val info = getRequiredAnnotation()
+        val info = getRequiredAnnotation<Info>()
 
         size = info.size
         name = info.name
     }
-
-    override fun requiredAnnotationType() = Info::class.java
 
     @JvmOverloads
     fun setItem(slot: Int, itemStack: ItemStack, player: SpigotPlayer, action: InventoryItemClickAction = {}) {
@@ -48,6 +46,7 @@ open class VitalInventory(val previousInventory: VitalInventory?) : RequiresAnno
     }
 
     open fun update(player: SpigotPlayer) {
+        if (player !in _playerInventories) return
         val inventory = _playerInventories[player]!!
 
         onUpdate(player)

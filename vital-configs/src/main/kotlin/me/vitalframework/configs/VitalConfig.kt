@@ -1,6 +1,6 @@
 package me.vitalframework.configs
 
-import me.vitalframework.RequiresAnnotation
+import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import me.vitalframework.logger
 import org.springframework.stereotype.Component
 import java.io.IOException
@@ -8,13 +8,13 @@ import java.io.InputStream
 import kotlin.io.path.*
 import kotlin.reflect.KClass
 
-abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
+abstract class VitalConfig {
     val log = logger()
     val fileName: String
     val processor: Processor<*, Any>
 
     init {
-        val info = getRequiredAnnotation()
+        val info = getRequiredAnnotation<Info>()
 
         fileName = info.name
         processor = try {
@@ -35,8 +35,6 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
             throw VitalConfigException.InjectFields(info.name, info.processor.java, e)
         }
     }
-
-    override fun requiredAnnotationType() = Info::class.java
 
     fun save(writeToFile: Boolean = true) {
         try {
@@ -76,11 +74,10 @@ abstract class VitalConfig : RequiresAnnotation<VitalConfig.Info> {
 
     @Target(AnnotationTarget.FIELD)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Property(vararg val value: KClass<*>)
+    annotation class Property(vararg val types: KClass<*>)
 
     interface Processor<S, out T> {
         val data: S
-
         fun load(inputStream: InputStream, clazz: Class<*>): Map<String, T>
         fun read(key: String): T?
         fun read(key: String, def: @UnsafeVariance T): T?

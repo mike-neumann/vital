@@ -1,16 +1,18 @@
 plugins {
     kotlin("jvm")
+    id("org.jetbrains.kotlin.kapt") version "2.1.20"
     kotlin("plugin.spring")
     id("org.springframework.boot")
     `java-library`
     `maven-publish`
 }
 
-subprojects {
+allprojects {
     group = "me.vitalframework"
     version = "1.0"
 
     apply(plugin = "kotlin")
+    apply(plugin = "org.jetbrains.kotlin.kapt")
     apply(plugin = "org.jetbrains.kotlin.plugin.spring")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "java-library")
@@ -19,22 +21,25 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
         maven("https://libraries.minecraft.net")
+        maven("https://repo.papermc.io/repository/maven-public/")
     }
 
     dependencies {
-        compileOnly("org.spigotmc:spigot-api:${findProperty("spigotApiVersion")}")
+        compileOnly("io.papermc.paper:paper-api:${findProperty("paperApiVersion")}")
         compileOnly("com.mojang:brigadier:${findProperty("brigadierVersion")}")
         compileOnly("net.md-5:bungeecord-api:${findProperty("bungeeApiVersion")}")
 
-        api("org.springframework.boot:spring-boot-starter:${findProperty("springBootVersion")}")
+        api("org.springframework.boot:spring-boot-starter:${findProperty("springBootVersion")}") {
+            // exclude(group = "ch.qos.logback", module = "logback-classic")
+            // exclude(group = "org.apache.logging.log4j", module = "log4j-to-slf4j")
+        }
 
-        testApi("org.springframework.boot:spring-boot-starter-test:${findProperty("springBootVersion")}")
-        testApi("org.junit.jupiter:junit-jupiter-api:${findProperty("junitVersion")}")
-        testApi("org.spigotmc:spigot-api:${findProperty("spigotApiVersion")}")
-        testApi("com.mojang:brigadier:${findProperty("brigadierVersion")}")
-        testApi("net.md-5:bungeecord-api:${findProperty("bungeeApiVersion")}")
+        testImplementation("org.springframework.boot:spring-boot-starter-test:${findProperty("springBootVersion")}")
+        testImplementation("org.junit.jupiter:junit-jupiter-api:${findProperty("junitVersion")}")
+        testImplementation("io.papermc.paper:paper-api:${findProperty("paperApiVersion")}")
+        testImplementation("com.mojang:brigadier:${findProperty("brigadierVersion")}")
+        testImplementation("net.md-5:bungeecord-api:${findProperty("bungeeApiVersion")}")
     }
 
     java {

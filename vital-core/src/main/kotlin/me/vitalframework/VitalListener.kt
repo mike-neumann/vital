@@ -8,7 +8,10 @@ interface VitalListener<T> {
 
     abstract class Spigot(override val plugin: SpigotPlugin) : VitalListener<SpigotPlugin>, SpigotListener {
         @PostConstruct
-        fun init() = Bukkit.getPluginManager().registerEvents(this, plugin)
+        fun init() {
+            Bukkit.getOnlinePlayers()
+            Bukkit.getPluginManager().registerEvents(this, plugin)
+        }
     }
 
     abstract class Bungee(override val plugin: BungeePlugin) : VitalListener<BungeePlugin>, BungeeListener {

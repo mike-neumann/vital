@@ -21,17 +21,10 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
 
         roundEnv.getElementsAnnotatedWith(Vital.Info::class.java)
             .filter { it.kind == ElementKind.CLASS }
-            .forEach { element ->
-                val typeElement = element as TypeElement
-                val typeMirror = typeElement.superclass
-                val typeMirrorName = typeMirror.toString()
-                val spigotPluginMirror = "org.bukkit.plugin.java.JavaPlugin"
-                val bungeecordPluginMirror = "net.md_5.bungee.api.plugin.Plugin"
-
-                if (typeMirrorName != spigotPluginMirror && typeMirrorName != bungeecordPluginMirror) return@forEach
+            .forEach {
+                val typeElement = it as TypeElement
                 val className = typeElement.qualifiedName.toString()
-
-                classNameVitalPluginInfoEntry = className to element.getAnnotation(Vital.Info::class.java)
+                classNameVitalPluginInfoEntry = className to it.getAnnotation(Vital.Info::class.java)
             }
         // If scan could not resolve the main class, cancel automatic `plugin.yml` creation.
         if (classNameVitalPluginInfoEntry == null) throw VitalPluginInfoAnnotationProcessingException.NoMainClass()
@@ -69,7 +62,8 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
 
     fun setupBungeePluginYml(name: String, className: String, version: String, author: Array<String>) {
         VitalPluginInfoHolder.PLUGIN_INFO.appendLine("name: $name")
-        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("main: $className")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("main: me.vitalframework.loader.VitalPluginLoader\$Bungee")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("real-main: $className")
         VitalPluginInfoHolder.PLUGIN_INFO.appendLine("version: $version")
         VitalPluginInfoHolder.PLUGIN_INFO.appendLine("author: ${author.contentToString()}")
     }
@@ -83,7 +77,8 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         author: Array<String>,
     ) {
         // append basic plugin meta information to plugin info holder.
-        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("main: $className")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("main: me.vitalframework.loader.VitalPluginLoader\$Spigot")
+        VitalPluginInfoHolder.PLUGIN_INFO.appendLine("real-main: $className")
         VitalPluginInfoHolder.PLUGIN_INFO.appendLine("name: $name")
         VitalPluginInfoHolder.PLUGIN_INFO.appendLine("version: $version")
         VitalPluginInfoHolder.PLUGIN_INFO.appendLine("description: $description")

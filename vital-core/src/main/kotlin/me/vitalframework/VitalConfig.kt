@@ -2,9 +2,11 @@ package me.vitalframework
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 
 class VitalConfig {
+    @ComponentScan(basePackages = ["me.vitalframework"])
     @RequiresSpigot
     @Configuration
     class Spigot {
@@ -14,6 +16,7 @@ class VitalConfig {
         fun spigotPlugin(@Qualifier("plugin") plugin: SpigotPlugin) = plugin
     }
 
+    @ComponentScan(basePackages = ["me.vitalframework"])
     @RequiresBungee
     @Configuration
     class Bungee {

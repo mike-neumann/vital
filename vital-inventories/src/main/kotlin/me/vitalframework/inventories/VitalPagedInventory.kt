@@ -44,17 +44,17 @@ abstract class VitalPagedInventory(previousInventory: VitalInventory?) : VitalIn
         return list.subList(startIndex, endIndex)
     }
 
-    override fun open(player: SpigotPlayer) {
+    final override fun open(player: SpigotPlayer) {
         super.open(player)
         setPage(1, player)
     }
 
-    override fun update(player: SpigotPlayer) {
+    final override fun update(player: SpigotPlayer) {
         super.update(player)
         setPage(page, player)
     }
 
-    protected fun onPageChange(page: Long, player: SpigotPlayer) {}
+    protected open fun onPageChange(page: Long, player: SpigotPlayer) {}
 
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)

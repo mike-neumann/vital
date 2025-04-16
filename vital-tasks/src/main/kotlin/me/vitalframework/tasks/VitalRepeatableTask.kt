@@ -1,12 +1,12 @@
 package me.vitalframework.tasks
 
 import me.vitalframework.*
+import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import net.md_5.bungee.api.ProxyServer
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
-abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) :
-    RequiresAnnotation<VitalRepeatableTask.Info> {
+abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) {
     var interval: Long
     var allowTick = true
     var runnable: R? = null
@@ -16,12 +16,10 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) :
     val running get() = runnable != null && task != null
 
     init {
-        val info = getRequiredAnnotation()
+        val info = getRequiredAnnotation<Info>()
 
         interval = info.interval
     }
-
-    override fun requiredAnnotationType() = Info::class.java
 
     fun start() {
         if (running) return

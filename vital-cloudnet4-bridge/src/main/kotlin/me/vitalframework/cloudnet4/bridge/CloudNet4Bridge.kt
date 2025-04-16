@@ -40,7 +40,7 @@ interface CloudNet4Bridge<P> {
 
     fun getPlayerCount(taskName: String) = CloudNet4Driver.getCloudServers(taskName)
         .map { it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf()).size }
-        .reduce { a, b -> Integer.sum(a, b) }
+        .reduce(Integer::sum)
 
     object Spigot : CloudNet4Bridge<SpigotPlayer> {
         override fun getPlayerUniqueId(player: SpigotPlayer) = player.uniqueId

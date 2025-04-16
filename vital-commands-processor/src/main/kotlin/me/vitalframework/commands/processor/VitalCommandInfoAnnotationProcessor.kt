@@ -37,9 +37,7 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
 
         generatePluginYmlCommands(commandInfoList, pluginInfoAnnotationProcessor.pluginEnvironment)
 
-        ran = true
-
-        return true
+        return true.also { ran = true }
     }
 
     private fun generatePluginYmlCommands(commandInfos: MutableList<VitalCommand.Info>, pluginEnvironment: Vital.Info.PluginEnvironment) {

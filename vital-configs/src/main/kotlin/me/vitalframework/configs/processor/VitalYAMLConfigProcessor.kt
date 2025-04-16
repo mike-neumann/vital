@@ -36,7 +36,7 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
             typeDescription.setExcludes(*excludes)
             yaml.addTypeDescription(typeDescription)
             // add type descriptors for annotated property types...
-            for (clazz in configProperty.value) {
+            for (clazz in configProperty.types) {
                 addTypeDescriptors(clazz.java)
             }
 

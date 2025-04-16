@@ -19,14 +19,21 @@ include("vital-tasks")
 include("vital-utils")
 
 pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+
     plugins {
         val kotlinVersion: String by settings
         val springBootVersion: String by settings
         val springDependencyManagementVersion: String by settings
 
         kotlin("jvm") version kotlinVersion
+        kotlin("kapt") version kotlinVersion
         kotlin("plugin.spring") version kotlinVersion
         id("org.springframework.boot") version springBootVersion
         id("io.spring.dependency-management") version springDependencyManagementVersion
     }
 }
+include("vital-loader")
