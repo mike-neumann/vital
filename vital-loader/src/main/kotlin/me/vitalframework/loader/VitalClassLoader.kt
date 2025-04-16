@@ -10,10 +10,14 @@ import java.net.URLClassLoader
 import java.util.*
 import java.util.jar.JarFile
 
-// this class loader only needs to know its own nested-jars to resolve any dependency classes,
-// since the plugin class loader does not know about those.
-// own plugin files / classes MUST be loaded by the plugin class loader or else spigot / paper complains about class origins
-abstract class VitalClassLoader<T : Any>(plugin: T, private val parentFirstPackages: List<String>) : URLClassLoader(
+/**
+ * internal vital class loader responsible for loading classes that are contained within the nested jars of the final plugin jar.
+ * attempts to load classes and resources from its own classpath first, before delegating to parent (plugin).
+ * exposes a way to configure parent-first packages that must be loaded from the parent class loader (plugin), before delegating to child.
+ * parent-first packages are needed, when the child has classes on its classpath that are similar to ones found in the parent
+ * and types don't match during runtime execution.
+ */
+abstract class VitalClassLoader<T : Any>(plugin: T, private vararg val parentFirstPackages: String) : URLClassLoader(
     (plugin.javaClass.classLoader as URLClassLoader).urLs,
     plugin.javaClass.classLoader.parent
 ) {
@@ -21,7 +25,7 @@ abstract class VitalClassLoader<T : Any>(plugin: T, private val parentFirstPacka
         // since we cannot directly read content out of nested jars (virtual paths)
         // we need to extract them one by one into a temp file
         // after extraction is done, and we have scanned every known class,
-        // we can remove their temp file
+        // we can remove their temp file when the jvm exists (deleteOnExit())
         val pluginFile = File(plugin.javaClass.protectionDomain.codeSource.location.toURI())
         val jarFile = JarFile(pluginFile)
         val urls = jarFile.entries().toList().filter { it.name.endsWith(".jar") }.map {
@@ -55,33 +59,19 @@ abstract class VitalClassLoader<T : Any>(plugin: T, private val parentFirstPacka
         }
     }
 
-    override fun getResource(name: String): URL? {
-        var found = findResource(name)
-        //println("vital found: $found")
-        if (found == null) {
-            //println("parent is: $parent")
-            found = parent.getResource(name)
-            //println("plugin found: $found")
-        }
-        if (found == null) {
-            found = parent.parent.getResource(name)
-        }
-        return found
-    }
+    override fun getResource(name: String): URL? = findResource(name) ?: parent.getResource(name) ?: parent.parent.getResource(name)
 
-    override fun getResources(name: String): Enumeration<URL> {
-        val urls = super.getResources(name).toList()
-        val pluginUrls = parent.getResources(name).toList()
-        val parentUrls = parent.parent.getResources(name).toList()
-        val allUrls = urls + pluginUrls + parentUrls
-        //println("looking for resources $name, found: $allUrls")
-        return Collections.enumeration(allUrls)
-    }
+    override fun getResources(name: String): Enumeration<URL> = Collections.enumeration(
+        super.getResources(name).toList() + parent.getResources(name).toList() + parent.parent.getResources(name).toList()
+    )
+
+    class Spigot(plugin: JavaPlugin) : VitalClassLoader<JavaPlugin>(plugin, "org.bukkit.", "net.kyori.")
 
     // paper wants to make it as difficult for us as possible,
     // so we must use internal paper components to trick paper into thinking
-    // that we are in internal plugin class loader
-    class Spigot(private val plugin: JavaPlugin) : VitalClassLoader<JavaPlugin>(plugin, listOf("org.bukkit.", "net.kyori.")),
+    // that we are an internal plugin class loader
+    @Suppress("UnstableApiUsage")
+    class Paper(private val plugin: JavaPlugin) : VitalClassLoader<JavaPlugin>(plugin, "org.bukkit.", "net.kyori."),
         ConfiguredPluginClassLoader {
         override fun getConfiguration() = (plugin.javaClass.classLoader as PluginClassLoader).configuration
         override fun loadClass(p0: String, p1: Boolean, p2: Boolean, p3: Boolean): Class<*> =
@@ -92,6 +82,5 @@ abstract class VitalClassLoader<T : Any>(plugin: T, private val parentFirstPacka
         override fun getGroup() = (plugin.javaClass.classLoader as PluginClassLoader).group
     }
 
-    // TODO
-    class Bungee(plugin: Plugin) : VitalClassLoader<Plugin>(plugin, listOf("net.md_5.bungee", "net.kyori."))
+    class Bungee(plugin: Plugin) : VitalClassLoader<Plugin>(plugin, "net.md_5.bungee.", "net.kyori.")
 }

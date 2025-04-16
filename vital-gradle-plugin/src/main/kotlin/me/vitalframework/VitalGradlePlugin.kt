@@ -1,7 +1,5 @@
 package me.vitalframework
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -12,7 +10,6 @@ class VitalGradlePlugin : Plugin<Project> {
         target.plugins.apply("org.springframework.boot")
         target.plugins.apply("org.jetbrains.kotlin.plugin.spring")
         target.plugins.apply("io.spring.dependency-management")
-        target.plugins.apply("com.gradleup.shadow")
 
         target.afterEvaluate {
             target.applyDependency("implementation", "me.vitalframework:vital-core:${target.getProperty("vitalVersion")}")
@@ -47,11 +44,8 @@ class VitalGradlePlugin : Plugin<Project> {
                             if (file.extension == "jar") {
                                 val jarFiles = target.zipTree(file)
 
-                                if (jarFiles.any {
-                                        it.path.contains("kotlin/") || it.path.contains("me/vitalframework/") || it.path.contains(
-                                            "org/springframework"
-                                        )
-                                    }) {
+                                //
+                                if (jarFiles.any { it.path.contains("kotlin/") || it.path.contains("me/vitalframework/loader") }) {
                                     target.copy {
                                         it.from(jarFiles)
                                         it.into(unpackDir)
@@ -59,6 +53,8 @@ class VitalGradlePlugin : Plugin<Project> {
 
                                     if (!jarFiles.any { it.path.contains("kotlin/") }) {
                                         // we want to keep kotlin dependencies as a jar on the root
+                                        // otherwise we cannot use kotlin-reflect when our plugin tries to load
+                                        // and start up the vital instance
                                         continue
                                     }
                                 }
@@ -79,50 +75,8 @@ class VitalGradlePlugin : Plugin<Project> {
                     target.ant.invokeMethod("zip", mapOf("destfile" to repackedJar, "basedir" to unpackDir))
                 }
             }
-            target.tasks.named("shadowJar", ShadowJar::class.java) {
-                it.mustRunAfter(target.tasks.named("bootJar"))
-                // service files are not automatically merged which can cause
-//                it.mergeServiceFiles()
-//                it.mergeGroovyExtensionModules()
-//            TODO: currently does not work with logger factories on paper...
-//            appendTransform(it, "META-INF/spring.factories")
-//            appendTransform(it, "META-INF/spring.handlers")
-//            appendTransform(it, "META-INF/spring.schemas")
-//            appendTransform(it, "META-INF/spring.tooling")
-//            appendTransform(it, "META-INF/web-fragment.xml")
-//            appendTransform(it, "META-INF/web-fragment.xml")
-//                it.appendTransform("META-INF/spring/aot.factories")
-//                it.appendTransform("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports")
-//                it.appendTransform("META-INF/spring.factories")
-            }
-//            target.tasks.register("excludeDuplicates", ShadowJar::class.java) {
-//                it.mustRunAfter(target.tasks.named("shadowJar"))
-//                it.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-//                it.exclude(
-//                    "META-INF/DEPENDENCIES",
-//                    "META-INF/LICENSE",
-//                    "META-INF/LICENSE.md",
-//                    "META-INF/LICENSE.txt",
-//                    "META-INF/NOTICE",
-//                    "META-INF/NOTICE.md",
-//                    "META-INF/NOTICE.txt",
-//                    "META-INF/additional-spring-configuration-metadata.json",
-//                    "META-INF/license.txt",
-//                    "META-INF/notice.txt",
-//                    "META-INF/sisu/javax.inject.Named",
-//                    "META-INF/spring-configuration-metadata.json",
-//                    "META-INF/spring.handlers",
-//                    "META-INF/spring.schemas",
-//                    "META-INF/spring.tooling",
-//                    "META-INF/web-fragment.xml",
-//                    "license.txt",
-//                    "notice.txt"
-//                )
-//        }
         }
     }
-
-    private fun ShadowJar.appendTransform(resource: String) = transform<AppendingTransformer> { it.resource.set(resource) }
 
     private fun Project.hasDependency(dependencyNotation: String) = configurations.flatMap { it.allDependencies }
         .any { "${it.group}:${it.name}:${it.version}".startsWith(dependencyNotation) }
