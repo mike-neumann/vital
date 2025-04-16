@@ -17,6 +17,7 @@ include("vital-scoreboards")
 include("vital-statistics")
 include("vital-tasks")
 include("vital-utils")
+include("vital-loader")
 
 pluginManagement {
     repositories {
@@ -36,4 +37,3 @@ pluginManagement {
         id("io.spring.dependency-management") version springDependencyManagementVersion
     }
 }
-include("vital-loader")

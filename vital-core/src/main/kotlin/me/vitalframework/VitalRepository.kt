@@ -6,7 +6,6 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
 
     fun save(entity: T) = let {
         if (exists(entity)) delete(entity)
-
         _entities.add(entity).also { onSave(entity) }.let { entity }
     }
 

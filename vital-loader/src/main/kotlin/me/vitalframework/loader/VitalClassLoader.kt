@@ -17,10 +17,12 @@ import java.util.jar.JarFile
  * parent-first packages are needed, when the child has classes on its classpath that are similar to ones found in the parent
  * and types don't match during runtime execution.
  */
-abstract class VitalClassLoader<T : Any>(plugin: T, private vararg val parentFirstPackages: String) : URLClassLoader(
-    (plugin.javaClass.classLoader as URLClassLoader).urLs,
-    plugin.javaClass.classLoader.parent
-) {
+abstract class VitalClassLoader<T : Any>(
+    plugin: T,
+    urls: Array<URL>,
+    parent: ClassLoader?,
+    private vararg val parentFirstPackages: String,
+) : URLClassLoader(urls, parent) {
     init {
         // since we cannot directly read content out of nested jars (virtual paths)
         // we need to extract them one by one into a temp file
@@ -35,6 +37,7 @@ abstract class VitalClassLoader<T : Any>(plugin: T, private vararg val parentFir
             // now we have copied our virtual .jar file into a temp file,
             // we can now scan the file for its entries / classes
             // and register them on this class loader
+            // the temp file will be deleted when this jvm terminates
             tempFile.toURI().toURL()
         }
         urls.forEach(::addURL)
@@ -46,15 +49,11 @@ abstract class VitalClassLoader<T : Any>(plugin: T, private vararg val parentFir
         try {
             // some classes MUST be loaded from parent first,
             // to fix some bullshit issues regarding SPIs and plugin class loading
-            if (parentFirstPackages.any { name.startsWith(it) }) {
-                return super.loadClass(name, resolve)
-            }
-            //println("looking for $name")
+            if (parentFirstPackages.any { name.startsWith(it) }) super.loadClass(name, resolve)
             val clazz = findClass(name)
             if (resolve) resolveClass(clazz)
             return clazz
-        } catch (e: Exception) {
-            //println("falling back to parent for $name")
+        } catch (_: Exception) {
             return super.loadClass(name, resolve)
         }
     }
@@ -65,13 +64,23 @@ abstract class VitalClassLoader<T : Any>(plugin: T, private vararg val parentFir
         super.getResources(name).toList() + parent.getResources(name).toList() + parent.parent.getResources(name).toList()
     )
 
-    class Spigot(plugin: JavaPlugin) : VitalClassLoader<JavaPlugin>(plugin, "org.bukkit.", "net.kyori.")
+    class Spigot(plugin: JavaPlugin) : VitalClassLoader<JavaPlugin>(
+        plugin,
+        (plugin.javaClass.classLoader as URLClassLoader).urLs,
+        plugin.javaClass.classLoader.parent,
+        "org.bukkit.",
+        "net.kyori."
+    )
 
     // paper wants to make it as difficult for us as possible,
     // so we must use internal paper components to trick paper into thinking
     // that we are an internal plugin class loader
     @Suppress("UnstableApiUsage")
-    class Paper(private val plugin: JavaPlugin) : VitalClassLoader<JavaPlugin>(plugin, "org.bukkit.", "net.kyori."),
+    class Paper(private val plugin: JavaPlugin) : VitalClassLoader<JavaPlugin>(
+        plugin,
+        (plugin.javaClass.classLoader as URLClassLoader).urLs,
+        plugin.javaClass.classLoader.parent,
+    ),
         ConfiguredPluginClassLoader {
         override fun getConfiguration() = (plugin.javaClass.classLoader as PluginClassLoader).configuration
         override fun loadClass(p0: String, p1: Boolean, p2: Boolean, p3: Boolean): Class<*> =
@@ -82,5 +91,10 @@ abstract class VitalClassLoader<T : Any>(plugin: T, private vararg val parentFir
         override fun getGroup() = (plugin.javaClass.classLoader as PluginClassLoader).group
     }
 
-    class Bungee(plugin: Plugin) : VitalClassLoader<Plugin>(plugin, "net.md_5.bungee.", "net.kyori.")
+    class Bungee(plugin: Plugin) : VitalClassLoader<Plugin>(
+        plugin,
+        (plugin.javaClass.classLoader as URLClassLoader).urLs,
+        plugin.javaClass.classLoader,
+        "net.md_5.bungee."
+    )
 }

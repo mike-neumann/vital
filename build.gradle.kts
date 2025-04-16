@@ -30,10 +30,7 @@ allprojects {
         compileOnly("com.mojang:brigadier:${findProperty("brigadierVersion")}")
         compileOnly("net.md-5:bungeecord-api:${findProperty("bungeeApiVersion")}")
 
-        api("org.springframework.boot:spring-boot-starter:${findProperty("springBootVersion")}") {
-            // exclude(group = "ch.qos.logback", module = "logback-classic")
-            // exclude(group = "org.apache.logging.log4j", module = "log4j-to-slf4j")
-        }
+        api("org.springframework.boot:spring-boot-starter:${findProperty("springBootVersion")}")
 
         testImplementation("org.springframework.boot:spring-boot-starter-test:${findProperty("springBootVersion")}")
         testImplementation("org.junit.jupiter:junit-jupiter-api:${findProperty("junitVersion")}")
@@ -57,7 +54,6 @@ allprojects {
                 groupId = group.toString()
                 artifactId = project.name
                 version = version
-
                 from(components["java"])
             }
         }
@@ -76,7 +72,5 @@ allprojects {
         )
     }
 
-    tasks.test {
-        useJUnitPlatform()
-    }
+    tasks.test { useJUnitPlatform() }
 }

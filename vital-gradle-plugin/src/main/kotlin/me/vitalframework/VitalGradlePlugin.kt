@@ -43,8 +43,7 @@ class VitalGradlePlugin : Plugin<Project> {
                         for (file in bootInfLib.listFiles()!!) {
                             if (file.extension == "jar") {
                                 val jarFiles = target.zipTree(file)
-
-                                //
+                                // kotlin and vital-loader dependencies MUST remain on the classpath, so the plugin can load
                                 if (jarFiles.any { it.path.contains("kotlin/") || it.path.contains("me/vitalframework/loader") }) {
                                     target.copy {
                                         it.from(jarFiles)

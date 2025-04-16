@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 
-class VitalConfig {
+class VitalSpringConfig {
     @ComponentScan(basePackages = ["me.vitalframework"])
     @RequiresSpigot
     @Configuration

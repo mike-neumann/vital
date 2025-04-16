@@ -11,14 +11,11 @@ interface VitalPluginLoader {
     fun <T : Any> enable(vitalClassLoader: VitalClassLoader<T>, pluginYmlFileName: String) {
         try {
             val loaderOptions = LoaderOptions().apply { tagInspector = TagInspector { true } }
-            val constructor = Constructor(loaderOptions)
             val dumperOptions = DumperOptions().apply { defaultFlowStyle = DumperOptions.FlowStyle.BLOCK }
-            val representer = Representer(dumperOptions)
             val pluginYml = vitalClassLoader.getResourceAsStream(pluginYmlFileName)!!
-            val yaml = Yaml(constructor, representer, dumperOptions, loaderOptions)
-            val data = yaml.load<Map<String, Any>>(pluginYml)
-            val mainClassName = data["real-main"] as String
-            val mainClass = vitalClassLoader.loadClass(mainClassName)
+            val yaml = Yaml(Constructor(loaderOptions), Representer(dumperOptions), dumperOptions, loaderOptions)
+            val data = yaml.load<Map<String, String>>(pluginYml)
+            val mainClass = vitalClassLoader.loadClass(data["real-main"])
             val vital = vitalClassLoader.loadClass("me.vitalframework.Vital")
             val run = vital.getMethod("run", Any::class.java, Class::class.java, ClassLoader::class.java)
             run(null, this, mainClass, vitalClassLoader)
