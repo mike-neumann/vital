@@ -233,16 +233,16 @@ interface VitalUtils<CS, P : CS> {
                         this == Material.HOPPER ||
                         this == Material.HOPPER_MINECART)
 
-        fun isInsideLocationArea(location1: Location, location2: Location, location: Location): Boolean {
+        fun Location.isInsideLocationArea(location1: Location, location2: Location): Boolean {
             val ourMinX = min(location1.x, location2.x)
             val ourMaxX = max(location1.x, location2.x)
             val ourMinY = min(location1.y, location2.y)
             val ourMaxY = max(location1.y, location2.y)
             val ourMinZ = min(location1.z, location2.z)
             val ourMaxZ = max(location1.z, location2.z)
-            val theirX = location.x
-            val theirY = location.y
-            val theirZ = location.z
+            val theirX = x
+            val theirY = y
+            val theirZ = z
 
             return theirX >= ourMinX && theirX <= ourMaxX && theirY >= ourMinY && theirY <= ourMaxY && theirZ >= ourMinZ && theirZ <= ourMaxZ
         }
@@ -261,21 +261,21 @@ interface VitalUtils<CS, P : CS> {
             return Location(location1.world, randomX, randomY, randomZ)
         }
 
-        fun getCenterBlockLocation(location: Location, xOffset: Double, yOffset: Double, zOffset: Double): Location {
-            val finalLocation = location.block.location.clone()
+        fun Location.getCenterBlockLocation(xOffset: Double, yOffset: Double, zOffset: Double): Location {
+            val finalLocation = block.location.clone()
                 .add(.5, .5, .5)
                 .add(xOffset, yOffset, zOffset)
 
-            finalLocation.pitch = location.pitch
-            finalLocation.yaw = location.yaw
-            finalLocation.direction = location.direction
+            finalLocation.pitch = pitch
+            finalLocation.yaw = yaw
+            finalLocation.direction = direction
 
             return finalLocation
         }
 
-        fun Location.getCenterBlockLocation() = getCenterBlockLocation(this, 0.0, 0.0, 0.0)
-        fun Location.getCenterBlockTopLocation() = getCenterBlockLocation(this, 0.0, .5, 0.0)
-        fun Location.getCenterBlockSideLocation() = getCenterBlockLocation(this, 0.0, -.5, 0.0)
+        fun Location.getCenterBlockLocation() = getCenterBlockLocation(0.0, 0.0, 0.0)
+        fun Location.getCenterBlockTopLocation() = getCenterBlockLocation(0.0, .5, 0.0)
+        fun Location.getCenterBlockSideLocation() = getCenterBlockLocation(0.0, -.5, 0.0)
 
         fun getCircumferenceOfLocationArea(location1: Location, location2: Location): List<Location> {
             val minX = min(location1.x, location2.x)
