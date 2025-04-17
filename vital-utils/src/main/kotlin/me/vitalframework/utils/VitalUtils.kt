@@ -174,64 +174,64 @@ interface VitalUtils<CS, P : CS> {
 
         fun SpigotPlayer.teleportWithEffect(to: Entity) = teleportWithEffect(to.location, PotionEffectType.SLOWNESS)
 
-        fun canBePlacedInMidAir(material: Material) = !material.hasGravity() &&
-                !isVegetation(material) &&
-                (material != Material.REDSTONE &&
-                        material != Material.REDSTONE_TORCH &&
-                        material != Material.REPEATER &&
-                        material != Material.COMPARATOR &&
-                        material != Material.LEVER &&
-                        material != Material.TRIPWIRE &&
-                        !material.name.contains("BUTTON") &&
-                        !material.name.contains("PRESSURE_PLATE") &&
-                        !material.name.contains("RAIL"))
+        fun Material.canBePlacedInMidAir() = !hasGravity() &&
+                !isVegetation() &&
+                (this != Material.REDSTONE &&
+                        this != Material.REDSTONE_TORCH &&
+                        this != Material.REPEATER &&
+                        this != Material.COMPARATOR &&
+                        this != Material.LEVER &&
+                        this != Material.TRIPWIRE &&
+                        !name.contains("BUTTON") &&
+                        !name.contains("PRESSURE_PLATE") &&
+                        !name.contains("RAIL"))
 
-        fun isVegetation(material: Material) = material.name.contains("SAPLING") ||
-                material.name.contains("FLOWER") ||
-                material.name.contains("WHEAT") ||
-                material.name.contains("SEEDS") ||
-                material.name.contains("CROP") ||
-                material.name.contains("KELP") ||
-                material.name.contains("BUSH") ||
-                material.name.contains("MUSHROOM") ||
-                material.name.contains("CHORUS") ||
-                material.name.contains("FERN") ||
-                material.name.contains("POTTED") ||
-                material.name.contains("ROSE") ||
-                material.name.contains("POPPY") ||
-                material == Material.MELON_STEM ||
-                material == Material.PUMPKIN_STEM ||
-                material == Material.BAMBOO ||
-                material == Material.SUGAR_CANE ||
-                material == Material.SEA_PICKLE ||
-                material == Material.NETHER_WART ||
-                material == Material.LILY_PAD ||
-                material == Material.VINE ||
-                material == Material.GLOW_LICHEN ||
-                material == Material.SCULK_VEIN ||
-                material == Material.CACTUS ||
-                material == Material.LILAC ||
-                material == Material.PEONY ||
-                material == Material.TALL_GRASS ||
-                material == Material.TALL_SEAGRASS ||
-                material == Material.MANGROVE_PROPAGULE
+        fun Material.isVegetation() = name.contains("SAPLING") ||
+                name.contains("FLOWER") ||
+                name.contains("WHEAT") ||
+                name.contains("SEEDS") ||
+                name.contains("CROP") ||
+                name.contains("KELP") ||
+                name.contains("BUSH") ||
+                name.contains("MUSHROOM") ||
+                name.contains("CHORUS") ||
+                name.contains("FERN") ||
+                name.contains("POTTED") ||
+                name.contains("ROSE") ||
+                name.contains("POPPY") ||
+                this == Material.MELON_STEM ||
+                this == Material.PUMPKIN_STEM ||
+                this == Material.BAMBOO ||
+                this == Material.SUGAR_CANE ||
+                this == Material.SEA_PICKLE ||
+                this == Material.NETHER_WART ||
+                this == Material.LILY_PAD ||
+                this == Material.VINE ||
+                this == Material.GLOW_LICHEN ||
+                this == Material.SCULK_VEIN ||
+                this == Material.CACTUS ||
+                this == Material.LILAC ||
+                this == Material.PEONY ||
+                this == Material.TALL_GRASS ||
+                this == Material.TALL_SEAGRASS ||
+                this == Material.MANGROVE_PROPAGULE
 
-        fun isRedstoneMachine(material: Material) = material.creativeCategory == CreativeCategory.REDSTONE &&
-                (material == Material.REDSTONE_TORCH ||
-                        material.name.contains("PISTON") ||
-                        material.name.contains("BUTTON") ||
-                        material.name.contains("PRESSURE_PLATE") ||
-                        material.name.contains("DETECTOR") ||
-                        material.name.contains("LAMP") ||
-                        material == Material.COMPARATOR ||
-                        material == Material.REPEATER ||
-                        material == Material.REDSTONE ||
-                        material == Material.REDSTONE_WIRE ||
-                        material == Material.OBSERVER ||
-                        material == Material.DROPPER ||
-                        material == Material.DISPENSER ||
-                        material == Material.HOPPER ||
-                        material == Material.HOPPER_MINECART)
+        fun Material.isRedstoneMachine() = creativeCategory == CreativeCategory.REDSTONE &&
+                (this == Material.REDSTONE_TORCH ||
+                        name.contains("PISTON") ||
+                        name.contains("BUTTON") ||
+                        name.contains("PRESSURE_PLATE") ||
+                        name.contains("DETECTOR") ||
+                        name.contains("LAMP") ||
+                        this == Material.COMPARATOR ||
+                        this == Material.REPEATER ||
+                        this == Material.REDSTONE ||
+                        this == Material.REDSTONE_WIRE ||
+                        this == Material.OBSERVER ||
+                        this == Material.DROPPER ||
+                        this == Material.DISPENSER ||
+                        this == Material.HOPPER ||
+                        this == Material.HOPPER_MINECART)
 
         fun isInsideLocationArea(location1: Location, location2: Location, location: Location): Boolean {
             val ourMinX = min(location1.x, location2.x)
@@ -273,9 +273,9 @@ interface VitalUtils<CS, P : CS> {
             return finalLocation
         }
 
-        fun getCenterBlockLocation(location: Location) = getCenterBlockLocation(location, 0.0, 0.0, 0.0)
-        fun getCenterBlockTopLocation(location: Location) = getCenterBlockLocation(location, 0.0, .5, 0.0)
-        fun getCenterBlockSideLocation(location: Location) = getCenterBlockLocation(location, 0.0, -.5, 0.0)
+        fun Location.getCenterBlockLocation() = getCenterBlockLocation(this, 0.0, 0.0, 0.0)
+        fun Location.getCenterBlockTopLocation() = getCenterBlockLocation(this, 0.0, .5, 0.0)
+        fun Location.getCenterBlockSideLocation() = getCenterBlockLocation(this, 0.0, -.5, 0.0)
 
         fun getCircumferenceOfLocationArea(location1: Location, location2: Location): List<Location> {
             val minX = min(location1.x, location2.x)
