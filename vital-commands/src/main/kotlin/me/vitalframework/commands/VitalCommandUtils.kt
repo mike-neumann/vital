@@ -151,10 +151,10 @@ object VitalCommandUtils {
         context: VitalCommand.GlobalExceptionHandlerContext,
         sender: Any,
         executedArg: String,
-        commandArg: VitalCommand.Arg,
+        commandArg: VitalCommand.Arg?,
         exception: Throwable,
     ) = let {
-        val injectableParameters = mutableMapOf<Int, Any>()
+        val injectableParameters = mutableMapOf<Int, Any?>()
         context.commandSenderIndex?.let { injectableParameters[it] = sender }
         context.executedArgIndex?.let { injectableParameters[it] = executedArg }
         context.commandArgIndex?.let { injectableParameters[it] = commandArg }

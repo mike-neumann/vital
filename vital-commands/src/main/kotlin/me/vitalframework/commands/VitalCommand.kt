@@ -39,6 +39,27 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
     abstract fun getAllPlayerNames(): List<String>
     internal fun getArg(executedArg: String) = args.entries.filter { it.key.matcher(executedArg).matches() }.map { it.value }.firstOrNull()
 
+    private fun executeGlobalExceptionHandlerMethod(sender: CS, executedArg: String, commandArg: Arg?, exception: Throwable) {
+        val globalContext = VitalGlobalCommandExceptionHandlerProcessor.getGlobalExceptionHandler(exception.javaClass)
+            ?: return onCommandError(sender, commandArg, exception)
+
+        try {
+            globalContext.handlerMethod(
+                globalContext.adviceInstance,
+                *VitalCommandUtils.getInjectableGlobalExceptionHandlerMethodParameters(
+                    globalContext,
+                    sender,
+                    executedArg,
+                    commandArg,
+                    exception
+                )
+            )
+            return
+        } catch (e: Exception) {
+            throw VitalCommandException.ExecuteGlobalExceptionHandlerMethod(globalContext.handlerMethod, globalContext, e)
+        }
+    }
+
     private fun executeArgExceptionHandlerMethod(sender: CS, exception: Throwable, executedArg: String, commandArg: Arg) {
         val exceptionHandlers = argExceptionHandlers[commandArg] ?: emptyMap()
         // we may or may not have an exception handler mapped for this execution context
@@ -46,24 +67,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         if (context == null) {
             // we do not have any exception handler mapped for this argument
             // try to find a global exception handler
-            val globalContext = VitalGlobalCommandExceptionHandlerProcessor.getGlobalExceptionHandler(exception.javaClass)
-                ?: return onCommandError(sender, commandArg, exception)
-
-            try {
-                globalContext.handlerMethod(
-                    globalContext.adviceInstance,
-                    *VitalCommandUtils.getInjectableGlobalExceptionHandlerMethodParameters(
-                        globalContext,
-                        sender,
-                        executedArg,
-                        commandArg,
-                        exception
-                    )
-                )
-                return
-            } catch (e: Exception) {
-                throw VitalCommandException.ExecuteGlobalExceptionHandlerMethod(globalContext.handlerMethod, globalContext, e)
-            }
+            return executeGlobalExceptionHandlerMethod(sender, executedArg, commandArg, exception)
         }
 
         try {
@@ -145,7 +149,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
             executingArg == null && joinedPlayerArgs.isBlank() -> try {
                 onBaseCommand(sender)
             } catch (e: Exception) {
-                return onCommandError(sender, null, e)
+                return executeGlobalExceptionHandlerMethod(sender, joinedPlayerArgs, null, e)
             }
 
             executingArg != null -> {
