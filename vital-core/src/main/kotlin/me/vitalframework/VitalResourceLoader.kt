@@ -2,6 +2,10 @@ package me.vitalframework
 
 import org.springframework.core.io.*
 
+/**
+ * Internal spring resource loader responsible for locating resources in the spring context.
+ * Will strip any protocol from requested resources to enable correct resource loading.
+ */
 class VitalResourceLoader : DefaultResourceLoader() {
     override fun getResource(location: String): Resource {
         // strip the protocol from the location before attempting to fetch

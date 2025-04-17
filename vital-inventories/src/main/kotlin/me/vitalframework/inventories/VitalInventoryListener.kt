@@ -32,7 +32,6 @@ class VitalInventoryListener(plugin: SpigotPlugin) : VitalListener.Spigot(plugin
     fun onPlayerCloseInventory(e: InventoryCloseEvent) {
         val player = e.player as SpigotPlayer
         val vitalInventory = Vital.context.getBeansOfType(VitalInventory::class.java).values.firstOrNull { it.hasInventoryOpen(player) }
-
         vitalInventory?.close(player)
     }
 }

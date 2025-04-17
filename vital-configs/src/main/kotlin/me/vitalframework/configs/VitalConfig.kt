@@ -29,7 +29,7 @@ abstract class VitalConfig {
         }
 
         try {
-            // after everything has worked without problem, inject field of our config with the values now retrievable...
+            // after everything has worked without problem, inject fields of our config with the values now retrievable...
             load(inputStream)
         } catch (e: Exception) {
             throw VitalConfigException.InjectFields(info.name, info.processor.java, e)

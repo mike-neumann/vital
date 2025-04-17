@@ -16,7 +16,7 @@ open class VitalItem {
     val initialCooldown: Int
     val itemStack: ItemStack by lazy {
         itemBuilder {
-            val info = this@VitalItem.getRequiredAnnotation<Info>();
+            val info = this@VitalItem.getRequiredAnnotation<Info>()
             type = info.type
             name = info.name
             amount = info.amount
@@ -32,7 +32,7 @@ open class VitalItem {
     val playerCooldown = mutableMapOf<SpigotPlayer, Int>()
 
     init {
-        val info = getRequiredAnnotation<Info>();
+        val info = getRequiredAnnotation<Info>()
         this.initialCooldown = info.cooldown
     }
 
@@ -61,7 +61,7 @@ open class VitalItem {
         return uuid == otherId
     }
 
-    override fun toString() = super.toString().replace("${itemStack.type} x ${itemStack.amount}", "${itemStack.type} x 1");
+    override fun toString() = super.toString().replace("${itemStack.type} x ${itemStack.amount}", "${itemStack.type} x 1")
 
     open fun onLeftClick(e: PlayerInteractEvent) {}
     open fun onRightClick(e: PlayerInteractEvent) {}

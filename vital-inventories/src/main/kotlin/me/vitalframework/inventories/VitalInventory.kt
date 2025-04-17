@@ -2,6 +2,8 @@ package me.vitalframework.inventories
 
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
+import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -24,9 +26,8 @@ open class VitalInventory(val previousInventory: VitalInventory?) {
 
     init {
         val info = getRequiredAnnotation<Info>()
-
         size = info.size
-        name = info.name
+        name = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(info.name))
     }
 
     @JvmOverloads

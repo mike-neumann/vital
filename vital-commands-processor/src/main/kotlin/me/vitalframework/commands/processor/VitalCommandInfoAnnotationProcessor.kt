@@ -25,13 +25,11 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
         // Scan for all commands annotated with `VitalCommandInfo.
         for (element in roundEnv.getElementsAnnotatedWith(VitalCommand.Info::class.java)) {
             val commandInfo = element.getAnnotation(VitalCommand.Info::class.java)
-
             if (commandInfo !in commandInfoList) commandInfoList.add(commandInfo!!)
         }
 
         for (clazz in Reflections("me.vitalframework").getTypesAnnotatedWith(VitalCommand.Info::class.java, true)) {
             val commandInfo = clazz.getDeclaredAnnotation(VitalCommand.Info::class.java)
-
             if (!commandInfoList.contains(commandInfo)) commandInfoList.add(commandInfo!!)
         }
 
@@ -52,7 +50,6 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    description: ${commandInfo.description}")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    permission: ${commandInfo.permission}")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    usage: ${commandInfo.usage}")
-
                 if (commandInfo.aliases.isNotEmpty()) VitalPluginInfoHolder.PLUGIN_INFO.appendLine("    aliases: ${commandInfo.aliases.contentToString()}")
             }
 

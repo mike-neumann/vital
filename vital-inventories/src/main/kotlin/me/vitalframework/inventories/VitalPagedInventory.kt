@@ -17,7 +17,6 @@ abstract class VitalPagedInventory(previousInventory: VitalInventory?) : VitalIn
 
     init {
         val info = javaClass.getAnnotation(Info::class.java)
-
         fromSlot = info.fromSlot
         toSlot = info.toSlot
     }
@@ -25,22 +24,17 @@ abstract class VitalPagedInventory(previousInventory: VitalInventory?) : VitalIn
     fun updateMaxPage(totalContent: Int) = run { maxPage = ceil(totalContent.toDouble() / pageContentAmount).toLong() }
 
     fun setPage(page: Long, player: SpigotPlayer) {
-        var page = page
-        if (page <= 0) page = 1
-        if (page >= maxPage) page = maxPage
-
-        this.page = page
-        onPageChange(page, player)
+        val newPage = if (page <= 0) 1 else if (page >= maxPage) maxPage else page
+        this.page = newPage
+        onPageChange(newPage, player)
         super.update(player)
     }
 
     protected fun <T> sliceForPage(list: List<T>): List<T> {
         val startIndex = (pageContentAmount * (page - 1)).toInt()
         val endIndex = startIndex + pageContentAmount
-
         if (startIndex >= list.size || startIndex < 0) return mutableListOf()
         if (endIndex >= list.size) return list.subList(startIndex, list.size)
-
         return list.subList(startIndex, endIndex)
     }
 

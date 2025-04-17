@@ -19,7 +19,6 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) {
 
     init {
         val info = getRequiredAnnotation<Info>()
-
         initialCountdown = info.countdown
         countdown = info.countdown
         interval = info.interval
@@ -27,7 +26,6 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) {
 
     fun start() {
         if (running) return
-
         onStart()
         runnable = createRunnable()
         task = createTask()
@@ -35,7 +33,6 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) {
 
     fun stop() {
         if (!running) return
-
         onStop()
         cancelRunnable()
         cancelTask()
@@ -60,7 +57,6 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) {
         if (countdown <= 0) {
             stop()
             onExpire()
-
             return
         }
 

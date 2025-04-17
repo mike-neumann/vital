@@ -34,9 +34,7 @@ class VitalConfigLocation {
 
     fun toLocation(): Location {
         var world = Bukkit.getWorld(this.world!!)
-
         if (world == null) world = WorldCreator(this.world!!).createWorld()
-
         return Location(world, x, y, z, yaw, pitch)
     }
 }

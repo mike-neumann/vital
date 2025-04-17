@@ -1,12 +1,24 @@
 package me.vitalframework
 
+import org.springframework.stereotype.Repository
+
+/**
+ * Repository class, not to be confused with the spring boot repository.
+ * This class provides volatile data storage.
+ *
+ * DO NOT ANNOTATE IMPLEMENTATIONS WITH [Repository]
+ * AS THIS WILL BREAK INTERNAL FUNCTIONALITY.
+ */
 abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     private val _entities = mutableListOf<T>()
     val entities: List<T> get() = _entities
 
     fun save(entity: T) = let {
         if (exists(entity)) delete(entity)
-        _entities.add(entity).also { onSave(entity) }.let { entity }
+        entity.also {
+            _entities.add(entity)
+            onSave(entity)
+        }
     }
 
     fun exists(entity: T) = _entities.contains(entity)

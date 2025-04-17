@@ -48,14 +48,12 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
 
     fun addPlayer(player: SpigotPlayer) {
         if (player in _players) return
-
         _players.add(player)
         update()
     }
 
     fun removePlayer(player: SpigotPlayer) {
         if (player !in _players) return
-
         _players.remove(player)
         update()
     }

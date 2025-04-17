@@ -13,7 +13,7 @@ class VitalGlobalScoreboard(title: String, vararg var lines: Supplier<String>) :
     val players: List<SpigotPlayer> get() = _players
 
     private fun update(player: SpigotPlayer) {
-        player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
+        player.scoreboard = Bukkit.getScoreboardManager().mainScoreboard
         player.scoreboard = scoreboardContent.bukkitScoreboard
     }
 
@@ -46,16 +46,14 @@ class VitalGlobalScoreboard(title: String, vararg var lines: Supplier<String>) :
 
     fun addPlayer(player: SpigotPlayer) {
         if (player in _players) return
-
         _players.add(player)
         update()
     }
 
     fun removePlayer(player: SpigotPlayer) {
         if (player !in _players) return
-
         _players.remove(player)
-        player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
+        player.scoreboard = Bukkit.getScoreboardManager().mainScoreboard
         update()
     }
 }

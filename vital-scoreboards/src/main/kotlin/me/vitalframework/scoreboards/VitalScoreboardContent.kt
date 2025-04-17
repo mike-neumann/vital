@@ -13,7 +13,7 @@ class VitalScoreboardContent internal constructor(title: String) {
             field = value
             update()
         }
-    val bukkitScoreboard = Bukkit.getScoreboardManager()!!.newScoreboard
+    val bukkitScoreboard = Bukkit.getScoreboardManager().newScoreboard
     private val _teams = mutableListOf<VitalScoreboardTeam>()
     val teams: List<VitalScoreboardTeam> get() = _teams
 
@@ -40,14 +40,12 @@ class VitalScoreboardContent internal constructor(title: String) {
 
     fun addTeam(team: VitalScoreboardTeam) {
         if (team in _teams) return
-
         _teams.add(team)
         update()
     }
 
     fun removeTeam(team: VitalScoreboardTeam) {
         if (team !in _teams) return
-
         _teams.remove(team)
         update()
     }

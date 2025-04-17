@@ -17,13 +17,11 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) {
 
     init {
         val info = getRequiredAnnotation<Info>()
-
         interval = info.interval
     }
 
     fun start() {
         if (running) return
-
         onStart()
         runnable = createRunnable()
         task = createTask()
@@ -31,7 +29,6 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) {
 
     fun stop() {
         if (!running) return
-
         onStop()
         cancelRunnable()
         cancelTask()
@@ -41,7 +38,6 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) {
 
     fun handleTick() {
         if (!allowTick) return
-
         onTick()
     }
 
@@ -69,8 +65,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) {
         override fun cancelTask(): Unit = run { task?.cancel() }
     }
 
-    class Bungee(plugin: BungeePlugin) :
-        VitalRepeatableTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
+    class Bungee(plugin: BungeePlugin) : VitalRepeatableTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
         override fun createRunnable() = BungeeRunnable { handleTick() }
         override fun createTask() = ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, interval, TimeUnit.MILLISECONDS)!!
         override fun cancelRunnable(): Unit = run { task?.cancel() }

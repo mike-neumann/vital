@@ -13,12 +13,9 @@ class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<Spi
 
     fun update(player: SpigotPlayer) {
         if (!_scoreboardContent.containsKey(player)) return
-
-        player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
+        player.scoreboard = Bukkit.getScoreboardManager().mainScoreboard
         updateContent(player)
-        val scoreboard = _scoreboardContent[player]!!
-
-        player.scoreboard = scoreboard.bukkitScoreboard
+        player.scoreboard = _scoreboardContent[player]!!.bukkitScoreboard
     }
 
     private fun updateContent(player: SpigotPlayer) {
@@ -43,16 +40,14 @@ class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<Spi
 
     fun addPlayer(player: SpigotPlayer) {
         if (_scoreboardContent.containsKey(player)) return
-
-        _scoreboardContent.put(player, VitalScoreboardContent(title))
+        _scoreboardContent[player] = VitalScoreboardContent(title)
         update(player)
     }
 
     fun removePlayer(player: SpigotPlayer) {
         if (!_scoreboardContent.containsKey(player)) return
-
         _scoreboardContent.remove(player)
-        player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
+        player.scoreboard = Bukkit.getScoreboardManager().mainScoreboard
     }
 
     private fun applyLines(player: SpigotPlayer) = lines.map { it.apply(player) }
