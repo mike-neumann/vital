@@ -49,7 +49,7 @@ abstract class VitalClassLoader<T : Any>(
         try {
             // some classes MUST be loaded from parent first,
             // to fix some bullshit issues regarding SPIs and plugin class loading
-            if (parentFirstPackages.any { name.startsWith(it) }) super.loadClass(name, resolve)
+            if (parentFirstPackages.any { name.startsWith(it) }) return super.loadClass(name, resolve)
             val clazz = findClass(name)
             if (resolve) resolveClass(clazz)
             return clazz
@@ -80,6 +80,8 @@ abstract class VitalClassLoader<T : Any>(
         plugin,
         (plugin.javaClass.classLoader as URLClassLoader).urLs,
         plugin.javaClass.classLoader.parent,
+        "org.bukkit.",
+        "net.kyori."
     ),
         ConfiguredPluginClassLoader {
         override fun getConfiguration() = (plugin.javaClass.classLoader as PluginClassLoader).configuration
