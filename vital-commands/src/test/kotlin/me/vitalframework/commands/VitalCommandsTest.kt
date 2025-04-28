@@ -5,12 +5,35 @@ import org.junit.jupiter.api.*
 
 class VitalCommandsTest {
     @Test
+    fun `arg handler return type mapping should fail`() {
+        assertThrows<VitalCommandException.InvalidArgHandlerReturnSignature> {
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(Arg("testArg"))
+                fun onTestArg() {
+                }
+            }
+        }
+    }
+
+    @Test
     fun `arg handler parameter mapping should fail`() {
-        assertThrows<VitalCommandException.InvalidArgHandlerMethodSignature> {
+        assertThrows<VitalCommandException.InvalidArgHandlerParameterSignature> {
             @VitalCommand.Info("testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg(i: Int) = ReturnState.SUCCESS
+            }
+        }
+    }
+
+    @Test
+    fun `arg handler return type mapping should work`() {
+        assertDoesNotThrow {
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(Arg("testArg"))
+                fun onTestArg() = ReturnState.SUCCESS
             }
         }
     }
@@ -21,7 +44,8 @@ class VitalCommandsTest {
             @VitalCommand.Info("testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
-                fun onTestArg() = ReturnState.SUCCESS
+                fun onTestArg(sender: CommandSender, executedArg: String, commandArg: Arg, values: Array<String>) =
+                    ReturnState.SUCCESS
             }
         }
     }
@@ -30,7 +54,7 @@ class VitalCommandsTest {
     fun `arg handler parameter mapping with variables should work`() {
         val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
             @ArgHandler(Arg("testArg %PLAYER%"))
-            fun onTestArg(sender: CommandSender, values: Array<String>): ReturnState {
+            fun onTestArg(sender: CommandSender, executedArg: String, commandArg: Arg, values: Array<String>): ReturnState {
                 sender.sendMessage(values.contentToString())
                 return ReturnState.SUCCESS
             }
@@ -40,68 +64,7 @@ class VitalCommandsTest {
         testCommand.execute(sender, arrayOf("testArg", "xRa1ny"))
         println(sender.messages)
         assert(sender.messages.size == 1)
-        assert(sender.messages.component1() == "[xRa1ny]")
-    }
-
-    @Test
-    fun `arg exception handler parameter mapping should fail`() {
-        assertThrows<VitalCommandException.InvalidArgExceptionHandlerMethodSignature> {
-            @VitalCommand.Info("testCommand")
-            object : VitalTestCommand() {
-                @ArgHandler(Arg("testArg"))
-                fun onTestArg() = ReturnState.SUCCESS
-
-                @ArgExceptionHandler("testArg", RuntimeException::class)
-                fun onTestArgException(i: Int) = ReturnState.SUCCESS
-            }
-        }
-    }
-
-    @Test
-    fun `arg exception handler parameter mapping should work`() {
-        assertDoesNotThrow {
-            @VitalCommand.Info("testCommand")
-            object : VitalTestCommand() {
-                @ArgHandler(Arg("testArg"))
-                fun onTestArg() = ReturnState.SUCCESS
-
-                @ArgExceptionHandler("testArg", RuntimeException::class)
-                fun onTestArgException() = ReturnState.SUCCESS
-            }
-        }
-    }
-
-    @Test
-    fun `base command should be executed`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            override fun onBaseCommand(sender: CommandSender): ReturnState {
-                sender.sendMessage("onBaseCommand")
-                return ReturnState.SUCCESS
-            }
-        }
-        val sender = VitalTestCommand.Player()
-
-        testCommand.execute(sender, arrayOf(""))
-
-        assert(sender.messages.size == 1)
-        assert(sender.messages.component1() == "onBaseCommand")
-    }
-
-    @Test
-    fun `command arg should be executed`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(Arg("testArg"))
-            fun onTestArg(sender: CommandSender): ReturnState {
-                sender.sendMessage("onTestArg")
-                return ReturnState.SUCCESS
-            }
-        }
-        val sender = VitalTestCommand.Player()
-
-        testCommand.execute(sender, arrayOf("testArg"))
-
-        assert(sender.messages.size == 1)
-        assert(sender.messages.component1() == "onTestArg")
+        assert(sender.messages.component1() == "[xra1ny]")
     }
 
     @Test
@@ -127,6 +90,94 @@ class VitalCommandsTest {
                 fun onTestArgException() = ReturnState.SUCCESS
             }
         }
+    }
+
+    @Test
+    fun `arg exception handler parameter mapping should fail`() {
+        assertThrows<VitalCommandException.InvalidArgExceptionHandlerMethodSignature> {
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(Arg("testArg"))
+                fun onTestArg() = ReturnState.SUCCESS
+
+                @ArgExceptionHandler("testArg", RuntimeException::class)
+                fun onTestArgException(i: Int) = ReturnState.SUCCESS
+            }
+        }
+    }
+
+    @Test
+    fun `arg exception handler parameter mapping should work`() {
+        assertDoesNotThrow {
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(Arg("testArg"))
+                fun onTestArg() = ReturnState.SUCCESS
+
+                @ArgExceptionHandler("testArg", RuntimeException::class)
+                fun onTestArgException(sender: CommandSender, executedArg: String, commandArg: Arg, e: RuntimeException) =
+                    ReturnState.SUCCESS
+            }
+        }
+    }
+
+//    TODO: cannot test global command exception handlers yet
+//     tests are not spring boot tests, also command advices are created dynamically in testcases
+//    @Test
+//    fun `global command exception handler parameter mapping should fail`() {
+//        assertThrows<VitalCommandException.InvalidGlobalExceptionHandlerMethodSignature> {
+//            @VitalCommand.Advice(VitalTestCommand.CommandSender::class)
+//            object {
+//                @VitalCommand.GlobalExceptionHandler(Exception::class)
+//                fun onException(i: Int) {
+//                }
+//            }
+//        }
+//    }
+//
+//    @Test
+//    fun `global command exception handler parameter mapping should work`() {
+//        assertDoesNotThrow {
+//            @VitalCommand.Advice(VitalTestCommand.CommandSender::class)
+//            object {
+//                @VitalCommand.GlobalExceptionHandler(Exception::class)
+//                fun onException(sender: VitalTestCommand.CommandSender, executedArg: String, commandArg: VitalCommand.Arg?, e: Exception) {
+//                }
+//            }
+//        }
+//    }
+
+    @Test
+    fun `base command should be executed`() {
+        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
+            override fun onBaseCommand(sender: CommandSender): ReturnState {
+                sender.sendMessage("onBaseCommand")
+                return ReturnState.SUCCESS
+            }
+        }
+        val sender = VitalTestCommand.Player()
+
+        testCommand.execute(sender, arrayOf(""))
+
+        assert(sender.messages.size == 1)
+        assert(sender.messages.component1() == "onBaseCommand")
+    }
+
+    @Test
+    fun `arg handler should be executed`() {
+        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
+            @ArgHandler(Arg("testArg"))
+            fun onTestArg(sender: CommandSender): ReturnState {
+                sender.sendMessage("onTestArg")
+                return ReturnState.SUCCESS
+            }
+        }
+        val sender = VitalTestCommand.Player()
+
+        testCommand.execute(sender, arrayOf("testArg"))
+
+        assert(sender.messages.size == 1)
+        assert(sender.messages.component1() == "onTestArg")
     }
 
     @Test
@@ -262,5 +313,22 @@ class VitalCommandsTest {
         for (material in Material.entries) {
             assert(material.name in tabCompletions)
         }
+    }
+
+    @Test
+    fun `arg handler parameter matching placeholder should be executed`() {
+        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
+            @ArgHandler(Arg("testArg %PLAYER%"))
+            fun onTestArg(sender: CommandSender, values: Array<String>): ReturnState {
+                sender.sendMessage(values.contentToString())
+                return ReturnState.SUCCESS
+            }
+        }
+        val sender = VitalTestCommand.Player()
+
+        testCommand.execute(sender, arrayOf("testArg", "%PLAYER%"))
+        println(sender.messages)
+        assert(sender.messages.size == 1)
+        assert(sender.messages.component1() == "[%player%]")
     }
 }

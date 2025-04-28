@@ -8,14 +8,19 @@ abstract class VitalCommandException(message: String, cause: Throwable? = null) 
         VitalCommandException(
             "Error while executing arg exception handler method '${method.name}(${
                 method.parameters.joinToString(", ") { "${it.type.simpleName} ${it.name}" }
-            })' using context '$context'",
-            cause
+            })' using context '$context'", cause
         )
 
     class UnmappedArgHandler(arg: String) : VitalCommandException("No arg handler method exists for arg '$arg'")
 
-    class InvalidArgHandlerMethodSignature(method: Method, parameter: Parameter) : VitalCommandException(
-        "Invalid arg handler method signature '${method.name}(${
+    class InvalidArgHandlerReturnSignature(method: Method, returnType: Class<*>) : VitalCommandException(
+        "Invalid arg handler return signature '${method.name}(${
+            method.parameters.joinToString(", ") { "${it.type.simpleName} ${it.name}" }
+        })', found '${returnType.name}', must be '${VitalCommand.ReturnState::class.java.name}'"
+    )
+
+    class InvalidArgHandlerParameterSignature(method: Method, parameter: Parameter) : VitalCommandException(
+        "Invalid arg handler parameter signature '${method.name}(${
             method.parameters.joinToString(", ") { "${it.type.simpleName} ${it.name}" }
         })', failed at '${parameter.type.simpleName} ${parameter.name}'"
     )
@@ -42,7 +47,6 @@ abstract class VitalCommandException(message: String, cause: Throwable? = null) 
         VitalCommandException(
             "Error while executing global exception handler method '${method.name}(${
                 method.parameters.joinToString(", ") { "${it.type.simpleName} ${it.name}" }
-            })' using context '$context'",
-            cause
+            })' using context '$context'", cause
         )
 }

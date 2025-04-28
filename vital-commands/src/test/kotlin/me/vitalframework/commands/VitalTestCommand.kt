@@ -1,10 +1,7 @@
 package me.vitalframework.commands
 
 abstract class VitalTestCommand :
-    VitalCommand<VitalTestCommand.Plugin, VitalTestCommand.CommandSender>(
-        Plugin(),
-        CommandSender::class.java
-    ) {
+    VitalCommand<VitalTestCommand.Plugin, VitalTestCommand.CommandSender>(Plugin(), CommandSender::class.java) {
     class Plugin
     class Player : CommandSender()
     open class CommandSender {

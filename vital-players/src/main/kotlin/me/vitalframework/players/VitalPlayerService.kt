@@ -17,6 +17,9 @@ class VitalPlayerService(private val playerRepository: VitalPlayerRepository) {
         playerRepository.delete(vitalPlayer)
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun <T : VitalPlayer<*>> getPlayers() = playerRepository.entities as List<T>
+
+    @Suppress("UNCHECKED_CAST")
     fun <T : VitalPlayer<*>> getPlayer(id: UUID) = playerRepository.get(id) as T?
 }

@@ -11,6 +11,7 @@ import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.*
 import org.bukkit.entity.Entity
 import org.bukkit.inventory.CreativeCategory
+import org.bukkit.inventory.MenuType
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.jetbrains.annotations.Range
@@ -409,6 +410,9 @@ interface VitalUtils<CS, P : CS> {
 
         fun cleanGameRules(worldName: String) = Bukkit.getWorld(worldName)?.cleanGameRules()
             ?: throw RuntimeException("World $worldName does not exist")
+
+        @Suppress("UnstableApiUsage")
+        fun SpigotPlayer.openInventory(menuType: MenuType.Typed<*, *>) = openInventory(menuType.create(this))
     }
 
     object Bungee : VitalUtils<BungeeCommandSender, BungeePlayer> {

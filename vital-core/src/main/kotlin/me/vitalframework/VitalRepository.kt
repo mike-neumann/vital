@@ -1,5 +1,6 @@
 package me.vitalframework
 
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
 
 /**
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository
  * DO NOT ANNOTATE IMPLEMENTATIONS WITH [Repository]
  * AS THIS WILL BREAK INTERNAL FUNCTIONALITY.
  */
+@Component
 abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     private val _entities = mutableListOf<T>()
     val entities: List<T> get() = _entities

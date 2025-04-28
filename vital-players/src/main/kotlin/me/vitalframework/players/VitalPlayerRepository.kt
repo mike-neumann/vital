@@ -1,8 +1,8 @@
 package me.vitalframework.players
 
 import me.vitalframework.VitalRepository
-import org.springframework.stereotype.Repository
+import org.springframework.stereotype.Component
 import java.util.*
 
-@Repository
+@Component
 class VitalPlayerRepository : VitalRepository<VitalPlayer<*>, UUID>()

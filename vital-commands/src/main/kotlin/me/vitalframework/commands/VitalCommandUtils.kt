@@ -19,7 +19,6 @@ object VitalCommandUtils {
 
     fun VitalCommand<*, *>.getMappedArgHandlers() = javaClass.methods
         .asSequence()
-        .filter { VitalCommand.ReturnState::class.java.isAssignableFrom(it.returnType) }
         .filter { it.isAnnotationPresent(VitalCommand.ArgHandler::class.java) }
         .map { method -> method.getAnnotationsByType(VitalCommand.ArgHandler::class.java).map { method to it } }
         .flatten()
@@ -36,16 +35,18 @@ object VitalCommandUtils {
         executedArg: String,
         commandArg: VitalCommand.Arg,
         values: Array<String>,
-    ) = let {
+    ): Array<Any> {
         val injectableParameters = mutableMapOf<Int, Any>()
+
         context.commandSenderIndex?.let { injectableParameters[it] = sender }
         context.executedArgIndex?.let { injectableParameters[it] = executedArg }
         context.commandArgIndex?.let { injectableParameters[it] = commandArg }
         context.valuesIndex?.let { injectableParameters[it] = values }
-        injectableParameters.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
+
+        return injectableParameters.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
     }
 
-    fun VitalCommand<*, *>.getMappedArgExceptionHandlers() = let {
+    fun VitalCommand<*, *>.getMappedArgExceptionHandlers(): MutableMap<VitalCommand.Arg, MutableMap<Class<out Throwable>, VitalCommand.ArgExceptionHandlerContext>> {
         val mappedArgExceptionHandlers =
             mutableMapOf<VitalCommand.Arg, MutableMap<Class<out Throwable>, VitalCommand.ArgExceptionHandlerContext>>()
 
@@ -65,7 +66,7 @@ object VitalCommandUtils {
                 }
             }
 
-        mappedArgExceptionHandlers
+        return mappedArgExceptionHandlers
     }
 
     fun getInjectableArgExceptionHandlerMethodParameters(
@@ -74,38 +75,45 @@ object VitalCommandUtils {
         executedArg: String,
         commandArg: VitalCommand.Arg,
         exception: Throwable,
-    ) = let {
+    ): Array<Any> {
         val injectableParameters = mutableMapOf<Int, Any>()
+
         context.commandSenderIndex?.let { injectableParameters[it] = sender }
         context.executedArgIndex?.let { injectableParameters[it] = executedArg }
-        context.argIndex?.let { injectableParameters[it] = commandArg }
+        context.commandArgIndex?.let { injectableParameters[it] = commandArg }
         context.exceptionIndex?.let { injectableParameters[it] = exception }
-        injectableParameters.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
+
+        return injectableParameters.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
     }
 
-    fun getArgHandlerContext(commandSenderClass: Class<*>, method: Method) = let {
+    fun getArgHandlerContext(commandSenderClass: Class<*>, method: Method): VitalCommand.ArgHandlerContext {
+        if (method.returnType != VitalCommand.ReturnState::class.java) {
+            throw VitalCommandException.InvalidArgHandlerReturnSignature(method, method.returnType)
+        }
         var commandSenderIndex: Int? = null
         var executedArgIndex: Int? = null
         var commandArgIndex: Int? = null
         var valuesIndex: Int? = null
+
         for (parameter in method.parameters) {
             when {
                 commandSenderClass.isAssignableFrom(parameter.type) -> commandSenderIndex = method.parameters.indexOf(parameter)
                 String::class.java.isAssignableFrom(parameter.type) -> executedArgIndex = method.parameters.indexOf(parameter)
                 VitalCommand.Arg::class.java.isAssignableFrom(parameter.type) -> commandArgIndex = method.parameters.indexOf(parameter)
                 Array<String>::class.java.isAssignableFrom(parameter.type) -> valuesIndex = method.parameters.indexOf(parameter)
-                else -> throw VitalCommandException.InvalidArgHandlerMethodSignature(method, parameter)
+                else -> throw VitalCommandException.InvalidArgHandlerParameterSignature(method, parameter)
             }
         }
 
-        VitalCommand.ArgHandlerContext(method, commandSenderIndex, executedArgIndex, commandArgIndex, valuesIndex)
+        return VitalCommand.ArgHandlerContext(method, commandSenderIndex, executedArgIndex, commandArgIndex, valuesIndex)
     }
 
-    fun getArgExceptionHandlerContext(commandSenderClass: Class<*>, method: Method) = let {
+    fun getArgExceptionHandlerContext(commandSenderClass: Class<*>, method: Method): VitalCommand.ArgExceptionHandlerContext {
         var commandSenderIndex: Int? = null
         var executedArgIndex: Int? = null
         var commandArgIndex: Int? = null
         var exceptionIndex: Int? = null
+
         for (parameter in method.parameters) {
             when {
                 commandSenderClass.isAssignableFrom(parameter.type) -> commandSenderIndex = method.parameters.indexOf(parameter)
@@ -116,15 +124,20 @@ object VitalCommandUtils {
             }
         }
 
-        VitalCommand.ArgExceptionHandlerContext(method, commandSenderIndex, executedArgIndex, commandArgIndex, exceptionIndex)
+        return VitalCommand.ArgExceptionHandlerContext(method, commandSenderIndex, executedArgIndex, commandArgIndex, exceptionIndex)
     }
 
-    fun getGlobalExceptionHandlerContext(adviceInstance: Any, commandSenderClass: Class<*>, method: Method) = let {
+    fun getGlobalExceptionHandlerContext(
+        adviceInstance: Any,
+        commandSenderClass: Class<*>,
+        method: Method,
+    ): VitalCommand.GlobalExceptionHandlerContext {
         var commandSenderIndex: Int? = null
         var executedArgIndex: Int? = null
         var commandArgIndex: Int? = null
         var valuesIndex: Int? = null
         var exceptionIndex: Int? = null
+
         for (parameter in method.parameters) {
             when {
                 commandSenderClass.isAssignableFrom(parameter.type) -> commandSenderIndex = method.parameters.indexOf(parameter)
@@ -136,7 +149,7 @@ object VitalCommandUtils {
             }
         }
 
-        VitalCommand.GlobalExceptionHandlerContext(
+        return VitalCommand.GlobalExceptionHandlerContext(
             adviceInstance,
             method,
             commandSenderIndex,
@@ -153,12 +166,14 @@ object VitalCommandUtils {
         executedArg: String,
         commandArg: VitalCommand.Arg?,
         exception: Throwable,
-    ) = let {
+    ): Array<Any?> {
         val injectableParameters = mutableMapOf<Int, Any?>()
+
         context.commandSenderIndex?.let { injectableParameters[it] = sender }
         context.executedArgIndex?.let { injectableParameters[it] = executedArg }
         context.commandArgIndex?.let { injectableParameters[it] = commandArg }
         context.exceptionIndex?.let { injectableParameters[it] = exception }
-        injectableParameters.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
+
+        return injectableParameters.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
     }
 }

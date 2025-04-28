@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.kotlin.kapt") version "2.1.20"
+    kotlin("kapt")
     kotlin("plugin.spring")
     id("org.springframework.boot")
     `java-library`

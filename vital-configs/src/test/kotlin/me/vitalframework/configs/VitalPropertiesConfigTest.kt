@@ -8,7 +8,6 @@ open class VitalPropertiesConfigTest {
     fun `config content should not be initialized`() {
         assertThrows<UninitializedPropertyAccessException> {
             val testPropertiesConfig = VitalTestPropertiesConfig()
-
             testPropertiesConfig.testPropertiesString
         }
     }

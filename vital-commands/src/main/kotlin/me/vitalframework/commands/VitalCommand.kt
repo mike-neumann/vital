@@ -153,7 +153,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
             }
 
             executingArg != null -> {
-                if (executingArg.permission.isNotBlank() && hasPermission(sender, executingArg.permission)) {
+                if (executingArg.permission.isNotBlank() && !hasPermission(sender, executingArg.permission)) {
                     ReturnState.NO_PERMISSION
                 } else if (executingArg.playerOnly && !isPlayer(sender)) {
                     ReturnState.ONLY_PLAYER
@@ -161,7 +161,8 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
                     val values = mutableListOf<String>()
                     val commandArgs = executingArg.name.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.map { it.lowercase() }
 
-                    args.map(String::lowercase).filterNot(commandArgs::contains).forEach(values::add)
+                    args.map(String::lowercase).filter { it !in commandArgs || (it.startsWith("%") && it.endsWith("%")) }
+                        .forEach(values::add)
 
                     try {
                         executeArgHandlerMethod(sender, joinedPlayerArgs, executingArg, values.toTypedArray())
@@ -270,7 +271,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         val handlerMethod: Method,
         val commandSenderIndex: Int?,
         val executedArgIndex: Int?,
-        val argIndex: Int?,
+        val commandArgIndex: Int?,
         val exceptionIndex: Int?,
     )
 

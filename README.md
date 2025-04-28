@@ -5,45 +5,56 @@
 Vital is the new framework to streamline your plugin development.  
 Current implementations of the mc server api require you to manually implement systems which could easily be replaced by
 already existing ones.  
-Spring solved this issue years ago, why invent the wheel anew?  
+Spring solved this issue years ago...  
 Vital is designed to work in tandem with the programmer, allowing you to create simple or even extensive and complex
-server application.
+server applications.
 
-## Techstack
+## TechStack
 
 - JDK 21
-- Spigot 1.20.1
+- Spigot 1.21.4
 - Gradle
-- Spring
+- Spring Boot 3.x
 
 ## 🧩Module Overview
 
 Vital is thoughtfully organized into several submodules which each serve a different purpose, so you can only implement
-the things you need for your project.
+the things you really need for your project.
 
-- 🏢**vital-core**: Provides Vital's core functionality (required by some modules)
-- 👥**vital-users**: Implement your own player management system, useful when you need to store player information, why
-  not store them directly on a player instance?
-- 📜**vital-configs**: OOP-Driven configuration system designed to simplify and improve the way you interact with
-  configuration files, now classes are your config!
-- ⌨️**vital-commands**: Custom command creation system to easily create organized commands, even with automatic tab
-  completion and permission management!
-- 💫**vital-holograms**: Easily create your own holograms, store them in configs (vital-configs) or whatever
-- 🍄**vital-items**: Allows you to create your own class based items which serve right and left-click functions to the
-  user wielding it
-- ⏲️**vital-tasks**: Custom scheduler service, provides you with the ability to create repeated tasks and even
-  countdowns
-- 📋**vital-inventories**: Create interactive inventory menus with this module, global or player based ones
-- 📊**vital-scoreboards**: OK I don't even need to explain why you need this... Easily create scoreboard within a single
-  line of code!
-- 🎮**vital-minigames**: Minigame management solution, provides minigame state management, countdown minigame states and
-  much more!
-- 🛠️**vital-utils**: Provides utilities useful for many implementations
+- **vital-cloudnet4-bridge**: Provides an intuitive way to interact with the CloudNET-Bridge module (v4).
+- **vital-cloudnet4-driver**: Provides an intuitive way to interact with the CloudNET-Driver module (v4).
+- **vital-commands**: Provides an extensive way to create custom commands, even with automatic tab-completion and custom
+  exception handling.
+- **vital-configs**: Provides an OOP-Driven configuration system. Read and write to config files using classes instead
+  of raw and loose data.
+- **vital-core**: The core module required by all Vital modules.
+- **vital-core-holograms**: Provides an easy and developer-friendly way to create holograms.
+- **vital-inventories**: Provides an intuitive way to create reactive interactive inventory menus, global or
+  player-based.
+- **vital-items**: Provides a way to create interactive items directly as a class, to encapsulate functionality.
+- **vital-minigames**: Provides an easy way to create minigames using a custom state-system to make minigame creation
+  fun again, without creating spaghetti code.
+- **vital-players**: Provides a custom player management solution, to store volatile data directly on a player class of
+  your choice.
+- **vital-scoreboards**: Provides an easy way to create reactive player-based or global scoreboard that may hold
+  important information.
+- **vital-statistics**: Hooks into your servers heartbeat to ensure server stability by having an eye on certain
+  statistics you can view later.
+- **vital-tasks**: Provides an easy way to implement server-based scheduled tasks using the servers runtime scheduler (
+  RepeatableTask, Countdowns).
+- **vital-utils**: Provides many utilities the server runtimes are missing to streamline development and make it even
+  more efficient.
 
-Powered by Spring, Vital delivers component based, testable code, with the ability to include many extensions via Spring
+Powered by Spring Boot, Vital delivers component based, testable code, with the ability to include many extensions via Spring
 dependencies.
 
 ## You matter
 
 You can contribute to the Vital project to make it even better for everyone!  
-Please PR (Pull Request) if you have any ideas or want to change something.
+PR (Pull Request) if you have any ideas or want to change something.
+
+__Make minecraft development great again!__
+
+## Getting started
+
+To get started with Vital, please follow the instructions on the wiki.
