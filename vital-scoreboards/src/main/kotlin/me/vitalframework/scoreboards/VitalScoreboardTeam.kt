@@ -22,14 +22,17 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
     var canSeeFriendlyInvisibles = false
 
     fun update() {
-        bukkitTeam.displayName = name
+        bukkitTeam.displayName(MiniMessage.miniMessage().deserialize(name))
         bukkitTeam.setAllowFriendlyFire(friendlyFire)
         bukkitTeam.setCanSeeFriendlyInvisibles(canSeeFriendlyInvisibles)
 
-        if (prefix != null)
-            bukkitTeam.prefix = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(prefix!!))
-        if (suffix != null)
-            bukkitTeam.suffix = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(suffix!!))
+        if (prefix != null) {
+            bukkitTeam.prefix(MiniMessage.miniMessage().deserialize(prefix!!))
+        }
+
+        if (suffix != null) {
+            bukkitTeam.suffix(MiniMessage.miniMessage().deserialize(suffix!!))
+        }
         // Update all options
         for ((option, status) in _options) {
             bukkitTeam.setOption(option, status)
@@ -44,7 +47,9 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
         }
     }
 
-    fun setOption(option: Team.Option, status: OptionStatus) = run { _options[option] = status }
+    fun setOption(option: Team.Option, status: OptionStatus) {
+        _options[option] = status
+    }
 
     fun addPlayer(player: SpigotPlayer) {
         if (player in _players) return

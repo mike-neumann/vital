@@ -1,12 +1,12 @@
 package me.vitalframework.commands
 
 import jakarta.annotation.PostConstruct
+import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
 @Component
-class VitalGlobalCommandExceptionHandlerProcessor(applicationContext: ApplicationContext) {
-    private val commands = applicationContext.getBeansOfType(VitalCommand::class.java).values
+class VitalGlobalCommandExceptionHandlerProcessor(applicationContext: ApplicationContext, val commands: List<VitalCommand<*, *>>) {
     private val advices = applicationContext.getBeansWithAnnotation(VitalCommand.Advice::class.java).values
 
     @PostConstruct
@@ -15,7 +15,7 @@ class VitalGlobalCommandExceptionHandlerProcessor(applicationContext: Applicatio
             // get all advices for the command sender of the command.
             advices
                 .filter {
-                    command.commandSenderClass.isAssignableFrom(it::class.java.getAnnotation(VitalCommand.Advice::class.java).commandSenderClass.java)
+                    command.commandSenderClass.isAssignableFrom(it.getRequiredAnnotation<VitalCommand.Advice>().commandSenderClass.java)
                 }
                 .forEach { adviceInstance ->
                     val advice = adviceInstance.javaClass.getAnnotation(VitalCommand.Advice::class.java)!!

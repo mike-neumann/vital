@@ -29,7 +29,7 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
         yaml.addTypeDescription(rootTypeDescription)
 
         for (field in VitalConfigUtils.getPropertyFieldsFromType(type)) {
-            val configProperty = field.getAnnotation(VitalConfig.Property::class.java)
+            val configProperty = field.getAnnotation(VitalConfig.Property::class.java)!!
             val typeDescription = TypeDescription(field.type, "!${field.type.simpleName}")
             val excludes = VitalConfigUtils.getNonPropertyFieldsFromType(field.type).map { it.name }.toTypedArray()
 
@@ -50,7 +50,9 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
         addTypeDescriptors(clazz)
         val data = yaml.load<Map<String, Any>>(inputStream)
 
-        if (data != null) this.data.putAll(data)
+        if (data != null) {
+            this.data.putAll(data)
+        }
 
         return this.data
     }
@@ -58,7 +60,7 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
     override fun read(key: String) = data[key]
     override fun read(key: String, def: Any) = data.getOrDefault(key, def)
     override fun write(serializedContent: Map<String, Any>) = data.putAll(serializedContent)
-    override fun write(instance: Any) = run {}
+    override fun write(instance: Any) {}
     override fun write(key: String, value: Any) = run { data[key] = serialize(value) }
 
     override fun save(serializedContent: Map<String, Any>): String {
@@ -82,10 +84,10 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
         }
 
         instance
-    } catch (e: NoSuchMethodException) {
-        // default constructor not found, attempt to get constructor matching properties...
+    } catch (_: NoSuchMethodException) {
+        // the default constructor was not found, attempt to get constructor matching properties...
         val constructor = type.getConstructor(*VitalConfigUtils.getPropertyFieldsFromType(type).map { it.javaClass }.toTypedArray())
-        // constructor found, create new instance with this constructor...
+        // constructor found, create a new instance with this constructor...
         constructor.newInstance(serializedContent.values)
     }
 }

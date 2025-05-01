@@ -6,19 +6,19 @@ import org.bukkit.event.inventory.InventoryCloseEvent
 import org.springframework.stereotype.Component
 
 @Component
-class VitalInventoryListener(plugin: SpigotPlugin) : VitalListener.Spigot(plugin) {
+class VitalInventoryListener(plugin: SpigotPlugin, val inventories: List<VitalInventory>) : VitalListener.Spigot(plugin) {
     @SpigotEventHandler
     fun onPlayerClickInInventory(e: InventoryClickEvent) {
-        val clickedInventory = e.clickedInventory
         val player = e.whoClicked as SpigotPlayer
-        val vitalInventory = Vital.context.getBeansOfType(VitalInventory::class.java).values.firstOrNull { it.hasInventoryOpen(player) }
+        val vitalInventory = inventories.firstOrNull { it.hasInventoryOpen(player) }
 
-        if (clickedInventory == null) {
-            // TODO: navigate to previous menu, currently still buggy
-//            if (vitalInventory != null && vitalInventory.getPreviousInventory() != null) {
-//                vitalInventory.close(player);
-//                vitalInventory.getPreviousInventory().open(player);
-//            }
+        if (e.clickedInventory == null) {
+            val previousInventory = vitalInventory?.previousInventories[player]
+
+            if (vitalInventory != null && previousInventory != null) {
+                vitalInventory.close(player)
+                previousInventory.open(player)
+            }
             return
         }
 
@@ -31,7 +31,7 @@ class VitalInventoryListener(plugin: SpigotPlugin) : VitalListener.Spigot(plugin
     @SpigotEventHandler
     fun onPlayerCloseInventory(e: InventoryCloseEvent) {
         val player = e.player as SpigotPlayer
-        val vitalInventory = Vital.context.getBeansOfType(VitalInventory::class.java).values.firstOrNull { it.hasInventoryOpen(player) }
+        val vitalInventory = inventories.firstOrNull { it.hasInventoryOpen(player) }
         vitalInventory?.close(player)
     }
 }

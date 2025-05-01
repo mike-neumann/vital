@@ -8,15 +8,15 @@ import org.springframework.util.ClassUtils
 class Vital {
     companion object {
         @JvmStatic
-        lateinit var context: ConfigurableApplicationContext
+        lateinit var CONTEXT: ConfigurableApplicationContext
             private set
 
         @JvmStatic
         fun run(loader: Any, pluginClass: Class<*>, classLoader: ClassLoader) {
             Thread.currentThread().contextClassLoader = classLoader
             ClassUtils.overrideThreadContextClassLoader(classLoader)
-            // finally start up spring boot, using the previously generated "PluginConfiguration" class as the main class
-            context = SpringApplicationBuilder(classLoader.loadClass("${pluginClass.packageName}.PluginConfiguration"))
+            // start up spring boot using the previously generated "PluginConfiguration" class as the main class
+            CONTEXT = SpringApplicationBuilder(classLoader.loadClass("${pluginClass.packageName}.PluginConfiguration"))
                 // here we register the plugin instance as a bean so we can inject it elsewhere
                 .initializers({ it.beanFactory.registerSingleton("plugin", loader) })
                 // this is needed so spring can locate classes and resources that are on the plugin classpath

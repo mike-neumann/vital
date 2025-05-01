@@ -18,7 +18,11 @@ class VitalPropertiesConfigProcessor : Processor<Properties, String> {
     override fun read(key: String, def: String): String? = data.getProperty(key, def)
 
     override fun write(instance: Any) = write(serialize(instance))
-    override fun write(key: String, value: String) = data.setProperty(key, value).let {}
+
+    override fun write(key: String, value: String) {
+        data.setProperty(key, value)
+    }
+
     override fun write(serializedContent: Map<String, String>) {
         for ((key, value) in serializedContent) {
             write(key, value)
@@ -49,10 +53,10 @@ class VitalPropertiesConfigProcessor : Processor<Properties, String> {
         }
 
         instance
-    } catch (e: NoSuchMethodException) {
-        // default constructor not found, attempt to get constructor matching properties...
+    } catch (_: NoSuchMethodException) {
+        // the default constructor was not found, attempt to get constructor matching properties...
         val constructor = type.getConstructor(*VitalConfigUtils.getPropertyFieldsFromType(type).map { it.javaClass }.toTypedArray())
-        // constructor found, create new instance with this constructor...
+        // constructor found, create a new instance with this constructor...
         constructor.newInstance(serializedContent.values)
     }
 }

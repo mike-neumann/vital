@@ -32,6 +32,6 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
 
     fun delete(entity: T) = run { _entities.remove(entity).also { onDelete(entity) } }
 
-    protected open fun onSave(entity: T) {}
-    protected open fun onDelete(entity: T) {}
+    protected fun onSave(entity: T) {}
+    protected fun onDelete(entity: T) {}
 }

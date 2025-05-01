@@ -7,5 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class VitalItemListener(plugin: SpigotPlugin, val itemService: VitalItemService) : VitalListener.Spigot(plugin) {
     @SpigotEventHandler
-    fun onPlayerInteract(e: PlayerInteractEvent): Unit = run { itemService.handleInteraction(e) }
+    fun onPlayerInteract(e: PlayerInteractEvent){
+        itemService.handleInteraction(e)
+    }
 }

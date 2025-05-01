@@ -1,13 +1,14 @@
 package me.vitalframework.inventories
 
 import me.vitalframework.SpigotPlayer
+import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import org.jetbrains.annotations.Range
 import kotlin.math.ceil
 
-abstract class VitalPagedInventory(previousInventory: VitalInventory?) : VitalInventory(previousInventory) {
-    var page = 1L
-        private set
-    var maxPage = 1L
+abstract class VitalPagedInventory : VitalInventory() {
+    private val _pages = mutableMapOf<SpigotPlayer, Int>()
+    val pages: Map<SpigotPlayer, Int> get() = _pages
+    var maxPage = 1
         private set
     var fromSlot = 0
         private set
@@ -16,39 +17,40 @@ abstract class VitalPagedInventory(previousInventory: VitalInventory?) : VitalIn
     val pageContentAmount get() = (toSlot + 1 /* since content is INCLUSIVE to the SLOT itself */) - fromSlot
 
     init {
-        val info = javaClass.getAnnotation(Info::class.java)
+        val info = getRequiredAnnotation<Info>()
         fromSlot = info.fromSlot
         toSlot = info.toSlot
     }
 
-    fun updateMaxPage(totalContent: Int) = run { maxPage = ceil(totalContent.toDouble() / pageContentAmount).toLong() }
+    fun updateMaxPage(totalContent: Int) = run { maxPage = ceil(totalContent.toDouble() / pageContentAmount).toInt() }
 
-    fun setPage(page: Long, player: SpigotPlayer) {
+    fun setPage(page: Int, player: SpigotPlayer, totalContent: Int? = null) {
         val newPage = if (page <= 0) 1 else if (page >= maxPage) maxPage else page
-        this.page = newPage
+        _pages[player] = page
+        updateMaxPage(totalContent ?: 1)
         onPageChange(newPage, player)
         super.update(player)
     }
 
-    protected fun <T> sliceForPage(list: List<T>): List<T> {
-        val startIndex = (pageContentAmount * (page - 1)).toInt()
+    protected fun <T> sliceForPage(player: SpigotPlayer, list: List<T>): List<T> {
+        val startIndex = (pageContentAmount * ((_pages[player] ?: 1) - 1))
         val endIndex = startIndex + pageContentAmount
         if (startIndex >= list.size || startIndex < 0) return mutableListOf()
         if (endIndex >= list.size) return list.subList(startIndex, list.size)
         return list.subList(startIndex, endIndex)
     }
 
-    final override fun open(player: SpigotPlayer) {
-        super.open(player)
+    final override fun open(player: SpigotPlayer, previousInventory: VitalInventory?) {
+        super.open(player, previousInventory)
         setPage(1, player)
     }
 
     final override fun update(player: SpigotPlayer) {
         super.update(player)
-        setPage(page, player)
+        setPage(_pages[player] ?: 1, player)
     }
 
-    protected open fun onPageChange(page: Long, player: SpigotPlayer) {}
+    protected open fun onPageChange(page: Int, player: SpigotPlayer) {}
 
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)

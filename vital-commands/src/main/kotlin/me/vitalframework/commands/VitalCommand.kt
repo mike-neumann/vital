@@ -110,7 +110,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
                     }
 
                     if (!commandArgMatches) {
-                        // any previous token do not match, we can stop right here
+                        // any previous token does not match, we can stop right here
                         break
                     }
                 }

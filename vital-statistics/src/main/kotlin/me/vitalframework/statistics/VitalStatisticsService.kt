@@ -20,7 +20,7 @@ class VitalStatisticsService(val statisticsConfig: VitalStatisticsConfig) {
     val lastUnhealthyTps: Map<Long, Int> get() = _lastUnhealthyTps
 
     fun handleTick() {
-        val currentTimeMillis = System.currentTimeMillis();
+        val currentTimeMillis = System.currentTimeMillis()
 
         if (currentTimeMillis - lastTickTime >= statisticsConfig.maxTaskInactiveTolerance) {
             log.warn("vital-statistics has detected increased scheduler inconsistency of ${currentTimeMillis - lastTickTime} millis")

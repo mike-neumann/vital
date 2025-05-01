@@ -2,8 +2,8 @@ package me.vitalframework.inventories
 
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
+import me.vitalframework.items.itemBuilder
 import net.kyori.adventure.text.minimessage.MiniMessage
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -14,12 +14,15 @@ import org.springframework.stereotype.Component
 
 typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
 
-open class VitalInventory(val previousInventory: VitalInventory?) {
+open class VitalInventory {
     val size: Int
     val name: String
+    val background: Material
+    private val _previousInventories = mutableMapOf<SpigotPlayer, VitalInventory>()
     private val _playerInventories = mutableMapOf<SpigotPlayer, Inventory>()
     private val _items = mutableMapOf<Int, ItemStack>()
     private val _actions = mutableMapOf<Pair<SpigotPlayer, Int>, InventoryItemClickAction>()
+    val previousInventories: Map<SpigotPlayer, VitalInventory> get() = _previousInventories
     val playerInventories: Map<SpigotPlayer, Inventory> get() = _playerInventories
     val items: Map<Int, ItemStack> get() = _items
     val actions: Map<Pair<SpigotPlayer, Int>, InventoryItemClickAction> get() = _actions
@@ -27,7 +30,8 @@ open class VitalInventory(val previousInventory: VitalInventory?) {
     init {
         val info = getRequiredAnnotation<Info>()
         size = info.size
-        name = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(info.name))
+        name = info.name
+        background = info.background
     }
 
     @JvmOverloads
@@ -52,14 +56,24 @@ open class VitalInventory(val previousInventory: VitalInventory?) {
 
         onUpdate(player)
 
+        for (i in 0..<size) {
+            inventory.setItem(i, itemBuilder {
+                type = background
+            })
+        }
+
         for ((i, item) in _items) {
             inventory.setItem(i, item)
         }
     }
 
-    open fun open(player: SpigotPlayer) {
-        val inventory = Bukkit.createInventory(player, size, name)
+    open fun open(player: SpigotPlayer, previousInventory: VitalInventory? = null) {
+        previousInventory?.close(player)
+        val inventory = Bukkit.createInventory(player, size, MiniMessage.miniMessage().deserialize(name))
 
+        if (previousInventory != null) {
+            _previousInventories[player] = previousInventory
+        }
         _playerInventories[player] = inventory
 
         onOpen(player)
@@ -71,13 +85,13 @@ open class VitalInventory(val previousInventory: VitalInventory?) {
 
     fun close(player: SpigotPlayer) {
         _playerInventories.remove(player)
-        onClose(player)
+        player.closeInventory()
     }
 
-    open fun onOpen(player: SpigotPlayer) {}
-    open fun onUpdate() {}
-    open fun onUpdate(player: SpigotPlayer) {}
-    open fun onClose(player: SpigotPlayer) {}
+    protected open fun onOpen(player: SpigotPlayer) {}
+    protected open fun onUpdate() {}
+    protected open fun onUpdate(player: SpigotPlayer) {}
+    protected open fun onClose(player: SpigotPlayer) {}
 
     @Component
     @Retention(AnnotationRetention.RUNTIME)

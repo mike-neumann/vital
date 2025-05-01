@@ -1,6 +1,7 @@
 package me.vitalframework.utils
 
 import me.vitalframework.*
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer
@@ -21,6 +22,11 @@ import kotlin.math.min
 
 interface VitalUtils<CS, P : CS> {
     companion object {
+        fun String.toMiniMessageComponent() = MiniMessage.miniMessage().deserialize(this)
+        fun Component.toLegacySectionString() = LegacyComponentSerializer.legacySection().serialize(this)
+        fun Component.toLegacyAmpersandString() = LegacyComponentSerializer.legacyAmpersand().serialize(this)
+        fun Component.toBungeeComponent() = BungeeComponentSerializer.get().serialize(this)
+
         fun chatButton(hover: String, text: String, click: String, action: ClickEvent.Action) =
             "<hover:show_text:'$hover'><click:${action.name.lowercase()}:'$click'>$text</click></hover>"
 
@@ -44,9 +50,9 @@ interface VitalUtils<CS, P : CS> {
     fun P.sendFormattedTitle(
         title: String = "",
         subtitle: String = "",
-        fadeIn: @Range(from = 0, to = 72000) Int,
-        stay: @Range(from = 0, to = 72000) Int,
-        fadeOut: @Range(from = 0, to = 72000) Int,
+        fadeIn: @Range(from = 0, to = 72_000) Int,
+        stay: @Range(from = 0, to = 72_000) Int,
+        fadeOut: @Range(from = 0, to = 72_000) Int,
     )
 
     fun P.sendFormattedTitle(title: String = "", subtitle: String = "")
@@ -56,18 +62,18 @@ interface VitalUtils<CS, P : CS> {
     fun broadcastFormattedTitle(
         title: String = "",
         subtitle: String = "",
-        fadeIn: @Range(from = 0, to = 72000) Int,
-        stay: @Range(from = 0, to = 72000) Int,
-        fadeOut: @Range(from = 0, to = 72000) Int,
+        fadeIn: @Range(from = 0, to = 72_000) Int,
+        stay: @Range(from = 0, to = 72_000) Int,
+        fadeOut: @Range(from = 0, to = 72_000) Int,
         predicate: (P) -> Boolean = { true },
     ) = broadcastAction(predicate) { it.sendFormattedTitle(title, subtitle, fadeIn, stay, fadeOut) }
 
-    fun P.sendFormattedPersistentTitle(title: String = "", subtitle: String = "", fadeIn: @Range(from = 0, to = 72000) Int)
+    fun P.sendFormattedPersistentTitle(title: String = "", subtitle: String = "", fadeIn: @Range(from = 0, to = 72_000) Int)
 
     fun broadcastFormattedPersistentTitle(
         title: String = "",
         subtitle: String = "",
-        fadeIn: @Range(from = 0, to = 72000) Int,
+        fadeIn: @Range(from = 0, to = 72_000) Int,
         predicate: (P) -> Boolean = { true },
     ) = broadcastAction(predicate) { it.sendFormattedPersistentTitle(title, subtitle, fadeIn) }
 
@@ -83,13 +89,13 @@ interface VitalUtils<CS, P : CS> {
 
         override fun SpigotCommandSender.sendFormattedMessage(message: String) = spigot().sendMessage(
             // must be used since, both version (paper and spigot) support the bungeeapi implementations...
-            *BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message))
+            *message.toMiniMessageComponent().toBungeeComponent()
         )
 
         override fun broadcastFormattedMessage(message: String, predicate: (SpigotPlayer) -> Boolean) =
             broadcastAction(predicate) {
                 // must be used since, both version (paper and spigot) support the bungeeapi implementations...
-                it.spigot().sendMessage(*BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message)))
+                it.spigot().sendMessage(*message.toMiniMessageComponent().toBungeeComponent())
             }
 
         @JvmOverloads
@@ -103,20 +109,20 @@ interface VitalUtils<CS, P : CS> {
         override fun SpigotPlayer.sendFormattedTitle(
             title: String,
             subtitle: String,
-            fadeIn: @Range(from = 0, to = 72000) Int,
-            stay: @Range(from = 0, to = 72000) Int,
-            fadeOut: @Range(from = 0, to = 72000) Int,
+            fadeIn: @Range(from = 0, to = 72_000) Int,
+            stay: @Range(from = 0, to = 72_000) Int,
+            fadeOut: @Range(from = 0, to = 72_000) Int,
         ) = sendTitle(
-            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)),
-            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle)),
+            title.toMiniMessageComponent().toLegacySectionString(),
+            subtitle.toMiniMessageComponent().toLegacySectionString(),
             fadeIn,
             stay,
             fadeOut
         )
 
         override fun SpigotPlayer.sendFormattedTitle(title: String, subtitle: String) = sendTitle(
-            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)),
-            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle))
+            title.toMiniMessageComponent().toLegacySectionString(),
+            subtitle.toMiniMessageComponent().toLegacySectionString()
         )
 
         override fun broadcastFormattedTitle(title: String, subtitle: String, predicate: (SpigotPlayer) -> Boolean) =
@@ -125,19 +131,19 @@ interface VitalUtils<CS, P : CS> {
         override fun SpigotPlayer.sendFormattedPersistentTitle(
             title: String,
             subtitle: String,
-            fadeIn: @Range(from = 0, to = 72000) Int,
+            fadeIn: @Range(from = 0, to = 72_000) Int,
         ) = sendTitle(
-            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title)),
-            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle)),
+            title.toMiniMessageComponent().toLegacySectionString(),
+            subtitle.toMiniMessageComponent().toLegacySectionString(),
             fadeIn,
-            72000,  /* 1h */
+            72_000, /* 1h */
             0
         )
 
         override fun broadcastFormattedPersistentTitle(
             title: String,
             subtitle: String,
-            fadeIn: @Range(from = 0, to = 72000) Int,
+            fadeIn: @Range(from = 0, to = 72_000) Int,
             predicate: (SpigotPlayer) -> Boolean,
         ) = broadcastAction { it.sendFormattedPersistentTitle(title, subtitle, fadeIn) }
 
@@ -159,7 +165,7 @@ interface VitalUtils<CS, P : CS> {
         }
 
         override fun SpigotPlayer.sendFormattedActionBar(message: String) = spigot().sendMessage(
-            ChatMessageType.ACTION_BAR, *BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message))
+            ChatMessageType.ACTION_BAR, *message.toMiniMessageComponent().toBungeeComponent()
         )
 
         override fun broadcastFormattedActionBar(message: String, predicate: (SpigotPlayer) -> Boolean) =
@@ -409,7 +415,7 @@ interface VitalUtils<CS, P : CS> {
         }
 
         fun cleanGameRules(worldName: String) = Bukkit.getWorld(worldName)?.cleanGameRules()
-            ?: throw RuntimeException("World $worldName does not exist")
+            ?: throw RuntimeException("World '$worldName' does not exist")
 
         @Suppress("UnstableApiUsage")
         fun SpigotPlayer.openInventory(menuType: MenuType.Typed<*, *>) = openInventory(menuType.create(this))
@@ -420,26 +426,18 @@ interface VitalUtils<CS, P : CS> {
             ProxyServer.getInstance().players.filter(predicate).forEach(action)
 
         override fun BungeeCommandSender.sendFormattedMessage(message: String) =
-            sendMessage(*BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize(message)))
+            sendMessage(*message.toMiniMessageComponent().toBungeeComponent())
 
         override fun BungeePlayer.sendFormattedTitle(
             title: String,
             subtitle: String,
-            fadeIn: @Range(from = 0, to = 72000) Int,
-            stay: @Range(from = 0, to = 72000) Int,
-            fadeOut: @Range(from = 0, to = 72000) Int,
+            fadeIn: @Range(from = 0, to = 72_000) Int,
+            stay: @Range(from = 0, to = 72_000) Int,
+            fadeOut: @Range(from = 0, to = 72_000) Int,
         ) = sendTitle(
             ProxyServer.getInstance().createTitle()
-                .title(
-                    TextComponent.fromLegacy(
-                        LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
-                    )
-                )
-                .subTitle(
-                    TextComponent.fromLegacy(
-                        LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle))
-                    )
-                )
+                .title(TextComponent.fromLegacy(title.toMiniMessageComponent().toLegacySectionString()))
+                .subTitle(TextComponent.fromLegacy(subtitle.toMiniMessageComponent().toLegacySectionString()))
                 .fadeIn(fadeIn)
                 .stay(stay)
                 .fadeOut(fadeOut)
@@ -447,28 +445,19 @@ interface VitalUtils<CS, P : CS> {
 
         override fun BungeePlayer.sendFormattedTitle(title: String, subtitle: String) = sendTitle(
             ProxyServer.getInstance().createTitle()
-                .title(
-                    TextComponent.fromLegacy(
-                        LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
-                    )
-                )
-                .subTitle(
-                    TextComponent.fromLegacy(
-                        LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(subtitle))
-                    )
-                )
+                .title(TextComponent.fromLegacy(title.toMiniMessageComponent().toLegacySectionString()))
+                .subTitle(TextComponent.fromLegacy(subtitle.toMiniMessageComponent().toLegacySectionString()))
         )
 
-        override fun BungeePlayer.sendFormattedPersistentTitle(title: String, subtitle: String, fadeIn: @Range(from = 0, to = 72000) Int) =
-            sendFormattedTitle(title, subtitle, fadeIn, 72000,  /* 1h */0)
+        override fun BungeePlayer.sendFormattedPersistentTitle(title: String, subtitle: String, fadeIn: @Range(from = 0, to = 72_000) Int) =
+            sendFormattedTitle(title, subtitle, fadeIn, 72_000,  /* 1h */0)
 
         override fun BungeePlayer.sendFormattedActionBar(message: String) = sendMessage(
             ChatMessageType.ACTION_BAR,
-            TextComponent.fromLegacy(LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(message)))
+            TextComponent.fromLegacy(message.toMiniMessageComponent().toLegacySectionString())
         )
 
-        override fun broadcastFormattedTitle(title: String, subtitle: String, predicate: (BungeePlayer) -> Boolean) {
-            TODO("Not yet implemented")
-        }
+        override fun broadcastFormattedTitle(title: String, subtitle: String, predicate: (BungeePlayer) -> Boolean) =
+            broadcastAction(predicate) { it.sendFormattedTitle(title, subtitle) }
     }
 }

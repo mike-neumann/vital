@@ -11,14 +11,14 @@ class VitalItemService(val items: List<VitalItem>) {
     @Scheduled(fixedRate = 50)
     fun handleCooldown() {
         for (item in items) {
-            item.playerCooldown
-                .filter { it.value > 0 }
-                .forEach { (player, _) ->
-                    item.playerCooldown[player] = item.playerCooldown[player]!! - 50
-                    item.onCooldownTick(player)
+            for ((player, _) in item.playerCooldown.filter { it.value > 0 }) {
+                item.playerCooldown[player] = item.playerCooldown[player]!! - 50
+                item.onCooldownTick(player)
 
-                    if (item.playerCooldown[player]!! <= 0) item.onCooldownExpire(player)
+                if (item.playerCooldown[player]!! <= 0) {
+                    item.onCooldownExpire(player)
                 }
+            }
         }
     }
 }

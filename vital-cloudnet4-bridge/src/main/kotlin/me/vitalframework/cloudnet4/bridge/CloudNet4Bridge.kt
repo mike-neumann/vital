@@ -12,12 +12,12 @@ import java.util.*
 
 interface CloudNet4Bridge<P> {
     companion object {
-        val serviceRegistry = InjectionLayer.ext().instance(ServiceRegistry::class.java)!!
-        val playerManager = serviceRegistry.firstProvider(PlayerManager::class.java)!!
+        val SERVICE_REGISTRY = InjectionLayer.ext().instance(ServiceRegistry::class.java)!!
+        val PLAYER_MANAGER = SERVICE_REGISTRY.firstProvider(PlayerManager::class.java)!!
     }
 
     fun getPlayerUniqueId(player: P): UUID
-    fun P.getPlayerExecutor() = playerManager.playerExecutor(getPlayerUniqueId(this))
+    fun P.getPlayerExecutor() = PLAYER_MANAGER.playerExecutor(getPlayerUniqueId(this))
     fun P.connect(serverName: String) = getPlayerExecutor().connect(serverName)
     fun P.runCommand(command: String) = getPlayerExecutor().spoofCommandExecution(command)
 

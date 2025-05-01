@@ -54,9 +54,8 @@ open class VitalItem {
         if (other.itemMeta == null) return other == this
         if (!other.itemMeta!!.persistentDataContainer.has(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING))
             return toString() == other.toString().replace("${other.type} x ${other.amount}", "${other.type} x 1")
-        val uuid =
-            UUID.fromString(itemStack.itemMeta!!.persistentDataContainer.get(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING))
-        val otherId = UUID.fromString(other.itemMeta!!.persistentDataContainer.get(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING))
+        val uuid = UUID.fromString(itemStack.itemMeta!!.persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING])
+        val otherId = UUID.fromString(other.itemMeta!!.persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING])
 
         return uuid == otherId
     }

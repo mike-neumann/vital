@@ -20,5 +20,7 @@ inline fun headBuilder(init: VitalHeadItemStackBuilder.() -> Unit): ItemStack {
         lore = headItemStackBuilder.lore
         itemFlags = headItemStackBuilder.itemFlags
         enchantments = headItemStackBuilder.enchantments
-    }.apply { itemMeta = (itemMeta as SkullMeta).apply { owningPlayer = headItemStackBuilder.owningPlayer } }
+    }.apply {
+        itemMeta = (itemMeta as SkullMeta).apply { owningPlayer = headItemStackBuilder.owningPlayer }
+    }
 }

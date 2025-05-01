@@ -27,7 +27,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
             }.firstOrNull() ?: throw VitalPluginInfoAnnotationProcessingException.NoMainClass()
 
         pluginEnvironment = info.environment
-        // finally generate the plugin.yml
+        // finally, generate the plugin.yml
         setupPluginYml(info.environment, className, info.name, info.description, info.version, info.apiVersion, info.author)
         generatePluginYml(info.environment)
         val packageNames = className.split("[.]".toRegex()).dropLastWhile { it.isEmpty() }.toMutableList().apply { removeLast() }
@@ -59,7 +59,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
 
             Vital.Info.PluginEnvironment.SPIGOT, Vital.Info.PluginEnvironment.PAPER -> {
                 val vitalPluginLoaderImplementationName = if (pluginEnvironment == Vital.Info.PluginEnvironment.PAPER) "Paper" else "Spigot"
-                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("main: me.vitalframework.loader.VitalPluginLoader\$$vitalPluginLoaderImplementationName")
+                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("main: me.vitalframework.loader.VitalPluginLoader$$vitalPluginLoaderImplementationName")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("real-main: $className")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("name: $name")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("version: $version")

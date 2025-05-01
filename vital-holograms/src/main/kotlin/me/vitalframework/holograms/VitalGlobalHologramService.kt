@@ -24,7 +24,7 @@ class VitalGlobalHologramService(val globalHologramRepository: VitalGlobalHologr
                 it.isVisible = false
                 it.isMarker = true
                 it.isCustomNameVisible = true
-                it.customName = formattedLine
+                it.customName(MiniMessage.miniMessage().deserialize(formattedLine))
             }.uniqueId
         }
 

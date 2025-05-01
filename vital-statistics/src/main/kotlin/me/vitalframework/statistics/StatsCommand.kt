@@ -19,7 +19,7 @@ interface StatsCommand<CS> {
     fun handleOnCommand(sender: CS) {
         val serverStatus = if (statisticsService.tps >= statisticsConfig.minTps) "<green>HEALTHY</green>" else "<red>UNHEALTHY</yellow>"
         val ramUsageInGigaBytes = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024f / 1024 / 1024
-        val vitalModuleNames = Vital.context.getBeansOfType(VitalSubModule::class.java)
+        val vitalModuleNames = Vital.CONTEXT.getBeansOfType(VitalSubModule::class.java)
 
         sendMessage(sender, "Spring version: <yellow>${SpringVersion.getVersion()}")
         sendMessage(sender, "Server status: <yellow>${statisticsService.tps} TPS ($serverStatus)")
@@ -66,6 +66,7 @@ interface StatsCommand<CS> {
             sender.sendFormattedMessage("MC Version: <yellow>${Bukkit.getVersion()}")
             sender.sendFormattedMessage("Bukkit Version: <yellow>${Bukkit.getBukkitVersion()}")
             handleOnCommand(sender)
+
             return ReturnState.SUCCESS
         }
 
@@ -84,6 +85,7 @@ interface StatsCommand<CS> {
         override fun onBaseCommand(sender: BungeeCommandSender): ReturnState {
             sender.sendFormattedMessage("Bungee version: <yellow>${ProxyServer.getInstance().version}")
             handleOnCommand(sender)
+
             return ReturnState.SUCCESS
         }
 

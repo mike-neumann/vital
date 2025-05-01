@@ -29,7 +29,7 @@ abstract class VitalConfig {
         }
 
         try {
-            // after everything has worked without problem, inject fields of our config with the values now retrievable...
+            // after everything has worked without any problem, inject fields of our config with the values now retrievable...
             load(inputStream)
         } catch (e: Exception) {
             throw VitalConfigException.InjectFields(info.name, info.processor.java, e)
@@ -40,13 +40,13 @@ abstract class VitalConfig {
         try {
             if (writeToFile) {
                 val file = Path(fileName)
-                // create file is not already exists
+                // create the file if it does not exist
                 if (!file.exists()) {
                     if (file.parent != null) file.parent.createDirectories()
 
                     try {
                         file.createFile()
-                        log.debug("{} config file created", file.name)
+                        log.debug("${file.name} config file created")
                     } catch (e: IOException) {
                         throw VitalConfigException.CreateFile(file.name, e)
                     }

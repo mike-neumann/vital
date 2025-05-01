@@ -2,7 +2,6 @@ package me.vitalframework.items
 
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
@@ -28,14 +27,12 @@ inline fun itemBuilder(init: VitalItemStackBuilder.() -> Unit): ItemStack {
         // since we know we have an item which is not of type AIR, we now have a persistent data container
         itemMeta = itemMeta!!.apply {
             // each item MUST have a unique identifier, used in interactive items.
-            persistentDataContainer.set(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING, UUID.randomUUID().toString())
+            persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING] = UUID.randomUUID().toString()
 
             if (itemStackBuilder.name != null) {
-                setDisplayName(
-                    LegacyComponentSerializer.legacySection().serialize(
-                        MiniMessage.miniMessage().deserialize("<reset><white>${itemStackBuilder.name}")
-                            .decoration(TextDecoration.ITALIC, false)
-                    )
+                displayName(
+                    MiniMessage.miniMessage().deserialize("<reset><white>${itemStackBuilder.name}")
+                        .decoration(TextDecoration.ITALIC, false)
                 )
             }
 
@@ -47,9 +44,7 @@ inline fun itemBuilder(init: VitalItemStackBuilder.() -> Unit): ItemStack {
                 addItemFlags(itemFlag)
             }
 
-            lore = itemStackBuilder.lore
-                .map { MiniMessage.miniMessage().deserialize(it).decoration(TextDecoration.ITALIC, false) }
-                .map { LegacyComponentSerializer.legacySection().serialize(it) }
+            lore(itemStackBuilder.lore.map { MiniMessage.miniMessage().deserialize(it).decoration(TextDecoration.ITALIC, false) })
 
             isUnbreakable = itemStackBuilder.unbreakable
         }

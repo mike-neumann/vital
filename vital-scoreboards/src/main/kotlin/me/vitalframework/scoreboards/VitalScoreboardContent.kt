@@ -23,11 +23,11 @@ class VitalScoreboardContent internal constructor(title: String) {
         ) ?: bukkitScoreboard.registerNewObjective(
             PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
             Criteria.DUMMY,
-            LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
+            MiniMessage.miniMessage().deserialize(title)
         )
 
         objective.displaySlot = DisplaySlot.SIDEBAR
-        objective.displayName = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(title))
+        objective.displayName(MiniMessage.miniMessage().deserialize(title))
         // Reset scores for existing entries
         for (entry in bukkitScoreboard.entries) {
             bukkitScoreboard.resetScores(entry)
