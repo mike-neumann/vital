@@ -18,20 +18,24 @@ interface StatsCommand<CS> {
 
     fun handleOnCommand(sender: CS) {
         val serverStatus = if (statisticsService.tps >= statisticsConfig.minTps) "<green>HEALTHY</green>" else "<red>UNHEALTHY</yellow>"
-        val ramUsageInGigaBytes = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024f / 1024 / 1024
+        val ramUsageInGigaBytes = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024 / 1024
         val vitalModuleNames = Vital.CONTEXT.getBeansOfType(VitalSubModule::class.java)
 
+        sendMessage(sender, "-----> Server-Statistics")
         sendMessage(sender, "Spring version: <yellow>${SpringVersion.getVersion()}")
         sendMessage(sender, "Server status: <yellow>${statisticsService.tps} TPS ($serverStatus)")
         sendMessage(sender, "RAM usage: <yellow>$ramUsageInGigaBytes GB")
         sendMessage(sender, "Vital modules: <yellow>${vitalModuleNames.size}")
 
         for ((name, _) in vitalModuleNames) {
-            sendMessage(sender, " - <yellow>$name")
+            sendMessage(sender, "> <yellow>$name")
         }
+
+        sendMessage(sender, "-----")
     }
 
     fun handleOnHealthTps(sender: CS): VitalCommand.ReturnState {
+        sendMessage(sender, "-----> TPS")
         sendMessage(sender, "TPS: <yellow>${statisticsService.tps}")
         sendMessage(
             sender,
@@ -39,7 +43,7 @@ interface StatsCommand<CS> {
         )
 
         for ((time, tps) in statisticsService.lastTps) {
-            sendMessage(sender, " - <yellow>${SimpleDateFormat("HH:mm:ss").format(Date(time))}, $tps TPS")
+            sendMessage(sender, "> <yellow>${SimpleDateFormat("HH:mm:ss").format(Date(time))}, $tps TPS")
         }
 
         sendMessage(
@@ -48,8 +52,10 @@ interface StatsCommand<CS> {
         )
 
         for ((time, tps) in statisticsService.lastUnhealthyTps) {
-            sendMessage(sender, " - <yellow>${SimpleDateFormat("HH:mm:ss").format(Date(time))}, $tps TPS")
+            sendMessage(sender, "> <yellow>${SimpleDateFormat("HH:mm:ss").format(Date(time))}, $tps TPS")
         }
+
+        sendMessage(sender, "-----")
 
         return VitalCommand.ReturnState.SUCCESS
     }

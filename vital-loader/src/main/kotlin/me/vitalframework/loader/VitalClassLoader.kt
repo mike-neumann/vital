@@ -19,7 +19,7 @@ import java.util.jar.JarFile
  * Parent-first packages are needed when multiple class definitions are found on the plugin classpath and nested-jars (dependencies)
  * and type definitions are conflicting between classloaders.
  *
- * @param[classLoaderName] configures which parent-first packages are loaded from vital.properties, e.g.
+ * @param[classLoaderName] configures which parent-first packages are loaded from vital.properties, e.g.,
  * classLoaderName = "spigot" -> will load the key "vital.classloader.spigot.parent-first-packages" in vital.properties
  */
 abstract class VitalClassLoader<T : Any>(classLoaderName: String, val plugin: T, urls: Array<URL>, parent: ClassLoader?) :

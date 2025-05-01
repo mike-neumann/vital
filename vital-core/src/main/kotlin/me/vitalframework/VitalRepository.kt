@@ -15,9 +15,9 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     private val _entities = mutableListOf<T>()
     val entities: List<T> get() = _entities
 
-    fun save(entity: T) = let {
+    fun save(entity: T): T {
         if (exists(entity)) delete(entity)
-        entity.also {
+        return entity.also {
             _entities.add(entity)
             onSave(entity)
         }

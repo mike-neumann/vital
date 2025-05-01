@@ -394,16 +394,16 @@ interface VitalUtils<CS, P : CS> {
             (-29_999_984..29_999_984).random()
         ).location
 
-        fun Location.getHighestSafeLocationFromTop(startFrom: Int = 256) = let {
+        fun Location.getHighestSafeLocationFromTop(startFrom: Int = 256): Location {
             var y = startFrom
             do {
                 y--
             } while (world!!.getBlockAt(x.toInt(), y, z.toInt()).type == Material.AIR)
 
-            world!!.getBlockAt(x.toInt(), y + 2, z.toInt()).location
+            return world!!.getBlockAt(x.toInt(), y + 2, z.toInt()).location
         }
 
-        fun Location.getHighestSafeLocationFromBottom(startFrom: Int = 50) = let {
+        fun Location.getHighestSafeLocationFromBottom(startFrom: Int = 50): Location {
             var safeY = startFrom
             do {
                 safeY++
@@ -411,7 +411,7 @@ interface VitalUtils<CS, P : CS> {
                 world!!.getBlockAt(x.toInt(), safeY + 1, z.toInt()).type != Material.AIR
             )
 
-            Location(world, x, safeY.toDouble(), z)
+            return Location(world, x, safeY.toDouble(), z)
         }
 
         fun cleanGameRules(worldName: String) = Bukkit.getWorld(worldName)?.cleanGameRules()
