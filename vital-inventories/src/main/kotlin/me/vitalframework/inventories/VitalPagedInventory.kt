@@ -3,7 +3,6 @@ package me.vitalframework.inventories
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import org.jetbrains.annotations.Range
-import kotlin.math.ceil
 
 abstract class VitalPagedInventory : VitalInventory() {
     private val _pages = mutableMapOf<SpigotPlayer, Int>()
@@ -22,12 +21,24 @@ abstract class VitalPagedInventory : VitalInventory() {
         toSlot = info.toSlot
     }
 
-    fun updateMaxPage(totalContent: Int) = run { maxPage = ceil(totalContent.toDouble() / pageContentAmount).toInt() }
+    fun updateMaxPage(totalContent: Int) {
+        var newMaxPage = totalContent.toDouble() / pageContentAmount.toDouble()
+
+        if (newMaxPage > 1) {
+            newMaxPage += 1
+        } else {
+            newMaxPage = 1.0
+        }
+
+        maxPage = newMaxPage.toInt()
+    }
 
     fun setPage(page: Int, player: SpigotPlayer, totalContent: Int? = null) {
+        if (totalContent != null) {
+            updateMaxPage(totalContent)
+        }
         val newPage = if (page <= 0) 1 else if (page >= maxPage) maxPage else page
-        _pages[player] = page
-        updateMaxPage(totalContent ?: 1)
+        _pages[player] = newPage
         onPageChange(newPage, player)
         super.update(player)
     }
