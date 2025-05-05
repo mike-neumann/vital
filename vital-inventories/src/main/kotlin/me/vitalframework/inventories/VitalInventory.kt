@@ -4,32 +4,29 @@ import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import me.vitalframework.items.itemBuilder
 import net.kyori.adventure.text.minimessage.MiniMessage
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.inventory.Inventory
-import org.bukkit.inventory.ItemStack
-import org.jetbrains.annotations.Range
+import org.bukkit.inventory.*
 import org.springframework.stereotype.Component
 
 typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
 
 open class VitalInventory {
-    val size: Int
+    val type: Info.Type
     val name: String
     val background: Material
     private val _previousInventories = mutableMapOf<SpigotPlayer, VitalInventory>()
-    private val _playerInventories = mutableMapOf<SpigotPlayer, Inventory>()
+    private val _playerInventories = mutableMapOf<SpigotPlayer, InventoryView>()
     private val _items = mutableMapOf<Int, ItemStack>()
     private val _actions = mutableMapOf<Pair<SpigotPlayer, Int>, InventoryItemClickAction>()
     val previousInventories: Map<SpigotPlayer, VitalInventory> get() = _previousInventories
-    val playerInventories: Map<SpigotPlayer, Inventory> get() = _playerInventories
+    val playerInventories: Map<SpigotPlayer, InventoryView> get() = _playerInventories
     val items: Map<Int, ItemStack> get() = _items
     val actions: Map<Pair<SpigotPlayer, Int>, InventoryItemClickAction> get() = _actions
 
     init {
         val info = getRequiredAnnotation<Info>()
-        size = info.size
+        type = info.type
         name = info.name
         background = info.background
     }
@@ -56,7 +53,7 @@ open class VitalInventory {
 
         onUpdate(player)
 
-        for (i in 0..<size) {
+        for (i in 0..<inventory.topInventory.size) {
             inventory.setItem(i, itemBuilder {
                 type = background
             })
@@ -67,18 +64,19 @@ open class VitalInventory {
         }
     }
 
+    @Suppress("UnstableApiUsage")
     open fun open(player: SpigotPlayer, previousInventory: VitalInventory? = null) {
         previousInventory?.close(player)
-        val inventory = Bukkit.createInventory(player, size, MiniMessage.miniMessage().deserialize(name))
+        val inventoryView = type.menuType.create(player, MiniMessage.miniMessage().deserialize(name))
 
         if (previousInventory != null) {
             _previousInventories[player] = previousInventory
         }
-        _playerInventories[player] = inventory
+        _playerInventories[player] = inventoryView
 
         onOpen(player)
         update(player)
-        player.openInventory(inventory)
+        player.openInventory(inventoryView)
     }
 
     fun click(e: InventoryClickEvent) = _actions[e.whoClicked to e.slot]?.invoke(e)
@@ -86,6 +84,7 @@ open class VitalInventory {
     fun close(player: SpigotPlayer) {
         _playerInventories.remove(player)
         player.closeInventory()
+        onClose(player)
     }
 
     protected open fun onOpen(player: SpigotPlayer) {}
@@ -96,5 +95,37 @@ open class VitalInventory {
     @Component
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.CLASS)
-    annotation class Info(val name: String, val size: @Range(from = 9, to = 54) Int = 9, val background: Material = Material.AIR)
+    annotation class Info(
+        val type: Type,
+        val name: String,
+        val background: Material = Material.AIR,
+    ) {
+        @Suppress("UnstableApiUsage")
+        enum class Type(val menuType: MenuType.Typed<*, *>) {
+            GENERIC_9X1(MenuType.GENERIC_9X1),
+            GENERIC_9X2(MenuType.GENERIC_9X2),
+            GENERIC_9X3(MenuType.GENERIC_9X3),
+            GENERIC_9X4(MenuType.GENERIC_9X4),
+            GENERIC_9X5(MenuType.GENERIC_9X5),
+            GENERIC_9X6(MenuType.GENERIC_9X6),
+            GENERIC_3X3(MenuType.GENERIC_3X3),
+            ANVIL(MenuType.ANVIL),
+            BEACON(MenuType.BEACON),
+            BLAST_FURNACE(MenuType.BLAST_FURNACE),
+            BREWING_STAND(MenuType.BREWING_STAND),
+            CRAFTING(MenuType.CRAFTING),
+            ENCHANTMENT(MenuType.ENCHANTMENT),
+            FURNACE(MenuType.FURNACE),
+            GRINDSTONE(MenuType.GRINDSTONE),
+            HOPPER(MenuType.HOPPER),
+            LECTERN(MenuType.LECTERN),
+            LOOM(MenuType.LOOM),
+            MERCHANT(MenuType.MERCHANT),
+            SHULKER_BOX(MenuType.SHULKER_BOX),
+            SMITHING(MenuType.SMITHING),
+            SMOKER(MenuType.SMOKER),
+            CARTOGRAPHY_TABLE(MenuType.CARTOGRAPHY_TABLE),
+            STONECUTTER(MenuType.STONECUTTER)
+        }
+    }
 }
