@@ -842,6 +842,7 @@ interface VitalUtils<CS, P : CS> {
          * @param startFrom The y-coordinate to start the search from, defaulting to 256. The method iterates downward from this height.
          * @return The location of the highest safe block, which is two blocks above the first non-air block encountered.
          */
+        @JvmOverloads
         fun Location.getHighestSafeLocationFromTop(startFrom: Int = 256): Location {
             var y = startFrom
             do {
@@ -858,6 +859,7 @@ interface VitalUtils<CS, P : CS> {
          * @param startFrom The y-coordinate from which to begin the search. Defaults to 50.
          * @return The highest safe `Location` instance found above or at the starting position.
          */
+        @JvmOverloads
         fun Location.getHighestSafeLocationFromBottom(startFrom: Int = 50): Location {
             var safeY = startFrom
             do {
