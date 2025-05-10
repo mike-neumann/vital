@@ -4,11 +4,18 @@ import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
 
 /**
- * Repository class, not to be confused with the spring boot repository.
- * This class provides volatile data storage.
+ * An in-memory repository implementation that provides volatile data storage.
  *
- * DO NOT ANNOTATE IMPLEMENTATIONS WITH [Repository]
- * AS THIS WILL BREAK INTERNAL FUNCTIONALITY.
+ * This repository maintains data only during runtime and does not persist data
+ * between application restarts. It is designed to work with entities that implement
+ * [VitalEntity] interface.
+ *
+ * Important: This is a custom repository implementation and should not be confused
+ * with Spring Boot repositories. Do not annotate implementations of this class
+ * with Spring's @Repository annotation as it will interfere with internal
+ * functionality.
+ *
+ * @param T The type of entity this repository manages, must implement [VitalEntity]
  */
 @Component
 abstract class VitalRepository<T : VitalEntity<ID>, ID> {

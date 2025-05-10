@@ -4,6 +4,14 @@ import org.bukkit.*
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
+/**
+ * Represents a configurable wrapper for an `ItemStack`, allowing its properties,
+ * such as type, display name, lore, enchantments, and item flags, to be managed
+ * through configuration.
+ *
+ * This class provides utilities to convert an existing `ItemStack` into a
+ * `VitalConfigItemStack` and vice versa.
+ */
 class VitalConfigItemStack {
     companion object {
         fun of(itemStack: ItemStack): VitalConfigItemStack {
