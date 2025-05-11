@@ -13,7 +13,7 @@ class VitalInventoryListener(plugin: SpigotPlugin, val inventories: List<VitalIn
         val vitalInventory = inventories.firstOrNull { it.hasInventoryOpen(player) }
 
         if (e.clickedInventory == null) {
-            val previousInventory = vitalInventory?.previousInventories?.get(player)
+            val previousInventory = vitalInventory?.previousInventories?.get(player.uniqueId)
 
             if (vitalInventory != null && previousInventory != null) {
                 vitalInventory.close(player)

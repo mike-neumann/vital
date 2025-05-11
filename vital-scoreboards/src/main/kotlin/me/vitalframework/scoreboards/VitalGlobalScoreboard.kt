@@ -5,6 +5,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
+import java.util.*
 import java.util.function.Supplier
 
 /**
@@ -23,6 +24,8 @@ import java.util.function.Supplier
  * @param lines A vararg of `Supplier<String>` instances that dynamically provide the lines of the scoreboard.
  */
 class VitalGlobalScoreboard(title: String, vararg var lines: Supplier<String>) : VitalScoreboard {
+    private val _players = mutableListOf<UUID>()
+
     /**
      * Represents the content of the scoreboard used in the context of the `VitalGlobalScoreboard`.
      *
@@ -36,18 +39,18 @@ class VitalGlobalScoreboard(title: String, vararg var lines: Supplier<String>) :
      * - Providing support for interactivity with player and team information.
      */
     val scoreboardContent = VitalScoreboardContent(title)
-    private val _players = mutableListOf<SpigotPlayer>()
 
     /**
-     * Retrieves the list of players currently associated with the scoreboard.
+     * Returns a list of UUIDs representing the players currently associated with the global scoreboard.
      *
-     * This list provides a read-only view of the players who are actively being tracked
-     * or displayed on the scoreboard. Modifications to this list are managed internally
-     * by the corresponding methods for adding or removing players.
+     * This property provides read-only access to the internal list of players (`_players`) who
+     * are actively linked to this scoreboard. The list represents all players whose scoreboards
+     * will be updated and synchronized by this implementation.
      *
-     * @return A list of `SpigotPlayer` instances tracked by the scoreboard.
+     * Modifications, such as adding or removing players, should be handled through the appropriate
+     * methods within the `VitalGlobalScoreboard` class to ensure consistency and proper synchronization.
      */
-    val players: List<SpigotPlayer> get() = _players
+    val players: List<UUID> get() = _players
 
     /**
      * Updates the specified player's scoreboard.
@@ -77,6 +80,7 @@ class VitalGlobalScoreboard(title: String, vararg var lines: Supplier<String>) :
         updateContent()
 
         for (player in _players) {
+            val player = Bukkit.getPlayer(player) ?: continue
             update(player)
         }
     }
@@ -122,8 +126,8 @@ class VitalGlobalScoreboard(title: String, vararg var lines: Supplier<String>) :
      * @param player The player to be added to the scoreboard.
      */
     fun addPlayer(player: SpigotPlayer) {
-        if (player in _players) return
-        _players.add(player)
+        if (player.uniqueId in _players) return
+        _players.add(player.uniqueId)
         update()
     }
 
@@ -135,8 +139,8 @@ class VitalGlobalScoreboard(title: String, vararg var lines: Supplier<String>) :
      * @param player The player to be removed from the scoreboard.
      */
     fun removePlayer(player: SpigotPlayer) {
-        if (player !in _players) return
-        _players.remove(player)
+        if (player.uniqueId !in _players) return
+        _players.remove(player.uniqueId)
         player.scoreboard = Bukkit.getScoreboardManager().mainScoreboard
         update()
     }

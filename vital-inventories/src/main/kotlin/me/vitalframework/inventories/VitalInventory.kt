@@ -4,10 +4,12 @@ import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import me.vitalframework.items.itemBuilder
 import net.kyori.adventure.text.minimessage.MiniMessage
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.*
 import org.springframework.stereotype.Component
+import java.util.*
 
 typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
 
@@ -24,17 +26,85 @@ typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
  * default configurations for the inventory.
  */
 open class VitalInventory {
-    val type: Info.Type
-    val name: String
-    val background: Material
-    private val _previousInventories = mutableMapOf<SpigotPlayer, VitalInventory>()
-    private val _playerInventories = mutableMapOf<SpigotPlayer, InventoryView>()
+    private val _previousInventories = mutableMapOf<UUID, VitalInventory>()
+    private val _playerInventories = mutableMapOf<UUID, InventoryView>()
     private val _items = mutableMapOf<Int, ItemStack>()
-    private val _actions = mutableMapOf<Pair<SpigotPlayer, Int>, InventoryItemClickAction>()
-    val previousInventories: Map<SpigotPlayer, VitalInventory> get() = _previousInventories
-    val playerInventories: Map<SpigotPlayer, InventoryView> get() = _playerInventories
+    private val _actions = mutableMapOf<Pair<UUID, Int>, InventoryItemClickAction>()
+
+    /**
+     * Represents the type of inventory associated with this instance of `VitalInventory`.
+     *
+     * The type is defined by the `Info.Type` enumeration, which maps to specific menu layouts
+     * or configurations supported by the framework. Each type corresponds to a unique structure
+     * or interaction model, such as a 9x1 generic inventory, an anvil, or a crafting table.
+     */
+    val type: Info.Type
+
+    /**
+     * The name of the inventory instance.
+     *
+     * This property typically holds a descriptive or unique identifier
+     * for the inventory, often used for display or internal
+     * tracking within the inventory management system.
+     */
+    val name: String
+
+    /**
+     * Represents the default background material used for the inventory display.
+     *
+     * This value defines the appearance of unused slots or areas within the inventory
+     * that are not occupied by specific items. It serves as the visual backdrop,
+     * helping to improve the readability and organization of the inventory UI.
+     */
+    val background: Material
+
+    /**
+     * A map of previous inventories associated with their respective unique player identifiers.
+     *
+     * This property provides access to the previous `VitalInventory` instances managed by this class,
+     * where each entry associates a player's UUID with their corresponding inventory. It is read-only
+     * and is commonly used to retrieve or manage inventory states prior to the current one.
+     */
+    val previousInventories: Map<UUID, VitalInventory> get() = _previousInventories
+
+    /**
+     * A read-only property that provides access to the mapping of active player inventories managed by this instance.
+     *
+     * This map associates each player's UUID with their respective `InventoryView`,
+     * enabling the direct management and updating of individual player inventories.
+     *
+     * The `playerInventories` map reflects the current state of all inventories actively
+     * maintained by the `VitalInventory` instance.
+     */
+    val playerInventories: Map<UUID, InventoryView> get() = _playerInventories
+
+    /**
+     * Represents a mapping of inventory item slots to their corresponding `ItemStack` objects
+     * within this `VitalInventory` instance.
+     *
+     * This property provides a read-only view of the current inventory items, where the key
+     * is the slot number (an integer) and the value is the `ItemStack` assigned to that slot.
+     *
+     * The `_items` field is the underlying data store for this property.
+     * Modifications to the inventory are managed through other methods within the class that
+     * interact with `_items`.
+     *
+     * @return A map where keys are slot indices and values are `ItemStack` objects for the inventory.
+     */
     val items: Map<Int, ItemStack> get() = _items
-    val actions: Map<Pair<SpigotPlayer, Int>, InventoryItemClickAction> get() = _actions
+
+    /**
+     * A mapping of inventory click actions associated with specific inventory slots and players.
+     *
+     * The key is a pair consisting of a player's unique identifier (`UUID`) and
+     * an inventory slot index (`Int`). The value is an instance of
+     * `InventoryItemClickAction`, representing the action to be executed
+     * when the item in the corresponding slot is clicked by the specified player.
+     *
+     * This property is used to manage and retrieve custom click actions
+     * registered for individual slots in player-specific inventories.
+     */
+    val actions: Map<Pair<UUID, Int>, InventoryItemClickAction> get() = _actions
 
     init {
         val info = getRequiredAnnotation<Info>()
@@ -55,7 +125,7 @@ open class VitalInventory {
     @JvmOverloads
     fun setItem(slot: Int, itemStack: ItemStack, player: SpigotPlayer, action: InventoryItemClickAction = {}) {
         _items[slot] = itemStack
-        _actions[player to slot] = action
+        _actions[player.uniqueId to slot] = action
     }
 
     /**
@@ -65,7 +135,7 @@ open class VitalInventory {
      * @param player The SpigotPlayer to check for an open inventory.
      * @return True if the player has an open inventory managed by this instance, false otherwise.
      */
-    fun hasInventoryOpen(player: SpigotPlayer) = _playerInventories.containsKey(player)
+    fun hasInventoryOpen(player: SpigotPlayer) = _playerInventories.containsKey(player.uniqueId)
 
     /**
      * Updates all player inventories managed by this instance and performs custom update logic.
@@ -81,7 +151,8 @@ open class VitalInventory {
     fun update() {
         onUpdate()
 
-        for ((player, _) in _playerInventories) {
+        for ((uniqueId, _) in _playerInventories) {
+            val player = Bukkit.getPlayer(uniqueId) ?: continue
             update(player)
         }
     }
@@ -98,8 +169,8 @@ open class VitalInventory {
      *               performing any actions.
      */
     open fun update(player: SpigotPlayer) {
-        if (player !in _playerInventories) return
-        val inventory = _playerInventories[player]!!
+        if (player.uniqueId !in _playerInventories) return
+        val inventory = _playerInventories[player.uniqueId]!!
 
         onUpdate(player)
 
@@ -129,9 +200,9 @@ open class VitalInventory {
         val inventoryView = type.menuType.create(player, MiniMessage.miniMessage().deserialize(name))
 
         if (previousInventory != null) {
-            _previousInventories[player] = previousInventory
+            _previousInventories[player.uniqueId] = previousInventory
         }
-        _playerInventories[player] = inventoryView
+        _playerInventories[player.uniqueId] = inventoryView
 
         onOpen(player)
         update(player)
@@ -145,7 +216,7 @@ open class VitalInventory {
      * @param e The inventory click event containing information about the player who clicked,
      *          the slot clicked, and other relevant details.
      */
-    fun click(e: InventoryClickEvent) = _actions[e.whoClicked to e.slot]?.invoke(e)
+    fun click(e: InventoryClickEvent) = _actions[e.whoClicked.uniqueId to e.slot]?.invoke(e)
 
     /**
      * Closes the inventory for the specified player and handles associated cleanup actions.
@@ -153,7 +224,7 @@ open class VitalInventory {
      * @param player The Spigot player instance for whom the inventory is being closed.
      */
     fun close(player: SpigotPlayer) {
-        _playerInventories.remove(player)
+        _playerInventories.remove(player.uniqueId)
         player.closeInventory()
         onClose(player)
     }

@@ -4,9 +4,11 @@ import me.vitalframework.SpigotPlayer
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import org.bukkit.Bukkit
 import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.scoreboard.Team
 import org.bukkit.scoreboard.Team.OptionStatus
+import java.util.*
 
 /**
  * Represents a team within a scoreboard system, providing functionality for managing
@@ -28,22 +30,23 @@ import org.bukkit.scoreboard.Team.OptionStatus
  * @param scoreboard The scoreboard to which this team belongs.
  */
 class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Scoreboard) {
-    private val _players = mutableListOf<SpigotPlayer>()
+    private val _players = mutableListOf<UUID>()
+    private val _options = mutableMapOf<Team.Option, OptionStatus>()
 
     /**
-     * Retrieves the list of players associated with the team.
+     * Returns a read-only list of UUIDs representing the players currently associated with the team.
      *
-     * This property provides a read-only view of the players currently part of the team.
-     * Modifications to the underlying list are managed internally by adding or removing
-     * players through appropriate methods of the `VitalScoreboardTeam` class.
+     * This property provides access to the internal `_players` list, which contains the unique
+     * identifiers of all players that are members of the team. The list is used to track membership
+     * and to perform operations that require synchronization with the team's state.
      *
-     * The players in this list are synchronized with the internal state of the team
-     * and are considered active members of the team.
+     * Modifications to the list of players, such as adding or removing members, should only be performed
+     * using the dedicated methods of the containing `VitalScoreboardTeam` class to ensure consistency
+     * with the team's configuration and behavior.
      *
-     * @return A list of `SpigotPlayer` instances representing the players in the team.
+     * The list is primarily used in processes such as updating the scoreboard and team configurations.
      */
-    val players: List<SpigotPlayer> get() = _players
-    private val _options = mutableMapOf<Team.Option, OptionStatus>()
+    val players: List<UUID> get() = _players
 
     /**
      * Represents the behavioral and configuration options associated with the team,
@@ -52,12 +55,12 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
      * The `options` property provides a read-only view of the team's options and their current states.
      *
      * Key points about this property:
-     * - The map keys are instances of `Team.Option`, which enumerate the available configurable options for the team.
+     * - The map keys are instances of `Team.Option`, which list the available configurable options for the team.
      * - The map values are instances of `OptionStatus`, representing the current state of the respective option.
      * - Used internally to manage and synchronize the behavior and settings of the team, including properties like
      *   friendly fire, visibility, and other configurable attributes.
      *
-     * This property is utilized during team updates to ensure the team's internal and external representations
+     * This property is used during team updates to ensure the team's internal and external representations
      * are consistent with the configured options.
      */
     val options: Map<Team.Option, OptionStatus> get() = _options
@@ -163,7 +166,8 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
             bukkitTeam.removeEntry(entry)
         }
         // Add new members
-        for (player in _players) {
+        for (uniqueId in _players) {
+            val player = Bukkit.getPlayer(uniqueId) ?: continue
             bukkitTeam.addPlayer(player)
         }
     }
@@ -189,8 +193,8 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
      * @param player The player to be added to the team.
      */
     fun addPlayer(player: SpigotPlayer) {
-        if (player in _players) return
-        _players.add(player)
+        if (player.uniqueId in _players) return
+        _players.add(player.uniqueId)
         update()
     }
 
@@ -201,8 +205,8 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
      * @param player The player to be removed from the team.
      */
     fun removePlayer(player: SpigotPlayer) {
-        if (player !in _players) return
-        _players.remove(player)
+        if (player.uniqueId !in _players) return
+        _players.remove(player.uniqueId)
         update()
     }
 }

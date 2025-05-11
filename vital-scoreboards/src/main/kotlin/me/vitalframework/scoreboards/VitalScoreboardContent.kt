@@ -16,6 +16,8 @@ import org.bukkit.scoreboard.DisplaySlot
  * The title determines the display name of the scoreboard's objective.
  */
 class VitalScoreboardContent internal constructor(title: String) {
+    private val _teams = mutableListOf<VitalScoreboardTeam>()
+
     /**
      * Represents the title of the scoreboard. This property is used to define the name and display text
      * for the scoreboard's objective. When changed, it triggers an update to ensure the scoreboard
@@ -39,7 +41,6 @@ class VitalScoreboardContent internal constructor(title: String) {
      * custom scoreboard content dynamically.
      */
     val bukkitScoreboard = Bukkit.getScoreboardManager().newScoreboard
-    private val _teams = mutableListOf<VitalScoreboardTeam>()
 
     /**
      * Provides a read-only list of all the teams currently managed within the scoreboard content.

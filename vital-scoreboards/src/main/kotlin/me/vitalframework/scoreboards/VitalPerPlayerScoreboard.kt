@@ -5,6 +5,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
+import java.util.UUID
 import java.util.function.Function
 
 /**
@@ -17,19 +18,22 @@ import java.util.function.Function
  * line based on the player's context.
  */
 class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<SpigotPlayer, String>) : VitalScoreboard {
-    private val _scoreboardContent = mutableMapOf<SpigotPlayer, VitalScoreboardContent>()
+    private val _scoreboardContent = mutableMapOf<UUID, VitalScoreboardContent>()
 
     /**
-     * Retrieves a map containing the scoreboard content associated with each individual player.
-     * The keys in the map represent instances of `SpigotPlayer`, while the values are instances
-     * of `VitalScoreboardContent` that define the structure and visual representation of the
-     * scoreboard for the corresponding player.
+     * Provides a mapping between player UUIDs and their corresponding scoreboard content.
      *
-     * This property is designed to manage player-specific scoreboard data within the context
-     * of the `VitalPerPlayerScoreboard` system, ensuring that each player has an independent
-     * scoreboard setup.
+     * This property serves as a read-only view of the internal `_scoreboardContent` map,
+     * which stores instances of [VitalScoreboardContent] associated with individual players.
+     * It allows querying the scoreboard content for a specific player by their unique identifier.
+     *
+     * The mapping ensures that each player is assigned custom scoreboard content, enabling dynamic
+     * updates and personalized scoreboard interactions within the system.
+     *
+     * Accessing this property does not allow for modifications; updates to the scoreboard content
+     * must be performed through designated methods within the enclosing class.
      */
-    val scoreboardContent: Map<SpigotPlayer, VitalScoreboardContent> get() = _scoreboardContent
+    val scoreboardContent: Map<UUID, VitalScoreboardContent> get() = _scoreboardContent
 
     /**
      * Updates the scoreboard content for the specified player.
@@ -40,10 +44,10 @@ class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<Spi
      * @param player The player whose scoreboard content needs to be updated.
      */
     fun update(player: SpigotPlayer) {
-        if (!_scoreboardContent.containsKey(player)) return
+        if (player.uniqueId !in _scoreboardContent) return
         player.scoreboard = Bukkit.getScoreboardManager().mainScoreboard
         updateContent(player)
-        player.scoreboard = _scoreboardContent[player]!!.bukkitScoreboard
+        player.scoreboard = _scoreboardContent[player.uniqueId]!!.bukkitScoreboard
     }
 
     /**
@@ -53,8 +57,8 @@ class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<Spi
      * @param player The player whose scoreboard content should be updated.
      */
     private fun updateContent(player: SpigotPlayer) {
-        if (!_scoreboardContent.containsKey(player)) return
-        val scoreboard = _scoreboardContent[player]!!
+        if (player.uniqueId !in _scoreboardContent) return
+        val scoreboard = _scoreboardContent[player.uniqueId]!!
 
         scoreboard.update()
         val objective = scoreboard.bukkitScoreboard.getObjective(
@@ -79,8 +83,8 @@ class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<Spi
      * @param player The player to be added to the scoreboard system.
      */
     fun addPlayer(player: SpigotPlayer) {
-        if (_scoreboardContent.containsKey(player)) return
-        _scoreboardContent[player] = VitalScoreboardContent(title)
+        if (player.uniqueId in _scoreboardContent) return
+        _scoreboardContent[player.uniqueId] = VitalScoreboardContent(title)
         update(player)
     }
 
@@ -91,8 +95,8 @@ class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<Spi
      * @param player The player to be removed from the scoreboard.
      */
     fun removePlayer(player: SpigotPlayer) {
-        if (!_scoreboardContent.containsKey(player)) return
-        _scoreboardContent.remove(player)
+        if (player.uniqueId !in _scoreboardContent) return
+        _scoreboardContent.remove(player.uniqueId)
         player.scoreboard = Bukkit.getScoreboardManager().mainScoreboard
     }
 

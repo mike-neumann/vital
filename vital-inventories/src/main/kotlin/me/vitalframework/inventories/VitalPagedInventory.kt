@@ -3,16 +3,65 @@ package me.vitalframework.inventories
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import org.jetbrains.annotations.Range
+import java.util.UUID
 
 abstract class VitalPagedInventory : VitalInventory() {
-    private val _pages = mutableMapOf<SpigotPlayer, Int>()
-    val pages: Map<SpigotPlayer, Int> get() = _pages
+    private val _pages = mutableMapOf<UUID, Int>()
+
+    /**
+     * A read-only map that associates each player's unique identifier (UUID) with their current page number.
+     *
+     * This property is used to track the current page state for each player interacting with the inventory system.
+     * The map's keys represent the players, and the values represent the page numbers the players are currently viewing.
+     *
+     * The map is derived from the internal `_pages` field and provides no direct modification capabilities,
+     * ensuring external immutability of the page state.
+     */
+    val pages: Map<UUID, Int> get() = _pages
+
+    /**
+     * Represents the maximum number of pages available in the paginated inventory system.
+     *
+     * This variable is dynamically updated based on the total amount of content
+     * and defines the upper limit of pages that can be navigated.
+     *
+     * The value is initialized to 1 and can only be modified internally.
+     */
     var maxPage = 1
         private set
+
+    /**
+     * Represents the starting slot index for the current page of the inventory.
+     *
+     * This variable is used internally to determine the first slot where content
+     * should be placed when rendering a paged inventory for a player. The value
+     * is updated dynamically based on the current page and the inventory layout.
+     *
+     * The setter is private, restricting modifications to the internal logic of
+     * the class, ensuring consistency with the inventory's pagination behavior.
+     */
     var fromSlot = 0
         private set
+
+    /**
+     * The ending slot index for a range of slots within the paginated inventory system.
+     *
+     * This value determines the last slot considered in a given range, typically used when
+     * slicing inventory content to display the correct subset for a player's current page.
+     *
+     * The value is automatically managed, and private setters ensure it cannot be modified directly
+     * outside the class's internal logic.
+     */
     var toSlot = 0
         private set
+
+    /**
+     * Represents the amount of content present on the current page.
+     *
+     * The value is calculated as the difference between `toSlot` and `fromSlot`, inclusively.
+     * This ensures that the calculation accounts for the content range, where `toSlot` is the
+     * last slot that contains content, and `fromSlot` is the first slot that contains content.
+     */
     val pageContentAmount get() = (toSlot + 1 /* since content is INCLUSIVE to the SLOT itself */) - fromSlot
 
     init {
@@ -50,7 +99,7 @@ abstract class VitalPagedInventory : VitalInventory() {
             updateMaxPage(totalContent)
         }
         val newPage = if (page <= 0) 1 else if (page >= maxPage) maxPage else page
-        _pages[player] = newPage
+        _pages[player.uniqueId] = newPage
         onPageChange(newPage, player)
         super.update(player)
     }
@@ -65,7 +114,7 @@ abstract class VitalPagedInventory : VitalInventory() {
      *         indices exceed the bounds of the original list
      */
     protected fun <T> sliceForPage(player: SpigotPlayer, list: List<T>): List<T> {
-        val startIndex = (pageContentAmount * ((_pages[player] ?: 1) - 1))
+        val startIndex = (pageContentAmount * ((_pages[player.uniqueId] ?: 1) - 1))
         val endIndex = startIndex + pageContentAmount
         if (startIndex >= list.size || startIndex < 0) return mutableListOf()
         if (endIndex >= list.size) return list.subList(startIndex, list.size)
@@ -93,7 +142,7 @@ abstract class VitalPagedInventory : VitalInventory() {
      */
     final override fun update(player: SpigotPlayer) {
         super.update(player)
-        setPage(_pages[player] ?: 1, player)
+        setPage(_pages[player.uniqueId] ?: 1, player)
     }
 
     /**

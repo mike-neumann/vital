@@ -24,7 +24,52 @@ import java.util.*
  * The class also ensures that each item is uniquely identifiable through its persistent data container.
  */
 open class VitalItem {
+    /**
+     * Represents the initial cooldown period for an item in milliseconds.
+     *
+     * This value defines the time duration that must elapse after the item is used
+     * before it can be interacted with again. The cooldown mechanism helps regulate
+     * repetitive interactions and ensures balanced item usability during player interactions.
+     *
+     * The `initialCooldown` is applied when the item is first interacted with and
+     * works in conjunction with the player's cooldown state to prevent excessive usage.
+     */
     val initialCooldown: Int
+
+    /**
+     * A mapping of players to their respective cooldown durations for item interactions in milliseconds.
+     *
+     * This map is used to track and manage the cooldown state of players when they interact with items
+     * associated with the `VitalItem` class. The keys represent the unique identifiers (UUIDs) of the
+     * players, and the values represent the remaining cooldown time in milliseconds for each player.
+     *
+     * The `playerCooldown` map ensures that players cannot repeatedly interact with items that are
+     * currently in cooldown, thus enforcing a delay between successive interactions.
+     *
+     * Cooldown timing is typically updated through a scheduled task, decrementing the values over time.
+     * Once the cooldown duration for a player reaches zero, the associated behavior for cooldown expiry
+     * is triggered.
+     */
+    val playerCooldown = mutableMapOf<UUID, Int>()
+
+    /**
+     * Lazily initialized `ItemStack` representing the custom item configuration for the current `VitalItem`.
+     *
+     * This `ItemStack` is constructed using a builder pattern, populated with properties
+     * defined by the `@Info` annotation on the `VitalItem` class. The configuration includes
+     * attributes such as the item's material type, display name, lore, flags, enchantments, and various modifiers.
+     *
+     * The created `ItemStack` ensures unique identification through a persistent data container
+     * holding a UUID, allowing it to be programmatically distinguishable from other items.
+     *
+     * - `type`: Specifies the material type of the item (e.g., DIAMOND_SWORD).
+     * - `name`: The display name of the item.
+     * - `amount`: Number of items in the stack.
+     * - `lore`: Descriptive texts providing additional context or information about the item.
+     * - `itemFlags`: Custom visual or behavior attributes applied to the item (e.g., hiding enchantments).
+     * - `unbreakable`: Indicates if the item is unbreakable.
+     * - `enchanted`: When true, applies a visual enchantment effect, and optionally adds actual enchantments.
+     */
     val itemStack: ItemStack by lazy {
         itemBuilder {
             val info = this@VitalItem.getRequiredAnnotation<Info>()
@@ -40,7 +85,6 @@ open class VitalItem {
             }
         }
     }
-    val playerCooldown = mutableMapOf<SpigotPlayer, Int>()
 
     init {
         val info = getRequiredAnnotation<Info>()
@@ -56,8 +100,8 @@ open class VitalItem {
      *          information such as the action type (e.g., left- or right-click) and the interacting player.
      */
     fun handleInteraction(e: PlayerInteractEvent) {
-        if (!playerCooldown.containsKey(e.player)) playerCooldown[e.player] = 0
-        if (playerCooldown[e.player]!! >= 1) return onCooldown(e)
+        if (!playerCooldown.containsKey(e.player.uniqueId)) playerCooldown[e.player.uniqueId] = 0
+        if (playerCooldown[e.player.uniqueId]!! >= 1) return onCooldown(e)
         val action = e.action
 
         when (action) {
@@ -65,7 +109,7 @@ open class VitalItem {
             else -> onRightClick(e)
         }
 
-        playerCooldown[e.player] = initialCooldown
+        playerCooldown[e.player.uniqueId] = initialCooldown
     }
 
     /**
