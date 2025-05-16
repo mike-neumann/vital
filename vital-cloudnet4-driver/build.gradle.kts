@@ -1,3 +1,3 @@
 dependencies {
-    api("eu.cloudnetservice.cloudnet:driver:${findProperty("cloudnetVersion")}")
+    api(libs.bundles.cloudnet4.driver.api)
 }

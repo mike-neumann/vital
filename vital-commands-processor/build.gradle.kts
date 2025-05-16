@@ -1,5 +1,3 @@
 dependencies {
-    api(project(":vital-core-processor"))
-    api(project(":vital-commands"))
-    api("org.reflections:reflections:${findProperty("reflectionsVersion")}")
+    api(libs.bundles.commands.processor.api)
 }

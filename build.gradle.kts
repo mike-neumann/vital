@@ -1,8 +1,8 @@
 plugins {
-    kotlin("jvm")
-    kotlin("kapt")
-    kotlin("plugin.spring")
-    id("org.springframework.boot")
+    alias(libs.plugins.jvm)
+    alias(libs.plugins.kapt)
+    alias(libs.plugins.spring)
+    alias(libs.plugins.spring.boot)
     `java-library`
     `maven-publish`
 }
@@ -26,17 +26,9 @@ allprojects {
     }
 
     dependencies {
-        compileOnly("io.papermc.paper:paper-api:${findProperty("paperApiVersion")}")
-        compileOnly("com.mojang:brigadier:${findProperty("brigadierVersion")}")
-        compileOnly("net.md-5:bungeecord-api:${findProperty("bungeeApiVersion")}")
-
-        api("org.springframework.boot:spring-boot-starter:${findProperty("springBootVersion")}")
-
-        testImplementation("org.springframework.boot:spring-boot-starter-test:${findProperty("springBootVersion")}")
-        testImplementation("org.junit.jupiter:junit-jupiter-api:${findProperty("junitVersion")}")
-        testImplementation("io.papermc.paper:paper-api:${findProperty("paperApiVersion")}")
-        testImplementation("com.mojang:brigadier:${findProperty("brigadierVersion")}")
-        testImplementation("net.md-5:bungeecord-api:${findProperty("bungeeApiVersion")}")
+        compileOnly(rootProject.libs.bundles.root.compileOnly)
+        api(rootProject.libs.bundles.root.api)
+        testImplementation(rootProject.libs.bundles.root.testImplementation)
     }
 
     java {
