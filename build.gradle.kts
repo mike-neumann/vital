@@ -7,7 +7,12 @@ plugins {
     `maven-publish`
 }
 
-allprojects {
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+subprojects {
     group = "me.vitalframework"
     version = "1.0"
 
