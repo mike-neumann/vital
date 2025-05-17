@@ -1,3 +1,3 @@
 dependencies {
-    api(libs.bundles.configs.api)
+    api(project(":vital-core"))
 }

@@ -1,3 +1,3 @@
 dependencies {
-    api(libs.bundles.minigames.api)
+    api(project(":vital-tasks"))
 }

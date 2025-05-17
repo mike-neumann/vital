@@ -1,3 +1,5 @@
 dependencies {
-    api(libs.bundles.statistics.api)
+    api(project(":vital-commands"))
+    api(project(":vital-utils"))
+    api(project(":vital-tasks"))
 }
