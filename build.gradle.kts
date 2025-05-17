@@ -17,8 +17,6 @@ subprojects {
     version = "1.0"
 
     apply(plugin = "kotlin")
-    apply(plugin = "org.jetbrains.kotlin.kapt")
-    apply(plugin = "org.jetbrains.kotlin.plugin.spring")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
