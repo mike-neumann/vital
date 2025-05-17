@@ -3,8 +3,8 @@ plugins {
     alias(libs.plugins.kapt)
     alias(libs.plugins.spring)
     alias(libs.plugins.spring.boot)
-    `java-library`
-    `maven-publish`
+    alias(libs.plugins.javaLibrary)
+    alias(libs.plugins.mavenPublish)
 }
 
 repositories {
@@ -16,7 +16,9 @@ subprojects {
     group = "me.vitalframework"
     version = "1.0"
 
-    apply(plugin = "kotlin")
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jetbrains.kotlin.kapt")
+    apply(plugin = "org.jetbrains.kotlin.plugin.spring")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
