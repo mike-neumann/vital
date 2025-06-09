@@ -11,6 +11,15 @@ class VitalGradlePlugin : Plugin<Project> {
         target.plugins.apply("org.jetbrains.kotlin.plugin.spring")
         target.plugins.apply("io.spring.dependency-management")
         target.plugins.apply("org.springframework.boot")
+        // try to exclude the vital core processor when running tests,
+        // this will fix "NoMainClass" Exception while running tests.
+        try {
+            target.tasks.named("test") {
+                it.project.configurations.all { it.exclude(mapOf("group" to "me.vitalframework", "module" to "vital-core-processor")) }
+            }
+        } catch (_: Exception) {
+            // if we don't have a test task, then we can ignore this step
+        }
 
         target.afterEvaluate {
             target.applyDependency("implementation", "me.vitalframework:vital-core:${target.getProperty("vitalVersion")}")

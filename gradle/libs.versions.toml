@@ -40,7 +40,7 @@ adventure-platform-bukkit = { group = "net.kyori", name = "adventure-platform-bu
 
 [bundles]
 root-compileOnly = ["paperApi", "brigadier", "bungeeApi"]
-root-api = ["spring-boot-starter"]
+root-api = ["spring-boot-starter", "spring-boot-starter-test"]
 root-testImplementation = ["spring-boot-starter-test", "junit-jupiter-api", "paperApi", "brigadier", "bungeeApi"]
 cloudnet4-bridge-api = ["cloudnet-bridge"]
 cloudnet4-driver-api = ["cloudnet-driver"]
