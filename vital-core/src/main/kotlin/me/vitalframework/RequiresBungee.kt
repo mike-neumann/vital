@@ -12,6 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
  * where the BungeeCord platform dependency is present.
  */
 @ConditionalOnClass(name = ["net.md_5.bungee.api.plugin.Plugin"])
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class RequiresBungee

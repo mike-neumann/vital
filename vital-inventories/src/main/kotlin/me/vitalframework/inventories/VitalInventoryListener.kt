@@ -5,6 +5,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.springframework.stereotype.Component
 
+@RequiresSpigot
 @Component
 class VitalInventoryListener(plugin: SpigotPlugin, val inventories: List<VitalInventory>) : VitalListener.Spigot(plugin) {
     @SpigotEventHandler

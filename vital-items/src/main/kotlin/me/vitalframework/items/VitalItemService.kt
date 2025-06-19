@@ -1,10 +1,12 @@
 package me.vitalframework.items
 
+import me.vitalframework.RequiresSpigot
 import org.bukkit.Bukkit
 import org.bukkit.event.player.PlayerInteractEvent
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
+@RequiresSpigot
 @Service
 class VitalItemService(val items: List<VitalItem>) {
     fun handleInteraction(e: PlayerInteractEvent) = items.firstOrNull { it == e.item }?.handleInteraction(e)

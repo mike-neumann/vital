@@ -1,5 +1,6 @@
 package me.vitalframework.holograms
 
+import me.vitalframework.RequiresSpigot
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Bukkit
@@ -16,6 +17,7 @@ import java.util.*
  * the creation, retrieval, and removal of these holograms while ensuring their persistence
  * through a repository.
  */
+@RequiresSpigot
 @Service
 class VitalGlobalHologramService(val globalHologramRepository: VitalGlobalHologramRepository) {
     /**

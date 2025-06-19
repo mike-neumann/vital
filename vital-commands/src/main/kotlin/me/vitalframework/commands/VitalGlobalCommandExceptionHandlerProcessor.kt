@@ -1,10 +1,12 @@
 package me.vitalframework.commands
 
 import jakarta.annotation.PostConstruct
+import me.vitalframework.RequiresSpigot
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
+@RequiresSpigot
 @Component
 class VitalGlobalCommandExceptionHandlerProcessor(applicationContext: ApplicationContext, val commands: List<VitalCommand<*, *>>) {
     private val advices = applicationContext.getBeansWithAnnotation(VitalCommand.Advice::class.java).values

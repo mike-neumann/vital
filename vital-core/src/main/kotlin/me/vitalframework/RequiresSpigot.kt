@@ -12,6 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
  * within a Spigot server environment.
  */
 @ConditionalOnClass(name = ["org.bukkit.plugin.java.JavaPlugin"])
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class RequiresSpigot 

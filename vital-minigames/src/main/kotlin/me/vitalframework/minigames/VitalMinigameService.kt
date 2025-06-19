@@ -1,5 +1,6 @@
 package me.vitalframework.minigames
 
+import me.vitalframework.RequiresSpigot
 import me.vitalframework.SpigotPlugin
 import org.bukkit.Bukkit
 import org.bukkit.event.HandlerList
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service
  * @param plugin The Spigot plugin instance that owns this service.
  * @param minigameStates A list of available minigame states, each of which extends `VitalBaseMinigameState`.
  */
+@RequiresSpigot
 @Service
 class VitalMinigameService(val plugin: SpigotPlugin, val minigameStates: List<VitalBaseMinigameState>) {
     /**
