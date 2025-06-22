@@ -24,7 +24,7 @@ abstract class VitalPlayer<T>(val player: T) : VitalEntity<UUID> {
      * @constructor Creates an instance of `Spigot` using the provided [player] of type `SpigotPlayer`.
      * @param player The underlying Spigot player instance this class represents.
      */
-    abstract class Spigot(player: SpigotPlayer) : VitalPlayer<SpigotPlayer>(player) {
+    open class Spigot(player: SpigotPlayer) : VitalPlayer<SpigotPlayer>(player) {
         override var id = player.uniqueId
     }
 
@@ -37,7 +37,7 @@ abstract class VitalPlayer<T>(val player: T) : VitalEntity<UUID> {
      *
      * @param player The instance of the Bungee-specific player abstraction [BungeePlayer].
      */
-    abstract class Bungee(player: BungeePlayer) : VitalPlayer<BungeePlayer>(player) {
+    open class Bungee(player: BungeePlayer) : VitalPlayer<BungeePlayer>(player) {
         override var id: UUID = player.uniqueId
     }
 }
