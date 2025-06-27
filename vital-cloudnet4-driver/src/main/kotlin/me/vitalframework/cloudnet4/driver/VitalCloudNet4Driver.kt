@@ -10,7 +10,7 @@ import eu.cloudnetservice.driver.service.ServiceInfoSnapshot
  * CloudNet 4 cloud infrastructure, providing access to core functionalities
  * such as cloud service management, service tasks, and cloud server operations.
  */
-object CloudNet4Driver {
+object VitalCloudNet4Driver {
     /**
      * Represents the cloud service provider instance used to interact with cloud infrastructure services.
      *
@@ -20,13 +20,13 @@ object CloudNet4Driver {
      * The instance is provided via dependency injection and is expected to be preconfigured
      * to access and manage cloud resources.
      */
-    val CLOUD_SERVICE_PROVIDER = InjectionLayer.ext().instance(CloudServiceProvider::class.java)!!
+    val cloudServiceProvider = InjectionLayer.ext().instance(CloudServiceProvider::class.java)!!
 
     /**
      * A constant that provides an instance of the ServiceTaskProvider, initialized via dependency injection.
      * It is used to get service tasks by their respective names.
      */
-    val SERVICE_TASK_PROVIDER = InjectionLayer.ext().instance(ServiceTaskProvider::class.java)!!
+    val serviceTaskProvider = InjectionLayer.ext().instance(ServiceTaskProvider::class.java)!!
 
     /**
      * A factory instance for creating cloud services, using a dependency injection framework.
@@ -34,7 +34,7 @@ object CloudNet4Driver {
      * from the injection layer. It is used to create and configure cloud service instances
      * based on specific requirements and configurations.
      */
-    val CLOUD_SERVICE_FACTORY = InjectionLayer.ext().instance(CloudServiceFactory::class.java)!!
+    val cloudServiceFactory = InjectionLayer.ext().instance(CloudServiceFactory::class.java)!!
 
     /**
      * Retrieves all cloud servers associated with the specified task name.
@@ -45,7 +45,7 @@ object CloudNet4Driver {
      * @param taskName The name of the task to filter the cloud servers by.
      * @return A list of cloud servers corresponding to the specified task name.
      */
-    fun getCloudServers(taskName: String) = CLOUD_SERVICE_PROVIDER.servicesByTask(taskName)
+    fun getCloudServers(taskName: String) = cloudServiceProvider.servicesByTask(taskName)
 
     /**
      * Retrieves a cloud server instance by its name from the cloud service provider.
@@ -53,7 +53,7 @@ object CloudNet4Driver {
      * @param serverName the name of the server to retrieve
      * @return the instance of the cloud server, if found
      */
-    fun getCloudServer(serverName: String) = CLOUD_SERVICE_PROVIDER.serviceByName(serverName)
+    fun getCloudServer(serverName: String) = cloudServiceProvider.serviceByName(serverName)
 
     /**
      * Retrieves the server task associated with the given task name.
@@ -61,7 +61,7 @@ object CloudNet4Driver {
      * @param taskName The name of the task to retrieve from the service task provider.
      * @return The server task corresponding to the specified task name.
      */
-    fun getServerTask(taskName: String) = SERVICE_TASK_PROVIDER.serviceTask(taskName)
+    fun getServerTask(taskName: String) = serviceTaskProvider.serviceTask(taskName)
 
     /**
      * Stops a cloud server by its name. This method retrieves the server instance
@@ -85,7 +85,7 @@ object CloudNet4Driver {
      * @return A list of cloud servers satisfying the given predicate.
      */
     @JvmOverloads
-    inline fun getCloudServers(predicate: (ServiceInfoSnapshot) -> Boolean = { true }) = CLOUD_SERVICE_PROVIDER.runningServices()
+    inline fun getCloudServers(predicate: (ServiceInfoSnapshot) -> Boolean = { true }) = cloudServiceProvider.runningServices()
         .filter(predicate)
 
     /**
@@ -93,7 +93,7 @@ object CloudNet4Driver {
      *
      * @param taskName The name of the task for which a cloud server needs to be started.
      */
-    fun startCloudServer(taskName: String) = CLOUD_SERVICE_FACTORY.createCloudService(
+    fun startCloudServer(taskName: String) = cloudServiceFactory.createCloudService(
         ServiceConfiguration.builder(getServerTask(taskName)!!).build()
     )
 }

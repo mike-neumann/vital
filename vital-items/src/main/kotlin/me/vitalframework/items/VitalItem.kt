@@ -1,7 +1,9 @@
 package me.vitalframework.items
 
 import me.vitalframework.SpigotPlayer
+import me.vitalframework.Vital
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
+import me.vitalframework.localization.getTranslatedText
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.block.Action
@@ -24,6 +26,8 @@ import java.util.*
  * The class also ensures that each item is uniquely identifiable through its persistent data container.
  */
 open class VitalItem {
+    val uniqueId: UUID = UUID.randomUUID()
+
     /**
      * Represents the initial cooldown period for an item in milliseconds.
      *
@@ -52,43 +56,23 @@ open class VitalItem {
      */
     val playerCooldown = mutableMapOf<UUID, Int>()
 
-    /**
-     * Lazily initialized `ItemStack` representing the custom item configuration for the current `VitalItem`.
-     *
-     * This `ItemStack` is constructed using a builder pattern, populated with properties
-     * defined by the `@Info` annotation on the `VitalItem` class. The configuration includes
-     * attributes such as the item's material type, display name, lore, flags, enchantments, and various modifiers.
-     *
-     * The created `ItemStack` ensures unique identification through a persistent data container
-     * holding a UUID, allowing it to be programmatically distinguishable from other items.
-     *
-     * - `type`: Specifies the material type of the item (e.g., DIAMOND_SWORD).
-     * - `name`: The display name of the item.
-     * - `amount`: Number of items in the stack.
-     * - `lore`: Descriptive texts providing additional context or information about the item.
-     * - `itemFlags`: Custom visual or behavior attributes applied to the item (e.g., hiding enchantments).
-     * - `unbreakable`: Indicates if the item is unbreakable.
-     * - `enchanted`: When true, applies a visual enchantment effect, and optionally adds actual enchantments.
-     */
-    val itemStack: ItemStack by lazy {
-        itemBuilder {
-            val info = this@VitalItem.getRequiredAnnotation<Info>()
-            type = info.type
-            name = info.name
-            amount = info.amount
-            lore = info.lore.toMutableList()
-            itemFlags = info.itemFlags.toMutableList()
-            unbreakable = info.unbreakable
-
-            if (info.enchanted) {
-                enchantments[Enchantment.FORTUNE] = 1
-            }
-        }
-    }
-
     init {
         val info = getRequiredAnnotation<Info>()
         this.initialCooldown = info.cooldown
+    }
+
+    fun getItemStack(player: SpigotPlayer) = itemBuilder(uniqueId) {
+        val info = this@VitalItem.getRequiredAnnotation<Info>()
+        type = info.type
+        name = if ("vital-localization" in Vital.vitalSubModules) player.getTranslatedText(info.name) else info.name
+        amount = info.amount
+        lore = info.lore.toMutableList()
+        itemFlags = info.itemFlags.toMutableList()
+        unbreakable = info.unbreakable
+
+        if (info.enchanted) {
+            enchantments[Enchantment.FORTUNE] = 1
+        }
     }
 
     /**
@@ -112,28 +96,17 @@ open class VitalItem {
         playerCooldown[e.player.uniqueId] = initialCooldown
     }
 
-    /**
-     * Compares this `VitalItem` instance with another object to determine equality.
-     * This method specifically checks if the provided object is an instance of `ItemStack`
-     * and verifies their metadata for a unique identifier match.
-     *
-     * @param other The object to compare with this instance for equality.
-     *              May or may not be an instance of `ItemStack`.
-     * @return `true` if the `other` object is an `ItemStack` and matches the current item's unique identifier;
-     *         `false` otherwise.
-     */
+    // TODO
+    // this does not work with items if the server restarts
+    // the uniqueId field is volatile and will be regenerated
     override fun equals(other: Any?): Boolean {
-        if (other !is ItemStack) return false
-        if (other.itemMeta == null) return other == this
-        if (!other.itemMeta!!.persistentDataContainer.has(VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING))
-            return toString() == other.toString().replace("${other.type} x ${other.amount}", "${other.type} x 1")
-        val uuid = UUID.fromString(itemStack.itemMeta!!.persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING])
-        val otherId = UUID.fromString(other.itemMeta!!.persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING])
+        if (other !is ItemStack && other !is VitalItem) return false
+        if (other is ItemStack) {
+            return uniqueId == UUID.fromString(other.itemMeta.persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING])
+        }
 
-        return uuid == otherId
+        return uniqueId == (other as VitalItem).uniqueId
     }
-
-    override fun toString() = super.toString().replace("${itemStack.type} x ${itemStack.amount}", "${itemStack.type} x 1")
 
     /**
      * Handles the logic executed when the player performs a left-click while interacting
@@ -177,6 +150,9 @@ open class VitalItem {
      * @param player The player currently undergoing the cooldown.
      */
     open fun onCooldownTick(player: SpigotPlayer) {}
+    override fun toString(): String {
+        return "VitalItem(uniqueId=$uniqueId, initialCooldown=$initialCooldown, playerCooldown=$playerCooldown)"
+    }
 
     /**
      * Annotation used to define metadata and behavior for custom items in the Vital framework.

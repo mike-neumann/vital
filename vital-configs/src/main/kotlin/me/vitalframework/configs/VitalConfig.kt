@@ -38,7 +38,7 @@ import kotlin.reflect.KClass
  *     are thrown with detailed error descriptions.
  */
 abstract class VitalConfig {
-    val log = logger()
+    val logger = logger<VitalConfig>()
     val fileName: String
     val processor: Processor<*, Any>
 
@@ -85,7 +85,7 @@ abstract class VitalConfig {
 
                     try {
                         file.createFile()
-                        log.debug("${file.name} config file created")
+                        logger.debug("${file.name} config file created")
                     } catch (e: IOException) {
                         throw VitalConfigException.CreateFile(file.name, e)
                     }

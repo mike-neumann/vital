@@ -40,12 +40,17 @@ the things you really need for your project.
   important information.
 - **vital-statistics**: Hooks into your servers heartbeat to ensure server stability by having an eye on certain
   statistics you can view later.
-- **vital-tasks**: Provides an easy way to implement server-based scheduled tasks using the servers runtime scheduler (
-  RepeatableTask, Countdowns).
+- **vital-tasks**: Provides an easy way to implement server-based scheduled tasks using the servers runtime scheduler
+  (RepeatableTask, Countdowns).
 - **vital-utils**: Provides many utilities the server runtimes are missing to streamline development and make it even
   more efficient.
+- **vital-localization**: Provides functionality to specify a custom locale on each player, utilizing spring boot's i18n
+  functionality for bundle resolution.
 
-Powered by Spring Boot, Vital delivers component based, testable code, with the ability to include many extensions via Spring
+_**To utilize all of Vital's functionality, you can use `vital-all` as a dependency, which includes all modules**_
+
+Powered by Spring Boot, Vital delivers component based, testable code, with the ability to include many extensions via
+Spring
 dependencies.
 
 ## You matter

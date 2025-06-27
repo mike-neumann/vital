@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class VitalStatisticsService(val statisticsConfig: VitalStatisticsConfig) {
-    private val log = logger()
+    private val logger = logger()
     private val _lastTps = mutableMapOf<Long, Int>()
     private val _lastUnhealthyTps = mutableMapOf<Long, Int>()
     final var lastTickTime = 0L
@@ -23,8 +23,8 @@ class VitalStatisticsService(val statisticsConfig: VitalStatisticsConfig) {
         val currentTimeMillis = System.currentTimeMillis()
 
         if (currentTimeMillis - lastTickTime >= statisticsConfig.maxTaskInactiveTolerance) {
-            log.warn("vital-statistics has detected increased scheduler inconsistency of ${currentTimeMillis - lastTickTime} millis")
-            log.warn("This could indicate bad server-performance / health")
+            logger.warn("vital-statistics has detected increased scheduler inconsistency of ${currentTimeMillis - lastTickTime} millis")
+            logger.warn("This could indicate bad server-performance / health")
         }
 
         if (currentTimeMillis - lastSecondTime >= 1_000) {

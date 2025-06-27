@@ -1,12 +1,10 @@
 package me.vitalframework.commands
 
 import jakarta.annotation.PostConstruct
-import me.vitalframework.RequiresSpigot
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
-@RequiresSpigot
 @Component
 class VitalGlobalCommandExceptionHandlerProcessor(applicationContext: ApplicationContext, val commands: List<VitalCommand<*, *>>) {
     private val advices = applicationContext.getBeansWithAnnotation(VitalCommand.Advice::class.java).values
@@ -26,7 +24,7 @@ class VitalGlobalCommandExceptionHandlerProcessor(applicationContext: Applicatio
                         .map { method -> method.getAnnotationsByType(VitalCommand.GlobalExceptionHandler::class.java).map { method to it } }
                         .flatten()
                         .forEach { (method, exceptionHandler) ->
-                            GLOBAL_EXCEPTION_HANDLERS[exceptionHandler.type.java] =
+                            globalExceptionHandlers[exceptionHandler.type.java] =
                                 VitalCommandUtils.getGlobalExceptionHandlerContext(adviceInstance, advice.commandSenderClass.java, method)
                         }
                 }
@@ -34,9 +32,10 @@ class VitalGlobalCommandExceptionHandlerProcessor(applicationContext: Applicatio
     }
 
     companion object {
-        private val GLOBAL_EXCEPTION_HANDLERS = mutableMapOf<Class<out Throwable>, VitalCommand.GlobalExceptionHandlerContext>()
+        private val globalExceptionHandlers = mutableMapOf<Class<out Throwable>, VitalCommand.GlobalExceptionHandlerContext>()
 
-        fun getGlobalExceptionHandler(type: Class<out Throwable>) =
-            GLOBAL_EXCEPTION_HANDLERS.entries.find { it.key.isAssignableFrom(type) }?.value
+        fun getGlobalExceptionHandler(type: Class<out Throwable>) = globalExceptionHandlers.entries.find {
+            it.key.isAssignableFrom(type)
+        }?.value
     }
 }

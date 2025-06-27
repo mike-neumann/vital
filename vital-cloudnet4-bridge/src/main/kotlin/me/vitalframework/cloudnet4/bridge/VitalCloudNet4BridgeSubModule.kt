@@ -4,4 +4,4 @@ import me.vitalframework.VitalSubModule
 import org.springframework.stereotype.Component
 
 @Component("vital-cloudnet4-bridge")
-class CloudNet4BridgeSubModule : VitalSubModule()
+class VitalCloudNet4BridgeSubModule : VitalSubModule()

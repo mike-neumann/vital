@@ -4,4 +4,4 @@ import me.vitalframework.VitalSubModule
 import org.springframework.stereotype.Component
 
 @Component("vital-cloudnet4-driver")
-class CloudNet4DriverSubModule : VitalSubModule()
+class VitalCloudNet4DriverSubModule : VitalSubModule()

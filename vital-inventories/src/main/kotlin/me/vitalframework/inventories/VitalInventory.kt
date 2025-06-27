@@ -1,8 +1,10 @@
 package me.vitalframework.inventories
 
 import me.vitalframework.SpigotPlayer
+import me.vitalframework.Vital
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import me.vitalframework.items.itemBuilder
+import me.vitalframework.localization.getTranslatedText
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -197,7 +199,11 @@ open class VitalInventory {
     @Suppress("UnstableApiUsage")
     open fun open(player: SpigotPlayer, previousInventory: VitalInventory? = null) {
         previousInventory?.close(player)
-        val inventoryView = type.menuType.create(player, MiniMessage.miniMessage().deserialize(name))
+        val inventoryView = type.menuType.create(
+            player, MiniMessage.miniMessage().deserialize(
+                if ("vital-inventories" in Vital.vitalSubModules) player.getTranslatedText(name) else name
+            )
+        )
 
         if (previousInventory != null) {
             _previousInventories[player.uniqueId] = previousInventory

@@ -15,7 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
  * The annotation is typically applied at the class or function level and contributes
  * to the configuration and functionality of the application.
  */
-@ConditionalOnClass(name = ["me.vitalframework.cloudnet4.driver.CloudNet4DriverSubModule"])
+@ConditionalOnClass(name = ["me.vitalframework.cloudnet4.driver.VitalCloudNet4DriverSubModule"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class RequiresVitalCloudNet4Driver

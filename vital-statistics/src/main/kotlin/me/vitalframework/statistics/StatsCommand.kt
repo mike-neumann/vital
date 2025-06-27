@@ -7,6 +7,7 @@ import me.vitalframework.utils.VitalUtils.Spigot.sendFormattedMessage
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
 import org.springframework.core.SpringVersion
+import org.springframework.stereotype.Component
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,15 +20,14 @@ interface StatsCommand<CS> {
     fun handleOnCommand(sender: CS) {
         val serverStatus = if (statisticsService.tps >= statisticsConfig.minTps) "<green>HEALTHY</green>" else "<red>UNHEALTHY</yellow>"
         val ramUsageInGigaBytes = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024 / 1024
-        val vitalModuleNames = Vital.CONTEXT.getBeansOfType(VitalSubModule::class.java)
 
         sendMessage(sender, "-----> Server-Statistics")
         sendMessage(sender, "Spring version: <yellow>${SpringVersion.getVersion()}")
         sendMessage(sender, "Server status: <yellow>${statisticsService.tps} TPS ($serverStatus)")
         sendMessage(sender, "RAM usage: <yellow>$ramUsageInGigaBytes GB")
-        sendMessage(sender, "Vital modules: <yellow>${vitalModuleNames.size}")
+        sendMessage(sender, "Vital sub-modules: <yellow>${Vital.vitalSubModules.size}")
 
-        for ((name, _) in vitalModuleNames) {
+        for (name in Vital.vitalSubModules) {
             sendMessage(sender, "> <yellow>$name")
         }
 
@@ -61,6 +61,7 @@ interface StatsCommand<CS> {
     }
 
     @RequiresSpigot
+    @Component
     class Spigot(
         plugin: SpigotPlugin,
         override val statisticsService: VitalStatisticsService,
@@ -81,6 +82,7 @@ interface StatsCommand<CS> {
     }
 
     @RequiresBungee
+    @Component
     class Bungee(
         plugin: BungeePlugin,
         override val statisticsService: VitalStatisticsService,

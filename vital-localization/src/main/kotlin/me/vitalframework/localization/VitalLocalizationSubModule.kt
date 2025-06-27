@@ -1,0 +1,118 @@
+package me.vitalframework.localization
+
+import me.vitalframework.*
+import org.springframework.context.MessageSource
+import org.springframework.stereotype.Component
+import java.util.*
+
+@Component("vital-localization")
+class VitalLocalizationSubModule : VitalSubModule()
+
+/**
+ * Maintains a mapping of player instances to their associated locales within the Vital framework.
+ *
+ * This map is used to store and retrieve localization preferences for specific players. The key represents
+ * the player instance, while the value represents the `Locale` assigned to that player. A value of `null`
+ * indicates that no locale has been set for the corresponding player.
+ *
+ * This collection underpins player-specific localization features, enabling the system to adapt messages
+ * and translations based on individual player locales. It supports various player implementations, such as
+ * `SpigotPlayer` and `BungeePlayer`.
+ *
+ * Note:
+ * - The map is mutable, allowing dynamic updates to player locales during runtime.
+ * - Setting a player's locale to `null` effectively removes their localization preferences.
+ */
+private val playerLocales = mutableMapOf<Any, Locale?>()
+
+/**
+ * Represents the locale associated with a specific `SpigotPlayer` instance within the `Vital` framework.
+ *
+ * This property enables setting or retrieving the player's assigned `Locale` for localization purposes.
+ * It supports features such as player-specific message translations based on their preferred or assigned language.
+ *
+ * Getter:
+ * - Retrieves the `Locale` assigned to the `SpigotPlayer`. Returns `null` if no locale has been set.
+ *
+ * Setter:
+ * - Assigns a new `Locale` to the `SpigotPlayer`. Setting to `null` removes the player's assigned locale.
+ *
+ * The underlying implementation uses an internal map to store and retrieve locale information
+ * associated with `SpigotPlayer` instances.
+ *
+ * Note:
+ * - This property facilitates the execution of localization methods, such as retrieving
+ *   localized messages or formatted translations for the player.
+ */
+var SpigotPlayer.vitalLocale: Locale?
+    get() = playerLocales[this]
+    set(value) {
+        playerLocales[this] = value
+    }
+
+/**
+ * Represents the locale associated with a specific `BungeePlayer` instance within the `Vital` framework.
+ *
+ * This property allows for the retrieval and assignment of a player's locale, enabling features such as
+ * player-specific localization and personalized message translation. By associating a `Locale` with
+ * individual `BungeePlayer` instances, the localization system ensures that players receive content
+ * in their preferred or assigned language.
+ *
+ * Getter:
+ * - Retrieves the `Locale` assigned to the `BungeePlayer`. If no locale has been assigned, `null` is returned.
+ *
+ * Setter:
+ * - Updates the player's associated locale. The value may be set to `null` to clear the assigned locale for
+ *   the player.
+ *
+ * This property relies on an internal map to store and retrieve locale data for `BungeePlayer` instances.
+ */
+var BungeePlayer.vitalLocale: Locale?
+    get() = playerLocales[this]
+    set(value) {
+        playerLocales[this] = value
+    }
+
+/**
+ * Retrieves a localized message for the given key, arguments, and locale.
+ * If the locale is null or the message cannot be resolved, the key itself is returned.
+ *
+ * @param key The message key used to identify the localized text.
+ * @param args Arguments to format the localized text. Defaults to an empty array.
+ * @param locale The locale for which the message should be localized. If null, the key is returned.
+ * @return The localized message for the given key and locale, or the key itself if localization fails.
+ */
+fun getMessage(key: String, args: Array<Any>, locale: Locale?): String =
+    if (locale == null) {
+        key
+    } else {
+        try {
+            Vital.context.getBean(MessageSource::class.java).getMessage(key, args, locale)
+        } catch (_: Exception) {
+            key
+        }
+    }
+
+/**
+ * Retrieves a localized and translated text for the given key based on the player's assigned locale.
+ *
+ * The method uses the `vitalLocale` associated with the `SpigotPlayer` instance to fetch
+ * the translated message. If no arguments are provided, the method will simply return
+ * the translated text associated with the key. If arguments are provided, they will be
+ * used for formatting the message.
+ *
+ * @param key The message key used to retrieve the localized text.
+ * @param args Optional arguments to format the localized text. Defaults to an empty array.
+ * @return The translated and formatted text for the given key and arguments.
+ */
+fun SpigotPlayer.getTranslatedText(key: String, args: Array<Any> = emptyArray()): String = getMessage(key, args, vitalLocale)
+
+/**
+ * Retrieves the translated text for the given key based on the player's locale.
+ * If the locale is not available or the translation key cannot be resolved, the key itself is returned.
+ *
+ * @param key The translation key used to fetch the desired localized message.
+ * @param args Optional arguments to be inserted into the localized message. Defaults to an empty array.
+ * @return A string containing the localized message if available; otherwise, the key itself.
+ */
+fun BungeePlayer.getTranslatedText(key: String, args: Array<Any> = emptyArray()): String = getMessage(key, args, vitalLocale)

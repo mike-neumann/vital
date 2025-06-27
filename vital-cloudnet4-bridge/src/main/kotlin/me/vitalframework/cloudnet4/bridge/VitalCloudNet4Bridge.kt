@@ -7,7 +7,7 @@ import eu.cloudnetservice.modules.bridge.BridgeDocProperties
 import eu.cloudnetservice.modules.bridge.player.PlayerManager
 import me.vitalframework.BungeePlayer
 import me.vitalframework.SpigotPlayer
-import me.vitalframework.cloudnet4.driver.CloudNet4Driver
+import me.vitalframework.cloudnet4.driver.VitalCloudNet4Driver
 import java.util.*
 
 /**
@@ -17,7 +17,7 @@ import java.util.*
  *
  * @param P The type representing the player object.
  */
-interface CloudNet4Bridge<P> {
+interface VitalCloudNet4Bridge<P> {
     companion object {
         /**
          * Singleton instance of the service registry used for managing and resolving dependencies
@@ -28,7 +28,7 @@ interface CloudNet4Bridge<P> {
          * It ensures that all required services are initialized and available for use across
          * the application where dependency management is required.
          */
-        val SERVICE_REGISTRY = InjectionLayer.ext().instance(ServiceRegistry::class.java)!!
+        val serviceRegistry = InjectionLayer.ext().instance(ServiceRegistry::class.java)!!
 
         /**
          * A globally accessible instance of the `PlayerManager` interface used to manage and interact with player-related
@@ -41,7 +41,7 @@ interface CloudNet4Bridge<P> {
          * The value is guaranteed to be non-null. In case no provider is found for the `PlayerManager` service, it will
          * result in an exception being thrown during initialization.
          */
-        val PLAYER_MANAGER = SERVICE_REGISTRY.firstProvider(PlayerManager::class.java)!!
+        val playerManager = serviceRegistry.firstProvider(PlayerManager::class.java)!!
     }
 
     /**
@@ -62,7 +62,7 @@ interface CloudNet4Bridge<P> {
      * @receiver The player instance for which the executor is being retrieved.
      * @return The player executor associated with the player.
      */
-    fun P.getPlayerExecutor() = PLAYER_MANAGER.playerExecutor(getPlayerUniqueId(this))
+    fun P.getPlayerExecutor() = playerManager.playerExecutor(getPlayerUniqueId(this))
 
     /**
      * Connects the current player to a specified server.
@@ -97,7 +97,7 @@ interface CloudNet4Bridge<P> {
      * @receiver The player instance for whom the cloud server is being retrieved.
      * @return The first cloud server containing the player, or `null` if none is found.
      */
-    fun P.getCloudServer() = CloudNet4Driver.getCloudServers {
+    fun P.getCloudServer() = VitalCloudNet4Driver.getCloudServers {
         it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf())
             .map { it.uniqueId }
             .any { it == getPlayerUniqueId(this) }
@@ -116,7 +116,7 @@ interface CloudNet4Bridge<P> {
      * @receiver The player instance for whom the non-proxy cloud server is being retrieved.
      * @return The first non-proxy cloud server containing the player, or `null` if none is found.
      */
-    fun P.getNonProxyCloudServer() = CloudNet4Driver.getCloudServers {
+    fun P.getNonProxyCloudServer() = VitalCloudNet4Driver.getCloudServers {
         it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf())
             .map { it.uniqueId }
             .any { it == getPlayerUniqueId(this) } && !it.isProxy()
@@ -150,7 +150,7 @@ interface CloudNet4Bridge<P> {
      * @param taskName The name of the task for which the cloud servers are queried.
      * @return The total number of players across all servers for the specified task.
      */
-    fun getPlayerCount(taskName: String) = CloudNet4Driver.getCloudServers(taskName)
+    fun getPlayerCount(taskName: String) = VitalCloudNet4Driver.getCloudServers(taskName)
         .map { it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf()).size }
         .reduce(Integer::sum)
 
@@ -163,9 +163,9 @@ interface CloudNet4Bridge<P> {
      * particularly handling player-specific UUID retrieval. As an extension of `CloudNet4Bridge`,
      * it supplies functionality for bridging the CloudNet system with Spigot servers.
      *
-     * @see CloudNet4Bridge
+     * @see VitalCloudNet4Bridge
      */
-    object Spigot : CloudNet4Bridge<SpigotPlayer> {
+    object Spigot : VitalCloudNet4Bridge<SpigotPlayer> {
         override fun getPlayerUniqueId(player: SpigotPlayer) = player.uniqueId
     }
 
@@ -179,9 +179,9 @@ interface CloudNet4Bridge<P> {
      * ensuring that the unique identifier for a player is retrieved correctly based on the
      * BungeePlayer's properties.
      *
-     * @see CloudNet4Bridge
+     * @see VitalCloudNet4Bridge
      */
-    object Bungee : CloudNet4Bridge<BungeePlayer> {
+    object Bungee : VitalCloudNet4Bridge<BungeePlayer> {
         override fun getPlayerUniqueId(player: BungeePlayer) = player.uniqueId!!
     }
 }

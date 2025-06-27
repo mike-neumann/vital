@@ -17,7 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
  *
  * Targets: Can be applied to classes or functions requiring CloudNet4Bridge integration.
  */
-@ConditionalOnClass(name = ["me.vitalframework.cloudnet4.bridge.CloudNet4BridgeSubModule"])
+@ConditionalOnClass(name = ["me.vitalframework.cloudnet4.bridge.VitalCloudNet4BridgeSubModule"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class RequiresVitalCloudNet4Bridge
