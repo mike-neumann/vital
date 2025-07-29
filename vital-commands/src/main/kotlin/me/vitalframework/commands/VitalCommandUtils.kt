@@ -27,7 +27,7 @@ object VitalCommandUtils {
      * and each value is the corresponding argument definition.
      */
     fun VitalCommand<*, *>.getMappedArgs() = javaClass.methods
-        .filter { it.isAnnotationPresent(VitalCommand.ArgHandler::class.java) }
+        .filter { it.getAnnotationsByType(VitalCommand.ArgHandler::class.java).size > 0 }
         .map { it.getAnnotationsByType(VitalCommand.ArgHandler::class.java).toList() }
         .flatten()
         .associate {
@@ -55,7 +55,7 @@ object VitalCommandUtils {
      */
     fun VitalCommand<*, *>.getMappedArgHandlers() = javaClass.methods
         .asSequence()
-        .filter { it.isAnnotationPresent(VitalCommand.ArgHandler::class.java) }
+        .filter { it.getAnnotationsByType(VitalCommand.ArgHandler::class.java).size > 0 }
         .map { method -> method.getAnnotationsByType(VitalCommand.ArgHandler::class.java).map { method to it } }
         .flatten()
         .associate { (method, argHandler) ->
@@ -107,7 +107,7 @@ object VitalCommandUtils {
             mutableMapOf<VitalCommand.Arg, MutableMap<Class<out Throwable>, VitalCommand.ArgExceptionHandlerContext>>()
 
         javaClass.methods
-            .filter { it.isAnnotationPresent(VitalCommand.ArgExceptionHandler::class.java) }
+            .filter { it.getAnnotationsByType(VitalCommand.ArgExceptionHandler::class.java).size > 0 }
             .map { method -> method.getAnnotationsByType(VitalCommand.ArgExceptionHandler::class.java).map { method to it } }
             .flatten()
             .forEach { (method, argExceptionHandler) ->

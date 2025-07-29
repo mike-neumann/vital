@@ -20,7 +20,7 @@ class VitalGlobalCommandExceptionHandlerProcessor(applicationContext: Applicatio
                 .forEach { adviceInstance ->
                     val advice = adviceInstance.javaClass.getAnnotation(VitalCommand.Advice::class.java)!!
                     adviceInstance::class.java.methods
-                        .filter { it.isAnnotationPresent(VitalCommand.GlobalExceptionHandler::class.java) }
+                        .filter { it.getAnnotationsByType(VitalCommand.GlobalExceptionHandler::class.java).size > 0 }
                         .map { method -> method.getAnnotationsByType(VitalCommand.GlobalExceptionHandler::class.java).map { method to it } }
                         .flatten()
                         .forEach { (method, exceptionHandler) ->
