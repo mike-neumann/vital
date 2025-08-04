@@ -1,14 +1,14 @@
 [versions]
 kotlin = "2.2.0"
-spring-boot = "3.4.4"
+spring-boot = "3.5.4"
 spring-dependencyManagement = "1.1.7"
-paperApi = "1.21.4-R0.1-SNAPSHOT"
+paperApi = "1.21.7-R0.1-SNAPSHOT"
 brigadier = "1.0.18"
-bungeeApi = "1.21-R0.2"
-junit = "5.12.1"
+bungeeApi = "1.21-R0.3"
+junit = "5.13.4"
 reflections = "0.10.2"
-adventure-platform = "4.4.0"
-adventure-serializers = "4.21.0"
+adventure-platform = "4.4.1"
+adventure-serializers = "4.24.0"
 cloudnet = "4.0.0-RC13"
 
 [plugins]
