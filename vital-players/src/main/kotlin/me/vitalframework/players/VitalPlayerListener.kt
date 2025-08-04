@@ -101,7 +101,7 @@ interface VitalPlayerListener {
     class Spigot(
         plugin: SpigotPlugin,
         override val playerService: VitalPlayerService,
-        @Value("\${vital.players.player-class-name:me.vitalframework.players.VitalPlayer\$Spigot}")
+        @param:Value($$"${vital.players.player-class-name:me.vitalframework.players.VitalPlayer$Spigot}")
         override val vitalPlayerClassName: String,
     ) : VitalPlayerListener, VitalListener.Spigot(plugin) {
         // should always be executed first.
@@ -141,7 +141,7 @@ interface VitalPlayerListener {
     class Bungee(
         plugin: BungeePlugin,
         override val playerService: VitalPlayerService,
-        @Value("\${vital.players.player-class-name:me.vitalframework.players.VitalPlayer\$Bungee}")
+        @param:Value($$"${vital.players.player-class-name:me.vitalframework.players.VitalPlayer$Bungee}")
         override val vitalPlayerClassName: String,
     ) : VitalPlayerListener, VitalListener.Bungee(plugin) {
         // should always be executed first.

@@ -51,7 +51,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         when (pluginEnvironment) {
             Vital.Info.PluginEnvironment.BUNGEE -> {
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("name: $name")
-                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("main: me.vitalframework.loader.VitalPluginLoader\$Bungee")
+                VitalPluginInfoHolder.PLUGIN_INFO.appendLine($$"main: me.vitalframework.loader.VitalPluginLoader$Bungee")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("real-main: $className")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("version: $version")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("author: ${author.contentToString()}")
@@ -93,7 +93,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         val resource = VitalPluginInfoAnnotationProcessor::class.java.getResourceAsStream("/Main.java")!!
         javaFileObject.openWriter().use {
             val template = InputStreamReader(resource).readText()
-            it.write(template.replace("\${packageName}", packageName).replace("\${scans}", "\"$packageName\""))
+            it.write(template.replace($$"${packageName}", packageName).replace($$"${scans}", "\"$packageName\""))
         }
     } catch (e: Exception) {
         throw VitalPluginInfoAnnotationProcessingException.GeneratePluginConfigurationClass(e)
