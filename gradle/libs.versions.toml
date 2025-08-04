@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.1.20"
+kotlin = "2.2.0"
 spring-boot = "3.4.4"
 spring-dependencyManagement = "1.1.7"
 paperApi = "1.21.4-R0.1-SNAPSHOT"
@@ -9,7 +9,7 @@ junit = "5.12.1"
 reflections = "0.10.2"
 adventure-platform = "4.4.0"
 adventure-serializers = "4.21.0"
-cloudnet = "4.0.0-RC9"
+cloudnet = "4.0.0-RC13"
 
 [plugins]
 jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -28,8 +28,8 @@ spring-dependencyManagementPlugin = { group = "io.spring.gradle", name = "depend
 spring-boot-gradlePlugin = { group = "org.springframework.boot", name = "org.springframework.boot.gradle.plugin", version.ref = "spring-boot" }
 spring-boot-starter = { group = "org.springframework.boot", name = "spring-boot-starter", version.ref = "spring-boot" }
 spring-boot-starter-test = { group = "org.springframework.boot", name = "spring-boot-starter-test", version.ref = "spring-boot" }
-cloudnet-bridge = { group = "eu.cloudnetservice.cloudnet", name = "bridge", version.ref = "cloudnet" }
-cloudnet-driver = { group = "eu.cloudnetservice.cloudnet", name = "driver", version.ref = "cloudnet" }
+cloudnet-bridgeApi = { group = "eu.cloudnetservice.cloudnet", name = "bridge-api", version.ref = "cloudnet" }
+cloudnet-driverApi = { group = "eu.cloudnetservice.cloudnet", name = "driver-api", version.ref = "cloudnet" }
 reflections = { group = "org.reflections", name = "reflections", version.ref = "reflections" }
 junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit" }
 adventure-text-minimessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventure-serializers" }
@@ -42,8 +42,8 @@ adventure-platform-bukkit = { group = "net.kyori", name = "adventure-platform-bu
 root-compileOnly = ["paperApi", "brigadier", "bungeeApi"]
 root-api = ["spring-boot-starter", "spring-boot-starter-test"]
 root-testImplementation = ["spring-boot-starter-test", "junit-jupiter-api", "paperApi", "brigadier", "bungeeApi"]
-cloudnet4-bridge-api = ["cloudnet-bridge"]
-cloudnet4-driver-api = ["cloudnet-driver"]
+cloudnet4-bridgeApi-compileOnly = ["cloudnet-bridgeApi"]
+cloudnet4-driverApi-compileOnly = ["cloudnet-driverApi"]
 commands-api = ["reflections"]
 commands-processor-api = ["reflections"]
 core-api = ["reflections"]

@@ -1,6 +1,6 @@
 # 🚀 Vital-Framework 🚀
 
-## 🌟Overview
+## 🌟 Overview
 
 Vital is the new framework to streamline your plugin development.  
 Current implementations of the mc server api require you to manually implement systems which could easily be replaced by
@@ -9,14 +9,7 @@ Spring solved this issue years ago...
 Vital is designed to work in tandem with the programmer, allowing you to create simple or even extensive and complex
 server applications.
 
-## TechStack
-
-- JDK 21
-- Spigot 1.21.4
-- Gradle
-- Spring Boot 3.x
-
-## 🧩Module Overview
+## 🧩 Module Overview
 
 Vital is thoughtfully organized into several submodules which each serve a different purpose, so you can only implement
 the things you really need for your project.

@@ -42,7 +42,7 @@ subprojects {
     }
 
     kotlin {
-        jvmToolchain(21)
+        jvmToolchain(24)
     }
 
     publishing {
@@ -52,6 +52,12 @@ subprojects {
                 artifactId = project.name
                 version = version
                 from(components["java"])
+            }
+        }
+
+        repositories {
+            maven("http://10.8.0.1:8082/repository/maven-releases/") {
+                isAllowInsecureProtocol = true
             }
         }
     }

@@ -1,5 +1,6 @@
 dependencies {
     api(project(":vital-core"))
     api(project(":vital-cloudnet4-driver"))
-    api(libs.bundles.cloudnet4.bridge.api)
+    compileOnly(libs.bundles.cloudnet4.driverApi.compileOnly)
+    compileOnly(libs.bundles.cloudnet4.bridgeApi.compileOnly)
 }

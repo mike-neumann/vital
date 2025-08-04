@@ -27,10 +27,9 @@ abstract class VitalClassLoader<T : Any>(classLoaderName: String, val plugin: T,
     val parentFirstPackages = mutableListOf<String>()
 
     init {
-        // since we cannot directly read content out of nested jars (virtual paths)
+        // since we cannot directly read content out of nested jars (virtual paths),
         // we need to extract them one by one into a temp file
-        // after extraction is done, and we have scanned every known class,
-        // we can remove their temp file when the jvm exists (deleteOnExit())
+        // after extraction is done we can remove their temp file when the jvm exists (deleteOnExit())
         val pluginFile = File(plugin.javaClass.protectionDomain.codeSource.location.toURI())
         val jarFile = JarFile(pluginFile)
         val jarUrls = jarFile.entries().toList().filter { it.name.endsWith(".jar") }.map {
@@ -52,7 +51,7 @@ abstract class VitalClassLoader<T : Any>(classLoaderName: String, val plugin: T,
     }
 
     /**
-     * exposes a way to manually add urls to the urlpath of this class loader (delegates to [URLClassLoader.addURL])
+     * exposes a way to manually add urls to the url path of this class loader (delegates to [URLClassLoader.addURL])
      */
     public override fun addURL(url: URL?) {
         super.addURL(url)
@@ -83,7 +82,7 @@ abstract class VitalClassLoader<T : Any>(classLoaderName: String, val plugin: T,
         "spigot",
         plugin,
         (plugin.javaClass.classLoader as URLClassLoader).urLs,
-        plugin.javaClass.classLoader.parent
+        plugin.javaClass.classLoader
     )
 
     // paper wants to make it as difficult for us as possible,
@@ -94,9 +93,8 @@ abstract class VitalClassLoader<T : Any>(classLoaderName: String, val plugin: T,
         "paper",
         plugin,
         (plugin.javaClass.classLoader as URLClassLoader).urLs,
-        plugin.javaClass.classLoader.parent
-    ),
-        ConfiguredPluginClassLoader {
+        plugin.javaClass.classLoader
+    ), ConfiguredPluginClassLoader {
         override fun getConfiguration() = (plugin.javaClass.classLoader as PluginClassLoader).configuration
         override fun loadClass(p0: String, p1: Boolean, p2: Boolean, p3: Boolean): Class<*> =
             (plugin.javaClass.classLoader as PluginClassLoader).loadClass(p0, p1, p2, p3)

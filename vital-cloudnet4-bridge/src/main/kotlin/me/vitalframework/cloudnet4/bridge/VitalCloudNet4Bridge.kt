@@ -32,8 +32,7 @@ interface VitalCloudNet4Bridge<P> {
 
         /**
          * A globally accessible instance of the `PlayerManager` interface used to manage and interact with player-related
-         * functionalities in the CloudNet framework. It is fetched from the `SERVICE_REGISTRY` as the first available
-         * provider of the `PlayerManager` service.
+         * functionalities in the CloudNet framework. It is fetched from the `ServiceRegistry`.
          *
          * This instance facilitates operations such as retrieving player-specific information, managing player connections,
          * executing commands on players, and other cloud-integrated player management tasks.
@@ -41,7 +40,7 @@ interface VitalCloudNet4Bridge<P> {
          * The value is guaranteed to be non-null. In case no provider is found for the `PlayerManager` service, it will
          * result in an exception being thrown during initialization.
          */
-        val playerManager = serviceRegistry.firstProvider(PlayerManager::class.java)!!
+        val playerManager = serviceRegistry.defaultInstance(PlayerManager::class.java)!!
     }
 
     /**
@@ -152,6 +151,7 @@ interface VitalCloudNet4Bridge<P> {
      */
     fun getPlayerCount(taskName: String) = VitalCloudNet4Driver.getCloudServers(taskName)
         .map { it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf()).size }
+        .ifEmpty { return 0 }
         .reduce(Integer::sum)
 
     /**
