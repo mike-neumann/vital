@@ -38,6 +38,7 @@ class VitalGradlePlugin : Plugin<Project> {
             target.tasks.named("bootJar", BootJar::class.java) { bootJar ->
                 bootJar.mainClass.set("")
                 bootJar.archiveFileName.set("${target.name}-old.jar")
+                bootJar.outputs.dir("${DIR_TMP_UNPACKED}${File.separator}${DIR_BOOT_INF_CLASSES}")
                 bootJar.doLast {
                     val originalJar = bootJar.archiveFile.get().asFile
                     val unpackDir = target.layout.buildDirectory.dir(DIR_TMP_UNPACKED).get().asFile.apply {
