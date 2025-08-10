@@ -1,6 +1,7 @@
 package me.vitalframework.localization
 
 import me.vitalframework.*
+import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataType
@@ -80,12 +81,16 @@ var SpigotPlayer.vitalLocale: Locale?
                 item.itemMeta = item.itemMeta.apply {
                     val displayName = displayName()
                     if (displayName != null) {
-                        displayName(MiniMessage.miniMessage().deserialize(getTranslatedText(localizationKey)))
+                        displayName(MiniMessage.miniMessage().deserialize(getTranslatedText(localizationKey))
+                            .decoration(TextDecoration.ITALIC, false))
                     }
 
                     val lore = lore()
                     if (lore != null) {
-                        lore(loreLocalizationKeys.map { MiniMessage.miniMessage().deserialize(getTranslatedText(it)) })
+                        lore(loreLocalizationKeys.map {
+                            MiniMessage.miniMessage().deserialize(getTranslatedText(it))
+                                .decoration(TextDecoration.ITALIC, false)
+                        })
                     }
                 }
             }
