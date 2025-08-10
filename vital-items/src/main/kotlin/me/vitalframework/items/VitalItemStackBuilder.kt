@@ -38,6 +38,7 @@ open class VitalItemStackBuilder {
     var lore = mutableListOf<String>()
     var itemFlags = mutableListOf<ItemFlag>()
     var enchantments = mutableMapOf<Enchantment, Int>()
+    var afterInit: (ItemStack) -> Unit = {}
 }
 
 /**
@@ -52,8 +53,7 @@ open class VitalItemStackBuilder {
  */
 inline fun itemBuilder(itemUuid: UUID? = null, init: VitalItemStackBuilder.() -> Unit): ItemStack {
     val itemStackBuilder = VitalItemStackBuilder().apply { init() }
-
-    return ItemStack(itemStackBuilder.type, itemStackBuilder.amount).apply {
+    val itemStack = ItemStack(itemStackBuilder.type, itemStackBuilder.amount).apply {
         if (type == Material.AIR) return this
         // since we know we have an item which is not of type AIR, we now have a persistent data container
         itemMeta = itemMeta!!.apply {
@@ -81,4 +81,8 @@ inline fun itemBuilder(itemUuid: UUID? = null, init: VitalItemStackBuilder.() ->
             isUnbreakable = itemStackBuilder.unbreakable
         }
     }
+
+    itemStackBuilder.afterInit(itemStack)
+
+    return itemStack
 }

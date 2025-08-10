@@ -63,8 +63,10 @@ open class VitalItem {
 
     fun getItemStack(player: SpigotPlayer) = itemBuilder(uniqueId) {
         val info = this@VitalItem.getRequiredAnnotation<Info>()
+
+        // first set default values, then try to localize them
         type = info.type
-        name = if ("vital-localization" in Vital.vitalSubModules) player.getTranslatedText(info.name) else info.name
+        name = info.name
         amount = info.amount
         lore = info.lore.toMutableList()
         itemFlags = info.itemFlags.toMutableList()
@@ -72,6 +74,26 @@ open class VitalItem {
 
         if (info.enchanted) {
             enchantments[Enchantment.FORTUNE] = 1
+        }
+
+        val usingVitalLocalization = "vital-localization" in Vital.vitalSubModules
+
+        if (usingVitalLocalization && info.localized) {
+            name = player.getTranslatedText(info.name)
+            lore = info.lore.map { player.getTranslatedText(it) }.toMutableList()
+            afterInit = {
+                it.itemMeta = it.itemMeta.apply {
+                    persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] = true
+                    persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZATION_KEY, PersistentDataType.STRING] = info.name
+                    persistentDataContainer[VitalNamespacedKey.ITEM_LORE_LOCALIZATION_KEYS, PersistentDataType.LIST.strings()] = info.lore.toList()
+                }
+            }
+        } else {
+            afterInit = {
+                it.itemMeta = it.itemMeta.apply {
+                    persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] = false
+                }
+            }
         }
     }
 
@@ -102,6 +124,7 @@ open class VitalItem {
     override fun equals(other: Any?): Boolean {
         if (other !is ItemStack && other !is VitalItem) return false
         if (other is ItemStack) {
+            if (other.itemMeta == null) return false
             return uniqueId == UUID.fromString(other.itemMeta.persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING])
         }
 
@@ -182,5 +205,6 @@ open class VitalItem {
         val cooldown: Int = 0,
         val enchanted: Boolean = false,
         val unbreakable: Boolean = true,
+        val localized: Boolean = false
     )
 }
