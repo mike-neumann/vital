@@ -26,9 +26,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
  * See Also:
  * - `VitalLocalizationSubModule`: Provides the core localization functionality for the framework.
  * - `VitalPlayer`: Core abstraction for player entities in the Vital framework, which supports locale assignment.
- * - `VitalPlayerService`: Manages `VitalPlayer` instances, which may utilize localization for personalized content.
+ * - `VitalPlayerService`: Manages `VitalPlayer` instances, which may use localization for personalized content.
  */
 @ConditionalOnClass(name = ["me.vitalframework.localization.VitalLocalizationSubModule"])
-@Target(AnnotationTarget.CLASS)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class RequiresVitalLocalization
