@@ -201,7 +201,7 @@ open class VitalInventory {
         previousInventory?.close(player)
         val inventoryView = type.menuType.create(
             player, MiniMessage.miniMessage().deserialize(
-                if ("vital-inventories" in Vital.vitalSubModules) player.getTranslatedText(name) else name
+                if ("vital-localization" in Vital.vitalSubModules) player.getTranslatedText(name) else name
             )
         )
 
