@@ -8,7 +8,7 @@ import eu.cloudnetservice.modules.bridge.player.PlayerManager
 import me.vitalframework.BungeePlayer
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.cloudnet4.driver.VitalCloudNet4Driver
-import java.util.*
+import java.util.UUID
 
 /**
  * Represents a bridge interface for managing player and server interactions within CloudNet4.
@@ -96,11 +96,14 @@ interface VitalCloudNet4Bridge<P> {
      * @receiver The player instance for whom the cloud server is being retrieved.
      * @return The first cloud server containing the player, or `null` if none is found.
      */
-    fun P.getCloudServer() = VitalCloudNet4Driver.getCloudServers {
-        it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf())
-            .map { it.uniqueId }
-            .any { it == getPlayerUniqueId(this) }
-    }.firstOrNull()
+    fun P.getCloudServer() =
+        VitalCloudNet4Driver
+            .getCloudServers {
+                it
+                    .readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf())
+                    .map { it.uniqueId }
+                    .any { it == getPlayerUniqueId(this) }
+            }.firstOrNull()
 
     /**
      * Retrieves the first non-proxy cloud server where the current player is present.
@@ -115,11 +118,15 @@ interface VitalCloudNet4Bridge<P> {
      * @receiver The player instance for whom the non-proxy cloud server is being retrieved.
      * @return The first non-proxy cloud server containing the player, or `null` if none is found.
      */
-    fun P.getNonProxyCloudServer() = VitalCloudNet4Driver.getCloudServers {
-        it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf())
-            .map { it.uniqueId }
-            .any { it == getPlayerUniqueId(this) } && !it.isProxy()
-    }.firstOrNull()
+    fun P.getNonProxyCloudServer() =
+        VitalCloudNet4Driver
+            .getCloudServers {
+                it
+                    .readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf())
+                    .map { it.uniqueId }
+                    .any { it == getPlayerUniqueId(this) } &&
+                    !it.isProxy()
+            }.firstOrNull()
 
     /**
      * Determines whether the service represented by this `ServiceInfoSnapshot` is a proxy.
@@ -135,10 +142,11 @@ interface VitalCloudNet4Bridge<P> {
      * @receiver The `ServiceInfoSnapshot` instance representing the service.
      * @return `true` if the service is a proxy; otherwise, `false`.
      */
-    fun ServiceInfoSnapshot.isProxy() = when (configuration().processConfig().environment()) {
-        "JAVA_PROXY", "PE_PROXY", "BUNGEECORD", "VELOCITY", "WATERDOG_PE" -> true
-        else -> false
-    }
+    fun ServiceInfoSnapshot.isProxy() =
+        when (configuration().processConfig().environment()) {
+            "JAVA_PROXY", "PE_PROXY", "BUNGEECORD", "VELOCITY", "WATERDOG_PE" -> true
+            else -> false
+        }
 
     /**
      * Retrieves the total number of players across all cloud servers for a specific task.
@@ -149,10 +157,12 @@ interface VitalCloudNet4Bridge<P> {
      * @param taskName The name of the task for which the cloud servers are queried.
      * @return The total number of players across all servers for the specified task.
      */
-    fun getPlayerCount(taskName: String) = VitalCloudNet4Driver.getCloudServers(taskName)
-        .map { it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf()).size }
-        .ifEmpty { return 0 }
-        .reduce(Integer::sum)
+    fun getPlayerCount(taskName: String) =
+        VitalCloudNet4Driver
+            .getCloudServers(taskName)
+            .map { it.readPropertyOrDefault(BridgeDocProperties.PLAYERS, listOf()).size }
+            .ifEmpty { return 0 }
+            .reduce(Integer::sum)
 
     /**
      * The `Spigot` object provides specific implementations for CloudNet integration with the

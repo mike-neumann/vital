@@ -1,13 +1,17 @@
 package me.vitalframework.localization
 
-import me.vitalframework.*
+import me.vitalframework.BungeePlayer
+import me.vitalframework.SpigotPlayer
+import me.vitalframework.Vital
+import me.vitalframework.VitalSubModule
+import me.vitalframework.logger
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataType
 import org.springframework.context.MessageSource
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.Locale
 
 @Component("vital-localization")
 class VitalLocalizationSubModule : VitalSubModule()
@@ -58,18 +62,31 @@ var SpigotPlayer.vitalLocale: Locale?
         if ("vital-items" in Vital.vitalSubModules) {
             // update any now non-localized items
             for (item in inventory.filter { it != null }) {
-                val itemLocalized = item.itemMeta.persistentDataContainer[NamespacedKey("vital", "item-localized"), PersistentDataType.BOOLEAN]
-                    ?: continue
+                val itemLocalized =
+                    item.itemMeta.persistentDataContainer[NamespacedKey("vital", "item-localized"), PersistentDataType.BOOLEAN]
+                        ?: continue
 
                 if (!itemLocalized) continue
 
-                val localizationKey = item.itemMeta.persistentDataContainer[NamespacedKey("vital", "item-localization-key"), PersistentDataType.STRING]
+                val localizationKey =
+                    item.itemMeta.persistentDataContainer[
+                        NamespacedKey(
+                            "vital",
+                            "item-localization-key",
+                        ), PersistentDataType.STRING,
+                    ]
                 if (localizationKey == null) {
                     logger.warn("Item '$item' has been marked for localization but no localization key is present")
                     continue
                 }
 
-                val loreLocalizationKeys = item.itemMeta.persistentDataContainer[NamespacedKey("vital", "item-lore-localization-keys"), PersistentDataType.LIST.strings()]
+                val loreLocalizationKeys =
+                    item.itemMeta.persistentDataContainer[
+                        NamespacedKey(
+                            "vital",
+                            "item-lore-localization-keys",
+                        ), PersistentDataType.LIST.strings(),
+                    ]
                 if (loreLocalizationKeys == null) {
                     logger.warn("Item '$item' has been marked for localization but no lore localization keys are present")
                     continue
@@ -78,21 +95,30 @@ var SpigotPlayer.vitalLocale: Locale?
                 // we have an item that is set to be localized
                 // update only its name and lore now.
                 // we want to set the same item state, only its name and lore should be touched.
-                item.itemMeta = item.itemMeta.apply {
-                    val displayName = displayName()
-                    if (displayName != null) {
-                        displayName(MiniMessage.miniMessage().deserialize(getTranslatedText(localizationKey))
-                            .decoration(TextDecoration.ITALIC, false))
-                    }
+                item.itemMeta =
+                    item.itemMeta.apply {
+                        val displayName = displayName()
+                        if (displayName != null) {
+                            displayName(
+                                MiniMessage
+                                    .miniMessage()
+                                    .deserialize(getTranslatedText(localizationKey))
+                                    .decoration(TextDecoration.ITALIC, false),
+                            )
+                        }
 
-                    val lore = lore()
-                    if (lore != null) {
-                        lore(loreLocalizationKeys.map {
-                            MiniMessage.miniMessage().deserialize(getTranslatedText(it))
-                                .decoration(TextDecoration.ITALIC, false)
-                        })
+                        val lore = lore()
+                        if (lore != null) {
+                            lore(
+                                loreLocalizationKeys.map {
+                                    MiniMessage
+                                        .miniMessage()
+                                        .deserialize(getTranslatedText(it))
+                                        .decoration(TextDecoration.ITALIC, false)
+                                },
+                            )
+                        }
                     }
-                }
             }
         }
     }
@@ -129,7 +155,11 @@ var BungeePlayer.vitalLocale: Locale?
  * @param locale The locale for which the message should be localized. If null, the key is returned.
  * @return The localized message for the given key and locale, or the key itself if localization fails.
  */
-fun getMessage(key: String, args: Array<Any?>, locale: Locale?): String =
+fun getMessage(
+    key: String,
+    args: Array<Any?>,
+    locale: Locale?,
+): String =
     if (locale == null) {
         key
     } else {
@@ -152,7 +182,10 @@ fun getMessage(key: String, args: Array<Any?>, locale: Locale?): String =
  * @param args Optional arguments to format the localized text.
  * @return The translated and formatted text for the given key and arguments.
  */
-fun SpigotPlayer.getTranslatedText(key: String, vararg args: Any?): String = getMessage(key, arrayOf(*args), vitalLocale)
+fun SpigotPlayer.getTranslatedText(
+    key: String,
+    vararg args: Any?,
+): String = getMessage(key, arrayOf(*args), vitalLocale)
 
 /**
  * Retrieves the translated text for the given key based on the player's locale.
@@ -162,4 +195,7 @@ fun SpigotPlayer.getTranslatedText(key: String, vararg args: Any?): String = get
  * @param args Optional arguments to be inserted into the localized message.
  * @return A string containing the localized message if available; otherwise, the key itself.
  */
-fun BungeePlayer.getTranslatedText(key: String, vararg args: Any?): String = getMessage(key, arrayOf(*args), vitalLocale)
+fun BungeePlayer.getTranslatedText(
+    key: String,
+    vararg args: Any?,
+): String = getMessage(key, arrayOf(*args), vitalLocale)

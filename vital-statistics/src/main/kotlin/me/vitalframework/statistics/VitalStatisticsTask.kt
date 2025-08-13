@@ -10,14 +10,18 @@ interface VitalStatisticsTask {
 
     @RequiresSpigot
     @Component
-    class Spigot(override val statisticsService: VitalStatisticsService) : VitalStatisticsTask {
+    class Spigot(
+        override val statisticsService: VitalStatisticsService,
+    ) : VitalStatisticsTask {
         @Scheduled(fixedRate = 50)
         fun handleTask() = statisticsService.handleTick()
     }
 
     @RequiresBungee
     @Component
-    class Bungee(override val statisticsService: VitalStatisticsService) : VitalStatisticsTask {
+    class Bungee(
+        override val statisticsService: VitalStatisticsService,
+    ) : VitalStatisticsTask {
         @Scheduled(fixedRate = 50)
         fun handleTask() = statisticsService.handleTick()
     }

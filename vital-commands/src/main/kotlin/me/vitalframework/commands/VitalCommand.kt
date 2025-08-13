@@ -1,7 +1,12 @@
 package me.vitalframework.commands
 
 import jakarta.annotation.PostConstruct
-import me.vitalframework.*
+import me.vitalframework.BungeeCommandSender
+import me.vitalframework.BungeePlayer
+import me.vitalframework.BungeePlugin
+import me.vitalframework.SpigotCommandSender
+import me.vitalframework.SpigotPlayer
+import me.vitalframework.SpigotPlugin
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import me.vitalframework.commands.VitalCommandUtils.getMappedArgExceptionHandlers
 import me.vitalframework.commands.VitalCommandUtils.getMappedArgHandlers
@@ -55,7 +60,10 @@ import kotlin.reflect.KClass
  * The class also features annotations to facilitate metadata about the command, such as its name,
  * description, usage, and required permission.
  */
-abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, val commandSenderClass: Class<CS>) {
+abstract class VitalCommand<P, CS : Any> protected constructor(
+    val plugin: P,
+    val commandSenderClass: Class<CS>,
+) {
     val name: String
     val permission: String
     val playerOnly: Boolean
@@ -88,7 +96,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @param permission The permission string to check against.
      * @return True if the command sender has the specified permission, false otherwise.
      */
-    abstract fun hasPermission(commandSender: CS, permission: String): Boolean
+    abstract fun hasPermission(
+        commandSender: CS,
+        permission: String,
+    ): Boolean
 
     /**
      * Retrieves a list of all player names.
@@ -107,7 +118,11 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @param executedArg The argument string that was executed. Used to search for a matching entry in the `args` map.
      * @return The first matching argument value or null if no match is found.
      */
-    internal fun getArg(executedArg: String) = args.entries.filter { it.key.matcher(executedArg).matches() }.map { it.value }.firstOrNull()
+    internal fun getArg(executedArg: String) =
+        args.entries
+            .filter { it.key.matcher(executedArg).matches() }
+            .map { it.value }
+            .firstOrNull()
 
     /**
      * Executes the global exception handler method for handling exceptions thrown during command execution.
@@ -126,9 +141,15 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @param commandArg The argument metadata associated with the command, or null if not applicable.
      * @param exception The exception that was thrown during command execution.
      */
-    private fun executeGlobalExceptionHandlerMethod(sender: CS, executedArg: String, commandArg: Arg?, exception: Throwable) {
-        val globalContext = VitalGlobalCommandExceptionHandlerProcessor.getGlobalExceptionHandler(exception.javaClass)
-            ?: return onCommandError(sender, commandArg, exception)
+    private fun executeGlobalExceptionHandlerMethod(
+        sender: CS,
+        executedArg: String,
+        commandArg: Arg?,
+        exception: Throwable,
+    ) {
+        val globalContext =
+            VitalGlobalCommandExceptionHandlerProcessor.getGlobalExceptionHandler(exception.javaClass)
+                ?: return onCommandError(sender, commandArg, exception)
 
         try {
             globalContext.handlerMethod(
@@ -138,8 +159,8 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
                     sender,
                     executedArg,
                     commandArg,
-                    exception
-                )
+                    exception,
+                ),
             )
             return
         } catch (e: Exception) {
@@ -161,10 +182,19 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @param executedArg The string representation of the executed argument related to the exception.
      * @param commandArg The metadata of the command argument associated with the exception.
      */
-    private fun executeArgExceptionHandlerMethod(sender: CS, exception: Throwable, executedArg: String, commandArg: Arg) {
+    private fun executeArgExceptionHandlerMethod(
+        sender: CS,
+        exception: Throwable,
+        executedArg: String,
+        commandArg: Arg,
+    ) {
         val exceptionHandlers = argExceptionHandlers[commandArg] ?: emptyMap()
         // we may or may not have an exception handler mapped for this execution context
-        val context = exceptionHandlers.entries.filter { it.key.isAssignableFrom(exception.javaClass) }.map { it.value }.firstOrNull()
+        val context =
+            exceptionHandlers.entries
+                .filter { it.key.isAssignableFrom(exception.javaClass) }
+                .map { it.value }
+                .firstOrNull()
         if (context == null) {
             // we do not have any exception handler mapped for this argument
             // try to find a global exception handler
@@ -174,7 +204,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         try {
             context.handlerMethod(
                 this,
-                *VitalCommandUtils.getInjectableArgExceptionHandlerMethodParameters(context, sender, executedArg, commandArg, exception)
+                *VitalCommandUtils.getInjectableArgExceptionHandlerMethodParameters(context, sender, executedArg, commandArg, exception),
             )
         } catch (e: Exception) {
             throw VitalCommandException.ExecuteArgExceptionHandlerMethod(context.handlerMethod, context, e)
@@ -194,11 +224,16 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @return The result of the handler method execution as a [ReturnState].
      * @throws VitalCommandException.UnmappedArgHandler if no handler is mapped for the provided argument.
      */
-    private fun executeArgHandlerMethod(sender: CS, executedArg: String, commandArg: Arg, values: Array<String>): ReturnState {
+    private fun executeArgHandlerMethod(
+        sender: CS,
+        executedArg: String,
+        commandArg: Arg,
+        values: Array<String>,
+    ): ReturnState {
         val context = argHandlers[commandArg] ?: throw VitalCommandException.UnmappedArgHandler(executedArg)
         return context.handlerMethod(
             this,
-            *VitalCommandUtils.getInjectableArgHandlerMethodParameters(context, sender, executedArg, commandArg, values)
+            *VitalCommandUtils.getInjectableArgHandlerMethodParameters(context, sender, executedArg, commandArg, values),
         ) as ReturnState
     }
 
@@ -209,7 +244,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @param args The arguments that have been entered so far by the sender. Used to determine matching commands or options.
      * @return A list of suggested completions based on the current input context.
      */
-    fun tabComplete(sender: CS, args: Array<String>): List<String> {
+    fun tabComplete(
+        sender: CS,
+        args: Array<String>,
+    ): List<String> {
         val tabCompleted = mutableListOf<String>()
         for ((_, commandArg) in this.args) {
             val splitCommandArg = commandArg.name.split(" ")
@@ -221,8 +259,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
                     // we have previous entered arguments, check if they match with the command arg, so we know we are on the right node
                     for (prevI in 0..<i) {
                         val previousEnteredArg = args[prevI]
-                        val previousCommandArg = splitCommandArg[prevI].replace(VARARG_REGEX.toRegex(), previousEnteredArg)
-                            .replace(ARG_REGEX.toRegex(), previousEnteredArg)
+                        val previousCommandArg =
+                            splitCommandArg[prevI]
+                                .replace(VARARG_REGEX.toRegex(), previousEnteredArg)
+                                .replace(ARG_REGEX.toRegex(), previousEnteredArg)
                         if (previousCommandArg != previousEnteredArg) {
                             // our previously entered arg does not match with the registered command arg
                             commandArgMatches = false
@@ -265,7 +305,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @param sender The command sender instance (either a player or console executor).
      * @param args An array of arguments passed to the command.
      */
-    fun execute(sender: CS, args: Array<String>) {
+    fun execute(
+        sender: CS,
+        args: Array<String>,
+    ) {
         val joinedPlayerArgs = args.joinToString(" ")
         if (playerOnly && !isPlayer(sender)) return onCommandRequiresPlayer(sender, joinedPlayerArgs, null)
         if (permission.isNotBlank() && !hasPermission(sender, permission)) {
@@ -273,39 +316,47 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         }
         val executingArg = getArg(joinedPlayerArgs)
         // if the player has not put in any arguments, we may execute the base command handler method
-        val commandReturnState = when {
-            executingArg == null && joinedPlayerArgs.isBlank() -> try {
-                onBaseCommand(sender)
-            } catch (e: Exception) {
-                return executeGlobalExceptionHandlerMethod(sender, joinedPlayerArgs, null, e)
-            }
-
-            executingArg != null -> {
-                if (executingArg.permission.isNotBlank() && !hasPermission(sender, executingArg.permission)) {
-                    ReturnState.NO_PERMISSION
-                } else if (executingArg.playerOnly && !isPlayer(sender)) {
-                    ReturnState.ONLY_PLAYER
-                } else {
-                    val values = mutableListOf<String>()
-                    val commandArgs = executingArg.name.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.map { it.lowercase() }
-
-                    args.map(String::lowercase).filter { it !in commandArgs || (it.startsWith("%") && it.endsWith("%")) }
-                        .forEach(values::add)
-
+        val commandReturnState =
+            when {
+                executingArg == null && joinedPlayerArgs.isBlank() ->
                     try {
-                        executeArgHandlerMethod(sender, joinedPlayerArgs, executingArg, values.toTypedArray())
+                        onBaseCommand(sender)
                     } catch (e: Exception) {
-                        return if (e is InvocationTargetException) {
-                            executeArgExceptionHandlerMethod(sender, e.targetException, joinedPlayerArgs, executingArg)
-                        } else {
-                            executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, executingArg)
+                        return executeGlobalExceptionHandlerMethod(sender, joinedPlayerArgs, null, e)
+                    }
+
+                executingArg != null -> {
+                    if (executingArg.permission.isNotBlank() && !hasPermission(sender, executingArg.permission)) {
+                        ReturnState.NO_PERMISSION
+                    } else if (executingArg.playerOnly && !isPlayer(sender)) {
+                        ReturnState.ONLY_PLAYER
+                    } else {
+                        val values = mutableListOf<String>()
+                        val commandArgs =
+                            executingArg.name
+                                .split(" ".toRegex())
+                                .dropLastWhile { it.isEmpty() }
+                                .map { it.lowercase() }
+
+                        args
+                            .map(String::lowercase)
+                            .filter { it !in commandArgs || (it.startsWith("%") && it.endsWith("%")) }
+                            .forEach(values::add)
+
+                        try {
+                            executeArgHandlerMethod(sender, joinedPlayerArgs, executingArg, values.toTypedArray())
+                        } catch (e: Exception) {
+                            return if (e is InvocationTargetException) {
+                                executeArgExceptionHandlerMethod(sender, e.targetException, joinedPlayerArgs, executingArg)
+                            } else {
+                                executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, executingArg)
+                            }
                         }
                     }
                 }
-            }
 
-            else -> ReturnState.INVALID_ARGS
-        }
+                else -> ReturnState.INVALID_ARGS
+            }
         when (commandReturnState) {
             ReturnState.SUCCESS -> run {}
             ReturnState.INVALID_ARGS -> onCommandInvalidArgs(sender, joinedPlayerArgs)
@@ -325,7 +376,11 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @param e The exception thrown during command execution.
      * @return Unit. This method does not return any specific value.
      */
-    protected open fun onCommandError(sender: CS, commandArg: Arg?, e: Throwable): Unit = run { throw e }
+    protected open fun onCommandError(
+        sender: CS,
+        commandArg: Arg?,
+        e: Throwable,
+    ): Unit = run { throw e }
 
     /**
      * Handles the execution of the base command when no specific subcommand is provided.
@@ -350,7 +405,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @param args The current argument string for which tab-completion is being requested.
      * @return A list of possible tab-completion suggestions for the given input.
      */
-    protected open fun onCommandTabComplete(sender: CS, args: String) = listOf<String>()
+    protected open fun onCommandTabComplete(
+        sender: CS,
+        args: String,
+    ) = listOf<String>()
 
     /**
      * Handles the scenario where a command is executed with invalid arguments.
@@ -362,7 +420,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @param sender The command sender who issued the command.
      * @param args The arguments that were deemed invalid.
      */
-    protected open fun onCommandInvalidArgs(sender: CS, args: String) {}
+    protected open fun onCommandInvalidArgs(
+        sender: CS,
+        args: String,
+    ) {}
 
     /**
      * Handles the scenario where a command requires a specific permission to be executed.
@@ -375,7 +436,11 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @param args The arguments provided with the command execution.
      * @param commandArg The associated command argument metadata, or null if not applicable.
      */
-    protected open fun onCommandRequiresPermission(sender: CS, args: String, commandArg: Arg?) {}
+    protected open fun onCommandRequiresPermission(
+        sender: CS,
+        args: String,
+        commandArg: Arg?,
+    ) {}
 
     /**
      * Handles the scenario where a command requires the sender to be a player.
@@ -388,7 +453,11 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @param args The arguments provided with the command execution.
      * @param commandArg The associated command argument metadata, or null if not applicable.
      */
-    protected open fun onCommandRequiresPlayer(sender: CS, args: String, commandArg: Arg?) {}
+    protected open fun onCommandRequiresPlayer(
+        sender: CS,
+        args: String,
+        commandArg: Arg?,
+    ) {}
 
     /**
      * Represents the possible states returned by the execution of a command.
@@ -429,7 +498,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
          * This state is used to enforce that specific commands are restricted to in-game players
          * and cannot be executed by non-player entities, such as the server console or command blocks.
          */
-        ONLY_PLAYER
+        ONLY_PLAYER,
     }
 
     /**
@@ -473,15 +542,23 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      */
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.CLASS)
-    annotation class Arg(val name: String, val permission: String = "", val playerOnly: Boolean = false) {
-        enum class Type(val placeholder: String, val action: (TabCompletionContext) -> Unit) {
+    annotation class Arg(
+        val name: String,
+        val permission: String = "",
+        val playerOnly: Boolean = false,
+    ) {
+        enum class Type(
+            val placeholder: String,
+            val action: (TabCompletionContext) -> Unit,
+        ) {
             PLAYER(
                 "%PLAYER%",
-                { context -> context.playerNames.filter { it !in context.completions }.forEach { context.completions.add(it) } }
+                { context -> context.playerNames.filter { it !in context.completions }.forEach { context.completions.add(it) } },
             ),
             BOOLEAN("%BOOLEAN%", { it.completions.addAll(arrayOf("true", "false")) }),
             NUMBER("%NUMBER%", { it.completions.add("0") }),
-            MATERIAL("%MATERIAL%", { context -> Material.entries.map { it.name }.forEach { context.completions.add(it) } });
+            MATERIAL("%MATERIAL%", { context -> Material.entries.map { it.name }.forEach { context.completions.add(it) } }),
+            ;
 
             companion object {
                 fun getTypeByPlaceholder(placeholder: String) = entries.firstOrNull { it.placeholder == placeholder }
@@ -502,7 +579,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
     @Repeatable
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.FUNCTION)
-    annotation class ArgHandler(val arg: Arg)
+    annotation class ArgHandler(
+        val arg: Arg,
+    )
 
     /**
      * Marks a method as an exception handler specifically for command arguments in the `VitalCommand` class.
@@ -516,7 +595,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
     @Repeatable
     @Target(AnnotationTarget.FUNCTION)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class ArgExceptionHandler(val arg: String, val type: KClass<out Throwable>)
+    annotation class ArgExceptionHandler(
+        val arg: String,
+        val type: KClass<out Throwable>,
+    )
 
     /**
      * Annotation used to define an advice class for handling global exception handlers across commands.
@@ -529,7 +611,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
     @Component
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Advice(val commandSenderClass: KClass<out Any>)
+    annotation class Advice(
+        val commandSenderClass: KClass<out Any>,
+    )
 
     /**
      * Annotation that marks a method as a handler for specific exceptions occurring during command execution.
@@ -543,7 +627,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
     @Repeatable
     @Target(AnnotationTarget.FUNCTION)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class GlobalExceptionHandler(val type: KClass<out Throwable>)
+    annotation class GlobalExceptionHandler(
+        val type: KClass<out Throwable>,
+    )
 
     /**
      * Context for handling global exceptions in the execution of commands.
@@ -582,7 +668,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @property playerNames A list of player names available for tab-completion, typically
      * used for commands where player-specific input is required.
      */
-    data class TabCompletionContext(val completions: MutableList<String>, val playerNames: List<String>)
+    data class TabCompletionContext(
+        val completions: MutableList<String>,
+        val playerNames: List<String>,
+    )
 
     /**
      * A data class that encapsulates the contextual information required to handle
@@ -635,19 +724,34 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @constructor Instantiated with a reference to a Spigot plugin.
      * @param plugin The plugin instance that the command is part of.
      */
-    abstract class Spigot(plugin: SpigotPlugin) : VitalCommand<SpigotPlugin, SpigotCommandSender>(plugin, SpigotCommandSender::class.java),
+    abstract class Spigot(
+        plugin: SpigotPlugin,
+    ) : VitalCommand<SpigotPlugin, SpigotCommandSender>(plugin, SpigotCommandSender::class.java),
         VitalPluginCommand.Spigot {
         @PostConstruct
         fun init() = plugin.getCommand(name)!!.setExecutor(this)
 
-        override fun onCommand(sender: SpigotCommandSender, command: Command, label: String, args: Array<String>) =
-            true.also { execute(sender, args) }
+        override fun onCommand(
+            sender: SpigotCommandSender,
+            command: Command,
+            label: String,
+            args: Array<String>,
+        ) = true.also { execute(sender, args) }
 
-        override fun onTabComplete(sender: SpigotCommandSender, command: Command, label: String, args: Array<String>) =
-            tabComplete(sender, args)
+        override fun onTabComplete(
+            sender: SpigotCommandSender,
+            command: Command,
+            label: String,
+            args: Array<String>,
+        ) = tabComplete(sender, args)
 
         override fun isPlayer(commandSender: SpigotCommandSender) = commandSender is SpigotPlayer
-        override fun hasPermission(commandSender: SpigotCommandSender, permission: String) = commandSender.hasPermission(permission)
+
+        override fun hasPermission(
+            commandSender: SpigotCommandSender,
+            permission: String,
+        ) = commandSender.hasPermission(permission)
+
         override fun getAllPlayerNames() = Bukkit.getOnlinePlayers().map { it.name }
     }
 
@@ -662,7 +766,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
      * @constructor Initializes the command with the specified BungeePlugin instance.
      * @param plugin The BungeePlugin instance associated with this command.
      */
-    abstract class Bungee(plugin: BungeePlugin) : VitalCommand<BungeePlugin, BungeeCommandSender>(plugin, BungeeCommandSender::class.java) {
+    abstract class Bungee(
+        plugin: BungeePlugin,
+    ) : VitalCommand<BungeePlugin, BungeeCommandSender>(plugin, BungeeCommandSender::class.java) {
         private lateinit var command: VitalPluginCommand.Bungee
 
         @PostConstruct
@@ -672,14 +778,27 @@ abstract class VitalCommand<P, CS : Any> protected constructor(val plugin: P, va
         }
 
         private fun setupCommand() {
-            this.command = object : VitalPluginCommand.Bungee(name) {
-                override fun execute(sender: BungeeCommandSender, args: Array<String>) = this@Bungee.execute(sender, args)
-                override fun onTabComplete(sender: BungeeCommandSender, args: Array<String>) = this@Bungee.tabComplete(sender, args)
-            }
+            this.command =
+                object : VitalPluginCommand.Bungee(name) {
+                    override fun execute(
+                        sender: BungeeCommandSender,
+                        args: Array<String>,
+                    ) = this@Bungee.execute(sender, args)
+
+                    override fun onTabComplete(
+                        sender: BungeeCommandSender,
+                        args: Array<String>,
+                    ) = this@Bungee.tabComplete(sender, args)
+                }
         }
 
         override fun isPlayer(commandSender: BungeeCommandSender) = commandSender is BungeePlayer
-        override fun hasPermission(commandSender: BungeeCommandSender, permission: String) = commandSender.hasPermission(permission)
+
+        override fun hasPermission(
+            commandSender: BungeeCommandSender,
+            permission: String,
+        ) = commandSender.hasPermission(permission)
+
         override fun getAllPlayerNames() = ProxyServer.getInstance().players.map { it.name }
     }
 

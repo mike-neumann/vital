@@ -2,7 +2,7 @@ package me.vitalframework.holograms
 
 import me.vitalframework.configs.VitalConfig
 import org.bukkit.Location
-import java.util.*
+import java.util.UUID
 
 /**
  * Represents a global implementation of a vital hologram with string-based content.

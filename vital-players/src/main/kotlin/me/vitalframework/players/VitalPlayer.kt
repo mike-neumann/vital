@@ -1,7 +1,9 @@
 package me.vitalframework.players
 
-import me.vitalframework.*
-import java.util.*
+import me.vitalframework.BungeePlayer
+import me.vitalframework.SpigotPlayer
+import me.vitalframework.VitalEntity
+import java.util.UUID
 
 /**
  * Represents a core player abstraction within the Vital framework.
@@ -13,7 +15,9 @@ import java.util.*
  * @property player The underlying player instance of type [T].
  * @constructor Creates an instance of `VitalPlayer` for the associated [player].
  */
-abstract class VitalPlayer<T>(val player: T) : VitalEntity<UUID> {
+abstract class VitalPlayer<T>(
+    val player: T,
+) : VitalEntity<UUID> {
     /**
      * Represents a Spigot implementation of the `VitalPlayer` abstraction.
      *
@@ -24,7 +28,9 @@ abstract class VitalPlayer<T>(val player: T) : VitalEntity<UUID> {
      * @constructor Creates an instance of `Spigot` using the provided [player] of type `SpigotPlayer`.
      * @param player The underlying Spigot player instance this class represents.
      */
-    open class Spigot(player: SpigotPlayer) : VitalPlayer<SpigotPlayer>(player) {
+    open class Spigot(
+        player: SpigotPlayer,
+    ) : VitalPlayer<SpigotPlayer>(player) {
         override var id = player.uniqueId
     }
 
@@ -37,7 +43,9 @@ abstract class VitalPlayer<T>(val player: T) : VitalEntity<UUID> {
      *
      * @param player The instance of the Bungee-specific player abstraction [BungeePlayer].
      */
-    open class Bungee(player: BungeePlayer) : VitalPlayer<BungeePlayer>(player) {
+    open class Bungee(
+        player: BungeePlayer,
+    ) : VitalPlayer<BungeePlayer>(player) {
         override var id: UUID = player.uniqueId
     }
 }

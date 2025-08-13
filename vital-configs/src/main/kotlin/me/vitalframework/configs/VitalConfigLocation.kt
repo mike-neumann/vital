@@ -1,6 +1,8 @@
 package me.vitalframework.configs
 
-import org.bukkit.*
+import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.WorldCreator
 
 /**
  * Represents a configuration-compatible wrapper for Minecraft Location.
@@ -17,14 +19,15 @@ import org.bukkit.*
  */
 class VitalConfigLocation {
     companion object {
-        fun of(location: Location) = VitalConfigLocation().apply {
-            world = location.world!!.name
-            x = location.x
-            y = location.y
-            z = location.z
-            pitch = location.pitch
-            yaw = location.yaw
-        }
+        fun of(location: Location) =
+            VitalConfigLocation().apply {
+                world = location.world!!.name
+                x = location.x
+                y = location.y
+                z = location.z
+                pitch = location.pitch
+                yaw = location.yaw
+            }
     }
 
     @VitalConfig.Property(String::class)

@@ -17,7 +17,9 @@ class VitalSpringConfig {
         // "plugin" is registered when vital starts up, we know it exists, so we can suppress the spring warning here
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         @Bean
-        fun spigotPlugin(@Qualifier("plugin") plugin: SpigotPlugin) = plugin
+        fun spigotPlugin(
+            @Qualifier("plugin") plugin: SpigotPlugin,
+        ) = plugin
     }
 
     @ComponentScan(basePackages = ["me.vitalframework"])
@@ -27,6 +29,8 @@ class VitalSpringConfig {
         // "plugin" is registered when vital starts up, we know it exists, so we can suppress the spring warning here
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         @Bean
-        fun bungeePlugin(@Qualifier("plugin") plugin: BungeePlugin) = plugin
+        fun bungeePlugin(
+            @Qualifier("plugin") plugin: BungeePlugin,
+        ) = plugin
     }
 }

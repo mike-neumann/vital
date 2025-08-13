@@ -1,7 +1,9 @@
 package me.vitalframework.commands
 
 import org.bukkit.Material
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 class VitalCommandsTest {
     @Test
@@ -44,21 +46,32 @@ class VitalCommandsTest {
             @VitalCommand.Info("testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
-                fun onTestArg(sender: CommandSender, executedArg: String, commandArg: Arg, values: Array<String>) =
-                    ReturnState.SUCCESS
+                fun onTestArg(
+                    sender: CommandSender,
+                    executedArg: String,
+                    commandArg: Arg,
+                    values: Array<String>,
+                ) = ReturnState.SUCCESS
             }
         }
     }
 
     @Test
     fun `arg handler parameter mapping with variables should work`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(Arg("testArg %PLAYER%"))
-            fun onTestArg(sender: CommandSender, executedArg: String, commandArg: Arg, values: Array<String>): ReturnState {
-                sender.sendMessage(values.contentToString())
-                return ReturnState.SUCCESS
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(Arg("testArg %PLAYER%"))
+                fun onTestArg(
+                    sender: CommandSender,
+                    executedArg: String,
+                    commandArg: Arg,
+                    values: Array<String>,
+                ): ReturnState {
+                    sender.sendMessage(values.contentToString())
+                    return ReturnState.SUCCESS
+                }
             }
-        }
         val sender = VitalTestCommand.Player()
 
         testCommand.execute(sender, arrayOf("testArg", "xRa1ny"))
@@ -115,8 +128,12 @@ class VitalCommandsTest {
                 fun onTestArg() = ReturnState.SUCCESS
 
                 @ArgExceptionHandler("testArg", RuntimeException::class)
-                fun onTestArgException(sender: CommandSender, executedArg: String, commandArg: Arg, e: RuntimeException) =
-                    ReturnState.SUCCESS
+                fun onTestArgException(
+                    sender: CommandSender,
+                    executedArg: String,
+                    commandArg: Arg,
+                    e: RuntimeException,
+                ) = ReturnState.SUCCESS
             }
         }
     }
@@ -149,12 +166,14 @@ class VitalCommandsTest {
 
     @Test
     fun `base command should be executed`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            override fun onBaseCommand(sender: CommandSender): ReturnState {
-                sender.sendMessage("onBaseCommand")
-                return ReturnState.SUCCESS
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                override fun onBaseCommand(sender: CommandSender): ReturnState {
+                    sender.sendMessage("onBaseCommand")
+                    return ReturnState.SUCCESS
+                }
             }
-        }
         val sender = VitalTestCommand.Player()
 
         testCommand.execute(sender, arrayOf(""))
@@ -165,13 +184,15 @@ class VitalCommandsTest {
 
     @Test
     fun `arg handler should be executed`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(Arg("testArg"))
-            fun onTestArg(sender: CommandSender): ReturnState {
-                sender.sendMessage("onTestArg")
-                return ReturnState.SUCCESS
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(Arg("testArg"))
+                fun onTestArg(sender: CommandSender): ReturnState {
+                    sender.sendMessage("onTestArg")
+                    return ReturnState.SUCCESS
+                }
             }
-        }
         val sender = VitalTestCommand.Player()
 
         testCommand.execute(sender, arrayOf("testArg"))
@@ -182,16 +203,18 @@ class VitalCommandsTest {
 
     @Test
     fun `arg exception handler should not be executed`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(Arg("testArg"))
-            fun onTestArg(sender: CommandSender) = ReturnState.SUCCESS
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(Arg("testArg"))
+                fun onTestArg(sender: CommandSender) = ReturnState.SUCCESS
 
-            @ArgExceptionHandler("testArg", type = Exception::class)
-            fun onTestArgException(sender: CommandSender): ReturnState {
-                sender.sendMessage("onTestArgException")
-                return ReturnState.SUCCESS
+                @ArgExceptionHandler("testArg", type = Exception::class)
+                fun onTestArgException(sender: CommandSender): ReturnState {
+                    sender.sendMessage("onTestArgException")
+                    return ReturnState.SUCCESS
+                }
             }
-        }
         val sender = VitalTestCommand.Player()
 
         testCommand.execute(sender, arrayOf("testArg"))
@@ -201,18 +224,18 @@ class VitalCommandsTest {
 
     @Test
     fun `arg exception handler should be executed`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(arg = Arg("testArg"))
-            fun onTestArg(): ReturnState {
-                throw RuntimeException("test exception")
-            }
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(arg = Arg("testArg"))
+                fun onTestArg(): ReturnState = throw RuntimeException("test exception")
 
-            @ArgExceptionHandler("testArg", type = RuntimeException::class)
-            fun onTestArgException(sender: CommandSender): ReturnState {
-                sender.sendMessage("onTestArgException")
-                return ReturnState.SUCCESS
+                @ArgExceptionHandler("testArg", type = RuntimeException::class)
+                fun onTestArgException(sender: CommandSender): ReturnState {
+                    sender.sendMessage("onTestArgException")
+                    return ReturnState.SUCCESS
+                }
             }
-        }
         val sender = VitalTestCommand.Player()
 
         testCommand.execute(sender, arrayOf("testArg"))
@@ -223,10 +246,12 @@ class VitalCommandsTest {
 
     @Test
     fun `tab completions should be empty`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(arg = Arg("testArg"))
-            fun onTestArg() = ReturnState.SUCCESS
-        }
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(arg = Arg("testArg"))
+                fun onTestArg() = ReturnState.SUCCESS
+            }
         val sender = VitalTestCommand.Player()
         val completions = testCommand.tabComplete(sender, arrayOf("d"))
 
@@ -235,10 +260,12 @@ class VitalCommandsTest {
 
     @Test
     fun `tab completions should contain arg`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(arg = Arg("testArg"))
-            fun onTestArg() = ReturnState.SUCCESS
-        }
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(arg = Arg("testArg"))
+                fun onTestArg() = ReturnState.SUCCESS
+            }
         val sender = VitalTestCommand.Player()
         val tabCompletions = testCommand.tabComplete(sender, arrayOf("t"))
 
@@ -248,10 +275,12 @@ class VitalCommandsTest {
 
     @Test
     fun `tab completions should contain sub arg`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(arg = Arg("testArg testSubArg"))
-            fun onTestArg() = ReturnState.SUCCESS
-        }
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(arg = Arg("testArg testSubArg"))
+                fun onTestArg() = ReturnState.SUCCESS
+            }
         val sender = VitalTestCommand.Player()
         val tabCompletions = testCommand.tabComplete(sender, arrayOf("testArg", ""))
 
@@ -261,10 +290,12 @@ class VitalCommandsTest {
 
     @Test
     fun `tab completions should contain player name`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(arg = Arg("%PLAYER%"))
-            fun onTestArg() = ReturnState.SUCCESS
-        }
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(arg = Arg("%PLAYER%"))
+                fun onTestArg() = ReturnState.SUCCESS
+            }
         val sender = VitalTestCommand.Player()
         val tabCompletions = testCommand.tabComplete(sender, arrayOf(""))
         // 2 since we also have %PLAYER% in the completions
@@ -274,10 +305,12 @@ class VitalCommandsTest {
 
     @Test
     fun `tab completions should contain boolean`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(arg = Arg("%BOOLEAN%"))
-            fun onTestArg() = ReturnState.SUCCESS
-        }
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(arg = Arg("%BOOLEAN%"))
+                fun onTestArg() = ReturnState.SUCCESS
+            }
         val sender = VitalTestCommand.Player()
         val tabCompletions = testCommand.tabComplete(sender, arrayOf(""))
         // 3 since we also have %BOOLEAN% in the completions
@@ -288,10 +321,12 @@ class VitalCommandsTest {
 
     @Test
     fun `tab completions should contain number`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(arg = Arg("%NUMBER%"))
-            fun onTestArg() = ReturnState.SUCCESS
-        }
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(arg = Arg("%NUMBER%"))
+                fun onTestArg() = ReturnState.SUCCESS
+            }
         val sender = VitalTestCommand.Player()
         val tabCompletions = testCommand.tabComplete(sender, arrayOf(""))
         // 2 since we also have %NUMBER% in the tab-completions
@@ -301,10 +336,12 @@ class VitalCommandsTest {
 
     @Test
     fun `tab completions should contain all materials`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(arg = Arg("%MATERIAL%"))
-            fun onTestArg() = ReturnState.SUCCESS
-        }
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(arg = Arg("%MATERIAL%"))
+                fun onTestArg() = ReturnState.SUCCESS
+            }
         val sender = VitalTestCommand.Player()
         val tabCompletions = testCommand.tabComplete(sender, arrayOf(""))
         // +1 since we also have %MATERIAL% in the completions
@@ -317,13 +354,18 @@ class VitalCommandsTest {
 
     @Test
     fun `arg handler parameter matching placeholder should be executed`() {
-        val testCommand = @VitalCommand.Info("testCommand") object : VitalTestCommand() {
-            @ArgHandler(Arg("testArg %PLAYER%"))
-            fun onTestArg(sender: CommandSender, values: Array<String>): ReturnState {
-                sender.sendMessage(values.contentToString())
-                return ReturnState.SUCCESS
+        val testCommand =
+            @VitalCommand.Info("testCommand")
+            object : VitalTestCommand() {
+                @ArgHandler(Arg("testArg %PLAYER%"))
+                fun onTestArg(
+                    sender: CommandSender,
+                    values: Array<String>,
+                ): ReturnState {
+                    sender.sendMessage(values.contentToString())
+                    return ReturnState.SUCCESS
+                }
             }
-        }
         val sender = VitalTestCommand.Player()
 
         testCommand.execute(sender, arrayOf("testArg", "%PLAYER%"))

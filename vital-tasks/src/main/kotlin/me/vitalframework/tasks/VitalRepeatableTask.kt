@@ -1,6 +1,11 @@
 package me.vitalframework.tasks
 
-import me.vitalframework.*
+import me.vitalframework.BungeePlugin
+import me.vitalframework.BungeeRunnable
+import me.vitalframework.BungeeTask
+import me.vitalframework.SpigotPlugin
+import me.vitalframework.SpigotRunnable
+import me.vitalframework.SpigotTask
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import net.md_5.bungee.api.ProxyServer
 import org.springframework.stereotype.Component
@@ -19,7 +24,9 @@ import java.util.concurrent.TimeUnit
  * @param R The type of the runnable defining the task's logic.
  * @param T The type of the task instance used to schedule or manage execution.
  */
-abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) {
+abstract class VitalRepeatableTask<P, R : Runnable, T>(
+    val plugin: P,
+) {
     /**
      * Represents the interval duration in milliseconds.
      * This variable defines the time span or delay used for scheduling repetitive tasks, setting timeouts, or controlling execution intervals in a process.
@@ -239,7 +246,9 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) {
     @Component
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Info(val interval: Long)
+    annotation class Info(
+        val interval: Long,
+    )
 
     /**
      * A concrete implementation of `VitalRepeatableTask` specific to the Spigot platform.
@@ -254,13 +263,18 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) {
      *
      * @param plugin The Spigot plugin instance to associate with this task.
      */
-    open class Spigot(plugin: SpigotPlugin) : VitalRepeatableTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
-        override fun createRunnable() = object : SpigotRunnable() {
-            override fun run() = handleTick()
-        }
+    open class Spigot(
+        plugin: SpigotPlugin,
+    ) : VitalRepeatableTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
+        override fun createRunnable() =
+            object : SpigotRunnable() {
+                override fun run() = handleTick()
+            }
 
         override fun createTask() = runnable!!.runTaskTimer(plugin, 0L, (interval / 1000L) * 20L)
+
         override fun cancelRunnable(): Unit = run { runnable?.cancel() }
+
         override fun cancelTask(): Unit = run { task?.cancel() }
     }
 
@@ -271,10 +285,15 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(val plugin: P) {
      * executing repeatable tasks tailored to the `BungeePlugin`. The `Bungee` class specifies
      * the creation of a runnable and a scheduled task, as well as their cancellation mechanisms.
      */
-    class Bungee(plugin: BungeePlugin) : VitalRepeatableTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
+    class Bungee(
+        plugin: BungeePlugin,
+    ) : VitalRepeatableTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
         override fun createRunnable() = BungeeRunnable { handleTick() }
+
         override fun createTask() = ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, interval, TimeUnit.MILLISECONDS)!!
+
         override fun cancelRunnable(): Unit = run { task?.cancel() }
+
         override fun cancelTask(): Unit = run { task?.cancel() }
     }
 }

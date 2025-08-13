@@ -1,6 +1,11 @@
 package me.vitalframework.tasks
 
-import me.vitalframework.*
+import me.vitalframework.BungeePlugin
+import me.vitalframework.BungeeRunnable
+import me.vitalframework.BungeeTask
+import me.vitalframework.SpigotPlugin
+import me.vitalframework.SpigotRunnable
+import me.vitalframework.SpigotTask
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import net.md_5.bungee.api.ProxyServer
 import org.springframework.stereotype.Component
@@ -25,7 +30,9 @@ import java.util.concurrent.TimeUnit
  * @param T The type of the task that executes the countdown.
  * @param R The type of the runnable associated with the countdown process.
  */
-abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) {
+abstract class VitalCountdownTask<P, R : Runnable, T>(
+    val plugin: P,
+) {
     /**
      * Represents the initial countdown value for the countdown task.
      *
@@ -323,7 +330,10 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) {
     @Component
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Info(val countdown: Long, val interval: Long = 1_000L)
+    annotation class Info(
+        val countdown: Long,
+        val interval: Long = 1_000L,
+    )
 
     /**
      * Represents a specialized countdown task for Spigot-based plugins.
@@ -335,13 +345,18 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) {
      *
      * @param plugin The Spigot plugin instance to associate with this countdown task.
      */
-    open class Spigot(plugin: SpigotPlugin) : VitalCountdownTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
-        override fun createRunnable() = object : SpigotRunnable() {
-            override fun run() = handleTick()
-        }
+    open class Spigot(
+        plugin: SpigotPlugin,
+    ) : VitalCountdownTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
+        override fun createRunnable() =
+            object : SpigotRunnable() {
+                override fun run() = handleTick()
+            }
 
         override fun createTask() = runnable!!.runTaskTimer(plugin, 0L, ((interval / 1000.0) * 20L).toLong())
+
         override fun cancelRunnable(): Unit = run { runnable?.cancel() }
+
         override fun cancelTask(): Unit = run { task?.cancel() }
     }
 
@@ -363,10 +378,15 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(val plugin: P) {
      * @constructor Initializes the Bungee countdown task with the provided plugin instance.
      * @param plugin The plugin instance this countdown task is associated with.
      */
-    open class Bungee(plugin: BungeePlugin) : VitalCountdownTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
+    open class Bungee(
+        plugin: BungeePlugin,
+    ) : VitalCountdownTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
         override fun createRunnable() = BungeeRunnable { handleTick() }
+
         override fun createTask() = ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, interval, TimeUnit.MILLISECONDS)!!
+
         override fun cancelRunnable(): Unit = run { task?.cancel() }
+
         override fun cancelTask(): Unit = run { task?.cancel() }
     }
 }

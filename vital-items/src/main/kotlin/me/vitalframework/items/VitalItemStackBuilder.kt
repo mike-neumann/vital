@@ -7,7 +7,7 @@ import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
-import java.util.*
+import java.util.UUID
 
 /**
  * A builder class for creating and configuring item stacks with customizable properties.
@@ -51,36 +51,43 @@ open class VitalItemStackBuilder {
  * @return The constructed `ItemStack` instance with the specified
  * properties applied.
  */
-inline fun itemBuilder(itemUuid: UUID? = null, init: VitalItemStackBuilder.() -> Unit): ItemStack {
+inline fun itemBuilder(
+    itemUuid: UUID? = null,
+    init: VitalItemStackBuilder.() -> Unit,
+): ItemStack {
     val itemStackBuilder = VitalItemStackBuilder().apply { init() }
-    val itemStack = ItemStack(itemStackBuilder.type, itemStackBuilder.amount).apply {
-        if (type == Material.AIR) return this
-        // since we know we have an item which is not of type AIR, we now have a persistent data container
-        itemMeta = itemMeta!!.apply {
-            // each item MUST have a unique identifier, used in interactive items.
-            persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING] =
-                itemUuid?.toString() ?: UUID.randomUUID().toString()
+    val itemStack =
+        ItemStack(itemStackBuilder.type, itemStackBuilder.amount).apply {
+            if (type == Material.AIR) return this
+            // since we know we have an item which is not of type AIR, we now have a persistent data container
+            itemMeta =
+                itemMeta!!.apply {
+                    // each item MUST have a unique identifier, used in interactive items.
+                    persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING] =
+                        itemUuid?.toString() ?: UUID.randomUUID().toString()
 
-            if (itemStackBuilder.name != null) {
-                displayName(
-                    MiniMessage.miniMessage().deserialize("<reset><white>${itemStackBuilder.name}")
-                        .decoration(TextDecoration.ITALIC, false)
-                )
-            }
+                    if (itemStackBuilder.name != null) {
+                        displayName(
+                            MiniMessage
+                                .miniMessage()
+                                .deserialize("<reset><white>${itemStackBuilder.name}")
+                                .decoration(TextDecoration.ITALIC, false),
+                        )
+                    }
 
-            for ((enchantment, level) in itemStackBuilder.enchantments) {
-                addEnchant(enchantment, level, true)
-            }
+                    for ((enchantment, level) in itemStackBuilder.enchantments) {
+                        addEnchant(enchantment, level, true)
+                    }
 
-            for (itemFlag in itemStackBuilder.itemFlags) {
-                addItemFlags(itemFlag)
-            }
+                    for (itemFlag in itemStackBuilder.itemFlags) {
+                        addItemFlags(itemFlag)
+                    }
 
-            lore(itemStackBuilder.lore.map { MiniMessage.miniMessage().deserialize(it).decoration(TextDecoration.ITALIC, false) })
+                    lore(itemStackBuilder.lore.map { MiniMessage.miniMessage().deserialize(it).decoration(TextDecoration.ITALIC, false) })
 
-            isUnbreakable = itemStackBuilder.unbreakable
+                    isUnbreakable = itemStackBuilder.unbreakable
+                }
         }
-    }
 
     itemStackBuilder.afterInit(itemStack)
 

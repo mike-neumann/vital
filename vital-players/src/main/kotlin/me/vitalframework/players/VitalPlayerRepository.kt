@@ -2,7 +2,7 @@ package me.vitalframework.players
 
 import me.vitalframework.VitalRepository
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 /**
  * Repository class for managing `VitalPlayer` entities in-memory.

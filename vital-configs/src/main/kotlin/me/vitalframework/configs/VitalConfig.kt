@@ -5,7 +5,13 @@ import me.vitalframework.logger
 import org.springframework.stereotype.Component
 import java.io.IOException
 import java.io.InputStream
-import kotlin.io.path.*
+import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createFile
+import kotlin.io.path.exists
+import kotlin.io.path.inputStream
+import kotlin.io.path.name
+import kotlin.io.path.writeText
 import kotlin.reflect.KClass
 
 /**
@@ -46,16 +52,20 @@ abstract class VitalConfig {
         val info = getRequiredAnnotation<Info>()
 
         fileName = info.name
-        processor = try {
-            info.processor.java.getDeclaredConstructor().newInstance()
-        } catch (e: Exception) {
-            throw VitalConfigException.CreateFileProcessor(info.name, info.processor.java, e)
-        }
+        processor =
+            try {
+                info.processor.java
+                    .getDeclaredConstructor()
+                    .newInstance()
+            } catch (e: Exception) {
+                throw VitalConfigException.CreateFileProcessor(info.name, info.processor.java, e)
+            }
         val file = Path(fileName)
-        val inputStream = when {
-            file.exists() -> file.inputStream()
-            else -> "".byteInputStream()
-        }
+        val inputStream =
+            when {
+                file.exists() -> file.inputStream()
+                else -> "".byteInputStream()
+            }
 
         try {
             // after everything has worked without any problem, inject fields of our config with the values now retrievable...
@@ -128,7 +138,10 @@ abstract class VitalConfig {
     @Component
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Info(val name: String, val processor: KClass<out Processor<*, Any>>)
+    annotation class Info(
+        val name: String,
+        val processor: KClass<out Processor<*, Any>>,
+    )
 
     /**
      * Annotation used to mark fields within a configuration class as properties.
@@ -146,7 +159,9 @@ abstract class VitalConfig {
      */
     @Target(AnnotationTarget.FIELD)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Property(vararg val types: KClass<*>)
+    annotation class Property(
+        vararg val types: KClass<*>,
+    )
 
     /**
      * Represents a generic processor interface for managing serialized and deserialized data.
@@ -176,7 +191,10 @@ abstract class VitalConfig {
          * @return A map containing key-value pairs, where keys are strings representing property or field names,
          *         and values are the deserialized objects of the specified type.
          */
-        fun load(inputStream: InputStream, clazz: Class<*>): Map<String, T>
+        fun load(
+            inputStream: InputStream,
+            clazz: Class<*>,
+        ): Map<String, T>
 
         /**
          * Retrieves the value associated with the provided key from the processor's internal storage.
@@ -195,7 +213,10 @@ abstract class VitalConfig {
          * @return The value associated with the specified key, or the default value if the key is not found.
          * Returns null if no value exists and no default is provided.
          */
-        fun read(key: String, def: @UnsafeVariance T): T?
+        fun read(
+            key: String,
+            def: @UnsafeVariance T,
+        ): T?
 
         /**
          * Writes the provided serialized content.
@@ -219,7 +240,10 @@ abstract class VitalConfig {
          * @param key The unique identifier used to associate the value in the storage.
          * @param value The value to be written, where the type may vary depending on the processor implementation.
          */
-        fun write(key: String, value: @UnsafeVariance T)
+        fun write(
+            key: String,
+            value: @UnsafeVariance T,
+        )
 
         /**
          * Saves the provided serialized content and returns the file name where the data was saved.
@@ -249,6 +273,9 @@ abstract class VitalConfig {
          * @return An instance of the specified type populated with data from the serialized content,
          *         or null if deserialization fails.
          */
-        fun deserialize(serializedContent: Map<String, @UnsafeVariance T>, type: Class<*>): Any?
+        fun deserialize(
+            serializedContent: Map<String, @UnsafeVariance T>,
+            type: Class<*>,
+        ): Any?
     }
 }

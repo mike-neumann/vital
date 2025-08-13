@@ -1,7 +1,6 @@
 package me.vitalframework
 
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Repository
 
 /**
  * An in-memory repository implementation that provides volatile data storage.
@@ -31,7 +30,9 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     }
 
     fun exists(entity: T) = _entities.contains(entity)
+
     fun exists(id: ID) = _entities.any { it.id == id }
+
     fun get(id: ID) = _entities.find { it.id == id }
 
     @JvmOverloads
@@ -40,5 +41,6 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     fun delete(entity: T) = run { _entities.remove(entity).also { onDelete(entity) } }
 
     protected fun onSave(entity: T) {}
+
     protected fun onDelete(entity: T) {}
 }

@@ -8,7 +8,7 @@ import org.bukkit.Bukkit
 import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.scoreboard.Team
 import org.bukkit.scoreboard.Team.OptionStatus
-import java.util.*
+import java.util.UUID
 
 /**
  * Represents a team within a scoreboard system, providing functionality for managing
@@ -29,7 +29,10 @@ import java.util.*
  * @param name The unique name of the team, used as an identifier.
  * @param scoreboard The scoreboard to which this team belongs.
  */
-class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Scoreboard) {
+class VitalScoreboardTeam internal constructor(
+    val name: String,
+    scoreboard: Scoreboard,
+) {
     private val _players = mutableListOf<UUID>()
     private val _options = mutableMapOf<Team.Option, OptionStatus>()
 
@@ -80,9 +83,10 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
      * - Facilitating synchronization of team configurations such as options, members, and display properties.
      * - Interacting with the Minecraft server through the Bukkit scoreboard system.
      */
-    val bukkitTeam: Team = scoreboard.registerNewTeam(
-        PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(name))
-    )
+    val bukkitTeam: Team =
+        scoreboard.registerNewTeam(
+            PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(name)),
+        )
 
     /**
      * Represents the prefix applied to the display names of members in this team.
@@ -182,7 +186,10 @@ class VitalScoreboardTeam internal constructor(val name: String, scoreboard: Sco
      * @param option The option to be set or updated for this team.
      * @param status The status that should be assigned to the specified option.
      */
-    fun setOption(option: Team.Option, status: OptionStatus) {
+    fun setOption(
+        option: Team.Option,
+        status: OptionStatus,
+    ) {
         _options[option] = status
     }
 

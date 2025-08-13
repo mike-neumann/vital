@@ -16,12 +16,16 @@ object VitalConfigUtils {
      * @return The value of the field, or null if the field is not set or accessible.
      * @throws VitalConfigException.ReadField If an exception occurs while attempting to read the field.
      */
-    fun readField(accessor: Any, field: Field): Any? = try {
-        field.isAccessible = true
-        field[accessor]
-    } catch (e: Exception) {
-        throw VitalConfigException.ReadField(field, e)
-    }
+    fun readField(
+        accessor: Any,
+        field: Field,
+    ): Any? =
+        try {
+            field.isAccessible = true
+            field[accessor]
+        } catch (e: Exception) {
+            throw VitalConfigException.ReadField(field, e)
+        }
 
     /**
      * Injects a value into the specified field of the given object.
@@ -33,7 +37,11 @@ object VitalConfigUtils {
      * @param value The value to inject into the specified field.
      * @throws VitalConfigException.InjectField if the injection fails.
      */
-    fun injectField(accessor: Any, field: Field, value: Any?) = try {
+    fun injectField(
+        accessor: Any,
+        field: Field,
+        value: Any?,
+    ) = try {
         // force field to be accessible even if private
         // this is needed for injection...
         field.isAccessible = true
@@ -68,5 +76,8 @@ object VitalConfigUtils {
      * @param property The name of the property to match against field names.
      * @return The first matching field if found, or null otherwise.
      */
-    fun getFieldByProperty(clazz: Class<*>, property: String) = getPropertyFieldsFromType(clazz).firstOrNull { it.name == property }
+    fun getFieldByProperty(
+        clazz: Class<*>,
+        property: String,
+    ) = getPropertyFieldsFromType(clazz).firstOrNull { it.name == property }
 }

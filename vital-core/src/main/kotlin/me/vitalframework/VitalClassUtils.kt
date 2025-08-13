@@ -11,8 +11,9 @@ object VitalClassUtils {
      * @return The annotation of type [T] if it exists on the object's class.
      * @throws RuntimeException If the object's class is not annotated with the specified annotation type.
      */
-    inline fun <reified T : Annotation> Any.getRequiredAnnotation() = javaClass.getAnnotation(T::class.java)
-        ?: throw RuntimeException("${javaClass.simpleName} must be annotated with '@${T::class.java.name}'")
+    inline fun <reified T : Annotation> Any.getRequiredAnnotation() =
+        javaClass.getAnnotation(T::class.java)
+            ?: throw RuntimeException("${javaClass.simpleName} must be annotated with '@${T::class.java.name}'")
 
     /**
      * Retrieves all annotations of a specified type applied to the current class.

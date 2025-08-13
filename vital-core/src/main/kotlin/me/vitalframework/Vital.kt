@@ -11,16 +11,21 @@ object Vital {
     val vitalSubModules = mutableListOf<String>()
 
     @JvmStatic
-    fun run(loader: Any, pluginClass: Class<*>, classLoader: ClassLoader) {
+    fun run(
+        loader: Any,
+        pluginClass: Class<*>,
+        classLoader: ClassLoader,
+    ) {
         Thread.currentThread().contextClassLoader = classLoader
         ClassUtils.overrideThreadContextClassLoader(classLoader)
         // start up spring boot using the previously generated "PluginConfiguration" class as the main class
-        context = SpringApplicationBuilder(classLoader.loadClass("${pluginClass.packageName}.PluginConfiguration"))
-            // here we register the plugin instance as a bean so we can inject it elsewhere
-            .initializers({ it.beanFactory.registerSingleton("plugin", loader) })
-            // this is needed so spring can locate classes and resources that are on the plugin classpath
-            .resourceLoader(VitalResourceLoader())
-            .run()
+        context =
+            SpringApplicationBuilder(classLoader.loadClass("${pluginClass.packageName}.PluginConfiguration"))
+                // here we register the plugin instance as a bean so we can inject it elsewhere
+                .initializers({ it.beanFactory.registerSingleton("plugin", loader) })
+                // this is needed so spring can locate classes and resources that are on the plugin classpath
+                .resourceLoader(VitalResourceLoader())
+                .run()
     }
 
     @Configuration
@@ -34,10 +39,12 @@ object Vital {
         val author: Array<String> = [],
         val environment: PluginEnvironment,
     ) {
-        enum class PluginEnvironment(val ymlFileName: String) {
+        enum class PluginEnvironment(
+            val ymlFileName: String,
+        ) {
             SPIGOT("plugin.yml"),
             PAPER("plugin.yml"),
-            BUNGEE("bungee.yml")
+            BUNGEE("bungee.yml"),
         }
     }
 }

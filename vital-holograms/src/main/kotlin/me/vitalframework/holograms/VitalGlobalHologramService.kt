@@ -7,7 +7,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.ArmorStand
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 /**
  * Service class for managing and interacting with global holograms in the game world.
@@ -19,7 +19,9 @@ import java.util.*
  */
 @RequiresSpigot
 @Service
-class VitalGlobalHologramService(val globalHologramRepository: VitalGlobalHologramRepository) {
+class VitalGlobalHologramService(
+    val globalHologramRepository: VitalGlobalHologramRepository,
+) {
     /**
      * Creates and spawns a global hologram at the specified location with the given name and lines of content.
      *
@@ -32,26 +34,33 @@ class VitalGlobalHologramService(val globalHologramRepository: VitalGlobalHologr
      *              Each line is processed and formatted appropriately.
      * @param location The location in the game world where the hologram will be created.
      */
-    fun createGlobalHologram(name: String, lines: List<String>, location: Location) {
+    fun createGlobalHologram(
+        name: String,
+        lines: List<String>,
+        location: Location,
+    ) {
         // now we can actually spawn the hologram.
-        val armorStand = location.world!!.spawn(location, ArmorStand::class.java) {
-            it.isVisible = false
-            it.isMarker = true
-        }
-        val lineArmorStandUniqueIds = lines.reversed().mapIndexed { i, line ->
-            // convert the minimessage formatted line into a legacy section formatted line.
-            val formattedLine = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(line))
-
-            location.world!!.spawn(location.clone().add(0.0, .25 * i, 0.0), ArmorStand::class.java) {
+        val armorStand =
+            location.world!!.spawn(location, ArmorStand::class.java) {
                 it.isVisible = false
                 it.isMarker = true
-                it.isCustomNameVisible = true
-                it.customName(MiniMessage.miniMessage().deserialize(formattedLine))
-            }.uniqueId
-        }
+            }
+        val lineArmorStandUniqueIds =
+            lines.reversed().mapIndexed { i, line ->
+                // convert the minimessage formatted line into a legacy section formatted line.
+                val formattedLine = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(line))
+
+                location.world!!
+                    .spawn(location.clone().add(0.0, .25 * i, 0.0), ArmorStand::class.java) {
+                        it.isVisible = false
+                        it.isMarker = true
+                        it.isCustomNameVisible = true
+                        it.customName(MiniMessage.miniMessage().deserialize(formattedLine))
+                    }.uniqueId
+            }
 
         globalHologramRepository.save(
-            VitalGlobalHologram(UUID.randomUUID(), name, lines, location, armorStand.uniqueId, lineArmorStandUniqueIds)
+            VitalGlobalHologram(UUID.randomUUID(), name, lines, location, armorStand.uniqueId, lineArmorStandUniqueIds),
         )
     }
 

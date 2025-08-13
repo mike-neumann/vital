@@ -18,7 +18,10 @@ import org.springframework.stereotype.Service
  */
 @RequiresSpigot
 @Service
-class VitalMinigameService(val plugin: SpigotPlugin, val minigameStates: List<VitalBaseMinigameState>) {
+class VitalMinigameService(
+    val plugin: SpigotPlugin,
+    val minigameStates: List<VitalBaseMinigameState>,
+) {
     /**
      * Represents the currently active state of the minigame.
      *

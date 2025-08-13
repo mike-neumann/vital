@@ -6,7 +6,10 @@ import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
 @Component
-class VitalGlobalCommandExceptionHandlerProcessor(applicationContext: ApplicationContext, val commands: List<VitalCommand<*, *>>) {
+class VitalGlobalCommandExceptionHandlerProcessor(
+    applicationContext: ApplicationContext,
+    val commands: List<VitalCommand<*, *>>,
+) {
     private val advices = applicationContext.getBeansWithAnnotation(VitalCommand.Advice::class.java).values
 
     @PostConstruct
@@ -16,8 +19,7 @@ class VitalGlobalCommandExceptionHandlerProcessor(applicationContext: Applicatio
             advices
                 .filter {
                     command.commandSenderClass.isAssignableFrom(it.getRequiredAnnotation<VitalCommand.Advice>().commandSenderClass.java)
-                }
-                .forEach { adviceInstance ->
+                }.forEach { adviceInstance ->
                     val advice = adviceInstance.javaClass.getAnnotation(VitalCommand.Advice::class.java)!!
                     adviceInstance::class.java.methods
                         .filter { it.getAnnotationsByType(VitalCommand.GlobalExceptionHandler::class.java).size > 0 }
@@ -34,8 +36,10 @@ class VitalGlobalCommandExceptionHandlerProcessor(applicationContext: Applicatio
     companion object {
         private val globalExceptionHandlers = mutableMapOf<Class<out Throwable>, VitalCommand.GlobalExceptionHandlerContext>()
 
-        fun getGlobalExceptionHandler(type: Class<out Throwable>) = globalExceptionHandlers.entries.find {
-            it.key.isAssignableFrom(type)
-        }?.value
+        fun getGlobalExceptionHandler(type: Class<out Throwable>) =
+            globalExceptionHandlers.entries
+                .find {
+                    it.key.isAssignableFrom(type)
+                }?.value
     }
 }

@@ -4,7 +4,9 @@ import me.vitalframework.logger
 import org.springframework.stereotype.Service
 
 @Service
-class VitalStatisticsService(val statisticsConfig: VitalStatisticsConfig) {
+class VitalStatisticsService(
+    val statisticsConfig: VitalStatisticsConfig,
+) {
     private val logger = logger()
     private val _lastTps = mutableMapOf<Long, Int>()
     private val _lastUnhealthyTps = mutableMapOf<Long, Int>()

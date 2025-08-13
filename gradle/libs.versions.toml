@@ -10,6 +10,7 @@ reflections = "0.10.2"
 adventure-platform = "4.4.1"
 adventure-serializers = "4.24.0"
 cloudnet = "4.0.0-RC13"
+ktlint = "13.0.0"
 
 [plugins]
 jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -18,6 +19,7 @@ spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 javaLibrary = { id = "org.gradle.java-library" }
 mavenPublish = { id = "org.gradle.maven-publish" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 
 [libraries]
 paperApi = { group = "io.papermc.paper", name = "paper-api", version.ref = "paperApi" }

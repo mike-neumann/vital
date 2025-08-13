@@ -2,7 +2,7 @@ package me.vitalframework.holograms
 
 import me.vitalframework.VitalEntity
 import org.bukkit.Location
-import java.util.*
+import java.util.UUID
 
 /**
  * Represents an abstract base class for all vital hologram entities in the system.

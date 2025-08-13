@@ -62,7 +62,7 @@ abstract class VitalPagedInventory : VitalInventory() {
      * This ensures that the calculation accounts for the content range, where `toSlot` is the
      * last slot that contains content, and `fromSlot` is the first slot that contains content.
      */
-    val pageContentAmount get() = (toSlot + 1 /* since content is INCLUSIVE to the SLOT itself */) - fromSlot
+    val pageContentAmount get() = (toSlot + 1) - fromSlot
 
     init {
         val info = getRequiredAnnotation<Info>()
@@ -94,11 +94,22 @@ abstract class VitalPagedInventory : VitalInventory() {
      * @param player The player for whom the page should be set.
      * @param totalContent The total amount of content used to update the maximum page. If null, the maximum page remains unchanged.
      */
-    fun setPage(page: Int, player: SpigotPlayer, totalContent: Int? = null) {
+    fun setPage(
+        page: Int,
+        player: SpigotPlayer,
+        totalContent: Int? = null,
+    ) {
         if (totalContent != null) {
             updateMaxPage(totalContent)
         }
-        val newPage = if (page <= 0) 1 else if (page >= maxPage) maxPage else page
+        val newPage =
+            if (page <= 0) {
+                1
+            } else if (page >= maxPage) {
+                maxPage
+            } else {
+                page
+            }
         _pages[player.uniqueId] = newPage
         onPageChange(newPage, player)
         super.update(player)
@@ -113,7 +124,10 @@ abstract class VitalPagedInventory : VitalInventory() {
      * @return a sublist containing the elements for the player's current page, or an empty list if the
      *         indices exceed the bounds of the original list
      */
-    protected fun <T> sliceForPage(player: SpigotPlayer, list: List<T>): List<T> {
+    protected fun <T> sliceForPage(
+        player: SpigotPlayer,
+        list: List<T>,
+    ): List<T> {
         val startIndex = (pageContentAmount * ((_pages[player.uniqueId] ?: 1) - 1))
         val endIndex = startIndex + pageContentAmount
         if (startIndex >= list.size || startIndex < 0) return mutableListOf()
@@ -129,7 +143,10 @@ abstract class VitalPagedInventory : VitalInventory() {
      * @param player The player for whom the inventory is being opened.
      * @param previousInventory The player's previous inventory, or null if there is no prior inventory.
      */
-    final override fun open(player: SpigotPlayer, previousInventory: VitalInventory?) {
+    final override fun open(
+        player: SpigotPlayer,
+        previousInventory: VitalInventory?,
+    ) {
         super.open(player, previousInventory)
         setPage(1, player)
     }
@@ -151,7 +168,10 @@ abstract class VitalPagedInventory : VitalInventory() {
      * @param page The new page number that the player has navigated to.
      * @param player The player for whom the page change has occurred.
      */
-    protected open fun onPageChange(page: Int, player: SpigotPlayer) {}
+    protected open fun onPageChange(
+        page: Int,
+        player: SpigotPlayer,
+    ) {}
 
     /**
      * Annotation for specifying a range of inventory slots within which an operation or configuration is valid.
@@ -161,5 +181,12 @@ abstract class VitalPagedInventory : VitalInventory() {
      */
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Info(val fromSlot: @Range(from = 0, to = 9) Int = 0, val toSlot: @Range(from = 0, to = 9) Int = 0)
+    annotation class Info(
+        val fromSlot:
+            @Range(from = 0, to = 9)
+            Int = 0,
+        val toSlot:
+            @Range(from = 0, to = 9)
+            Int = 0,
+    )
 }

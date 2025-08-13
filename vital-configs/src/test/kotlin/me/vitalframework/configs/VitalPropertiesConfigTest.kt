@@ -1,6 +1,8 @@
 package me.vitalframework.configs
 
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import org.springframework.util.ResourceUtils
 
 open class VitalPropertiesConfigTest {
@@ -16,9 +18,10 @@ open class VitalPropertiesConfigTest {
     fun `config content should be initialized`() {
         assertDoesNotThrow {
             // load config file into object
-            val testPropertiesConfig = VitalTestPropertiesConfig().apply {
-                load(ResourceUtils.getFile("classpath:test.properties").inputStream())
-            }
+            val testPropertiesConfig =
+                VitalTestPropertiesConfig().apply {
+                    load(ResourceUtils.getFile("classpath:test.properties").inputStream())
+                }
             // test that the file has been loaded successfully
             assert(testPropertiesConfig.testPropertiesString == "testPropertiesString")
         }

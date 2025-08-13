@@ -9,9 +9,11 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.inventory.*
+import org.bukkit.inventory.InventoryView
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.MenuType
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
 
@@ -125,7 +127,12 @@ open class VitalInventory {
      * @param action An optional action to execute when the item is clicked. Defaults to an empty action.
      */
     @JvmOverloads
-    fun setItem(slot: Int, itemStack: ItemStack, player: SpigotPlayer, action: InventoryItemClickAction = {}) {
+    fun setItem(
+        slot: Int,
+        itemStack: ItemStack,
+        player: SpigotPlayer,
+        action: InventoryItemClickAction = {},
+    ) {
         _items[slot] = itemStack
         _actions[player.uniqueId to slot] = action
     }
@@ -177,9 +184,12 @@ open class VitalInventory {
         onUpdate(player)
 
         for (i in 0..<inventory.topInventory.size) {
-            inventory.setItem(i, itemBuilder {
-                type = background
-            })
+            inventory.setItem(
+                i,
+                itemBuilder {
+                    type = background
+                },
+            )
         }
 
         for ((i, item) in _items) {
@@ -197,13 +207,18 @@ open class VitalInventory {
      *                           will be closed before opening the current one.
      */
     @Suppress("UnstableApiUsage")
-    open fun open(player: SpigotPlayer, previousInventory: VitalInventory? = null) {
+    open fun open(
+        player: SpigotPlayer,
+        previousInventory: VitalInventory? = null,
+    ) {
         previousInventory?.close(player)
-        val inventoryView = type.menuType.create(
-            player, MiniMessage.miniMessage().deserialize(
-                if ("vital-localization" in Vital.vitalSubModules) player.getTranslatedText(name) else name
+        val inventoryView =
+            type.menuType.create(
+                player,
+                MiniMessage.miniMessage().deserialize(
+                    if ("vital-localization" in Vital.vitalSubModules) player.getTranslatedText(name) else name,
+                ),
             )
-        )
 
         if (previousInventory != null) {
             _previousInventories[player.uniqueId] = previousInventory
@@ -287,7 +302,9 @@ open class VitalInventory {
         val background: Material = Material.AIR,
     ) {
         @Suppress("UnstableApiUsage")
-        enum class Type(val menuType: MenuType.Typed<*, *>) {
+        enum class Type(
+            val menuType: MenuType.Typed<*, *>,
+        ) {
             GENERIC_9X1(MenuType.GENERIC_9X1),
             GENERIC_9X2(MenuType.GENERIC_9X2),
             GENERIC_9X3(MenuType.GENERIC_9X3),
@@ -311,7 +328,7 @@ open class VitalInventory {
             SMITHING(MenuType.SMITHING),
             SMOKER(MenuType.SMOKER),
             CARTOGRAPHY_TABLE(MenuType.CARTOGRAPHY_TABLE),
-            STONECUTTER(MenuType.STONECUTTER)
+            STONECUTTER(MenuType.STONECUTTER),
         }
     }
 }

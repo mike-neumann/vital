@@ -1,7 +1,9 @@
 package me.vitalframework.cloudnet4.driver
 
 import eu.cloudnetservice.driver.inject.InjectionLayer
-import eu.cloudnetservice.driver.provider.*
+import eu.cloudnetservice.driver.provider.CloudServiceFactory
+import eu.cloudnetservice.driver.provider.CloudServiceProvider
+import eu.cloudnetservice.driver.provider.ServiceTaskProvider
 import eu.cloudnetservice.driver.service.ServiceConfiguration
 import eu.cloudnetservice.driver.service.ServiceInfoSnapshot
 
@@ -85,15 +87,18 @@ object VitalCloudNet4Driver {
      * @return A list of cloud servers satisfying the given predicate.
      */
     @JvmOverloads
-    inline fun getCloudServers(predicate: (ServiceInfoSnapshot) -> Boolean = { true }) = cloudServiceProvider.runningServices()
-        .filter(predicate)
+    inline fun getCloudServers(predicate: (ServiceInfoSnapshot) -> Boolean = { true }) =
+        cloudServiceProvider
+            .runningServices()
+            .filter(predicate)
 
     /**
      * Starts a cloud server based on the given task name.
      *
      * @param taskName The name of the task for which a cloud server needs to be started.
      */
-    fun startCloudServer(taskName: String) = cloudServiceFactory.createCloudService(
-        ServiceConfiguration.builder(getServerTask(taskName)!!).build()
-    )
+    fun startCloudServer(taskName: String) =
+        cloudServiceFactory.createCloudService(
+            ServiceConfiguration.builder(getServerTask(taskName)!!).build(),
+        )
 }

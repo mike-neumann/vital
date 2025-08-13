@@ -26,18 +26,19 @@ object VitalCommandUtils {
      * @return A map where each key is a compiled regular expression pattern representing the argument name,
      * and each value is the corresponding argument definition.
      */
-    fun VitalCommand<*, *>.getMappedArgs() = javaClass.methods
-        .filter { it.getAnnotationsByType(VitalCommand.ArgHandler::class.java).size > 0 }
-        .map { it.getAnnotationsByType(VitalCommand.ArgHandler::class.java).toList() }
-        .flatten()
-        .associate {
-            Pattern.compile(
-                it.arg.name
-                    .replace(VitalCommand.SPACE_REGEX.toRegex(), VitalCommand.SPACE_REPLACEMENT)
-                    .replace(VitalCommand.VARARG_REGEX.toRegex(), VitalCommand.VARARG_REPLACEMENT)
-                    .replace(VitalCommand.ARG_REGEX.toRegex(), VitalCommand.ARG_REPLACEMENT)
-            ) to it.arg
-        }
+    fun VitalCommand<*, *>.getMappedArgs() =
+        javaClass.methods
+            .filter { it.getAnnotationsByType(VitalCommand.ArgHandler::class.java).size > 0 }
+            .map { it.getAnnotationsByType(VitalCommand.ArgHandler::class.java).toList() }
+            .flatten()
+            .associate {
+                Pattern.compile(
+                    it.arg.name
+                        .replace(VitalCommand.SPACE_REGEX.toRegex(), VitalCommand.SPACE_REPLACEMENT)
+                        .replace(VitalCommand.VARARG_REGEX.toRegex(), VitalCommand.VARARG_REPLACEMENT)
+                        .replace(VitalCommand.ARG_REGEX.toRegex(), VitalCommand.ARG_REPLACEMENT),
+                ) to it.arg
+            }
 
     /**
      * Retrieves a mapping of argument handlers annotated within the `VitalCommand` class.
@@ -53,17 +54,18 @@ object VitalCommandUtils {
      * @return A map where each key represents the argument name defined in the `@ArgHandler` annotation,
      * and each value represents the prepared handler context for the argument's processing.
      */
-    fun VitalCommand<*, *>.getMappedArgHandlers() = javaClass.methods
-        .asSequence()
-        .filter { it.getAnnotationsByType(VitalCommand.ArgHandler::class.java).size > 0 }
-        .map { method -> method.getAnnotationsByType(VitalCommand.ArgHandler::class.java).map { method to it } }
-        .flatten()
-        .associate { (method, argHandler) ->
-            // now we have a viable method ready for handling incoming arguments
-            // we just need to filter out the injectable parameters for our method
-            // since we only support a handful of injectable params for handler methods...
-            argHandler.arg to getArgHandlerContext(commandSenderClass, method)
-        }
+    fun VitalCommand<*, *>.getMappedArgHandlers() =
+        javaClass.methods
+            .asSequence()
+            .filter { it.getAnnotationsByType(VitalCommand.ArgHandler::class.java).size > 0 }
+            .map { method -> method.getAnnotationsByType(VitalCommand.ArgHandler::class.java).map { method to it } }
+            .flatten()
+            .associate { (method, argHandler) ->
+                // now we have a viable method ready for handling incoming arguments
+                // we just need to filter out the injectable parameters for our method
+                // since we only support a handful of injectable params for handler methods...
+                argHandler.arg to getArgHandlerContext(commandSenderClass, method)
+            }
 
     /**
      * Retrieves an array of parameters to be injected into a handler method
@@ -90,7 +92,10 @@ object VitalCommandUtils {
         context.commandArgIndex?.let { injectableParameters[it] = commandArg }
         context.valuesIndex?.let { injectableParameters[it] = values }
 
-        return injectableParameters.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
+        return injectableParameters.entries
+            .sortedBy { it.key }
+            .map { it.value }
+            .toTypedArray()
     }
 
     /**
@@ -102,7 +107,8 @@ object VitalCommandUtils {
      * and the values are nested mutable maps. The nested maps have exception
      * types (`Class<out Throwable>`) as keys and exception handler context (`VitalCommand.ArgExceptionHandlerContext`) as values.
      */
-    fun VitalCommand<*, *>.getMappedArgExceptionHandlers(): MutableMap<VitalCommand.Arg, MutableMap<Class<out Throwable>, VitalCommand.ArgExceptionHandlerContext>> {
+    fun VitalCommand<*, *>.getMappedArgExceptionHandlers():
+        MutableMap<VitalCommand.Arg, MutableMap<Class<out Throwable>, VitalCommand.ArgExceptionHandlerContext>> {
         val mappedArgExceptionHandlers =
             mutableMapOf<VitalCommand.Arg, MutableMap<Class<out Throwable>, VitalCommand.ArgExceptionHandlerContext>>()
 
@@ -111,8 +117,9 @@ object VitalCommandUtils {
             .map { method -> method.getAnnotationsByType(VitalCommand.ArgExceptionHandler::class.java).map { method to it } }
             .flatten()
             .forEach { (method, argExceptionHandler) ->
-                val arg = getArg(argExceptionHandler.arg)
-                    ?: throw VitalCommandException.UnmappedArgExceptionHandlerArg(method, argExceptionHandler.arg)
+                val arg =
+                    getArg(argExceptionHandler.arg)
+                        ?: throw VitalCommandException.UnmappedArgExceptionHandlerArg(method, argExceptionHandler.arg)
                 val context = getArgExceptionHandlerContext(commandSenderClass, method)
 
                 if (!mappedArgExceptionHandlers.containsKey(arg)) {
@@ -152,7 +159,10 @@ object VitalCommandUtils {
         context.commandArgIndex?.let { injectableParameters[it] = commandArg }
         context.exceptionIndex?.let { injectableParameters[it] = exception }
 
-        return injectableParameters.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
+        return injectableParameters.entries
+            .sortedBy { it.key }
+            .map { it.value }
+            .toTypedArray()
     }
 
     /**
@@ -165,7 +175,10 @@ object VitalCommandUtils {
      * @throws VitalCommandException.InvalidArgHandlerReturnSignature If the method does not return `VitalCommand.ReturnState`.
      * @throws VitalCommandException.InvalidArgHandlerParameterSignature If any method parameter has an invalid type.
      */
-    fun getArgHandlerContext(commandSenderClass: Class<*>, method: Method): VitalCommand.ArgHandlerContext {
+    fun getArgHandlerContext(
+        commandSenderClass: Class<*>,
+        method: Method,
+    ): VitalCommand.ArgHandlerContext {
         if (method.returnType != VitalCommand.ReturnState::class.java) {
             throw VitalCommandException.InvalidArgHandlerReturnSignature(method, method.returnType)
         }
@@ -199,7 +212,10 @@ object VitalCommandUtils {
      * @throws VitalCommandException.InvalidArgExceptionHandlerMethodSignature If a parameter of an invalid type is
      *         encountered in the method.
      */
-    fun getArgExceptionHandlerContext(commandSenderClass: Class<*>, method: Method): VitalCommand.ArgExceptionHandlerContext {
+    fun getArgExceptionHandlerContext(
+        commandSenderClass: Class<*>,
+        method: Method,
+    ): VitalCommand.ArgExceptionHandlerContext {
         var commandSenderIndex: Int? = null
         var executedArgIndex: Int? = null
         var commandArgIndex: Int? = null
@@ -256,7 +272,7 @@ object VitalCommandUtils {
             executedArgIndex,
             commandArgIndex,
             valuesIndex,
-            exceptionIndex
+            exceptionIndex,
         )
     }
 
@@ -285,6 +301,9 @@ object VitalCommandUtils {
         context.commandArgIndex?.let { injectableParameters[it] = commandArg }
         context.exceptionIndex?.let { injectableParameters[it] = exception }
 
-        return injectableParameters.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
+        return injectableParameters.entries
+            .sortedBy { it.key }
+            .map { it.value }
+            .toTypedArray()
     }
 }

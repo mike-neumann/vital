@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.javaLibrary)
     alias(libs.plugins.mavenPublish)
+    alias(libs.plugins.ktlint)
 }
 
 repositories {
@@ -22,6 +23,7 @@ subprojects {
     apply(plugin = "org.springframework.boot")
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
     repositories {
         mavenLocal()
@@ -71,7 +73,7 @@ subprojects {
         (options as StandardJavadocDocletOptions).tags(
             "apiNote:a:API Note:",
             "implSpec:a:Implementation Requirements:",
-            "implNote:a:Implementation Note:"
+            "implNote:a:Implementation Note:",
         )
     }
 

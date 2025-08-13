@@ -5,7 +5,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
-import java.util.*
+import java.util.UUID
 import java.util.function.Supplier
 
 /**
@@ -23,7 +23,10 @@ import java.util.function.Supplier
  * @param title The title of the scoreboard.
  * @param lines A vararg of `Supplier<String>` instances that dynamically provide the lines of the scoreboard.
  */
-class VitalGlobalScoreboard(title: String, vararg var lines: Supplier<String>) : VitalScoreboard {
+class VitalGlobalScoreboard(
+    title: String,
+    vararg var lines: Supplier<String>,
+) : VitalScoreboard {
     private val _players = mutableListOf<UUID>()
 
     /**
@@ -102,18 +105,22 @@ class VitalGlobalScoreboard(title: String, vararg var lines: Supplier<String>) :
      */
     fun updateContent() {
         scoreboardContent.update()
-        val objective = scoreboardContent.bukkitScoreboard.getObjective(
-            PlainTextComponentSerializer.plainText()
-                .serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboardContent.title))
-        )
+        val objective =
+            scoreboardContent.bukkitScoreboard.getObjective(
+                PlainTextComponentSerializer
+                    .plainText()
+                    .serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboardContent.title)),
+            )
 
         for (lineIndex in lines.indices) {
             val lineSupplier = lines[lineIndex]
             val line = lineSupplier.get()
-            val score = objective!!.getScore(
-                LegacyComponentSerializer.legacySection()
-                    .serialize(MiniMessage.miniMessage().deserialize(line)) + "\u00A7".repeat(lineIndex)
-            )
+            val score =
+                objective!!.getScore(
+                    LegacyComponentSerializer
+                        .legacySection()
+                        .serialize(MiniMessage.miniMessage().deserialize(line)) + "\u00A7".repeat(lineIndex),
+                )
 
             score.score = lines.size - lineIndex
         }

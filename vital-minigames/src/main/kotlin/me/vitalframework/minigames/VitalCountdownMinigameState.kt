@@ -19,4 +19,7 @@ import me.vitalframework.tasks.VitalCountdownTask
  * @constructor Creates a new instance of `VitalCountdownMinigameState`.
  * @param plugin The Spigot plugin instance used to manage tasks and register listeners.
  */
-abstract class VitalCountdownMinigameState(plugin: SpigotPlugin) : VitalCountdownTask.Spigot(plugin), VitalBaseMinigameState
+abstract class VitalCountdownMinigameState(
+    plugin: SpigotPlugin,
+) : VitalCountdownTask.Spigot(plugin),
+    VitalBaseMinigameState

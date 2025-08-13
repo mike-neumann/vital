@@ -3,7 +3,7 @@ package me.vitalframework.holograms
 import me.vitalframework.RequiresSpigot
 import me.vitalframework.VitalRepository
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 /**
  * A repository for managing instances of [VitalGlobalHologram].

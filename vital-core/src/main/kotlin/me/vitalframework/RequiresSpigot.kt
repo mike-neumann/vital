@@ -14,4 +14,4 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 @ConditionalOnClass(name = ["org.bukkit.plugin.java.JavaPlugin"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class RequiresSpigot 
+annotation class RequiresSpigot

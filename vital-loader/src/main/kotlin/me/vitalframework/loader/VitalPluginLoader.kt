@@ -2,13 +2,18 @@ package me.vitalframework.loader
 
 import net.md_5.bungee.api.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
-import org.yaml.snakeyaml.*
+import org.yaml.snakeyaml.DumperOptions
+import org.yaml.snakeyaml.LoaderOptions
+import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.Constructor
 import org.yaml.snakeyaml.inspector.TagInspector
 import org.yaml.snakeyaml.representer.Representer
 
 interface VitalPluginLoader {
-    fun <T : Any> enable(vitalClassLoader: VitalClassLoader<T>, pluginYmlFileName: String) {
+    fun <T : Any> enable(
+        vitalClassLoader: VitalClassLoader<T>,
+        pluginYmlFileName: String,
+    ) {
         try {
             val loaderOptions = LoaderOptions().apply { tagInspector = TagInspector { true } }
             val dumperOptions = DumperOptions().apply { defaultFlowStyle = DumperOptions.FlowStyle.BLOCK }
@@ -27,15 +32,21 @@ interface VitalPluginLoader {
         }
     }
 
-    class Spigot : JavaPlugin(), VitalPluginLoader {
+    class Spigot :
+        JavaPlugin(),
+        VitalPluginLoader {
         override fun onEnable() = enable(VitalClassLoader.Spigot(this), "plugin.yml")
     }
 
-    class Paper : JavaPlugin(), VitalPluginLoader {
+    class Paper :
+        JavaPlugin(),
+        VitalPluginLoader {
         override fun onEnable() = enable(VitalClassLoader.Paper(this), "plugin.yml")
     }
 
-    class Bungee : Plugin(), VitalPluginLoader {
+    class Bungee :
+        Plugin(),
+        VitalPluginLoader {
         override fun onEnable() = enable(VitalClassLoader.Bungee(this), "bungee.yml")
     }
 }

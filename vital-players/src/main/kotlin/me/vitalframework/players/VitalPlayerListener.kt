@@ -1,6 +1,16 @@
 package me.vitalframework.players
 
-import me.vitalframework.*
+import me.vitalframework.BungeeEventHandler
+import me.vitalframework.BungeeEventPriority
+import me.vitalframework.BungeePlayer
+import me.vitalframework.BungeePlugin
+import me.vitalframework.RequiresBungee
+import me.vitalframework.RequiresSpigot
+import me.vitalframework.SpigotEventHandler
+import me.vitalframework.SpigotEventPriority
+import me.vitalframework.SpigotPlayer
+import me.vitalframework.SpigotPlugin
+import me.vitalframework.VitalListener
 import net.md_5.bungee.api.event.PlayerDisconnectEvent
 import net.md_5.bungee.api.event.PostLoginEvent
 import org.bukkit.event.player.PlayerJoinEvent
@@ -9,7 +19,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 /**
  * Listener interface for managing player-related events and operations within the Vital framework.
@@ -52,7 +62,11 @@ interface VitalPlayerListener {
      * @param playerClass The class type of the player instance.
      * @throws VitalPlayerException.InvalidClass If the `VitalPlayer` class does not extend the required `VitalPlayer` type.
      */
-    fun <T : Any> createPlayer(player: T, playerUniqueId: UUID, playerClass: Class<T>) = try {
+    fun <T : Any> createPlayer(
+        player: T,
+        playerUniqueId: UUID,
+        playerClass: Class<T>,
+    ) = try {
         // suppress since we catch the exception anyway (but the ide won't shut up)
         @Suppress("UNCHECKED_CAST")
         playerService.createPlayer(player, playerUniqueId, playerClass, Class.forName(vitalPlayerClassName) as Class<out VitalPlayer<*>>)
@@ -103,7 +117,8 @@ interface VitalPlayerListener {
         override val playerService: VitalPlayerService,
         @param:Value($$"${vital.players.player-class-name:me.vitalframework.players.VitalPlayer$Spigot}")
         override val vitalPlayerClassName: String,
-    ) : VitalPlayerListener, VitalListener.Spigot(plugin) {
+    ) : VitalListener.Spigot(plugin),
+        VitalPlayerListener {
         // should always be executed first.
         @SpigotEventHandler(priority = SpigotEventPriority.LOWEST)
         fun onPlayerJoin(e: PlayerJoinEvent) = createPlayer(e.player, e.player.uniqueId, SpigotPlayer::class.java)
@@ -143,7 +158,8 @@ interface VitalPlayerListener {
         override val playerService: VitalPlayerService,
         @param:Value($$"${vital.players.player-class-name:me.vitalframework.players.VitalPlayer$Bungee}")
         override val vitalPlayerClassName: String,
-    ) : VitalPlayerListener, VitalListener.Bungee(plugin) {
+    ) : VitalListener.Bungee(plugin),
+        VitalPlayerListener {
         // should always be executed first.
         @BungeeEventHandler(priority = BungeeEventPriority.LOWEST)
         fun onPostLogin(e: PostLoginEvent) = createPlayer(e.player, e.player.uniqueId, BungeePlayer::class.java)

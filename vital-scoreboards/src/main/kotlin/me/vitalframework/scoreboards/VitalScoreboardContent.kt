@@ -15,7 +15,9 @@ import org.bukkit.scoreboard.DisplaySlot
  * @constructor Creates an instance of VitalScoreboardContent with an initial title.
  * The title determines the display name of the scoreboard's objective.
  */
-class VitalScoreboardContent internal constructor(title: String) {
+class VitalScoreboardContent internal constructor(
+    title: String,
+) {
     private val _teams = mutableListOf<VitalScoreboardTeam>()
 
     /**
@@ -67,13 +69,14 @@ class VitalScoreboardContent internal constructor(title: String) {
      * - Calls the `update` method for each team associated with the scoreboard.
      */
     fun update() {
-        val objective = bukkitScoreboard.getObjective(
-            PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(title))
-        ) ?: bukkitScoreboard.registerNewObjective(
-            PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
-            Criteria.DUMMY,
-            MiniMessage.miniMessage().deserialize(title)
-        )
+        val objective =
+            bukkitScoreboard.getObjective(
+                PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
+            ) ?: bukkitScoreboard.registerNewObjective(
+                PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
+                Criteria.DUMMY,
+                MiniMessage.miniMessage().deserialize(title),
+            )
 
         objective.displaySlot = DisplaySlot.SIDEBAR
         objective.displayName(MiniMessage.miniMessage().deserialize(title))

@@ -4,7 +4,7 @@ import org.bukkit.Material
 import org.bukkit.OfflinePlayer
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
-import java.util.*
+import java.util.UUID
 
 /**
  * A specialized builder class for creating player head items in Bukkit/Spigot.
@@ -28,7 +28,10 @@ class VitalHeadItemStackBuilder : VitalItemStackBuilder() {
  * @return A configured `ItemStack` of type `Material.PLAYER_HEAD` with properties and metadata
  *         (e.g., name, lore, enchantments, owning player) applied from the builder.
  */
-inline fun headBuilder(itemUuid: UUID? = null, init: VitalHeadItemStackBuilder.() -> Unit): ItemStack {
+inline fun headBuilder(
+    itemUuid: UUID? = null,
+    init: VitalHeadItemStackBuilder.() -> Unit,
+): ItemStack {
     val headItemStackBuilder = VitalHeadItemStackBuilder().apply { init() }
 
     return itemBuilder(itemUuid) {

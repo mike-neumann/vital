@@ -3,9 +3,14 @@ package me.vitalframework.commands.processor
 import me.vitalframework.Vital
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import me.vitalframework.commands.VitalCommand
-import me.vitalframework.processor.*
+import me.vitalframework.processor.VitalPluginInfoAnnotationProcessingException
+import me.vitalframework.processor.VitalPluginInfoAnnotationProcessor
+import me.vitalframework.processor.VitalPluginInfoHolder
 import org.reflections.Reflections
-import javax.annotation.processing.*
+import javax.annotation.processing.AbstractProcessor
+import javax.annotation.processing.RoundEnvironment
+import javax.annotation.processing.SupportedAnnotationTypes
+import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.tools.StandardLocation
@@ -15,13 +20,17 @@ import javax.tools.StandardLocation
 class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
     private var ran = false
 
-    override fun process(annotations: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
+    override fun process(
+        annotations: MutableSet<out TypeElement>,
+        roundEnv: RoundEnvironment,
+    ): Boolean {
         if (ran) return true
         // Make sure the basic processor runs before this one.
-        val pluginInfoAnnotationProcessor = VitalPluginInfoAnnotationProcessor().apply {
-            init(processingEnv)
-            process(annotations, roundEnv)
-        }
+        val pluginInfoAnnotationProcessor =
+            VitalPluginInfoAnnotationProcessor().apply {
+                init(processingEnv)
+                process(annotations, roundEnv)
+            }
         val commandInfoList = mutableListOf<VitalCommand.Info>()
         // Scan for all commands annotated with `VitalCommandInfo.
         for (element in roundEnv.getElementsAnnotatedWith(VitalCommand.Info::class.java)) {
@@ -45,7 +54,10 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
         return true.also { ran = true }
     }
 
-    private fun generatePluginYmlCommands(commandInfos: MutableList<VitalCommand.Info>, pluginEnvironment: Vital.Info.PluginEnvironment) {
+    private fun generatePluginYmlCommands(
+        commandInfos: MutableList<VitalCommand.Info>,
+        pluginEnvironment: Vital.Info.PluginEnvironment,
+    ) {
         try {
             // Create the new `plugin.yml` file resource as the basic processor left it uncreated.
             val pluginYmlFileObject = processingEnv.filer.createResource(StandardLocation.CLASS_OUTPUT, "", pluginEnvironment.ymlFileName)

@@ -1,6 +1,9 @@
 package me.vitalframework.utils
 
-import me.vitalframework.*
+import me.vitalframework.BungeeCommandSender
+import me.vitalframework.BungeePlayer
+import me.vitalframework.SpigotCommandSender
+import me.vitalframework.SpigotPlayer
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -9,16 +12,22 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
-import org.bukkit.*
+import org.bukkit.Bukkit
+import org.bukkit.Difficulty
+import org.bukkit.GameRule
+import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.Sound
+import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.inventory.CreativeCategory
 import org.bukkit.inventory.MenuType
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.jetbrains.annotations.Range
-import java.util.*
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.random.Random
 
 interface VitalUtils<CS, P : CS> {
     companion object {
@@ -79,8 +88,12 @@ interface VitalUtils<CS, P : CS> {
          * @param click the action or command triggered when the button is clicked
          * @param action the type of click action to be performed
          */
-        fun chatButton(hover: String, text: String, click: String, action: ClickEvent.Action) =
-            "<hover:show_text:'$hover'><click:${action.name.lowercase()}:'$click'>$text</click></hover>"
+        fun chatButton(
+            hover: String,
+            text: String,
+            click: String,
+            action: ClickEvent.Action,
+        ) = "<hover:show_text:'$hover'><click:${action.name.lowercase()}:'$click'>$text</click></hover>"
 
         /**
          * Creates a chat button that executes a specified command when clicked.
@@ -88,7 +101,10 @@ interface VitalUtils<CS, P : CS> {
          * @param text The display text for the button in the chat.
          * @param command The command to be executed when the button is clicked.
          */
-        fun chatRunCommandButton(text: String, command: String) = chatButton(command, text, command, ClickEvent.Action.RUN_COMMAND)
+        fun chatRunCommandButton(
+            text: String,
+            command: String,
+        ) = chatButton(command, text, command, ClickEvent.Action.RUN_COMMAND)
 
         /**
          * Creates a chat button that suggests a command to the user upon clicking.
@@ -100,7 +116,10 @@ interface VitalUtils<CS, P : CS> {
          * @param text the text displayed on the button
          * @param command the command to suggest when the button is clicked
          */
-        fun chatSuggestCommandButton(text: String, command: String) = chatButton(command, text, command, ClickEvent.Action.SUGGEST_COMMAND)
+        fun chatSuggestCommandButton(
+            text: String,
+            command: String,
+        ) = chatButton(command, text, command, ClickEvent.Action.SUGGEST_COMMAND)
 
         /**
          * Creates a formatted "YES" button in green and bold text that, when clicked, executes a specified chat command.
@@ -166,7 +185,10 @@ interface VitalUtils<CS, P : CS> {
      * @param action A function representing the action to be executed for each player
      *               meeting the predicate's condition.
      */
-    fun broadcastAction(predicate: (P) -> Boolean = { true }, action: (P) -> Unit)
+    fun broadcastAction(
+        predicate: (P) -> Boolean = { true },
+        action: (P) -> Unit,
+    )
 
     /**
      * Sends a formatted message to the current player or client system (`CS`).
@@ -181,7 +203,10 @@ interface VitalUtils<CS, P : CS> {
      * @param message The formatted message to be broadcasted.
      * @param predicate A filter function that checks whether a player should receive the message. Defaults to a predicate that always returns true for all players.
      */
-    fun broadcastFormattedMessage(message: String, predicate: (P) -> Boolean = { true }) {
+    fun broadcastFormattedMessage(
+        message: String,
+        predicate: (P) -> Boolean = { true },
+    ) {
         broadcastAction(predicate) { it.sendFormattedMessage(message) }
     }
 
@@ -199,9 +224,15 @@ interface VitalUtils<CS, P : CS> {
     fun P.sendFormattedTitle(
         title: String = "",
         subtitle: String = "",
-        fadeIn: @Range(from = 0, to = 72_000) Int,
-        stay: @Range(from = 0, to = 72_000) Int,
-        fadeOut: @Range(from = 0, to = 72_000) Int,
+        fadeIn:
+            @Range(from = 0, to = 72_000)
+            Int,
+        stay:
+            @Range(from = 0, to = 72_000)
+            Int,
+        fadeOut:
+            @Range(from = 0, to = 72_000)
+            Int,
     )
 
     /**
@@ -211,7 +242,10 @@ interface VitalUtils<CS, P : CS> {
      * @param title The main title text to be displayed. Defaults to an empty string.
      * @param subtitle The subtitle text to be displayed below the main title. Defaults to an empty string.
      */
-    fun P.sendFormattedTitle(title: String = "", subtitle: String = "")
+    fun P.sendFormattedTitle(
+        title: String = "",
+        subtitle: String = "",
+    )
 
     /**
      * Broadcasts a formatted title and subtitle to all players satisfying the given predicate.
@@ -223,8 +257,11 @@ interface VitalUtils<CS, P : CS> {
      * @param subtitle The subtitle to be displayed under the main title. Defaults to an empty string.
      * @param predicate A filter function determining the players who should receive the formatted title.
      */
-    fun broadcastFormattedTitle(title: String = "", subtitle: String = "", predicate: (P) -> Boolean) =
-        broadcastAction(predicate) { it.sendFormattedTitle(title, subtitle) }
+    fun broadcastFormattedTitle(
+        title: String = "",
+        subtitle: String = "",
+        predicate: (P) -> Boolean,
+    ) = broadcastAction(predicate) { it.sendFormattedTitle(title, subtitle) }
 
     /**
      * Broadcasts a formatted title to all eligible recipients.
@@ -236,9 +273,15 @@ interface VitalUtils<CS, P : CS> {
     fun broadcastFormattedTitle(
         title: String = "",
         subtitle: String = "",
-        fadeIn: @Range(from = 0, to = 72_000) Int,
-        stay: @Range(from = 0, to = 72_000) Int,
-        fadeOut: @Range(from = 0, to = 72_000) Int,
+        fadeIn:
+            @Range(from = 0, to = 72_000)
+            Int,
+        stay:
+            @Range(from = 0, to = 72_000)
+            Int,
+        fadeOut:
+            @Range(from = 0, to = 72_000)
+            Int,
         predicate: (P) -> Boolean = { true },
     ) = broadcastAction(predicate) { it.sendFormattedTitle(title, subtitle, fadeIn, stay, fadeOut) }
 
@@ -252,7 +295,13 @@ interface VitalUtils<CS, P : CS> {
      * @param subtitle The subtitle text to be displayed below the main title. Defaults to an empty string.
      * @param fadeIn The duration (in ticks) for the fade-in animation. Must be between 0 and 72,000.
      */
-    fun P.sendFormattedPersistentTitle(title: String = "", subtitle: String = "", fadeIn: @Range(from = 0, to = 72_000) Int)
+    fun P.sendFormattedPersistentTitle(
+        title: String = "",
+        subtitle: String = "",
+        fadeIn:
+            @Range(from = 0, to = 72_000)
+            Int,
+    )
 
     /**
      * Sends a persistent formatted title and subtitle to all players that satisfy the specified predicate.
@@ -267,7 +316,9 @@ interface VitalUtils<CS, P : CS> {
     fun broadcastFormattedPersistentTitle(
         title: String = "",
         subtitle: String = "",
-        fadeIn: @Range(from = 0, to = 72_000) Int,
+        fadeIn:
+            @Range(from = 0, to = 72_000)
+            Int,
         predicate: (P) -> Boolean = { true },
     ) = broadcastAction(predicate) { it.sendFormattedPersistentTitle(title, subtitle, fadeIn) }
 
@@ -291,8 +342,10 @@ interface VitalUtils<CS, P : CS> {
      * @param predicate A filter function that determines which players should receive the message.
      *                  Defaults to a predicate that includes all players.
      */
-    fun broadcastFormattedActionBar(message: String, predicate: (P) -> Boolean = { true }) =
-        broadcastAction(predicate) { it.sendFormattedActionBar(message) }
+    fun broadcastFormattedActionBar(
+        message: String,
+        predicate: (P) -> Boolean = { true },
+    ) = broadcastAction(predicate) { it.sendFormattedActionBar(message) }
 
     /**
      * Utility object providing Spigot-specific implementations of the VitalUtils abstraction.
@@ -303,20 +356,27 @@ interface VitalUtils<CS, P : CS> {
      * CommandSender and Player entities.
      */
     object Spigot : VitalUtils<SpigotCommandSender, SpigotPlayer> {
-        override fun broadcastAction(predicate: (SpigotPlayer) -> Boolean, action: (SpigotPlayer) -> Unit) = Bukkit.getOnlinePlayers()
+        override fun broadcastAction(
+            predicate: (SpigotPlayer) -> Boolean,
+            action: (SpigotPlayer) -> Unit,
+        ) = Bukkit
+            .getOnlinePlayers()
             .filter(predicate)
             .forEach(action)
 
-        override fun SpigotCommandSender.sendFormattedMessage(message: String) = spigot().sendMessage(
-            // must be used since, both version (paper and spigot) support the bungeeapi implementations...
-            *message.toMiniMessageComponent().toBungeeComponent()
-        )
-
-        override fun broadcastFormattedMessage(message: String, predicate: (SpigotPlayer) -> Boolean) =
-            broadcastAction(predicate) {
+        override fun SpigotCommandSender.sendFormattedMessage(message: String) =
+            spigot().sendMessage(
                 // must be used since, both version (paper and spigot) support the bungeeapi implementations...
-                it.spigot().sendMessage(*message.toMiniMessageComponent().toBungeeComponent())
-            }
+                *message.toMiniMessageComponent().toBungeeComponent(),
+            )
+
+        override fun broadcastFormattedMessage(
+            message: String,
+            predicate: (SpigotPlayer) -> Boolean,
+        ) = broadcastAction(predicate) {
+            // must be used since, both version (paper and spigot) support the bungeeapi implementations...
+            it.spigot().sendMessage(*message.toMiniMessageComponent().toBungeeComponent())
+        }
 
         /**
          * Broadcasts a sound to all players satisfying the given predicate.
@@ -331,8 +391,12 @@ interface VitalUtils<CS, P : CS> {
          *                  Defaults to a predicate that includes all players.
          */
         @JvmOverloads
-        fun broadcastSound(sound: Sound, volume: Float, pitch: Float, predicate: (SpigotPlayer) -> Boolean = { true }) =
-            broadcastAction(predicate) { it.playSound(it, sound, volume, pitch) }
+        fun broadcastSound(
+            sound: Sound,
+            volume: Float,
+            pitch: Float,
+            predicate: (SpigotPlayer) -> Boolean = { true },
+        ) = broadcastAction(predicate) { it.playSound(it, sound, volume, pitch) }
 
         /**
          * Broadcasts a sound to all players satisfying the given predicate.
@@ -345,47 +409,65 @@ interface VitalUtils<CS, P : CS> {
          *                  Defaults to a predicate that always returns true.
          */
         @JvmOverloads
-        fun broadcastSound(sound: Sound, predicate: (SpigotPlayer) -> Boolean = { true }) =
-            broadcastSound(sound, 1f, 1f, predicate)
+        fun broadcastSound(
+            sound: Sound,
+            predicate: (SpigotPlayer) -> Boolean = { true },
+        ) = broadcastSound(sound, 1f, 1f, predicate)
 
         override fun SpigotPlayer.sendFormattedTitle(
             title: String,
             subtitle: String,
-            fadeIn: @Range(from = 0, to = 72_000) Int,
-            stay: @Range(from = 0, to = 72_000) Int,
-            fadeOut: @Range(from = 0, to = 72_000) Int,
+            fadeIn:
+                @Range(from = 0, to = 72_000)
+                Int,
+            stay:
+                @Range(from = 0, to = 72_000)
+                Int,
+            fadeOut:
+                @Range(from = 0, to = 72_000)
+                Int,
         ) = sendTitle(
             title.toMiniMessageComponent().toLegacySectionString(),
             subtitle.toMiniMessageComponent().toLegacySectionString(),
             fadeIn,
             stay,
-            fadeOut
+            fadeOut,
         )
 
-        override fun SpigotPlayer.sendFormattedTitle(title: String, subtitle: String) = sendTitle(
+        override fun SpigotPlayer.sendFormattedTitle(
+            title: String,
+            subtitle: String,
+        ) = sendTitle(
             title.toMiniMessageComponent().toLegacySectionString(),
-            subtitle.toMiniMessageComponent().toLegacySectionString()
+            subtitle.toMiniMessageComponent().toLegacySectionString(),
         )
 
-        override fun broadcastFormattedTitle(title: String, subtitle: String, predicate: (SpigotPlayer) -> Boolean) =
-            broadcastAction { it.sendFormattedTitle(title, subtitle) }
+        override fun broadcastFormattedTitle(
+            title: String,
+            subtitle: String,
+            predicate: (SpigotPlayer) -> Boolean,
+        ) = broadcastAction { it.sendFormattedTitle(title, subtitle) }
 
         override fun SpigotPlayer.sendFormattedPersistentTitle(
             title: String,
             subtitle: String,
-            fadeIn: @Range(from = 0, to = 72_000) Int,
+            fadeIn:
+                @Range(from = 0, to = 72_000)
+                Int,
         ) = sendTitle(
             title.toMiniMessageComponent().toLegacySectionString(),
             subtitle.toMiniMessageComponent().toLegacySectionString(),
             fadeIn,
-            72_000, /* 1h */
-            0
+            72_000, // 1h
+            0,
         )
 
         override fun broadcastFormattedPersistentTitle(
             title: String,
             subtitle: String,
-            fadeIn: @Range(from = 0, to = 72_000) Int,
+            fadeIn:
+                @Range(from = 0, to = 72_000)
+                Int,
             predicate: (SpigotPlayer) -> Boolean,
         ) = broadcastAction { it.sendFormattedPersistentTitle(title, subtitle, fadeIn) }
 
@@ -421,8 +503,10 @@ interface VitalUtils<CS, P : CS> {
          *                        Defaults to a predicate that includes all players.
          */
         @JvmOverloads
-        fun broadcastClearPotionEffect(potionEffectType: PotionEffectType, playerPredicate: (SpigotPlayer) -> Boolean = { true }) =
-            broadcastAction(playerPredicate) { it.removePotionEffect(potionEffectType) }
+        fun broadcastClearPotionEffect(
+            potionEffectType: PotionEffectType,
+            playerPredicate: (SpigotPlayer) -> Boolean = { true },
+        ) = broadcastAction(playerPredicate) { it.removePotionEffect(potionEffectType) }
 
         /**
          * Removes all active potion effects from players that satisfy the specified predicate.
@@ -434,16 +518,21 @@ interface VitalUtils<CS, P : CS> {
          *                        effects removed. Defaults to a predicate that accepts all players.
          */
         @JvmOverloads
-        fun broadcastClearPotionEffects(playerPredicate: (SpigotPlayer) -> Boolean = { true }) = broadcastAction(playerPredicate) {
-            it.activePotionEffects.map { it.type }.forEach { type: PotionEffectType -> it.removePotionEffect(type) }
-        }
+        fun broadcastClearPotionEffects(playerPredicate: (SpigotPlayer) -> Boolean = { true }) =
+            broadcastAction(playerPredicate) {
+                it.activePotionEffects.map { it.type }.forEach { type: PotionEffectType -> it.removePotionEffect(type) }
+            }
 
-        override fun SpigotPlayer.sendFormattedActionBar(message: String) = spigot().sendMessage(
-            ChatMessageType.ACTION_BAR, *message.toMiniMessageComponent().toBungeeComponent()
-        )
+        override fun SpigotPlayer.sendFormattedActionBar(message: String) =
+            spigot().sendMessage(
+                ChatMessageType.ACTION_BAR,
+                *message.toMiniMessageComponent().toBungeeComponent(),
+            )
 
-        override fun broadcastFormattedActionBar(message: String, predicate: (SpigotPlayer) -> Boolean) =
-            broadcastAction(predicate) { it.sendFormattedActionBar(message) }
+        override fun broadcastFormattedActionBar(
+            message: String,
+            predicate: (SpigotPlayer) -> Boolean,
+        ) = broadcastAction(predicate) { it.sendFormattedActionBar(message) }
 
         /**
          * Teleports a player to a specified location with a temporary visual potion effect.
@@ -455,7 +544,10 @@ interface VitalUtils<CS, P : CS> {
          * @param potionEffectType The type of potion effect to be applied temporarily. Defaults to `PotionEffectType.SLOWNESS`.
          */
         @JvmOverloads
-        fun SpigotPlayer.teleportWithEffect(location: Location, potionEffectType: PotionEffectType = PotionEffectType.SLOWNESS) {
+        fun SpigotPlayer.teleportWithEffect(
+            location: Location,
+            potionEffectType: PotionEffectType = PotionEffectType.SLOWNESS,
+        ) {
             removePotionEffect(potionEffectType)
             addPotionEffect(PotionEffect(potionEffectType, 2, Int.Companion.MAX_VALUE))
             teleport(location)
@@ -487,9 +579,11 @@ interface VitalUtils<CS, P : CS> {
          *
          * @return `true` if the material can be placed in mid-air, otherwise `false`.
          */
-        fun Material.canBePlacedInMidAir() = !hasGravity() &&
+        fun Material.canBePlacedInMidAir() =
+            !hasGravity() &&
                 !isVegetation() &&
-                (this != Material.REDSTONE &&
+                (
+                    this != Material.REDSTONE &&
                         this != Material.REDSTONE_TORCH &&
                         this != Material.REPEATER &&
                         this != Material.COMPARATOR &&
@@ -497,7 +591,8 @@ interface VitalUtils<CS, P : CS> {
                         this != Material.TRIPWIRE &&
                         !name.contains("BUTTON") &&
                         !name.contains("PRESSURE_PLATE") &&
-                        !name.contains("RAIL"))
+                        !name.contains("RAIL")
+                )
 
         /**
          * Checks if the material is related to vegetation.
@@ -509,7 +604,8 @@ interface VitalUtils<CS, P : CS> {
          * @receiver The material to be evaluated.
          * @return True if the material is considered vegetation, otherwise false.
          */
-        fun Material.isVegetation() = name.contains("SAPLING") ||
+        fun Material.isVegetation() =
+            name.contains("SAPLING") ||
                 name.contains("FLOWER") ||
                 name.contains("WHEAT") ||
                 name.contains("SEEDS") ||
@@ -552,8 +648,10 @@ interface VitalUtils<CS, P : CS> {
          *
          * @return `true` if the material is a redstone machine, otherwise `false`.
          */
-        fun Material.isRedstoneMachine() = creativeCategory == CreativeCategory.REDSTONE &&
-                (this == Material.REDSTONE_TORCH ||
+        fun Material.isRedstoneMachine() =
+            creativeCategory == CreativeCategory.REDSTONE &&
+                (
+                    this == Material.REDSTONE_TORCH ||
                         name.contains("PISTON") ||
                         name.contains("BUTTON") ||
                         name.contains("PRESSURE_PLATE") ||
@@ -567,7 +665,8 @@ interface VitalUtils<CS, P : CS> {
                         this == Material.DROPPER ||
                         this == Material.DISPENSER ||
                         this == Material.HOPPER ||
-                        this == Material.HOPPER_MINECART)
+                        this == Material.HOPPER_MINECART
+                )
 
         /**
          * Determines if the current location is inside a defined 3D rectangular area.
@@ -576,7 +675,10 @@ interface VitalUtils<CS, P : CS> {
          * @param location2 The opposite corner of the 3D rectangular area.
          * @return True if the current location is within or on the boundaries of the defined area, false otherwise.
          */
-        fun Location.isInsideLocationArea(location1: Location, location2: Location): Boolean {
+        fun Location.isInsideLocationArea(
+            location1: Location,
+            location2: Location,
+        ): Boolean {
             val ourMinX = min(location1.x, location2.x)
             val ourMaxX = max(location1.x, location2.x)
             val ourMinY = min(location1.y, location2.y)
@@ -587,7 +689,12 @@ interface VitalUtils<CS, P : CS> {
             val theirY = y
             val theirZ = z
 
-            return theirX >= ourMinX && theirX <= ourMaxX && theirY >= ourMinY && theirY <= ourMaxY && theirZ >= ourMinZ && theirZ <= ourMaxZ
+            return theirX >= ourMinX &&
+                theirX <= ourMaxX &&
+                theirY >= ourMinY &&
+                theirY <= ourMaxY &&
+                theirZ >= ourMinZ &&
+                theirZ <= ourMaxZ
         }
 
         /**
@@ -602,16 +709,19 @@ interface VitalUtils<CS, P : CS> {
          * @return A random `Location` object within the specified area, retaining the `world`
          *         of the first provided location (`location1`).
          */
-        fun getRandomLocationInLocationArea(location1: Location, location2: Location): Location {
+        fun getRandomLocationInLocationArea(
+            location1: Location,
+            location2: Location,
+        ): Location {
             val ourMinX = min(location1.x, location2.x)
             val ourMaxX = max(location1.x, location2.x)
             val ourMinY = min(location1.y, location2.y)
             val ourMaxY = max(location1.y, location2.y)
             val ourMinZ = min(location1.z, location2.z)
             val ourMaxZ = max(location1.z, location2.z)
-            val randomX = Random().nextDouble(ourMinX, ourMaxX)
-            val randomY = Random().nextDouble(ourMinY, ourMaxY)
-            val randomZ = Random().nextDouble(ourMinZ, ourMaxZ)
+            val randomX = Random.nextDouble(ourMinX, ourMaxX)
+            val randomY = Random.nextDouble(ourMinY, ourMaxY)
+            val randomZ = Random.nextDouble(ourMinZ, ourMaxZ)
 
             return Location(location1.world, randomX, randomY, randomZ)
         }
@@ -628,10 +738,16 @@ interface VitalUtils<CS, P : CS> {
          * @param zOffset The offset to apply along the z-axis relative to the block's center.
          * @return A `Location` object representing the center of the block with the applied offsets.
          */
-        fun Location.getCenterBlockLocation(xOffset: Double, yOffset: Double, zOffset: Double): Location {
-            val finalLocation = block.location.clone()
-                .add(.5, .5, .5)
-                .add(xOffset, yOffset, zOffset)
+        fun Location.getCenterBlockLocation(
+            xOffset: Double,
+            yOffset: Double,
+            zOffset: Double,
+        ): Location {
+            val finalLocation =
+                block.location
+                    .clone()
+                    .add(.5, .5, .5)
+                    .add(xOffset, yOffset, zOffset)
 
             finalLocation.pitch = pitch
             finalLocation.yaw = yaw
@@ -686,7 +802,10 @@ interface VitalUtils<CS, P : CS> {
          * @param location2 The second location defining the opposite corner of the cuboidal area.
          * @return A list of locations representing the circumference of the cuboidal area.
          */
-        fun getCircumferenceOfLocationArea(location1: Location, location2: Location): List<Location> {
+        fun getCircumferenceOfLocationArea(
+            location1: Location,
+            location2: Location,
+        ): List<Location> {
             val minX = min(location1.x, location2.x)
             val maxX = max(location1.x, location2.x)
             val minY = min(location1.y, location2.y)
@@ -751,7 +870,10 @@ interface VitalUtils<CS, P : CS> {
          * @param location2 The second corner of the area.
          * @return A list of all locations contained within the defined cuboid area, including the corners.
          */
-        fun getVolumeOfLocationArea(location1: Location, location2: Location): List<Location> {
+        fun getVolumeOfLocationArea(
+            location1: Location,
+            location2: Location,
+        ): List<Location> {
             val minX = min(location1.x, location2.x)
             val maxX = max(location1.x, location2.x)
             val minY = min(location1.y, location2.y)
@@ -784,7 +906,10 @@ interface VitalUtils<CS, P : CS> {
          * @param location2 The second corner of the area.
          * @return The total count of locations in the defined cuboid area.
          */
-        fun getVolumeSizeOfLocationArea(location1: Location, location2: Location) = getVolumeOfLocationArea(location1, location2).size
+        fun getVolumeSizeOfLocationArea(
+            location1: Location,
+            location2: Location,
+        ) = getVolumeOfLocationArea(location1, location2).size
 
         /**
          * Configures the game rules and environment settings for a `World` to align with a controlled or static gameplay setup.
@@ -830,11 +955,12 @@ interface VitalUtils<CS, P : CS> {
          * @receiver The world in which the random location is to be generated.
          * @return A random location within the world boundary.
          */
-        fun World.getRandomLocation() = getBlockAt(
-            (-29_999_984..29_999_984).random(),
-            (-256..256).random(),
-            (-29_999_984..29_999_984).random()
-        ).location
+        fun World.getRandomLocation() =
+            getBlockAt(
+                (-29_999_984..29_999_984).random(),
+                (-256..256).random(),
+                (-29_999_984..29_999_984).random(),
+            ).location
 
         /**
          * Determines the highest non-air block location from the specified start height and returns a safe location above it.
@@ -880,8 +1006,9 @@ interface VitalUtils<CS, P : CS> {
          * @param worldName The name of the world whose game rules are being cleaned and configured.
          *                  If the world doesn't exist, a runtime exception is thrown.
          */
-        fun cleanGameRules(worldName: String) = Bukkit.getWorld(worldName)?.cleanGameRules()
-            ?: throw RuntimeException("World '$worldName' does not exist")
+        fun cleanGameRules(worldName: String) =
+            Bukkit.getWorld(worldName)?.cleanGameRules()
+                ?: throw RuntimeException("World '$worldName' does not exist")
 
         /**
          * Opens a custom inventory menu for the player based on the provided menu type.
@@ -900,8 +1027,14 @@ interface VitalUtils<CS, P : CS> {
      * enabling server-wide or player-specific interactions.
      */
     object Bungee : VitalUtils<BungeeCommandSender, BungeePlayer> {
-        override fun broadcastAction(predicate: (BungeePlayer) -> Boolean, action: (BungeePlayer) -> Unit) =
-            ProxyServer.getInstance().players.filter(predicate).forEach(action)
+        override fun broadcastAction(
+            predicate: (BungeePlayer) -> Boolean,
+            action: (BungeePlayer) -> Unit,
+        ) = ProxyServer
+            .getInstance()
+            .players
+            .filter(predicate)
+            .forEach(action)
 
         override fun BungeeCommandSender.sendFormattedMessage(message: String) =
             sendMessage(*message.toMiniMessageComponent().toBungeeComponent())
@@ -909,33 +1042,55 @@ interface VitalUtils<CS, P : CS> {
         override fun BungeePlayer.sendFormattedTitle(
             title: String,
             subtitle: String,
-            fadeIn: @Range(from = 0, to = 72_000) Int,
-            stay: @Range(from = 0, to = 72_000) Int,
-            fadeOut: @Range(from = 0, to = 72_000) Int,
+            fadeIn:
+                @Range(from = 0, to = 72_000)
+                Int,
+            stay:
+                @Range(from = 0, to = 72_000)
+                Int,
+            fadeOut:
+                @Range(from = 0, to = 72_000)
+                Int,
         ) = sendTitle(
-            ProxyServer.getInstance().createTitle()
+            ProxyServer
+                .getInstance()
+                .createTitle()
                 .title(TextComponent.fromLegacy(title.toMiniMessageComponent().toLegacySectionString()))
                 .subTitle(TextComponent.fromLegacy(subtitle.toMiniMessageComponent().toLegacySectionString()))
                 .fadeIn(fadeIn)
                 .stay(stay)
-                .fadeOut(fadeOut)
+                .fadeOut(fadeOut),
         )
 
-        override fun BungeePlayer.sendFormattedTitle(title: String, subtitle: String) = sendTitle(
-            ProxyServer.getInstance().createTitle()
+        override fun BungeePlayer.sendFormattedTitle(
+            title: String,
+            subtitle: String,
+        ) = sendTitle(
+            ProxyServer
+                .getInstance()
+                .createTitle()
                 .title(TextComponent.fromLegacy(title.toMiniMessageComponent().toLegacySectionString()))
-                .subTitle(TextComponent.fromLegacy(subtitle.toMiniMessageComponent().toLegacySectionString()))
+                .subTitle(TextComponent.fromLegacy(subtitle.toMiniMessageComponent().toLegacySectionString())),
         )
 
-        override fun BungeePlayer.sendFormattedPersistentTitle(title: String, subtitle: String, fadeIn: @Range(from = 0, to = 72_000) Int) =
-            sendFormattedTitle(title, subtitle, fadeIn, 72_000,  /* 1h */0)
+        override fun BungeePlayer.sendFormattedPersistentTitle(
+            title: String,
+            subtitle: String,
+            fadeIn:
+                @Range(from = 0, to = 72_000)
+                Int,
+        ) = sendFormattedTitle(title, subtitle, fadeIn, 72_000, 0)
 
-        override fun BungeePlayer.sendFormattedActionBar(message: String) = sendMessage(
-            ChatMessageType.ACTION_BAR,
-            TextComponent.fromLegacy(message.toMiniMessageComponent().toLegacySectionString())
-        )
+        override fun BungeePlayer.sendFormattedActionBar(message: String) =
+            sendMessage(
+                ChatMessageType.ACTION_BAR,
+                TextComponent.fromLegacy(message.toMiniMessageComponent().toLegacySectionString()),
+            )
 
-        override fun broadcastFormattedTitle(title: String, subtitle: String, predicate: (BungeePlayer) -> Boolean) =
-            broadcastAction(predicate) { it.sendFormattedTitle(title, subtitle) }
+        override fun broadcastFormattedTitle(
+            title: String,
+            subtitle: String,
+            predicate: (BungeePlayer) -> Boolean,
+        ) = broadcastAction(predicate) { it.sendFormattedTitle(title, subtitle) }
     }
 }

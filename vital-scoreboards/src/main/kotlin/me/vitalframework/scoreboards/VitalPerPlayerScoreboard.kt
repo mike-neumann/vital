@@ -17,7 +17,10 @@ import java.util.function.Function
  * @property lines A variable number of functions that generate the content for each scoreboard
  * line based on the player's context.
  */
-class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<SpigotPlayer, String>) : VitalScoreboard {
+class VitalPerPlayerScoreboard(
+    val title: String,
+    vararg var lines: Function<SpigotPlayer, String>,
+) : VitalScoreboard {
     private val _scoreboardContent = mutableMapOf<UUID, VitalScoreboardContent>()
 
     /**
@@ -61,16 +64,19 @@ class VitalPerPlayerScoreboard(val title: String, vararg var lines: Function<Spi
         val scoreboard = _scoreboardContent[player.uniqueId]!!
 
         scoreboard.update()
-        val objective = scoreboard.bukkitScoreboard.getObjective(
-            PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboard.title))
-        )
+        val objective =
+            scoreboard.bukkitScoreboard.getObjective(
+                PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboard.title)),
+            )
         val lines = applyLines(player)
 
         for (lineIndex in lines.indices) {
-            val score = objective!!.getScore(
-                LegacyComponentSerializer.legacySection()
-                    .serialize(MiniMessage.miniMessage().deserialize(lines[lineIndex])) + "\u00A7".repeat(lineIndex)
-            )
+            val score =
+                objective!!.getScore(
+                    LegacyComponentSerializer
+                        .legacySection()
+                        .serialize(MiniMessage.miniMessage().deserialize(lines[lineIndex])) + "\u00A7".repeat(lineIndex),
+                )
 
             score.score = lines.size - lineIndex
         }

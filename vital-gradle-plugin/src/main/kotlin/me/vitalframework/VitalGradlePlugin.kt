@@ -24,14 +24,18 @@ class VitalGradlePlugin : Plugin<Project> {
         target.afterEvaluate {
             target.applyDependency("implementation", "me.vitalframework:vital-core:${target.getProperty("vitalVersion")}")
             target.applyDependency(
-                "kapt", "me.vitalframework:vital-core-processor:${target.getProperty("vitalVersion")}",
-                "annotationProcessor", "me.vitalframework:vital-core-processor:${target.getProperty("vitalVersion")}"
+                "kapt",
+                "me.vitalframework:vital-core-processor:${target.getProperty("vitalVersion")}",
+                "annotationProcessor",
+                "me.vitalframework:vital-core-processor:${target.getProperty("vitalVersion")}",
             )
 
             if (target.hasDependency("me.vitalframework:vital-commands")) {
                 target.applyDependency(
-                    "kapt", "me.vitalframework:vital-commands-processor:${target.getProperty("vitalVersion")}",
-                    "annotationProcessor", "me.vitalframework:vital-commands-processor:${target.getProperty("vitalVersion")}"
+                    "kapt",
+                    "me.vitalframework:vital-commands-processor:${target.getProperty("vitalVersion")}",
+                    "annotationProcessor",
+                    "me.vitalframework:vital-commands-processor:${target.getProperty("vitalVersion")}",
                 )
             }
 
@@ -41,10 +45,11 @@ class VitalGradlePlugin : Plugin<Project> {
                 bootJar.outputs.dir("${DIR_TMP_UNPACKED}${File.separator}${DIR_BOOT_INF_CLASSES}")
                 bootJar.doLast {
                     val originalJar = bootJar.archiveFile.get().asFile
-                    val unpackDir = target.layout.buildDirectory.dir(DIR_TMP_UNPACKED).get().asFile.apply {
-                        deleteRecursively()
-                        mkdirs()
-                    }
+                    val unpackDir =
+                        target.layout.buildDirectory.dir(DIR_TMP_UNPACKED).get().asFile.apply {
+                            deleteRecursively()
+                            mkdirs()
+                        }
                     target.copy {
                         it.from(target.zipTree(originalJar))
                         it.into(unpackDir)
@@ -81,7 +86,11 @@ class VitalGradlePlugin : Plugin<Project> {
                         }
                         bootInfClasses.deleteRecursively()
                     }
-                    val repackedJar = target.layout.buildDirectory.file("${DIR_LIBS}${target.name}.jar").get().asFile
+                    val repackedJar =
+                        target.layout.buildDirectory
+                            .file("${DIR_LIBS}${target.name}.jar")
+                            .get()
+                            .asFile
                     target.ant.invokeMethod("zip", mapOf("destfile" to repackedJar, "basedir" to unpackDir))
                 }
             }
@@ -89,10 +98,13 @@ class VitalGradlePlugin : Plugin<Project> {
     }
 
     private fun java.io.File.isKotlinPackage() = path.contains("kotlin${File.separator}")
+
     private fun java.io.File.isVitalLoaderPackage() = path.contains("me${File.separator}vitalframework${File.separator}loader")
 
-    private fun Project.hasDependency(dependencyNotation: String) = configurations.flatMap { it.allDependencies }
-        .any { "${it.group}:${it.name}:${it.version}".startsWith(dependencyNotation) }
+    private fun Project.hasDependency(dependencyNotation: String) =
+        configurations
+            .flatMap { it.allDependencies }
+            .any { "${it.group}:${it.name}:${it.version}".startsWith(dependencyNotation) }
 
     private fun Project.applyDependency(
         configurationName: String,
@@ -105,8 +117,9 @@ class VitalGradlePlugin : Plugin<Project> {
         dependencies.add(fallbackConfigurationName, fallbackDependencyNotation)
     }
 
-    private fun Project.getProperty(propertyName: String) = findProperty(propertyName)
-        ?: throw IllegalStateException("property '$propertyName' not found")
+    private fun Project.getProperty(propertyName: String) =
+        findProperty(propertyName)
+            ?: throw IllegalStateException("property '$propertyName' not found")
 
     companion object {
         private val DIR_TMP_UNPACKED = "tmp${File.separator}unpacked"

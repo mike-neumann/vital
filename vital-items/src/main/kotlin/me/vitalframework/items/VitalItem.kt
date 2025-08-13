@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 /**
  * Represents a customizable item with unique metadata and behavior within the Vital framework.
@@ -61,41 +61,45 @@ open class VitalItem {
         this.initialCooldown = info.cooldown
     }
 
-    fun getItemStack(player: SpigotPlayer) = itemBuilder(uniqueId) {
-        val info = this@VitalItem.getRequiredAnnotation<Info>()
+    fun getItemStack(player: SpigotPlayer) =
+        itemBuilder(uniqueId) {
+            val info = this@VitalItem.getRequiredAnnotation<Info>()
 
-        // first set default values, then try to localize them
-        type = info.type
-        name = info.name
-        amount = info.amount
-        lore = info.lore.toMutableList()
-        itemFlags = info.itemFlags.toMutableList()
-        unbreakable = info.unbreakable
+            // first set default values, then try to localize them
+            type = info.type
+            name = info.name
+            amount = info.amount
+            lore = info.lore.toMutableList()
+            itemFlags = info.itemFlags.toMutableList()
+            unbreakable = info.unbreakable
 
-        if (info.enchanted) {
-            enchantments[Enchantment.FORTUNE] = 1
-        }
+            if (info.enchanted) {
+                enchantments[Enchantment.FORTUNE] = 1
+            }
 
-        val usingVitalLocalization = "vital-localization" in Vital.vitalSubModules
+            val usingVitalLocalization = "vital-localization" in Vital.vitalSubModules
 
-        if (usingVitalLocalization && info.localized) {
-            name = player.getTranslatedText(info.name)
-            lore = info.lore.map { player.getTranslatedText(it) }.toMutableList()
-            afterInit = {
-                it.itemMeta = it.itemMeta.apply {
-                    persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] = true
-                    persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZATION_KEY, PersistentDataType.STRING] = info.name
-                    persistentDataContainer[VitalNamespacedKey.ITEM_LORE_LOCALIZATION_KEYS, PersistentDataType.LIST.strings()] = info.lore.toList()
+            if (usingVitalLocalization && info.localized) {
+                name = player.getTranslatedText(info.name)
+                lore = info.lore.map { player.getTranslatedText(it) }.toMutableList()
+                afterInit = {
+                    it.itemMeta =
+                        it.itemMeta.apply {
+                            persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] = true
+                            persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZATION_KEY, PersistentDataType.STRING] = info.name
+                            persistentDataContainer[VitalNamespacedKey.ITEM_LORE_LOCALIZATION_KEYS, PersistentDataType.LIST.strings()] =
+                                info.lore.toList()
+                        }
+                }
+            } else {
+                afterInit = {
+                    it.itemMeta =
+                        it.itemMeta.apply {
+                            persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] = false
+                        }
                 }
             }
-        } else {
-            afterInit = {
-                it.itemMeta = it.itemMeta.apply {
-                    persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] = false
-                }
-            }
         }
-    }
 
     /**
      * Handles a player's interaction event with an item and determines the appropriate response
@@ -125,7 +129,8 @@ open class VitalItem {
         if (other !is ItemStack && other !is VitalItem) return false
         if (other is ItemStack) {
             if (other.itemMeta == null) return false
-            return uniqueId == UUID.fromString(other.itemMeta.persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING])
+            return uniqueId ==
+                UUID.fromString(other.itemMeta.persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING])
         }
 
         return uniqueId == (other as VitalItem).uniqueId
@@ -173,9 +178,8 @@ open class VitalItem {
      * @param player The player currently undergoing the cooldown.
      */
     open fun onCooldownTick(player: SpigotPlayer) {}
-    override fun toString(): String {
-        return "VitalItem(uniqueId=$uniqueId, initialCooldown=$initialCooldown, playerCooldown=$playerCooldown)"
-    }
+
+    override fun toString(): String = "VitalItem(uniqueId=$uniqueId, initialCooldown=$initialCooldown, playerCooldown=$playerCooldown)"
 
     /**
      * Annotation used to define metadata and behavior for custom items in the Vital framework.
@@ -205,6 +209,6 @@ open class VitalItem {
         val cooldown: Int = 0,
         val enchanted: Boolean = false,
         val unbreakable: Boolean = true,
-        val localized: Boolean = false
+        val localized: Boolean = false,
     )
 }

@@ -1,12 +1,19 @@
 name: Vital
-
-on: [ push ]
-
+on: push
 permissions:
   contents: read
-
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 24
+      - run: ./gradlew ktlintCheck --info --stacktrace --refresh-dependencies
   build:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,7 +23,7 @@ jobs:
           java-version: 24
       - run: ./gradlew clean publishToMavenLocal --info --stacktrace --refresh-dependencies
   test:
-    needs: [ build ]
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

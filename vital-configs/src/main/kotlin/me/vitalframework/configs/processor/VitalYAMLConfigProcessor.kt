@@ -1,8 +1,13 @@
 package me.vitalframework.configs.processor
 
-import me.vitalframework.configs.*
+import me.vitalframework.configs.SnakeYamlConstructor
+import me.vitalframework.configs.VitalConfig
 import me.vitalframework.configs.VitalConfig.Processor
-import org.yaml.snakeyaml.*
+import me.vitalframework.configs.VitalConfigUtils
+import org.yaml.snakeyaml.DumperOptions
+import org.yaml.snakeyaml.LoaderOptions
+import org.yaml.snakeyaml.TypeDescription
+import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.inspector.TagInspector
 import org.yaml.snakeyaml.representer.Representer
 import java.io.InputStream
@@ -44,7 +49,10 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
         }
     }
 
-    override fun load(inputStream: InputStream, clazz: Class<*>): Map<String, Any> {
+    override fun load(
+        inputStream: InputStream,
+        clazz: Class<*>,
+    ): Map<String, Any> {
         data.clear()
         // add type descriptors for complex types...
         addTypeDescriptors(clazz)
@@ -58,10 +66,20 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
     }
 
     override fun read(key: String) = data[key]
-    override fun read(key: String, def: Any) = data.getOrDefault(key, def)
+
+    override fun read(
+        key: String,
+        def: Any,
+    ) = data.getOrDefault(key, def)
+
     override fun write(serializedContent: Map<String, Any>) = data.putAll(serializedContent)
+
     override fun write(instance: Any) {}
-    override fun write(key: String, value: Any) = run { data[key] = serialize(value) }
+
+    override fun write(
+        key: String,
+        value: Any,
+    ) = run { data[key] = serialize(value) }
 
     override fun save(serializedContent: Map<String, Any>): String {
         data.putAll(serializedContent)
@@ -72,22 +90,28 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
         return stringWriter.toString()
     }
 
-    override fun serialize(instance: Any) = VitalConfigUtils.getPropertyFieldsFromType(instance.javaClass)
-        .associate { it.name to VitalConfigUtils.readField(instance, it)!! }
+    override fun serialize(instance: Any) =
+        VitalConfigUtils
+            .getPropertyFieldsFromType(instance.javaClass)
+            .associate { it.name to VitalConfigUtils.readField(instance, it)!! }
 
-    override fun deserialize(serializedContent: Map<String, Any>, type: Class<*>): Any? = try {
-        val defaultConstructor = type.getConstructor()
-        val instance = defaultConstructor.newInstance()
-        // default constructor was found, inject field properties...
-        for ((key, value) in serializedContent) {
-            VitalConfigUtils.getFieldByProperty(type, key)?.let { VitalConfigUtils.injectField(instance, it, value) }
+    override fun deserialize(
+        serializedContent: Map<String, Any>,
+        type: Class<*>,
+    ): Any? =
+        try {
+            val defaultConstructor = type.getConstructor()
+            val instance = defaultConstructor.newInstance()
+            // default constructor was found, inject field properties...
+            for ((key, value) in serializedContent) {
+                VitalConfigUtils.getFieldByProperty(type, key)?.let { VitalConfigUtils.injectField(instance, it, value) }
+            }
+
+            instance
+        } catch (_: NoSuchMethodException) {
+            // the default constructor was not found, attempt to get constructor matching properties...
+            val constructor = type.getConstructor(*VitalConfigUtils.getPropertyFieldsFromType(type).map { it.javaClass }.toTypedArray())
+            // constructor found, create a new instance with this constructor...
+            constructor.newInstance(serializedContent.values)
         }
-
-        instance
-    } catch (_: NoSuchMethodException) {
-        // the default constructor was not found, attempt to get constructor matching properties...
-        val constructor = type.getConstructor(*VitalConfigUtils.getPropertyFieldsFromType(type).map { it.javaClass }.toTypedArray())
-        // constructor found, create a new instance with this constructor...
-        constructor.newInstance(serializedContent.values)
-    }
 }

@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service
 
 @RequiresSpigot
 @Service
-class VitalItemService(val items: List<VitalItem>) {
+class VitalItemService(
+    val items: List<VitalItem>,
+) {
     fun handleInteraction(e: PlayerInteractEvent) = items.firstOrNull { it == e.item }?.handleInteraction(e)
 
     @Scheduled(fixedRate = 50)
