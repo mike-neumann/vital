@@ -1,58 +1,73 @@
-# 🚀 Vital-Framework 🚀
+# 🚀 Vital - The ultimate plugin framework
+Vital is the ultimate Minecraft server plugin framework.  
+Delivering fast, easy-to-use, and powerful features, centralized so you don't have to reinvent the wheel.
 
-## 🌟 Overview
+# ✨ Highlights
+- **🧹 No `plugin.yml` anymore!**  
+  Vital takes care of all the annoying `plugin.yml` configuration stuff for you.  
+  Just write your code and let Vital do the rest.
 
-Vital is the new framework to streamline your plugin development.  
-Current implementations of the mc server api require you to manually implement systems which could easily be replaced by
-already existing ones.  
-Spring solved this issue years ago...  
-Vital is designed to work in tandem with the programmer, allowing you to create simple or even extensive and complex
-server applications.
 
-## 🧩 Module Overview
+- **🖥️ Advanced command system**  
+  Delivering an advanced command creation system built using annotations instead of juggling strings around.  
+  Define function-based command handling with advanced exception handling and **automatic tab completion** right out of the box!
 
-Vital is thoughtfully organized into several submodules which each serve a different purpose, so you can only implement
-the things you really need for your project.
 
-- **vital-cloudnet4-bridge**: Provides an intuitive way to interact with the CloudNET-Bridge module (v4).
-- **vital-cloudnet4-driver**: Provides an intuitive way to interact with the CloudNET-Driver module (v4).
-- **vital-commands**: Provides an extensive way to create custom commands, even with automatic tab-completion and custom
-  exception handling.
-- **vital-configs**: Provides an OOP-Driven configuration system. Read and write to config files using classes instead
-  of raw and loose data.
-- **vital-core**: The core module required by all Vital modules.
-- **vital-core-holograms**: Provides an easy and developer-friendly way to create holograms.
-- **vital-inventories**: Provides an intuitive way to create reactive interactive inventory menus, global or
-  player-based.
-- **vital-items**: Provides a way to create interactive items directly as a class, to encapsulate functionality.
-- **vital-minigames**: Provides an easy way to create minigames using a custom state-system to make minigame creation
-  fun again, without creating spaghetti code.
-- **vital-players**: Provides a custom player management solution, to store volatile data directly on a player class of
-  your choice.
-- **vital-scoreboards**: Provides an easy way to create reactive player-based or global scoreboard that may hold
-  important information.
-- **vital-statistics**: Hooks into your servers heartbeat to ensure server stability by having an eye on certain
-  statistics you can view later.
-- **vital-tasks**: Provides an easy way to implement server-based scheduled tasks using the servers runtime scheduler
-  (RepeatableTask, Countdowns).
-- **vital-utils**: Provides many utilities the server runtimes are missing to streamline development and make it even
-  more efficient.
-- **vital-localization**: Provides functionality to specify a custom locale on each player, utilizing spring boot's i18n
-  functionality for bundle resolution.
+- **📄 Advanced config system**  
+  Tired of writing non-typed, verbose and error-prone config files?  
+  Vital takes care of all the hassle for you.  
+  Just write your config **classes** and let Vital do the rest.  
+  No more loose config files, no more typos, no more errors.  
+  Use classes instead of strings!
 
-_**To utilize all of Vital's functionality, you can use `vital-all` as a dependency, which includes all modules**_
 
-Powered by Spring Boot, Vital delivers component based, testable code, with the ability to include many extensions via
-Spring
-dependencies.
+- **🧮 Easy-to-use scoreboard system**  
+  Utilize an easy-to-use scoreboard creation system to track static or even player-based dynamic data!.  
+  No more multi-line scoreboard creation, create one with a **single line of code!**
 
-## You matter
 
-You can contribute to the Vital project to make it even better for everyone!  
-PR (Pull Request) if you have any ideas or want to change something.
+- **🧰 Utilities, even for non-Vital projects!**  
+  Vital provides a wide range of utilities, even for projects that don't use Vital.  
+  Extension functions for creating adventure components.  
+  Sending formatted messages (MiniMessage) or titles.  
+  Designed to reduce boilerplate code.
 
-__Make minecraft development great again!__
 
-## Getting started
+- **🌍 Localization**  
+  Built-in support for localization using spring boot's message system.  
+  Works in inventories and even **items** that are **inside-of a player's inventory**, without having to manually update anything!
 
-To get started with Vital, please follow the instructions on the wiki.
+
+- **🗡️ Interactive items**  
+  Write class-based interactive items, with a simple and **easy-to-use API**.  
+  Create items that can be interacted with, even with a **cooldown** and **native localization support!**
+
+
+- **🏢 Enterprise ready**  
+  With spring boot at its core, Vital is designed to be enterprise ready.  
+  Built with developer usability in mind, Vital is the perfect solution for small to massive plugin projects.
+
+
+- **💻 Multi-Platform support**  
+  Vital supports Spigot, Paper and BungeeCord (and more to come) right out of the box, 
+  making it the perfect solution for your next project.
+
+
+- **📦 Module system**  
+  It's modular, meaning you may only include the stuff you actually need.
+  Only need the base functionality? No problem, just leave it as is.  
+  Need a reactive inventory system? Go ahead and include it.  
+  Want everything Vital has to offer?  Go for it, include every module.
+  This approach decreases jar size and makes your plugin easier to maintain.
+
+- **🔌 Plug-and-play**  
+  Vital is designed to work right out of the box, no hidden configuration steps needed.  
+  Just drop it in your plugin and start developing.
+
+# 🔧 Requirements
+- Java 24 or Kotlin 2.2.0 (JVM 24)
+- Gradle 9.0.0
+
+# 🤝 Want to contribute?
+Vital is open source, and we welcome contributions of any kind.  
+Have an idea? Found a bug? Feel free to open an issue or a pull request.
