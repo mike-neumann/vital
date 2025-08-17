@@ -186,7 +186,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         sender: CS,
         exception: Throwable,
         executedArg: String,
-        commandArg: Arg,
+        commandArg: Arg?,
     ) {
         val exceptionHandlers = argExceptionHandlers[commandArg] ?: emptyMap()
         // we may or may not have an exception handler mapped for this execution context
@@ -195,8 +195,8 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
                 .filter { it.key.isAssignableFrom(exception.javaClass) }
                 .map { it.value }
                 .firstOrNull()
-        if (context == null) {
-            // we do not have any exception handler mapped for this argument
+        if (context == null || commandArg == null) {
+            // we do not have any exception handler mapped for this argument, or the passed argument is null
             // try to find a global exception handler
             return executeGlobalExceptionHandlerMethod(sender, executedArg, commandArg, exception)
         }
@@ -311,16 +311,17 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     ) {
         val joinedPlayerArgs = args.joinToString(" ")
         if (playerOnly && !isPlayer(sender)) return onCommandRequiresPlayer(sender, joinedPlayerArgs, null)
-        if (permission.isNotBlank() && !hasPermission(sender, permission)) {
-            return onCommandRequiresPermission(sender, joinedPlayerArgs, null)
-        }
         val executingArg = getArg(joinedPlayerArgs)
         // if the player has not put in any arguments, we may execute the base command handler method
         val commandReturnState =
             when {
                 executingArg == null && joinedPlayerArgs.isBlank() ->
                     try {
-                        onBaseCommand(sender)
+                        if (permission.isNotBlank() && !hasPermission(sender, permission)) {
+                            ReturnState.NO_PERMISSION
+                        } else {
+                            onBaseCommand(sender)
+                        }
                     } catch (e: Exception) {
                         return executeGlobalExceptionHandlerMethod(sender, joinedPlayerArgs, null, e)
                     }
@@ -357,11 +358,20 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
 
                 else -> ReturnState.INVALID_ARGS
             }
-        when (commandReturnState) {
-            ReturnState.SUCCESS -> run {}
-            ReturnState.INVALID_ARGS -> onCommandInvalidArgs(sender, joinedPlayerArgs)
-            ReturnState.NO_PERMISSION -> onCommandRequiresPermission(sender, joinedPlayerArgs, executingArg)
-            ReturnState.ONLY_PLAYER -> onCommandRequiresPlayer(sender, joinedPlayerArgs, executingArg)
+
+        try {
+            when (commandReturnState) {
+                ReturnState.SUCCESS -> run {}
+                ReturnState.INVALID_ARGS -> onCommandInvalidArgs(sender, joinedPlayerArgs)
+                ReturnState.NO_PERMISSION -> onCommandRequiresPermission(sender, joinedPlayerArgs, executingArg)
+                ReturnState.ONLY_PLAYER -> onCommandRequiresPlayer(sender, joinedPlayerArgs, executingArg)
+            }
+        } catch (e: Exception) {
+            return if (e is InvocationTargetException) {
+                executeArgExceptionHandlerMethod(sender, e.targetException, joinedPlayerArgs, executingArg)
+            } else {
+                executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, executingArg)
+            }
         }
     }
 
