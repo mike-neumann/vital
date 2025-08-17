@@ -9,6 +9,7 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
@@ -79,6 +80,17 @@ interface VitalUtils<CS, P : CS> {
          * @return An array of `BaseComponent` representing the BungeeCord-compatible serialized format of the `Component`.
          */
         fun Component.toBungeeComponent() = BungeeComponentSerializer.get().serialize(this)
+
+        /**
+         * Converts the current `Component` instance into a plain text string representation.
+         *
+         * This method uses the `PlainTextComponentSerializer` to serialize the component,
+         * effectively stripping away any formatting or additional metadata, leaving only the
+         * raw text content.
+         *
+         * @return The plain text string representation of the component.
+         */
+        fun Component.toPlainTextString() = PlainTextComponentSerializer.plainText().serialize(this)
 
         /**
          * Creates a chat button with hover text, clickable text, and a specific click action.
