@@ -150,15 +150,15 @@ var BungeePlayer.vitalLocale: Locale?
  * Retrieves a localized message for the given key, arguments, and locale.
  * If the locale is null or the message cannot be resolved, the key itself is returned.
  *
+ * @param locale The locale for which the message should be localized. If null, the key is returned.
  * @param key The message key used to identify the localized text.
  * @param args Arguments to format the localized text. Defaults to an empty array.
- * @param locale The locale for which the message should be localized. If null, the key is returned.
  * @return The localized message for the given key and locale, or the key itself if localization fails.
  */
 fun getMessage(
+    locale: Locale?,
     key: String,
     args: Array<Any?>,
-    locale: Locale?,
 ): String =
     if (locale == null) {
         key
@@ -185,7 +185,7 @@ fun getMessage(
 fun SpigotPlayer.getTranslatedText(
     key: String,
     vararg args: Any?,
-): String = getMessage(key, arrayOf(*args), vitalLocale)
+): String = getMessage(vitalLocale, key, arrayOf(*args))
 
 /**
  * Retrieves the translated text for the given key based on the player's locale.
@@ -198,4 +198,4 @@ fun SpigotPlayer.getTranslatedText(
 fun BungeePlayer.getTranslatedText(
     key: String,
     vararg args: Any?,
-): String = getMessage(key, arrayOf(*args), vitalLocale)
+): String = getMessage(vitalLocale, key, arrayOf(*args))
