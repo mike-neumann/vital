@@ -67,9 +67,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     val name: String
     val permission: String
     val playerOnly: Boolean
-    private val args: Map<Pattern, Arg>
-    private val argHandlers: Map<Arg, ArgHandlerContext>
-    private val argExceptionHandlers: Map<Arg, Map<Class<out Throwable>, ArgExceptionHandlerContext>>
+    val args: Map<Pattern, Arg>
+    val argHandlers: Map<Arg, ArgHandlerContext>
+    val argExceptionHandlers: Map<Arg, Map<Class<out Throwable>, ArgExceptionHandlerContext>>
 
     init {
         val info = getRequiredAnnotation<Info>()
@@ -178,16 +178,27 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
      * is thrown with details about the handler method and context.
      *
      * @param sender The command sender who attempted to execute the command.
-     * @param exception The exception that was thrown during command execution.
+     * @param originalException The exception that was thrown during command execution.
      * @param executedArg The string representation of the executed argument related to the exception.
      * @param commandArg The metadata of the command argument associated with the exception.
      */
     private fun executeArgExceptionHandlerMethod(
         sender: CS,
-        exception: Throwable,
+        originalException: Throwable,
         executedArg: String,
         commandArg: Arg?,
     ) {
+        // when passing an invocation target exception, we first have to extract the actual exception that occurred.
+        var exception = originalException
+        if (exception is InvocationTargetException) {
+            var extractedException = originalException.targetException
+            while (extractedException is InvocationTargetException) {
+                extractedException = extractedException.targetException
+            }
+
+            exception = extractedException
+        }
+
         val exceptionHandlers = argExceptionHandlers[commandArg] ?: emptyMap()
         // we may or may not have an exception handler mapped for this execution context
         val context =
@@ -311,30 +322,28 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     ) {
         val joinedPlayerArgs = args.joinToString(" ")
         if (playerOnly && !isPlayer(sender)) return onCommandRequiresPlayer(sender, joinedPlayerArgs, null)
-        val executingArg = getArg(joinedPlayerArgs)
-        // if the player has not put in any arguments, we may execute the base command handler method
-        val commandReturnState =
-            when {
-                executingArg == null && joinedPlayerArgs.isBlank() ->
-                    try {
-                        if (permission.isNotBlank() && !hasPermission(sender, permission)) {
-                            ReturnState.NO_PERMISSION
-                        } else {
-                            onBaseCommand(sender)
-                        }
-                    } catch (e: Exception) {
-                        return executeGlobalExceptionHandlerMethod(sender, joinedPlayerArgs, null, e)
-                    }
 
-                executingArg != null -> {
-                    if (executingArg.permission.isNotBlank() && !hasPermission(sender, executingArg.permission)) {
+        // check for the base permission
+        // if the player doesn't even have the base permission set in the info annotation, we can cancel everything here
+        if (permission.isNotBlank() &&
+            !hasPermission(sender, permission)
+        ) {
+            return onCommandRequiresPermission(sender, joinedPlayerArgs, null)
+        }
+
+        // at this point, the player has at least the base permission set
+        val matchedArg = getArg(joinedPlayerArgs)
+        val returnState =
+            when {
+                matchedArg != null -> {
+                    if (matchedArg.permission.isNotBlank() && !hasPermission(sender, matchedArg.permission)) {
                         ReturnState.NO_PERMISSION
-                    } else if (executingArg.playerOnly && !isPlayer(sender)) {
+                    } else if (matchedArg.playerOnly && !isPlayer(sender)) {
                         ReturnState.ONLY_PLAYER
                     } else {
                         val values = mutableListOf<String>()
                         val commandArgs =
-                            executingArg.name
+                            matchedArg.name
                                 .split(" ".toRegex())
                                 .dropLastWhile { it.isEmpty() }
                                 .map { it.lowercase() }
@@ -345,13 +354,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
                             .forEach(values::add)
 
                         try {
-                            executeArgHandlerMethod(sender, joinedPlayerArgs, executingArg, values.toTypedArray())
+                            executeArgHandlerMethod(sender, joinedPlayerArgs, matchedArg, values.toTypedArray())
                         } catch (e: Exception) {
-                            return if (e is InvocationTargetException) {
-                                executeArgExceptionHandlerMethod(sender, e.targetException, joinedPlayerArgs, executingArg)
-                            } else {
-                                executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, executingArg)
-                            }
+                            executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, matchedArg)
                         }
                     }
                 }
@@ -360,18 +365,14 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
             }
 
         try {
-            when (commandReturnState) {
+            when (returnState) {
                 ReturnState.SUCCESS -> run {}
                 ReturnState.INVALID_ARGS -> onCommandInvalidArgs(sender, joinedPlayerArgs)
-                ReturnState.NO_PERMISSION -> onCommandRequiresPermission(sender, joinedPlayerArgs, executingArg)
-                ReturnState.ONLY_PLAYER -> onCommandRequiresPlayer(sender, joinedPlayerArgs, executingArg)
+                ReturnState.NO_PERMISSION -> onCommandRequiresPermission(sender, joinedPlayerArgs, matchedArg)
+                ReturnState.ONLY_PLAYER -> onCommandRequiresPlayer(sender, joinedPlayerArgs, matchedArg)
             }
         } catch (e: Exception) {
-            return if (e is InvocationTargetException) {
-                executeArgExceptionHandlerMethod(sender, e.targetException, joinedPlayerArgs, executingArg)
-            } else {
-                executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, executingArg)
-            }
+            executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, matchedArg)
         }
     }
 
@@ -390,19 +391,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         sender: CS,
         commandArg: Arg?,
         e: Throwable,
-    ): Unit = run { throw e }
-
-    /**
-     * Handles the execution of the base command when no specific subcommand is provided.
-     *
-     * This method is typically invoked when the base command is executed without arguments
-     * or when no matching subcommands are identified. It can be overridden to provide custom
-     * logic for handling such scenarios.
-     *
-     * @param sender The command sender who initiated the command action.
-     * @return A [ReturnState] indicating the result of the base command execution, by default [ReturnState.INVALID_ARGS].
-     */
-    protected open fun onBaseCommand(sender: CS) = ReturnState.INVALID_ARGS
+    ): Unit = throw e
 
     /**
      * Handles the tab-completion logic for a command.
@@ -544,7 +533,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
      * configuration options such as name, required permission, and whether the command is restricted
      * to player senders only.
      *
-     * @property name The name of the argument.
+     * If passing an empty string, the command sender must execute the command without an argument
+     * for the annotated member to be invoked.
+     *
+     * @property name The name of the argument, empty for no argument.
      * @property permission The required permission to use this argument. Defaults to an empty string,
      * meaning no specific permission is required.
      * @property playerOnly Specifies whether the command argument is restricted to player senders only.
@@ -553,7 +545,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.CLASS)
     annotation class Arg(
-        val name: String,
+        val name: String = "",
         val permission: String = "",
         val playerOnly: Boolean = false,
     ) {

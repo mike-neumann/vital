@@ -82,7 +82,8 @@ interface StatsCommand<CS> {
             message: String,
         ) = sender.sendFormattedMessage(message)
 
-        override fun onBaseCommand(sender: SpigotCommandSender): ReturnState {
+        @ArgHandler(Arg())
+        fun onNoArg(sender: SpigotCommandSender): ReturnState {
             sender.sendFormattedMessage("MC Version: <yellow>${Bukkit.getVersion()}")
             sender.sendFormattedMessage("Bukkit Version: <yellow>${Bukkit.getBukkitVersion()}")
             handleOnCommand(sender)
@@ -107,7 +108,8 @@ interface StatsCommand<CS> {
             message: String,
         ) = sender.sendFormattedMessage(message)
 
-        override fun onBaseCommand(sender: BungeeCommandSender): ReturnState {
+        @ArgHandler(Arg())
+        fun onNoArg(sender: BungeeCommandSender): ReturnState {
             sender.sendFormattedMessage("Bungee version: <yellow>${ProxyServer.getInstance().version}")
             handleOnCommand(sender)
 

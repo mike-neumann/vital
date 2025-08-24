@@ -1,7 +1,7 @@
 package me.vitalframework.commands
 
-import jakarta.annotation.PostConstruct
 import me.vitalframework.VitalClassUtils.getRequiredAnnotation
+import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
@@ -9,11 +9,10 @@ import org.springframework.stereotype.Component
 class VitalGlobalCommandExceptionHandlerProcessor(
     applicationContext: ApplicationContext,
     val commands: List<VitalCommand<*, *>>,
-) {
+) : InitializingBean {
     private val advices = applicationContext.getBeansWithAnnotation(VitalCommand.Advice::class.java).values
 
-    @PostConstruct
-    fun init() {
+    override fun afterPropertiesSet() {
         for (command in commands) {
             // get all advices for the command sender of the command.
             advices

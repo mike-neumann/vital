@@ -169,8 +169,9 @@ class VitalCommandsTest {
         val testCommand =
             @VitalCommand.Info("testCommand")
             object : VitalTestCommand() {
-                override fun onBaseCommand(sender: CommandSender): ReturnState {
-                    sender.sendMessage("onBaseCommand")
+                @ArgHandler(Arg())
+                fun onNoArg(sender: CommandSender): ReturnState {
+                    sender.sendMessage("onNoArg")
                     return ReturnState.SUCCESS
                 }
             }
@@ -179,7 +180,7 @@ class VitalCommandsTest {
         testCommand.execute(sender, arrayOf(""))
 
         assert(sender.messages.size == 1)
-        assert(sender.messages.component1() == "onBaseCommand")
+        assert(sender.messages.component1() == "onNoArg")
     }
 
     @Test
