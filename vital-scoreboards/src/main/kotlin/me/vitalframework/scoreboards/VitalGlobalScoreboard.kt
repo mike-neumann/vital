@@ -30,6 +30,19 @@ class VitalGlobalScoreboard(
     private val _players = mutableListOf<UUID>()
 
     /**
+     * Returns a list of UUIDs representing the players currently associated with the global scoreboard.
+     *
+     * This property provides read-only access to the internal list of players (`_players`) who
+     * are actively linked to this scoreboard. The list represents all players whose scoreboards
+     * will be updated and synchronized by this implementation.
+     *
+     * Modifications, such as adding or removing players, should be handled through the appropriate
+     * methods within the `VitalGlobalScoreboard` class to ensure consistency and proper synchronization.
+     */
+    val players: List<UUID>
+        get() = _players
+
+    /**
      * Represents the content of the scoreboard used in the context of the `VitalGlobalScoreboard`.
      *
      * This variable provides a centralized way to manage and update the structure and data
@@ -42,18 +55,6 @@ class VitalGlobalScoreboard(
      * - Providing support for interactivity with player and team information.
      */
     val scoreboardContent = VitalScoreboardContent(title)
-
-    /**
-     * Returns a list of UUIDs representing the players currently associated with the global scoreboard.
-     *
-     * This property provides read-only access to the internal list of players (`_players`) who
-     * are actively linked to this scoreboard. The list represents all players whose scoreboards
-     * will be updated and synchronized by this implementation.
-     *
-     * Modifications, such as adding or removing players, should be handled through the appropriate
-     * methods within the `VitalGlobalScoreboard` class to ensure consistency and proper synchronization.
-     */
-    val players: List<UUID> get() = _players
 
     /**
      * Updates the specified player's scoreboard.

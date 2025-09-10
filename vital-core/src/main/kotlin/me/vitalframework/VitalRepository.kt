@@ -19,7 +19,8 @@ import org.springframework.stereotype.Component
 @Component
 abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     private val _entities = mutableListOf<T>()
-    val entities: List<T> get() = _entities
+    val entities: List<T>
+        get() = _entities
 
     fun save(entity: T): T {
         if (exists(entity)) delete(entity)

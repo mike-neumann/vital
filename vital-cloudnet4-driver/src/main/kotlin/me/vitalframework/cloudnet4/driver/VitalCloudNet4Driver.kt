@@ -22,13 +22,15 @@ object VitalCloudNet4Driver {
      * The instance is provided via dependency injection and is expected to be preconfigured
      * to access and manage cloud resources.
      */
-    val cloudServiceProvider = InjectionLayer.ext().instance(CloudServiceProvider::class.java)!!
+    val cloudServiceProvider
+        get() = InjectionLayer.ext().instance(CloudServiceProvider::class.java)!!
 
     /**
      * A constant that provides an instance of the ServiceTaskProvider, initialized via dependency injection.
      * It is used to get service tasks by their respective names.
      */
-    val serviceTaskProvider = InjectionLayer.ext().instance(ServiceTaskProvider::class.java)!!
+    val serviceTaskProvider
+        get() = InjectionLayer.ext().instance(ServiceTaskProvider::class.java)!!
 
     /**
      * A factory instance for creating cloud services, using a dependency injection framework.
@@ -36,7 +38,8 @@ object VitalCloudNet4Driver {
      * from the injection layer. It is used to create and configure cloud service instances
      * based on specific requirements and configurations.
      */
-    val cloudServiceFactory = InjectionLayer.ext().instance(CloudServiceFactory::class.java)!!
+    val cloudServiceFactory
+        get() = InjectionLayer.ext().instance(CloudServiceFactory::class.java)!!
 
     /**
      * Retrieves all cloud servers associated with the specified task name.

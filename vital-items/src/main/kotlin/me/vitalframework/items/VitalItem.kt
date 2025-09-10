@@ -38,7 +38,8 @@ open class VitalItem {
      * The `initialCooldown` is applied when the item is first interacted with and
      * works in conjunction with the player's cooldown state to prevent excessive usage.
      */
-    val initialCooldown: Int
+    val initialCooldown
+        get() = getRequiredAnnotation<Info>().cooldown
 
     /**
      * A mapping of players to their respective cooldown durations for item interactions in milliseconds.
@@ -55,11 +56,6 @@ open class VitalItem {
      * is triggered.
      */
     val playerCooldown = mutableMapOf<UUID, Int>()
-
-    init {
-        val info = getRequiredAnnotation<Info>()
-        this.initialCooldown = info.cooldown
-    }
 
     fun getItemStack(player: SpigotPlayer) =
         itemBuilder(uniqueId) {

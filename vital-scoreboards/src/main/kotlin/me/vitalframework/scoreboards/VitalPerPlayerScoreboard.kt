@@ -36,7 +36,8 @@ class VitalPerPlayerScoreboard(
      * Accessing this property does not allow for modifications; updates to the scoreboard content
      * must be performed through designated methods within the enclosing class.
      */
-    val scoreboardContent: Map<UUID, VitalScoreboardContent> get() = _scoreboardContent
+    val scoreboardContent: Map<UUID, VitalScoreboardContent>
+        get() = _scoreboardContent
 
     /**
      * Updates the scoreboard content for the specified player.

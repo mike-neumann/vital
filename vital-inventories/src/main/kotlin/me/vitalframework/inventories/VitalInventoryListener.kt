@@ -7,6 +7,7 @@ import me.vitalframework.SpigotPlugin
 import me.vitalframework.VitalListener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.springframework.stereotype.Component
 
 @RequiresSpigot
@@ -41,5 +42,12 @@ class VitalInventoryListener(
         val player = e.player as SpigotPlayer
         val vitalInventory = inventories.firstOrNull { it.hasInventoryOpen(player) }
         vitalInventory?.close(player)
+    }
+
+    @SpigotEventHandler
+    fun onPlayerQuit(e: PlayerQuitEvent) {
+        for (inventory in inventories) {
+            inventory.close(e.player)
+        }
     }
 }

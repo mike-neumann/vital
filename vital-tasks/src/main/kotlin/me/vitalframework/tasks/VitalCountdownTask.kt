@@ -40,7 +40,8 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      * to reset or restart the task to its initial state. The countdown process
      * begins from this value and decrements over time until it reaches zero.
      */
-    val initialCountdown: Long
+    val initialCountdown
+        get() = getRequiredAnnotation<Info>().countdown
 
     /**
      * Represents the current countdown value in the `VitalCountdownTask`.
@@ -54,7 +55,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      *
      * @property countdown The remaining time for the countdown process.
      */
-    var countdown: Long
+    var countdown = initialCountdown
 
     /**
      * The interval between each tick of the countdown process, measured in milliseconds.
@@ -65,7 +66,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      * It is recommended to adjust the interval value based on the application's requirements for
      * responsiveness and performance.
      */
-    var interval: Long
+    var interval = getRequiredAnnotation<Info>().interval
 
     /**
      * Indicates whether the countdown task is allowed to tick or proceed with its operations.
@@ -112,14 +113,8 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      * signifying that the task is actively executing or ready to execute. Otherwise, it returns `false`,
      * indicating that the countdown process is not in progress.
      */
-    val running get() = runnable != null && task != null
-
-    init {
-        val info = getRequiredAnnotation<Info>()
-        initialCountdown = info.countdown
-        countdown = info.countdown
-        interval = info.interval
-    }
+    val running
+        get() = runnable != null && task != null
 
     /**
      * Starts the countdown task.

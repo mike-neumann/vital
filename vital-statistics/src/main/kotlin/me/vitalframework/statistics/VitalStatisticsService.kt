@@ -8,8 +8,15 @@ class VitalStatisticsService(
     val statisticsConfig: VitalStatisticsConfig,
 ) {
     private val logger = logger()
+
     private val _lastTps = mutableMapOf<Long, Int>()
+    val lastTps: Map<Long, Int>
+        get() = _lastTps
+
     private val _lastUnhealthyTps = mutableMapOf<Long, Int>()
+    val lastUnhealthyTps: Map<Long, Int>
+        get() = _lastUnhealthyTps
+
     final var lastTickTime = 0L
         private set
     final var lastSecondTime = 0L
@@ -18,8 +25,6 @@ class VitalStatisticsService(
         private set
     final var tps = 0
         private set
-    val lastTps: Map<Long, Int> get() = _lastTps
-    val lastUnhealthyTps: Map<Long, Int> get() = _lastUnhealthyTps
 
     fun handleTick() {
         val currentTimeMillis = System.currentTimeMillis()

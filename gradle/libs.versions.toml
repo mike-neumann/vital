@@ -1,5 +1,6 @@
 [versions]
 kotlin = "2.2.0"
+kotlin-coroutines = "1.10.2"
 spring-boot = "3.5.4"
 spring-dependencyManagement = "1.1.7"
 paperApi = "1.21.7-R0.1-SNAPSHOT"
@@ -39,19 +40,57 @@ adventure-text-serializer-legacy = { group = "net.kyori", name = "adventure-text
 adventure-text-serializer-plain = { group = "net.kyori", name = "adventure-text-serializer-plain", version.ref = "adventure-serializers" }
 adventure-platform-bungeecord = { group = "net.kyori", name = "adventure-platform-bungeecord", version.ref = "adventure-platform" }
 adventure-platform-bukkit = { group = "net.kyori", name = "adventure-platform-bukkit", version.ref = "adventure-platform" }
+kotlin-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
+kotlin-coroutines-reactor = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor", version.ref = "kotlin-coroutines" }
 
 [bundles]
-root-compileOnly = ["paperApi", "brigadier", "bungeeApi"]
-root-api = ["spring-boot-starter", "spring-boot-starter-test"]
-root-testImplementation = ["spring-boot-starter-test", "junit-jupiter-api", "paperApi", "brigadier", "bungeeApi"]
+root-compileOnly = [
+    "paperApi",
+    "brigadier",
+    "bungeeApi"
+]
+root-api = [
+    "spring-boot-starter",
+    "spring-boot-starter-test",
+    "kotlin-coroutines-core",
+    "kotlin-coroutines-reactor",
+]
+root-testImplementation = [
+    "spring-boot-starter-test",
+    "junit-jupiter-api",
+    "paperApi", "brigadier",
+    "bungeeApi"
+]
 cloudnet4-bridgeApi-compileOnly = ["cloudnet-bridgeApi"]
 cloudnet4-driverApi-compileOnly = ["cloudnet-driverApi"]
 commands-api = ["reflections"]
 commands-processor-api = ["reflections"]
 core-api = ["reflections"]
-gradlePlugin-api = ["spring-gradlePlugin", "spring-dependencyManagementPlugin", "spring-boot-gradlePlugin"]
-holograms-api = ["adventure-text-minimessage", "adventure-text-serializer-legacy"]
-inventories-api = ["adventure-text-minimessage", "adventure-text-serializer-legacy"]
-items-api = ["adventure-text-minimessage", "adventure-text-serializer-legacy"]
-scoreboards-api = ["adventure-text-minimessage", "adventure-text-serializer-legacy", "adventure-text-serializer-plain"]
-utils-api = ["adventure-text-minimessage", "adventure-text-serializer-legacy", "adventure-platform-bungeecord", "adventure-platform-bukkit"]
+gradlePlugin-api = [
+    "spring-gradlePlugin",
+    "spring-dependencyManagementPlugin",
+    "spring-boot-gradlePlugin"
+]
+holograms-api = [
+    "adventure-text-minimessage",
+    "adventure-text-serializer-legacy"
+]
+inventories-api = [
+    "adventure-text-minimessage",
+    "adventure-text-serializer-legacy"
+]
+items-api = [
+    "adventure-text-minimessage",
+    "adventure-text-serializer-legacy"
+]
+scoreboards-api = [
+    "adventure-text-minimessage",
+    "adventure-text-serializer-legacy",
+    "adventure-text-serializer-plain"
+]
+utils-api = [
+    "adventure-text-minimessage",
+    "adventure-text-serializer-legacy",
+    "adventure-platform-bungeecord",
+    "adventure-platform-bukkit"
+]

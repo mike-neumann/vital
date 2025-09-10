@@ -31,7 +31,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
      * Represents the interval duration in milliseconds.
      * This variable defines the time span or delay used for scheduling repetitive tasks, setting timeouts, or controlling execution intervals in a process.
      */
-    var interval: Long
+    var interval = getRequiredAnnotation<Info>().interval
 
     /**
      * Controls whether the task is allowed to process ticks.
@@ -83,12 +83,8 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
      * the task has been initialized and its execution has begun. It returns `false` if either
      * the `runnable` or `task` is null, suggesting the task is not active or has been stopped.
      */
-    val running get() = runnable != null && task != null
-
-    init {
-        val info = getRequiredAnnotation<Info>()
-        interval = info.interval
-    }
+    val running
+        get() = runnable != null && task != null
 
     /**
      * Starts the execution of the task.

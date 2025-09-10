@@ -34,7 +34,6 @@ class VitalScoreboardTeam internal constructor(
     scoreboard: Scoreboard,
 ) {
     private val _players = mutableListOf<UUID>()
-    private val _options = mutableMapOf<Team.Option, OptionStatus>()
 
     /**
      * Returns a read-only list of UUIDs representing the players currently associated with the team.
@@ -49,7 +48,10 @@ class VitalScoreboardTeam internal constructor(
      *
      * The list is primarily used in processes such as updating the scoreboard and team configurations.
      */
-    val players: List<UUID> get() = _players
+    val players: List<UUID>
+        get() = _players
+
+    private val _options = mutableMapOf<Team.Option, OptionStatus>()
 
     /**
      * Represents the behavioral and configuration options associated with the team,
@@ -66,7 +68,8 @@ class VitalScoreboardTeam internal constructor(
      * This property is used during team updates to ensure the team's internal and external representations
      * are consistent with the configured options.
      */
-    val options: Map<Team.Option, OptionStatus> get() = _options
+    val options: Map<Team.Option, OptionStatus>
+        get() = _options
 
     /**
      * Represents the underlying Bukkit team instance associated with the `VitalScoreboardTeam`.

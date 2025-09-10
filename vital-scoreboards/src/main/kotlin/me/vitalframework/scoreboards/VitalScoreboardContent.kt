@@ -21,6 +21,18 @@ class VitalScoreboardContent internal constructor(
     private val _teams = mutableListOf<VitalScoreboardTeam>()
 
     /**
+     * Provides a read-only list of all the teams currently managed within the scoreboard content.
+     * The returned list reflects the current state of teams and can be used for querying or
+     * iterating over all the teams added to this scoreboard.
+     *
+     * Modifications to the underlying internal team list will automatically be reflected in this property.
+     *
+     * @return An unmodifiable view of the current teams in the scoreboard content.
+     */
+    val teams: List<VitalScoreboardTeam>
+        get() = _teams
+
+    /**
      * Represents the title of the scoreboard. This property is used to define the name and display text
      * for the scoreboard's objective. When changed, it triggers an update to ensure the scoreboard
      * reflects the new title visually and functionally.
@@ -43,17 +55,6 @@ class VitalScoreboardContent internal constructor(
      * custom scoreboard content dynamically.
      */
     val bukkitScoreboard = Bukkit.getScoreboardManager().newScoreboard
-
-    /**
-     * Provides a read-only list of all the teams currently managed within the scoreboard content.
-     * The returned list reflects the current state of teams and can be used for querying or
-     * iterating over all the teams added to this scoreboard.
-     *
-     * Modifications to the underlying internal team list will automatically be reflected in this property.
-     *
-     * @return An unmodifiable view of the current teams in the scoreboard content.
-     */
-    val teams: List<VitalScoreboardTeam> get() = _teams
 
     /**
      * Updates the state of the scoreboard, including its objective, display, and associated teams.

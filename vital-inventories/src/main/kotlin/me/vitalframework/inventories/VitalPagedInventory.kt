@@ -17,7 +17,8 @@ abstract class VitalPagedInventory : VitalInventory() {
      * The map is derived from the internal `_pages` field and provides no direct modification capabilities,
      * ensuring external immutability of the page state.
      */
-    val pages: Map<UUID, Int> get() = _pages
+    val pages: Map<UUID, Int>
+        get() = _pages
 
     /**
      * Represents the maximum number of pages available in the paginated inventory system.
@@ -40,8 +41,8 @@ abstract class VitalPagedInventory : VitalInventory() {
      * The setter is private, restricting modifications to the internal logic of
      * the class, ensuring consistency with the inventory's pagination behavior.
      */
-    var fromSlot = 0
-        private set
+    val fromSlot
+        get() = getRequiredAnnotation<Info>().fromSlot
 
     /**
      * The ending slot index for a range of slots within the paginated inventory system.
@@ -52,8 +53,8 @@ abstract class VitalPagedInventory : VitalInventory() {
      * The value is automatically managed, and private setters ensure it cannot be modified directly
      * outside the class's internal logic.
      */
-    var toSlot = 0
-        private set
+    val toSlot
+        get() = getRequiredAnnotation<Info>().fromSlot
 
     /**
      * Represents the amount of content present on the current page.
@@ -62,13 +63,8 @@ abstract class VitalPagedInventory : VitalInventory() {
      * This ensures that the calculation accounts for the content range, where `toSlot` is the
      * last slot that contains content, and `fromSlot` is the first slot that contains content.
      */
-    val pageContentAmount get() = (toSlot + 1) - fromSlot
-
-    init {
-        val info = getRequiredAnnotation<Info>()
-        fromSlot = info.fromSlot
-        toSlot = info.toSlot
-    }
+    val pageContentAmount
+        get() = (toSlot + 1) - fromSlot
 
     /**
      * Updates the maximum number of pages based on the total amount of content.
@@ -133,6 +129,11 @@ abstract class VitalPagedInventory : VitalInventory() {
         if (startIndex >= list.size || startIndex < 0) return mutableListOf()
         if (endIndex >= list.size) return list.subList(startIndex, list.size)
         return list.subList(startIndex, endIndex)
+    }
+
+    final override fun close(player: SpigotPlayer) {
+        super.close(player)
+        _pages.remove(player.uniqueId)
     }
 
     /**

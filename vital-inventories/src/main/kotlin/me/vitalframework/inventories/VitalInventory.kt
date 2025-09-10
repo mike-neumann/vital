@@ -42,7 +42,8 @@ open class VitalInventory {
      * or configurations supported by the framework. Each type corresponds to a unique structure
      * or interaction model, such as a 9x1 generic inventory, an anvil, or a crafting table.
      */
-    val type: Info.Type
+    val type
+        get() = getRequiredAnnotation<Info>().type
 
     /**
      * The name of the inventory instance.
@@ -51,7 +52,8 @@ open class VitalInventory {
      * for the inventory, often used for display or internal
      * tracking within the inventory management system.
      */
-    val name: String
+    val name
+        get() = getRequiredAnnotation<Info>().name
 
     /**
      * Represents the default background material used for the inventory display.
@@ -60,7 +62,8 @@ open class VitalInventory {
      * that are not occupied by specific items. It serves as the visual backdrop,
      * helping to improve the readability and organization of the inventory UI.
      */
-    val background: Material
+    val background
+        get() = getRequiredAnnotation<Info>().background
 
     /**
      * A map of previous inventories associated with their respective unique player identifiers.
@@ -69,7 +72,8 @@ open class VitalInventory {
      * where each entry associates a player's UUID with their corresponding inventory. It is read-only
      * and is commonly used to retrieve or manage inventory states prior to the current one.
      */
-    val previousInventories: Map<UUID, VitalInventory> get() = _previousInventories
+    val previousInventories: Map<UUID, VitalInventory>
+        get() = _previousInventories
 
     /**
      * A read-only property that provides access to the mapping of active player inventories managed by this instance.
@@ -80,7 +84,8 @@ open class VitalInventory {
      * The `playerInventories` map reflects the current state of all inventories actively
      * maintained by the `VitalInventory` instance.
      */
-    val playerInventories: Map<UUID, InventoryView> get() = _playerInventories
+    val playerInventories: Map<UUID, InventoryView>
+        get() = _playerInventories
 
     /**
      * Represents a mapping of inventory item slots to their corresponding `ItemStack` objects
@@ -95,7 +100,8 @@ open class VitalInventory {
      *
      * @return A map where keys are slot indices and values are `ItemStack` objects for the inventory.
      */
-    val items: Map<Int, ItemStack> get() = _items
+    val items: Map<Int, ItemStack>
+        get() = _items
 
     /**
      * A mapping of inventory click actions associated with specific inventory slots and players.
@@ -108,14 +114,8 @@ open class VitalInventory {
      * This property is used to manage and retrieve custom click actions
      * registered for individual slots in player-specific inventories.
      */
-    val actions: Map<Pair<UUID, Int>, InventoryItemClickAction> get() = _actions
-
-    init {
-        val info = getRequiredAnnotation<Info>()
-        type = info.type
-        name = info.name
-        background = info.background
-    }
+    val actions: Map<Pair<UUID, Int>, InventoryItemClickAction>
+        get() = _actions
 
     /**
      * Sets an item in the given inventory slot for a specific player and associates an optional action
@@ -244,7 +244,7 @@ open class VitalInventory {
      *
      * @param player The Spigot player instance for whom the inventory is being closed.
      */
-    fun close(player: SpigotPlayer) {
+    open fun close(player: SpigotPlayer) {
         _playerInventories.remove(player.uniqueId)
         player.closeInventory()
         onClose(player)
