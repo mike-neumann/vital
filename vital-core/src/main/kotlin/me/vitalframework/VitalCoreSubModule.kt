@@ -21,5 +21,9 @@ typealias SpigotRunnable = org.bukkit.scheduler.BukkitRunnable
 typealias BungeeRunnable = Runnable
 typealias SpigotTask = org.bukkit.scheduler.BukkitTask
 typealias BungeeTask = net.md_5.bungee.api.scheduler.ScheduledTask
+typealias SpigotEvent = org.bukkit.event.Event
+typealias BungeeEvent = net.md_5.bungee.api.plugin.Event
+typealias SpigotCancellable = org.bukkit.event.Cancellable
+typealias BungeeCancellable = net.md_5.bungee.api.plugin.Cancellable
 
 fun <T : Any> T.logger() = LoggerFactory.getLogger(this::class.java)!!
