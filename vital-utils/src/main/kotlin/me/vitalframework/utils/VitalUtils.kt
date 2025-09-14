@@ -956,7 +956,10 @@ interface VitalUtils<CS, P : CS> {
          * @param pos2 The opposite corner of the cuboid region.
          * @return The total surface area of the cuboid region.
          */
-        fun calculateSurfaceArea(pos1: Location, pos2: Location): Int {
+        fun calculateSurfaceArea(
+            pos1: Location,
+            pos2: Location,
+        ): Int {
             val dx = abs(pos1.blockX - pos2.blockX) + 1
             val dy = abs(pos1.blockY - pos2.blockY) + 1
             val dz = abs(pos1.blockZ - pos2.blockZ) + 1
@@ -980,7 +983,10 @@ interface VitalUtils<CS, P : CS> {
          * @throws IllegalArgumentException if either `pos1` or `pos2` does not have an associated world,
          * or if the two locations belong to different worlds.
          */
-        fun getSurfaceAreaLocations(pos1: Location, pos2: Location): Sequence<Location> {
+        fun getSurfaceAreaLocations(
+            pos1: Location,
+            pos2: Location,
+        ): Sequence<Location> {
             val world: World = pos1.world ?: throw IllegalArgumentException("Location 1 has no world")
             require(world == pos2.world) { "Locations must be in the same world" }
 
@@ -991,7 +997,11 @@ interface VitalUtils<CS, P : CS> {
             val minZ = minOf(pos1.blockZ, pos2.blockZ)
             val maxZ = maxOf(pos1.blockZ, pos2.blockZ)
 
-            fun loc(x: Int, y: Int, z: Int) = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+            fun loc(
+                x: Int,
+                y: Int,
+                z: Int,
+            ) = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
 
             val xRange = minX..maxX
             val yRange = minY..maxY
@@ -1006,9 +1016,13 @@ interface VitalUtils<CS, P : CS> {
                 for (x in xRange) {
                     for (y in yRange) {
                         for (z in zRange) {
-                            if (x == minX || x == maxX ||
-                                y == minY || y == maxY ||
-                                z == minZ || z == maxZ) {
+                            if (x == minX ||
+                                x == maxX ||
+                                y == minY ||
+                                y == maxY ||
+                                z == minZ ||
+                                z == maxZ
+                            ) {
                                 yield(loc(x, y, z))
                             }
                         }
