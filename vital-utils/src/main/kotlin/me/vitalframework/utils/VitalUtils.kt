@@ -26,6 +26,7 @@ import org.bukkit.inventory.MenuType
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.jetbrains.annotations.Range
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -805,123 +806,216 @@ interface VitalUtils<CS, P : CS> {
         fun Location.getCenterBlockSideLocation() = getCenterBlockLocation(0.0, -.5, 0.0)
 
         /**
-         * Calculates and returns the locations forming the circumference of a cuboidal area defined by two locations.
+         * Calculates the volume of a rectangular cuboid defined by two locations.
          *
-         * This method determines the minimum and maximum coordinates for each axis (x, y, z) between the two provided
-         * locations and constructs the boundary of the area by generating the corresponding locations.
-         *
-         * @param location1 The first location defining one corner of the cuboidal area.
-         * @param location2 The second location defining the opposite corner of the cuboidal area.
-         * @return A list of locations representing the circumference of the cuboidal area.
+         * @param pos1 The first corner of the cuboid.
+         * @param pos2 The opposite corner of the cuboid.
+         * @return The volume of the cuboid in block units.
          */
-        fun getCircumferenceOfLocationArea(
-            location1: Location,
-            location2: Location,
-        ): List<Location> {
-            val minX = min(location1.x, location2.x)
-            val maxX = max(location1.x, location2.x)
-            val minY = min(location1.y, location2.y)
-            val maxY = max(location1.y, location2.y)
-            val minZ = min(location1.z, location2.z)
-            val maxZ = max(location1.z, location2.z)
-            val circumference = mutableListOf<Location>()
-
-            run {
-                var y = minY
-                while (y <= maxY) {
-                    var z = minZ
-                    while (z <= maxZ) {
-                        circumference.add(Location(location1.world, minX, y, z))
-                        z++
-                    }
-                    y++
-                }
-            }
-
-            run {
-                var y = minY
-                while (y <= maxY) {
-                    var z = minZ
-                    while (z <= maxZ) {
-                        circumference.add(Location(location1.world, maxX, y, z))
-                        z++
-                    }
-                    y++
-                }
-            }
-
-            run {
-                var y = minY
-                while (y <= maxY) {
-                    var x = minX
-                    while (x <= maxX) {
-                        circumference.add(Location(location1.world, x, y, minZ))
-                        x++
-                    }
-                    y++
-                }
-            }
-            var y = minY
-            while (y <= maxY) {
-                var x = minX
-                while (x <= maxX) {
-                    circumference.add(Location(location1.world, x, y, maxZ))
-                    x++
-                }
-                y++
-            }
-
-            return circumference
+        fun calculateVolume(
+            pos1: Location,
+            pos2: Location,
+        ): Int {
+            val dx = abs(pos1.blockX - pos2.blockX) + 1
+            val dy = abs(pos1.blockY - pos2.blockY) + 1
+            val dz = abs(pos1.blockZ - pos2.blockZ) + 1
+            return dx * dy * dz
         }
 
         /**
-         * Calculates the volume of a rectangular cuboid area defined by two corner locations
-         * and returns a list of all the locations within that volume.
+         * Generates a sequence of all block locations within the cuboid defined by two corner locations.
+         * The locations must belong to the same world, and the sequence is generated
+         * from the minimum coordinates to the maximum coordinates of the defined cuboid.
          *
-         * @param location1 The first corner of the area.
-         * @param location2 The second corner of the area.
-         * @return A list of all locations contained within the defined cuboid area, including the corners.
+         * @param pos1 The first corner location of the cuboid.
+         * @param pos2 The second corner location of the cuboid.
+         * @return A sequence of block locations within the cuboid.
+         * @throws IllegalArgumentException if the locations do not belong to the same world, or if one of the locations has no world.
          */
-        fun getVolumeOfLocationArea(
-            location1: Location,
-            location2: Location,
-        ): List<Location> {
-            val minX = min(location1.x, location2.x)
-            val maxX = max(location1.x, location2.x)
-            val minY = min(location1.y, location2.y)
-            val maxY = max(location1.y, location2.y)
-            val minZ = min(location1.z, location2.z)
-            val maxZ = max(location1.z, location2.z)
-            val volume = mutableListOf<Location>()
-            var x = minX
-            while (x <= maxX) {
-                var y = minY
-                while (y <= maxY) {
-                    var z = minZ
-                    while (z <= maxZ) {
-                        volume.add(Location(location1.world, x, y, z))
-                        z++
-                    }
-                    y++
-                }
-                x++
-            }
+        fun getVolumeLocations(
+            pos1: Location,
+            pos2: Location,
+        ): Sequence<Location> {
+            val world = pos1.world ?: throw IllegalArgumentException("Location 1 has no world")
+            require(world == pos2.world) { "Locations must be in the same world" }
 
-            return volume
+            val minX = minOf(pos1.blockX, pos2.blockX)
+            val maxX = maxOf(pos1.blockX, pos2.blockX)
+            val minY = minOf(pos1.blockY, pos2.blockY)
+            val maxY = maxOf(pos1.blockY, pos2.blockY)
+            val minZ = minOf(pos1.blockZ, pos2.blockZ)
+            val maxZ = maxOf(pos1.blockZ, pos2.blockZ)
+
+            return (minX..maxX).asSequence().flatMap { x ->
+                (minY..maxY).asSequence().flatMap { y ->
+                    (minZ..maxZ).asSequence().map { z ->
+                        Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+                    }
+                }
+            }
         }
 
         /**
-         * Determines the total number of locations within a rectangular cuboid area
-         * defined by two corner points.
+         * Calculates the total number of edges for a cuboid defined by two 3D locations.
          *
-         * @param location1 The first corner of the area.
-         * @param location2 The second corner of the area.
-         * @return The total count of locations in the defined cuboid area.
+         * This method determines the distances between the two positions in each dimension,
+         * computes the edges along each dimension, and adds the number of corners.
+         *
+         * @param pos1 The first location defining one corner of the cuboid.
+         * @param pos2 The second location defining the opposite corner of the cuboid.
+         * @return The total number of edges, including all dimensions and corners.
          */
-        fun getVolumeSizeOfLocationArea(
-            location1: Location,
-            location2: Location,
-        ) = getVolumeOfLocationArea(location1, location2).size
+        fun calculateEdges(
+            pos1: Location,
+            pos2: Location,
+        ): Int {
+            val dx = abs(pos1.blockX - pos2.blockX) + 1
+            val dy = abs(pos1.blockY - pos2.blockY) + 1
+            val dz = abs(pos1.blockZ - pos2.blockZ) + 1
+
+            // If any dimension is 1, treat it specially to avoid negative or zero edges
+            val edgeX = if (dx > 1) 4 * (dx - 1) else 0
+            val edgeY = if (dy > 1) 4 * (dy - 1) else 0
+            val edgeZ = if (dz > 1) 4 * (dz - 1) else 0
+
+            val corners = 8
+            return edgeX + edgeY + edgeZ + corners
+        }
+
+        /**
+         * Calculates and returns the edge locations of a cuboid defined by two diagonal corners.
+         *
+         * The method identifies all the points along the edges of the cuboid between the two given
+         * locations. Only the unique points are included in the resulting sequence.
+         *
+         * Both input locations must be in the same world, otherwise an exception is thrown.
+         *
+         * @param pos1 The first corner location of the cuboid.
+         * @param pos2 The second corner location of the cuboid.
+         * @return A sequence of unique locations representing the edges of the cuboid.
+         * @throws IllegalArgumentException if the locations are in different worlds, or if the first location has no world.
+         */
+        fun getEdgeLocations(
+            pos1: Location,
+            pos2: Location,
+        ): Sequence<Location> {
+            val world = pos1.world ?: throw IllegalArgumentException("Location 1 has no world")
+            require(world == pos2.world) { "Locations must be in the same world" }
+
+            val minX = minOf(pos1.blockX, pos2.blockX)
+            val maxX = maxOf(pos1.blockX, pos2.blockX)
+            val minY = minOf(pos1.blockY, pos2.blockY)
+            val maxY = maxOf(pos1.blockY, pos2.blockY)
+            val minZ = minOf(pos1.blockZ, pos2.blockZ)
+            val maxZ = maxOf(pos1.blockZ, pos2.blockZ)
+
+            fun loc(
+                x: Int,
+                y: Int,
+                z: Int,
+            ) = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+
+            val edges =
+                sequence {
+                    // Edges along X axis (4 edges)
+                    for (x in minX..maxX) {
+                        yield(loc(x, minY, minZ))
+                        yield(loc(x, minY, maxZ))
+                        yield(loc(x, maxY, minZ))
+                        yield(loc(x, maxY, maxZ))
+                    }
+
+                    // Edges along Y axis (4 edges)
+                    for (y in minY..maxY) {
+                        yield(loc(minX, y, minZ))
+                        yield(loc(minX, y, maxZ))
+                        yield(loc(maxX, y, minZ))
+                        yield(loc(maxX, y, maxZ))
+                    }
+
+                    // Edges along Z axis (4 edges)
+                    for (z in minZ..maxZ) {
+                        yield(loc(minX, minY, z))
+                        yield(loc(minX, maxY, z))
+                        yield(loc(maxX, minY, z))
+                        yield(loc(maxX, maxY, z))
+                    }
+                }
+
+            // Remove duplicates (some corners can appear multiple times)
+            return edges.distinct()
+        }
+
+        /**
+         * Calculates the surface area of a cuboid region defined by two locations.
+         *
+         * The calculation considers the total exposed surface area of the cuboid
+         * formed by the two locations, including all six faces.
+         *
+         * @param pos1 One corner of the cuboid region.
+         * @param pos2 The opposite corner of the cuboid region.
+         * @return The total surface area of the cuboid region.
+         */
+        fun calculateSurfaceArea(pos1: Location, pos2: Location): Int {
+            val dx = abs(pos1.blockX - pos2.blockX) + 1
+            val dy = abs(pos1.blockY - pos2.blockY) + 1
+            val dz = abs(pos1.blockZ - pos2.blockZ) + 1
+
+            val areaXY = dx * dy
+            val areaXZ = dx * dz
+            val areaYZ = dy * dz
+
+            return 2 * (areaXY + areaXZ + areaYZ)
+        }
+
+        /**
+         * Calculates the locations on the surface of the cuboid defined by two positions.
+         *
+         * The method returns a sequence of all `Location` objects that lie on the surface
+         * of the cuboid. The surface includes all blocks on any of the six faces.
+         *
+         * @param pos1 The first corner of the cuboid. Must belong to the same world as `pos2`.
+         * @param pos2 The second corner of the cuboid. Must belong to the same world as `pos1`.
+         * @return A sequence of `Location` objects that represent all positions on the surface of the cuboid.
+         * @throws IllegalArgumentException if either `pos1` or `pos2` does not have an associated world,
+         * or if the two locations belong to different worlds.
+         */
+        fun getSurfaceAreaLocations(pos1: Location, pos2: Location): Sequence<Location> {
+            val world: World = pos1.world ?: throw IllegalArgumentException("Location 1 has no world")
+            require(world == pos2.world) { "Locations must be in the same world" }
+
+            val minX = minOf(pos1.blockX, pos2.blockX)
+            val maxX = maxOf(pos1.blockX, pos2.blockX)
+            val minY = minOf(pos1.blockY, pos2.blockY)
+            val maxY = maxOf(pos1.blockY, pos2.blockY)
+            val minZ = minOf(pos1.blockZ, pos2.blockZ)
+            val maxZ = maxOf(pos1.blockZ, pos2.blockZ)
+
+            fun loc(x: Int, y: Int, z: Int) = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+
+            val xRange = minX..maxX
+            val yRange = minY..maxY
+            val zRange = minZ..maxZ
+
+            // Surface is blocks on any face:
+            // X == minX or maxX OR
+            // Y == minY or maxY OR
+            // Z == minZ or maxZ
+
+            return sequence {
+                for (x in xRange) {
+                    for (y in yRange) {
+                        for (z in zRange) {
+                            if (x == minX || x == maxX ||
+                                y == minY || y == maxY ||
+                                z == minZ || z == maxZ) {
+                                yield(loc(x, y, z))
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         /**
          * Configures the game rules and environment settings for a `World` to align with a controlled or static gameplay setup.
