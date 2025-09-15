@@ -51,13 +51,10 @@ root-compileOnly = [
 ]
 root-api = [
     "spring-boot-starter",
-    "spring-boot-starter-test",
     "kotlin-coroutines-core",
     "kotlin-coroutines-reactor",
 ]
 root-testImplementation = [
-    "spring-boot-starter-test",
-    "junit-jupiter-api",
     "paperApi", "brigadier",
     "bungeeApi"
 ]
@@ -93,4 +90,8 @@ utils-api = [
     "adventure-text-serializer-legacy",
     "adventure-platform-bungeecord",
     "adventure-platform-bukkit"
+]
+tests-api = [
+    "spring-boot-starter-test",
+    "junit-jupiter-api"
 ]

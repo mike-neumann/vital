@@ -94,6 +94,18 @@ class VitalGradlePlugin : Plugin<Project> {
                     target.ant.invokeMethod("zip", mapOf("destfile" to repackedJar, "basedir" to unpackDir))
                 }
             }
+
+            // also exclude logback, as this causes some problems with paper
+            target.configurations.all {
+                it.exclude(
+                    mapOf(
+                        "group" to "ch.qos.logback",
+                        "module" to "logback-core",
+                        "group" to "ch.qos.logback",
+                        "module" to "logback-classic",
+                    ),
+                )
+            }
         }
     }
 

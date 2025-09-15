@@ -17,4 +17,5 @@ dependencies {
     api(project(":vital-statistics"))
     api(project(":vital-tasks"))
     api(project(":vital-utils"))
+    api(project(":vital-tests"))
 }

@@ -36,6 +36,7 @@ subprojects {
         compileOnly(rootProject.libs.bundles.root.compileOnly)
         api(rootProject.libs.bundles.root.api)
         testImplementation(rootProject.libs.bundles.root.testImplementation)
+        testImplementation(rootProject.libs.bundles.tests.api)
     }
 
     java {
@@ -62,6 +63,14 @@ subprojects {
                 isAllowInsecureProtocol = true
             }
         }
+    }
+
+    configurations.all {
+        exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
+        exclude(group = "ch.qos.logback", module = "logback-core")
+        exclude(group = "ch.qos.logback", module = "logback-classic")
+        exclude(group = "org.slf4j", module = "jul-to-slf4j")
+        exclude(group = "org.slf4j", module = "log4j-over-slf4j")
     }
 
     tasks.compileKotlin {
