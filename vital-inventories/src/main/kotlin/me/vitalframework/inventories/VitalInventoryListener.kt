@@ -33,8 +33,8 @@ class VitalInventoryListener(
 
         if (vitalInventory == null || e.currentItem == null) return
 
-        vitalInventory.click(e)
         e.isCancelled = true
+        vitalInventory.click(e)
     }
 
     @SpigotEventHandler

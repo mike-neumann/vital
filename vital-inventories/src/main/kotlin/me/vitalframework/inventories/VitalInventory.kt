@@ -232,12 +232,15 @@ open class VitalInventory {
 
     /**
      * Handles a click event in the inventory by invoking the corresponding action for the specific
-     * player and slot, if an action is defined.
+     * player and slot if an action is defined.
      *
      * @param e The inventory click event containing information about the player who clicked,
      *          the slot clicked, and other relevant details.
      */
-    fun click(e: InventoryClickEvent) = _actions[e.whoClicked.uniqueId to e.slot]?.invoke(e)
+    fun click(e: InventoryClickEvent) {
+        _actions[e.whoClicked.uniqueId to e.slot]?.invoke(e)
+        onClick(e)
+    }
 
     /**
      * Closes the inventory for the specified player and handles associated cleanup actions.
@@ -277,6 +280,14 @@ open class VitalInventory {
      * @param player The player whose inventory is being updated.
      */
     protected open fun onUpdate(player: SpigotPlayer) {}
+
+    /**
+     * Called when any slot in this inventory has been clicked.
+     * This method can be overridden to define custom click logic for the inventory.
+     *
+     * @param e The click event
+     */
+    protected open fun onClick(e: InventoryClickEvent) {}
 
     /**
      * Handles the behavior that should occur when the inventory is closed for the specified player.
