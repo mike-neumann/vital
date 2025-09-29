@@ -350,8 +350,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
 
                         args
                             .map(String::lowercase)
-                            .filter { it !in commandArgs || (it.startsWith("%") && it.endsWith("%")) }
-                            .forEach(values::add)
+                            .filter {
+                                it !in commandArgs ||
+                                    ((it.startsWith("%") && it.endsWith("%")) || (it.startsWith("<") && it.endsWith(">")))
+                            }.forEach(values::add)
 
                         try {
                             executeArgHandlerMethod(sender, joinedPlayerArgs, matchedArg, values.toTypedArray())
@@ -550,20 +552,28 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         val playerOnly: Boolean = false,
     ) {
         enum class Type(
-            val placeholder: String,
+            val placeholders: List<String>,
             val action: (TabCompletionContext) -> Unit,
         ) {
+            // TODO: later remove any %...% placeholder
+            // TODO: future placeholders should always be <...>
             PLAYER(
-                "%PLAYER%",
+                listOf("%PLAYER%", "<player>"),
                 { context -> context.playerNames.filter { it !in context.completions }.forEach { context.completions.add(it) } },
             ),
-            BOOLEAN("%BOOLEAN%", { it.completions.addAll(arrayOf("true", "false")) }),
-            NUMBER("%NUMBER%", { it.completions.add("0") }),
-            MATERIAL("%MATERIAL%", { context -> Material.entries.map { it.name }.forEach { context.completions.add(it) } }),
+            BOOLEAN(listOf("%BOOLEAN%", "<boolean>"), { it.completions.addAll(arrayOf("true", "false")) }),
+            NUMBER(listOf("%NUMBER%", "<number>"), { it.completions.add("0") }),
+            MATERIAL(listOf("%MATERIAL%", "<material>"), { context ->
+                Material.entries.map { it.name }.forEach { context.completions.add(it) }
+            }),
             ;
 
             companion object {
-                fun getTypeByPlaceholder(placeholder: String) = entries.firstOrNull { it.placeholder == placeholder }
+                fun getTypeByPlaceholder(placeholder: String) =
+                    entries.firstOrNull {
+                        placeholder.lowercase() in
+                            it.placeholders.map { it.lowercase() }
+                    }
             }
         }
     }
@@ -823,7 +833,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
          *
          * Example match: `%example%*`
          */
-        const val VARARG_REGEX = "%\\S*%\\*"
+        const val VARARG_REGEX = "(%\\S*%\\*|<\\S*>\\*)"
 
         /**
          * A regular expression pattern used for parsing arguments in the format `%<value>%`
@@ -833,7 +843,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
          * - A `%` character followed by any non-whitespace sequence.
          * - Ending with another `%` character, ensuring it is not immediately followed by `*`.
          */
-        const val ARG_REGEX = "%\\S*%(?!\\*)"
+        const val ARG_REGEX = "(%\\S*%(?!\\*)|<\\S*>(?!\\*))"
 
         /**
          * Represents the string used to replace or represent spaces in certain contexts.
