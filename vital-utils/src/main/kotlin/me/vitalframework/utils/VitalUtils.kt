@@ -25,7 +25,10 @@ import org.bukkit.inventory.CreativeCategory
 import org.bukkit.inventory.MenuType
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import org.bukkit.scoreboard.Scoreboard
+import org.bukkit.scoreboard.Team
 import org.jetbrains.annotations.Range
+import java.util.UUID
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -92,6 +95,18 @@ interface VitalUtils<CS, P : CS> {
          * @return The plain text string representation of the component.
          */
         fun Component.toPlainTextString() = PlainTextComponentSerializer.plainText().serialize(this)
+
+        /**
+         * Converts the `Component` instance into a MiniMessage-formatted string.
+         *
+         * This method uses the MiniMessage serialization functionality to produce
+         * a string representation of the component, preserving its formatting and style
+         * as defined within the `Component`.
+         *
+         * @receiver The `Component` to be serialized into a MiniMessage-formatted string.
+         * @return A MiniMessage-compatible string representation of the `Component`.
+         */
+        fun Component.toMiniMessageString() = MiniMessage.miniMessage().serialize(this)
 
         /**
          * Creates a chat button with hover text, clickable text, and a specific click action.
@@ -184,6 +199,76 @@ interface VitalUtils<CS, P : CS> {
          * @param command the command to be executed when the decline button is clicked
          */
         fun chatRunCommandDeclineButton(command: String) = chatRunCommandButton("<red><bold>DECLINE</bold></red>", command)
+
+        /**
+         * Converts the current string into a regular expression that matches the string
+         * as a blacklisted word. The resulting regex is case-insensitive and allows for
+         * non-alphanumeric characters between the characters of the word.
+         *
+         * This method is useful for detecting variations of a word that might include
+         * special characters or different casing while maintaining its integrity as a match.
+         *
+         * @receiver The word to be converted into a regular expression.
+         * @return A regular expression instance that matches the blacklisted word in
+         *         case-insensitive formats, including potential variations with symbols
+         *         or spaces between the characters.
+         */
+        fun String.toBlacklistedWordRegex() = buildBlacklistedWordRegex(this)
+
+        /**
+         * Builds a regular expression pattern to detect a given word in a case-insensitive manner,
+         * ignoring special characters and non-alphanumeric symbols between characters.
+         *
+         * @param word The word to create a regex pattern for. It is expected to be a string
+         *             representing the blacklisted word.
+         * @return A compiled regular expression that matches the word case-insensitively,
+         *         including possible variations that may include non-alphanumeric characters
+         *         between the word's letters.
+         */
+        fun buildBlacklistedWordRegex(word: String): Regex {
+            val pattern = word.lowercase().map { Regex.escape(it.toString()) }.joinToString("[\\W_]*")
+            return Regex("\\b$pattern\\b", RegexOption.IGNORE_CASE)
+        }
+
+        /**
+         * Converts the current string to a censored version by replacing all occurrences of
+         * the provided blacklisted words with their censored forms.
+         *
+         * @param blacklistedWords A list of words that should be censored within the string.
+         */
+        fun String.toCensoredText(blacklistedWords: List<String>) = getCensoredText(this, blacklistedWords)
+
+        /**
+         * Replaces all occurrences of blacklisted words in the given text with a censored version.
+         * Each blacklisted word is replaced with its first character followed by asterisks, e.g., "test" becomes "t***".
+         * Single-character blacklisted words are replaced with a single asterisk.
+         *
+         * @param text The input text to be censored.
+         * @param blacklistedWords A list of words that should be censored in the input text.
+         * @return The censored text where all blacklisted words are replaced with their censored forms.
+         */
+        fun getCensoredText(
+            text: String,
+            blacklistedWords: List<String>,
+        ): String {
+            var result = text
+
+            // cumulatively update the message for each blacklisted word.
+            for (word in blacklistedWords) {
+                val regex = buildBlacklistedWordRegex(word)
+                result =
+                    regex.replace(result) {
+                        if (it.value.length > 1) {
+                            // replace "test" with "t***" and "t" with "*"
+                            it.value.first() + "*".repeat(it.value.length - 1)
+                        } else {
+                            "*".repeat(it.value.length)
+                        }
+                    }
+            }
+
+            return result
+        }
     }
 
     /**
@@ -369,6 +454,8 @@ interface VitalUtils<CS, P : CS> {
      * CommandSender and Player entities.
      */
     object Spigot : VitalUtils<SpigotCommandSender, SpigotPlayer> {
+        private val customNametagIdentifier = UUID.randomUUID().toString()
+
         override fun broadcastAction(
             predicate: (SpigotPlayer) -> Boolean,
             action: (SpigotPlayer) -> Unit,
@@ -987,7 +1074,7 @@ interface VitalUtils<CS, P : CS> {
             pos1: Location,
             pos2: Location,
         ): Sequence<Location> {
-            val world: World = pos1.world ?: throw IllegalArgumentException("Location 1 has no world")
+            val world = pos1.world ?: throw IllegalArgumentException("Location 1 has no world")
             require(world == pos2.world) { "Locations must be in the same world" }
 
             val minX = minOf(pos1.blockX, pos2.blockX)
@@ -1137,6 +1224,98 @@ interface VitalUtils<CS, P : CS> {
          */
         @Suppress("UnstableApiUsage")
         fun SpigotPlayer.openInventory(menuType: MenuType.Typed<*, *>) = openInventory(menuType.create(this))
+
+        /**
+         * Retrieves or creates a custom nametag team for the player in the specified scoreboard.
+         *
+         * This function constructs a unique team name using the player's unique ID, a custom identifier,
+         * and a sorting key. If a team with the constructed name does not already exist in the scoreboard,
+         * it registers a new team and applies the provided prefix and suffix to it.
+         *
+         * @param scoreboard The scoreboard in which the team will be retrieved or created.
+         * @param sort A sorting key used as part of the team's unique name, will determine the sorting from a - z in tab.
+         * @param prefix An optional component to set as the team's prefix. Defaults to null.
+         * @param suffix An optional component to set as the team's suffix. Defaults to null.
+         * @return The custom `Team` associated with the player, either newly created or existing.
+         */
+        fun SpigotPlayer.getCustomNametagTeam(
+            scoreboard: Scoreboard,
+            sort: String,
+            prefix: Component? = null,
+            suffix: Component? = null,
+        ): Team {
+            val teamName = "${sort}_${uniqueId}__$customNametagIdentifier"
+            return (scoreboard.getTeam(teamName) ?: scoreboard.registerNewTeam(teamName)).apply {
+                prefix(prefix)
+                suffix(suffix)
+            }
+        }
+
+        /**
+         * Retrieves or creates a custom nametag team for the player in the specified scoreboard.
+         *
+         * This function constructs a unique team name using the player's unique ID, a custom identifier,
+         * and a sorting key. If a team with the constructed name does not already exist in the scoreboard,
+         * it registers a new team and applies the provided prefix and suffix to it.
+         *
+         * @param scoreboard The scoreboard in which the team will be retrieved or created.
+         * @param sort A sorting key used as part of the team's unique name, will determine the sorting from a - z in tab.
+         * @param prefix An optional minimessage string to set as the team's prefix. Defaults to null.
+         * @param suffix An optional minimessage string to set as the team's suffix. Defaults to null.
+         * @return The custom `Team` associated with the player, either newly created or existing.
+         */
+        fun SpigotPlayer.getCustomNametagTeam(
+            scoreboard: Scoreboard,
+            sort: String,
+            prefix: String? = null,
+            suffix: String? = null,
+        ) = getCustomNametagTeam(scoreboard, sort, prefix?.toMiniMessageComponent(), suffix?.toMiniMessageComponent())
+
+        /**
+         * Sets a custom nametag for a `SpigotPlayer` instance, along with managing the scoreboard teams
+         * required to properly display the nametag information.
+         *
+         * This method creates a team on the player's scoreboard with the specified prefix, suffix,
+         * and sorting value. It also ensures visibility of other players' nametags by synchronizing
+         * all custom nametags across players on the server.
+         *
+         * @param sort A string value representing the sort order for the custom nametag, used to organize teams.
+         * @param prefix An optional minimessage string to be displayed as the prefix of the player's nametag. Defaults to `null`.
+         * @param suffix An optional minimessage string to be displayed as the suffix of the player's nametag. Defaults to `null`.
+         */
+        fun SpigotPlayer.setCustomNametag(
+            sort: String,
+            prefix: String? = null,
+            suffix: String? = null,
+        ) {
+            // first, we need to create a team on our own scoreboard.
+            // this will contain the data we set while calling this function.
+            val ourTeam = getCustomNametagTeam(scoreboard, sort, prefix, suffix)
+            ourTeam.addPlayer(this)
+
+            // now we have at least ourselves on our scoreboard.
+            // to also include everyone else, we need to grab the custom nametags of everyone else...
+            val otherPlayers = Bukkit.getOnlinePlayers().filter { it.uniqueId != uniqueId }
+            for (otherPlayer in otherPlayers) {
+                // try to grab the custom nametag team of the other player in this iteration...
+                // if the other does NOT have a custom nametag team, this iteration is skipped
+                val otherTeam =
+                    otherPlayer.scoreboard.teams.firstOrNull {
+                        it.name.endsWith(customNametagIdentifier) && it.hasPlayer(otherPlayer)
+                    } ?: continue
+
+                // at this point we have the team of the other player's custom nametag.
+                // we can now extract the values we need to construct a new team on OUR own scoreboard.
+                // this will then reflect the data of the other player for us to see...
+                // By standard, the first value before the initial "_" will ALWAYS be the sorting value,
+                // so we can safely extract this by splitting the string...
+                val otherTeamSort = otherTeam.name.substringBefore("_")
+
+                // we can now construct the other player's custom nametag on our own scoreboard...
+                val ourOtherTeam = otherPlayer.getCustomNametagTeam(scoreboard, otherTeamSort, otherTeam.prefix(), otherTeam.suffix())
+                ourOtherTeam.addPlayer(otherPlayer)
+            }
+        }
     }
 
     /**
