@@ -1,6 +1,5 @@
 package me.vitalframework.configs
 
-import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import me.vitalframework.logger
 import org.springframework.stereotype.Component
 import java.io.IOException
@@ -49,7 +48,7 @@ abstract class VitalConfig {
     val processor: Processor<*, Any>
 
     init {
-        val info = getRequiredAnnotation<Info>()
+        val info = getInfo()
 
         fileName = info.name
         processor =

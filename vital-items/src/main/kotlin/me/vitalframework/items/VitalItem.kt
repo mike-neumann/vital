@@ -2,7 +2,6 @@ package me.vitalframework.items
 
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.Vital
-import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import me.vitalframework.localization.getTranslatedText
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
@@ -39,7 +38,7 @@ open class VitalItem {
      * works in conjunction with the player's cooldown state to prevent excessive usage.
      */
     val initialCooldown
-        get() = getRequiredAnnotation<Info>().cooldown
+        get() = getInfo().cooldown
 
     /**
      * A mapping of players to their respective cooldown durations for item interactions in milliseconds.
@@ -59,7 +58,7 @@ open class VitalItem {
 
     fun getItemStack(player: SpigotPlayer) =
         itemBuilder(uniqueId) {
-            val info = this@VitalItem.getRequiredAnnotation<Info>()
+            val info = this@VitalItem.getInfo()
 
             // first set default values, then try to localize them
             type = info.type

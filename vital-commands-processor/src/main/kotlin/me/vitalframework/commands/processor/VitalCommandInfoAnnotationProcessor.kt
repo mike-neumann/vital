@@ -1,8 +1,8 @@
 package me.vitalframework.commands.processor
 
 import me.vitalframework.Vital
-import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import me.vitalframework.commands.VitalCommand
+import me.vitalframework.getRequiredAnnotation
 import me.vitalframework.processor.VitalPluginInfoAnnotationProcessingException
 import me.vitalframework.processor.VitalPluginInfoAnnotationProcessor
 import me.vitalframework.processor.VitalPluginInfoHolder

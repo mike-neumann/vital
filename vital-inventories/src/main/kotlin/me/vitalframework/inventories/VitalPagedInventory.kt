@@ -1,7 +1,6 @@
 package me.vitalframework.inventories
 
 import me.vitalframework.SpigotPlayer
-import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import org.jetbrains.annotations.Range
 import java.util.UUID
 
@@ -42,7 +41,7 @@ abstract class VitalPagedInventory : VitalInventory() {
      * the class, ensuring consistency with the inventory's pagination behavior.
      */
     val fromSlot
-        get() = getRequiredAnnotation<Info>().fromSlot
+        get() = getVitalPagedInventoryInfo().fromSlot
 
     /**
      * The ending slot index for a range of slots within the paginated inventory system.
@@ -54,7 +53,7 @@ abstract class VitalPagedInventory : VitalInventory() {
      * outside the class's internal logic.
      */
     val toSlot
-        get() = getRequiredAnnotation<Info>().fromSlot
+        get() = getVitalPagedInventoryInfo().fromSlot
 
     /**
      * Represents the amount of content present on the current page.

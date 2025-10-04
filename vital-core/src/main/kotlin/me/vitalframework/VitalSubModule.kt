@@ -1,7 +1,6 @@
 package me.vitalframework
 
 import jakarta.annotation.PostConstruct
-import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import org.springframework.stereotype.Component
 
 /**

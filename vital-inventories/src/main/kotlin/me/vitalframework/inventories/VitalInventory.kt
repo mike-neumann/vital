@@ -2,7 +2,6 @@ package me.vitalframework.inventories
 
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.Vital
-import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import me.vitalframework.items.itemBuilder
 import me.vitalframework.localization.getTranslatedText
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -43,7 +42,7 @@ open class VitalInventory {
      * or interaction model, such as a 9x1 generic inventory, an anvil, or a crafting table.
      */
     val type
-        get() = getRequiredAnnotation<Info>().type
+        get() = getInfo().type
 
     /**
      * The name of the inventory instance.
@@ -53,7 +52,7 @@ open class VitalInventory {
      * tracking within the inventory management system.
      */
     val name
-        get() = getRequiredAnnotation<Info>().name
+        get() = getInfo().name
 
     /**
      * Represents the default background material used for the inventory display.
@@ -63,7 +62,7 @@ open class VitalInventory {
      * helping to improve the readability and organization of the inventory UI.
      */
     val background
-        get() = getRequiredAnnotation<Info>().background
+        get() = getInfo().background
 
     /**
      * A map of previous inventories associated with their respective unique player identifiers.

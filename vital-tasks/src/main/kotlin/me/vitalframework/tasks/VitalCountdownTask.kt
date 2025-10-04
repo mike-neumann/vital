@@ -6,7 +6,6 @@ import me.vitalframework.BungeeTask
 import me.vitalframework.SpigotPlugin
 import me.vitalframework.SpigotRunnable
 import me.vitalframework.SpigotTask
-import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import net.md_5.bungee.api.ProxyServer
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
@@ -41,7 +40,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      * begins from this value and decrements over time until it reaches zero.
      */
     val initialCountdown
-        get() = getRequiredAnnotation<Info>().countdown
+        get() = getInfo().countdown
 
     /**
      * Represents the current countdown value in the `VitalCountdownTask`.
@@ -66,7 +65,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      * It is recommended to adjust the interval value based on the application's requirements for
      * responsiveness and performance.
      */
-    var interval = getRequiredAnnotation<Info>().interval
+    var interval = getInfo().interval
 
     /**
      * Indicates whether the countdown task is allowed to tick or proceed with its operations.

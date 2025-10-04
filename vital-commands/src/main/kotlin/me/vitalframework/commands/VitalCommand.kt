@@ -7,10 +7,6 @@ import me.vitalframework.BungeePlugin
 import me.vitalframework.SpigotCommandSender
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.SpigotPlugin
-import me.vitalframework.VitalClassUtils.getRequiredAnnotation
-import me.vitalframework.commands.VitalCommandUtils.getMappedArgExceptionHandlers
-import me.vitalframework.commands.VitalCommandUtils.getMappedArgHandlers
-import me.vitalframework.commands.VitalCommandUtils.getMappedArgs
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -72,7 +68,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     val argExceptionHandlers: Map<Arg, Map<Class<out Throwable>, ArgExceptionHandlerContext>>
 
     init {
-        val info = getRequiredAnnotation<Info>()
+        val info = getInfo()
         name = info.name
         permission = info.permission
         playerOnly = info.playerOnly
@@ -154,8 +150,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         try {
             globalContext.handlerMethod(
                 globalContext.adviceInstance,
-                *VitalCommandUtils.getInjectableGlobalExceptionHandlerMethodParameters(
-                    globalContext,
+                *globalContext.getInjectableGlobalExceptionHandlerMethodParameters(
                     sender,
                     executedArg,
                     commandArg,
@@ -215,7 +210,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         try {
             context.handlerMethod(
                 this,
-                *VitalCommandUtils.getInjectableArgExceptionHandlerMethodParameters(context, sender, executedArg, commandArg, exception),
+                *context.getInjectableArgExceptionHandlerMethodParameters(sender, executedArg, commandArg, exception),
             )
         } catch (e: Exception) {
             throw VitalCommandException.ExecuteArgExceptionHandlerMethod(context.handlerMethod, context, e)
@@ -244,7 +239,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         val context = argHandlers[commandArg] ?: throw VitalCommandException.UnmappedArgHandler(executedArg)
         return context.handlerMethod(
             this,
-            *VitalCommandUtils.getInjectableArgHandlerMethodParameters(context, sender, executedArg, commandArg, values),
+            *context.getInjectableArgHandlerMethodParameters(sender, executedArg, commandArg, values),
         ) as ReturnState
     }
 

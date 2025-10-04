@@ -6,7 +6,6 @@ import me.vitalframework.BungeeTask
 import me.vitalframework.SpigotPlugin
 import me.vitalframework.SpigotRunnable
 import me.vitalframework.SpigotTask
-import me.vitalframework.VitalClassUtils.getRequiredAnnotation
 import net.md_5.bungee.api.ProxyServer
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
@@ -31,7 +30,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
      * Represents the interval duration in milliseconds.
      * This variable defines the time span or delay used for scheduling repetitive tasks, setting timeouts, or controlling execution intervals in a process.
      */
-    var interval = getRequiredAnnotation<Info>().interval
+    var interval = getInfo().interval
 
     /**
      * Controls whether the task is allowed to process ticks.
