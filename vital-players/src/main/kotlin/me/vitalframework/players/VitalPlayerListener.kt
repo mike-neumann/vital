@@ -69,7 +69,12 @@ interface VitalPlayerListener {
     ) = try {
         // suppress since we catch the exception anyway (but the ide won't shut up)
         @Suppress("UNCHECKED_CAST")
-        playerService.createPlayer(player, playerUniqueId, playerClass, Class.forName(vitalPlayerClassName) as Class<out VitalPlayer<*>>)
+        playerService.createPlayer(
+            player,
+            playerUniqueId,
+            playerClass,
+            Class.forName(vitalPlayerClassName) as Class<out VitalPlayer<*>>,
+        )
     } catch (e: ClassCastException) {
         throw VitalPlayerException.InvalidClass(Class.forName(vitalPlayerClassName), e)
     }

@@ -18,31 +18,34 @@ import java.util.UUID
  */
 class VitalHeadItemStackBuilder : VitalItemStackBuilder() {
     var owningPlayer: OfflinePlayer? = null
-}
 
-/**
- * Builds an `ItemStack` of type `Material.PLAYER_HEAD` configured with properties
- * defined by the provided initialization block.
- *
- * @param init A lambda receiver used to configure properties of the `VitalHeadItemStackBuilder`.
- * @return A configured `ItemStack` of type `Material.PLAYER_HEAD` with properties and metadata
- *         (e.g., name, lore, enchantments, owning player) applied from the builder.
- */
-inline fun headBuilder(
-    itemUuid: UUID? = null,
-    init: VitalHeadItemStackBuilder.() -> Unit,
-): ItemStack {
-    val headItemStackBuilder = VitalHeadItemStackBuilder().apply { init() }
+    companion object {
+        /**
+         * Builds an `ItemStack` of type `Material.PLAYER_HEAD` configured with properties
+         * defined by the provided initialization block.
+         *
+         * @param init A lambda receiver used to configure properties of the `VitalHeadItemStackBuilder`.
+         * @return A configured `ItemStack` of type `Material.PLAYER_HEAD` with properties and metadata
+         *         (e.g., name, lore, enchantments, owning player) applied from the builder.
+         */
+        @JvmStatic
+        inline fun headBuilder(
+            itemUuid: UUID? = null,
+            init: VitalHeadItemStackBuilder.() -> Unit,
+        ): ItemStack {
+            val headItemStackBuilder = VitalHeadItemStackBuilder().apply { init() }
 
-    return itemBuilder(itemUuid) {
-        type = Material.PLAYER_HEAD
-        name = headItemStackBuilder.name
-        amount = headItemStackBuilder.amount
-        unbreakable = headItemStackBuilder.unbreakable
-        lore = headItemStackBuilder.lore
-        itemFlags = headItemStackBuilder.itemFlags
-        enchantments = headItemStackBuilder.enchantments
-    }.apply {
-        itemMeta = (itemMeta as SkullMeta).apply { owningPlayer = headItemStackBuilder.owningPlayer }
+            return itemBuilder(itemUuid) {
+                type = Material.PLAYER_HEAD
+                name = headItemStackBuilder.name
+                amount = headItemStackBuilder.amount
+                unbreakable = headItemStackBuilder.unbreakable
+                lore = headItemStackBuilder.lore
+                itemFlags = headItemStackBuilder.itemFlags
+                enchantments = headItemStackBuilder.enchantments
+            }.apply {
+                itemMeta = (itemMeta as SkullMeta).apply { owningPlayer = headItemStackBuilder.owningPlayer }
+            }
+        }
     }
 }

@@ -1,8 +1,8 @@
 package me.vitalframework.commands.processor
 
 import me.vitalframework.Vital
+import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
 import me.vitalframework.commands.VitalCommand
-import me.vitalframework.getRequiredAnnotation
 import me.vitalframework.processor.VitalPluginInfoAnnotationProcessingException
 import me.vitalframework.processor.VitalPluginInfoAnnotationProcessor
 import me.vitalframework.processor.VitalPluginInfoHolder
@@ -60,7 +60,8 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
     ) {
         try {
             // Create the new `plugin.yml` file resource as the basic processor left it uncreated.
-            val pluginYmlFileObject = processingEnv.filer.createResource(StandardLocation.CLASS_OUTPUT, "", pluginEnvironment.ymlFileName)
+            val pluginYmlFileObject =
+                processingEnv.filer.createResource(StandardLocation.CLASS_OUTPUT, "", pluginEnvironment.ymlFileName)
             // append all necessary meta-information for all commands to the content builder.
             VitalPluginInfoHolder.PLUGIN_INFO.appendLine("commands:")
 

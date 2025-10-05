@@ -1,6 +1,8 @@
 package me.vitalframework
 
 import jakarta.annotation.PostConstruct
+import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreSubModule.Companion.logger
 import org.springframework.stereotype.Component
 
 /**

@@ -19,6 +19,7 @@ import org.bukkit.WorldCreator
  */
 class VitalConfigLocation {
     companion object {
+        @JvmStatic
         fun of(location: Location) =
             VitalConfigLocation().apply {
                 world = location.world!!.name

@@ -4,4 +4,4 @@ import me.vitalframework.VitalSubModule
 import org.springframework.stereotype.Component
 
 @Component("vital-statistics")
-class VitalStatisticSubModule : VitalSubModule()
+class VitalStatisticsSubModule : VitalSubModule()

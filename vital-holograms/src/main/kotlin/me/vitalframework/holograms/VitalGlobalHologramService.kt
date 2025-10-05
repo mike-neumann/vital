@@ -48,7 +48,8 @@ class VitalGlobalHologramService(
         val lineArmorStandUniqueIds =
             lines.reversed().mapIndexed { i, line ->
                 // convert the minimessage formatted line into a legacy section formatted line.
-                val formattedLine = LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(line))
+                val formattedLine =
+                    LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(line))
 
                 location.world!!
                     .spawn(location.clone().add(0.0, .25 * i, 0.0), ArmorStand::class.java) {

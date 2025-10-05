@@ -72,9 +72,13 @@ class VitalScoreboardContent internal constructor(
     fun update() {
         val objective =
             bukkitScoreboard.getObjective(
-                PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
+                PlainTextComponentSerializer
+                    .plainText()
+                    .serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
             ) ?: bukkitScoreboard.registerNewObjective(
-                PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
+                PlainTextComponentSerializer
+                    .plainText()
+                    .serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
                 Criteria.DUMMY,
                 MiniMessage.miniMessage().deserialize(title),
             )

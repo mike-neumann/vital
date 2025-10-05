@@ -6,9 +6,11 @@ import me.vitalframework.BungeeTask
 import me.vitalframework.SpigotPlugin
 import me.vitalframework.SpigotRunnable
 import me.vitalframework.SpigotTask
+import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
 import net.md_5.bungee.api.ProxyServer
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
+import kotlin.reflect.KClass
 
 /**
  * Abstract class representing a repeatable task with lifecycle management.
@@ -225,6 +227,35 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
      * associated with this object.
      */
     fun onStop() {}
+
+    companion object {
+        /**
+         * Retrieves the VitalRepeatableTask.Info annotation associated with this class.
+         *
+         * @receiver the class for which the annotation is to be retrieved.
+         * @return the VitalRepeatableTask.Info annotation of this class.
+         */
+        @JvmStatic
+        fun Class<out VitalRepeatableTask<*, *, *>>.getInfo(): Info = getRequiredAnnotation<Info>()
+
+        /**
+         * Retrieves the VitalRepeatableTask.Info annotation associated with this class.
+         *
+         * @receiver the class for which the annotation is to be retrieved.
+         * @return the VitalRepeatableTask.Info annotation of this class.
+         */
+        @JvmStatic
+        fun KClass<out VitalRepeatableTask<*, *, *>>.getInfo(): Info = java.getInfo()
+
+        /**
+         * Retrieves the VitalRepeatableTask.Info annotation associated with this instance.
+         *
+         * @receiver the instance for which the annotation is to be retrieved.
+         * @return the VitalRepeatableTask.Info annotation of this instance.
+         */
+        @JvmStatic
+        fun VitalRepeatableTask<*, *, *>.getInfo(): Info = javaClass.getInfo()
+    }
 
     /**
      * Annotation used to provide metadata for a class that represents a task with a periodic execution cycle.

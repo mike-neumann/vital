@@ -57,7 +57,9 @@ abstract class VitalClassLoader<T : Any>(
         // now load vital.properties, which can be anywhere on the previously scanned classpath
         val vitalProperties = Properties().apply { load(getResourceAsStream("vital.properties")) }
         val vitalParentFirstPackages =
-            (vitalProperties["vital.classloader.$classLoaderName.parent-first-packages"] as? String?)?.split(",")?.map { it.trim() }
+            (vitalProperties["vital.classloader.$classLoaderName.parent-first-packages"] as? String?)
+                ?.split(",")
+                ?.map { it.trim() }
         vitalParentFirstPackages?.forEach(this.parentFirstPackages::add)
     }
 
@@ -90,7 +92,10 @@ abstract class VitalClassLoader<T : Any>(
 
     override fun getResources(name: String): Enumeration<URL> =
         Collections.enumeration(
-            super.getResources(name).toList() + parent.getResources(name).toList() + parent.parent.getResources(name).toList(),
+            super.getResources(name).toList() + parent.getResources(name).toList() +
+                parent.parent
+                    .getResources(name)
+                    .toList(),
         )
 
     class Spigot(

@@ -1,9 +1,11 @@
 package me.vitalframework.configs
 
-import me.vitalframework.logger
+import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreSubModule.Companion.logger
 import org.springframework.stereotype.Component
 import java.io.IOException
 import java.io.InputStream
+import java.lang.reflect.Field
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
@@ -120,8 +122,143 @@ abstract class VitalConfig {
         val serializedContent = processor.load(inputStream, javaClass)
 
         for ((key, value) in serializedContent) {
-            VitalConfigUtils.getFieldByProperty(javaClass, key)?.let { VitalConfigUtils.injectField(this, it, value) }
+            javaClass.getFieldByProperty(key)?.let { injectField(this, it, value) }
         }
+    }
+
+    companion object {
+        /**
+         * Retrieves the VitalConfig.Info annotation associated with this class.
+         *
+         * @receiver the class for which the annotation is to be retrieved.
+         * @return the VitalConfig.Info annotation of this class.
+         */
+        @JvmStatic
+        fun Class<out VitalConfig>.getInfo(): Info = getRequiredAnnotation<Info>()
+
+        /**
+         * Retrieves the VitalConfig.Info annotation associated with this class.
+         *
+         * @receiver the class for which the annotation is to be retrieved.
+         * @return the VitalConfig.Info annotation of this class.
+         */
+        @JvmStatic
+        fun KClass<out VitalConfig>.getInfo(): Info = java.getInfo()
+
+        /**
+         * Retrieves the VitalConfig.Info annotation associated with this instance.
+         *
+         * @receiver the instance for which the annotation is to be retrieved.
+         * @return the VitalConfig.Info annotation of this instance.
+         */
+        @JvmStatic
+        fun VitalConfig.getInfo(): Info = javaClass.getInfo()
+
+        /**
+         * Reads the value of the given field from the provided accessor object.
+         *
+         * @param accessor The instance of the object from which the field value is to be read.
+         * @param field The field to be accessed and read.
+         * @return The value of the field, or null if the field is not set or accessible.
+         * @throws VitalConfigException.ReadField If an exception occurs while attempting to read the field.
+         */
+        @JvmStatic
+        fun readField(
+            accessor: Any,
+            field: Field,
+        ): Any? =
+            try {
+                field.isAccessible = true
+                field[accessor]
+            } catch (e: Exception) {
+                throw VitalConfigException.ReadField(field, e)
+            }
+
+        /**
+         * Injects a value into the specified field of the given object.
+         * The method forcibly sets the field accessible, even if it is private,
+         * to allow value injection. If an error occurs, a `VitalConfigException.InjectField` is thrown.
+         *
+         * @param accessor The object containing the field to inject into.
+         * @param field The field that will be injected with the given value.
+         * @param value The value to inject into the specified field.
+         * @throws VitalConfigException.InjectField if the injection fails.
+         */
+        @JvmStatic
+        fun injectField(
+            accessor: Any,
+            field: Field,
+            value: Any?,
+        ) = try {
+            // force field to be accessible even if private
+            // this is needed for injection...
+            field.isAccessible = true
+            field[accessor] = value
+        } catch (e: Exception) {
+            throw VitalConfigException.InjectField(field, value, e)
+        }
+
+        /**
+         * Retrieves all fields from the specified class that are annotated with the [Property] annotation.
+         *
+         * @receiver The class from which the annotated fields should be retrieved.
+         * @return A list of fields that are annotated with the [Property] annotation.
+         */
+        @JvmStatic
+        fun Class<*>.getPropertyFieldsFromType() = declaredFields.filter { it.isAnnotationPresent(Property::class.java) }
+
+        /**
+         * Retrieves all fields from the specified class that are annotated with the [Property] annotation.
+         *
+         * @receiver The class from which the annotated fields should be retrieved.
+         * @return A list of fields that are annotated with the [Property] annotation.
+         */
+        @JvmStatic
+        fun KClass<*>.getPropertyFieldsFromType() = java.getPropertyFieldsFromType()
+
+        /**
+         * Filters and retrieves the declared fields of a class that are not annotated with the `@Property` annotation.
+         *
+         * This function examines all fields declared in the specified class and excludes any fields
+         * annotated with the `@Property` annotation. It returns a list of fields that do not have this annotation.
+         *
+         * @receiver The `Class` object of the type from which the non-property fields are to be retrieved.
+         */
+        @JvmStatic
+        fun Class<*>.getNonPropertyFieldsFromType() = declaredFields.filter { !it.isAnnotationPresent(Property::class.java) }
+
+        /**
+         * Filters and retrieves the declared fields of a class that are not annotated with the `@Property` annotation.
+         *
+         * This function examines all fields declared in the specified class and excludes any fields
+         * annotated with the `@Property` annotation. It returns a list of fields that do not have this annotation.
+         *
+         * @receiver The `Class` object of the type from which the non-property fields are to be retrieved.
+         */
+        @JvmStatic
+        fun KClass<*>.getNonPropertyFieldsFromType() = java.getNonPropertyFieldsFromType()
+
+        /**
+         * Retrieves the first field from a class that matches the specified property name.
+         * Searches through the fields filtered by a custom criterion defined in `getPropertyFieldsFromType`.
+         *
+         * @receiver The target class from which fields are to be retrieved.
+         * @param property The name of the property to match against field names.
+         * @return The first matching field if found, or null otherwise.
+         */
+        @JvmStatic
+        fun Class<*>.getFieldByProperty(property: String) = getPropertyFieldsFromType().firstOrNull { it.name == property }
+
+        /**
+         * Retrieves the first field from a class that matches the specified property name.
+         * Searches through the fields filtered by a custom criterion defined in `getPropertyFieldsFromType`.
+         *
+         * @receiver The target class from which fields are to be retrieved.
+         * @param property The name of the property to match against field names.
+         * @return The first matching field if found, or null otherwise.
+         */
+        @JvmStatic
+        fun KClass<*>.getFieldByProperty(property: String) = java.getFieldByProperty(property)
     }
 
     /**

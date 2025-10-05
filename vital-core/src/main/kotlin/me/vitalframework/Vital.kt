@@ -6,8 +6,11 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.util.ClassUtils
 
 object Vital {
+    @JvmStatic
     lateinit var context: ConfigurableApplicationContext
         private set
+
+    @JvmStatic
     val vitalSubModules = mutableListOf<String>()
 
     @JvmStatic

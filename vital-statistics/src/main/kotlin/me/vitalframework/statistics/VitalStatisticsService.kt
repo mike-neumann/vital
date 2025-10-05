@@ -1,6 +1,6 @@
 package me.vitalframework.statistics
 
-import me.vitalframework.logger
+import me.vitalframework.VitalCoreSubModule.Companion.logger
 import org.springframework.stereotype.Service
 
 @Service
@@ -46,7 +46,11 @@ class VitalStatisticsService(
             if (tps < statisticsConfig.minTps) {
                 _lastUnhealthyTps[System.currentTimeMillis()] = tps
 
-                if (_lastUnhealthyTps.size > statisticsConfig.maxTpsTaskCache) _lastUnhealthyTps.remove(_lastUnhealthyTps.keys.first())
+                if (_lastUnhealthyTps.size > statisticsConfig.maxTpsTaskCache) {
+                    _lastUnhealthyTps.remove(
+                        _lastUnhealthyTps.keys.first(),
+                    )
+                }
             }
         }
 

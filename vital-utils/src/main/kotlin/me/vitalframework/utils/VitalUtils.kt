@@ -46,6 +46,7 @@ interface VitalUtils<CS, P : CS> {
          * @receiver The string input in MiniMessage format to be converted into a component.
          * @return The deserialized Component representation of the MiniMessage string.
          */
+        @JvmStatic
         fun String.toMiniMessageComponent() = MiniMessage.miniMessage().deserialize(this)
 
         /**
@@ -58,6 +59,7 @@ interface VitalUtils<CS, P : CS> {
          * @receiver Component instance to be serialized into the legacy section string format.
          * @return A string representation of the component in legacy format.
          */
+        @JvmStatic
         fun Component.toLegacySectionString() = LegacyComponentSerializer.legacySection().serialize(this)
 
         /**
@@ -70,6 +72,7 @@ interface VitalUtils<CS, P : CS> {
          * @receiver The `Component` instance to be serialized.
          * @return A string representing the serialized component in the legacy ampersand format.
          */
+        @JvmStatic
         fun Component.toLegacyAmpersandString() = LegacyComponentSerializer.legacyAmpersand().serialize(this)
 
         /**
@@ -83,6 +86,7 @@ interface VitalUtils<CS, P : CS> {
          * @receiver The `Component` to be serialized into BungeeCord-compatible components.
          * @return An array of `BaseComponent` representing the BungeeCord-compatible serialized format of the `Component`.
          */
+        @JvmStatic
         fun Component.toBungeeComponent() = BungeeComponentSerializer.get().serialize(this)
 
         /**
@@ -94,6 +98,7 @@ interface VitalUtils<CS, P : CS> {
          *
          * @return The plain text string representation of the component.
          */
+        @JvmStatic
         fun Component.toPlainTextString() = PlainTextComponentSerializer.plainText().serialize(this)
 
         /**
@@ -106,6 +111,7 @@ interface VitalUtils<CS, P : CS> {
          * @receiver The `Component` to be serialized into a MiniMessage-formatted string.
          * @return A MiniMessage-compatible string representation of the `Component`.
          */
+        @JvmStatic
         fun Component.toMiniMessageString() = MiniMessage.miniMessage().serialize(this)
 
         /**
@@ -116,6 +122,7 @@ interface VitalUtils<CS, P : CS> {
          * @param click the action or command triggered when the button is clicked
          * @param action the type of click action to be performed
          */
+        @JvmStatic
         fun chatButton(
             hover: String,
             text: String,
@@ -129,6 +136,7 @@ interface VitalUtils<CS, P : CS> {
          * @param text The display text for the button in the chat.
          * @param command The command to be executed when the button is clicked.
          */
+        @JvmStatic
         fun chatRunCommandButton(
             text: String,
             command: String,
@@ -144,6 +152,7 @@ interface VitalUtils<CS, P : CS> {
          * @param text the text displayed on the button
          * @param command the command to suggest when the button is clicked
          */
+        @JvmStatic
         fun chatSuggestCommandButton(
             text: String,
             command: String,
@@ -154,6 +163,7 @@ interface VitalUtils<CS, P : CS> {
          *
          * @param command The chat command to be executed when the button is clicked.
          */
+        @JvmStatic
         fun chatRunCommandYesButton(command: String) = chatRunCommandButton("<green><bold>YES</bold></green>", command)
 
         /**
@@ -161,6 +171,7 @@ interface VitalUtils<CS, P : CS> {
          *
          * @param command The command to execute when the button is clicked.
          */
+        @JvmStatic
         fun chatRunCommandNoButton(command: String) = chatRunCommandButton("<red><bold>NO</bold></red>", command)
 
         /**
@@ -169,6 +180,7 @@ interface VitalUtils<CS, P : CS> {
          *
          * @param command The command to be executed when the "OK" button is clicked.
          */
+        @JvmStatic
         fun chatRunCommandOkButton(command: String) = chatRunCommandButton("<green><bold>OK</bold></green>", command)
 
         /**
@@ -176,6 +188,7 @@ interface VitalUtils<CS, P : CS> {
          *
          * @param command The command to execute when the button is clicked.
          */
+        @JvmStatic
         fun chatRunCommandXButton(command: String) = chatRunCommandButton("<red><bold>✕</bold></red>", command)
 
         /**
@@ -183,6 +196,7 @@ interface VitalUtils<CS, P : CS> {
          *
          * @param command The command to be executed when the button is clicked.
          */
+        @JvmStatic
         fun chatRunCommandCheckmarkButton(command: String) = chatRunCommandButton("<green><bold>✓</bold></green>", command)
 
         /**
@@ -191,6 +205,7 @@ interface VitalUtils<CS, P : CS> {
          *
          * @param command The command to be executed when the "ACCEPT" button is clicked.
          */
+        @JvmStatic
         fun chatRunCommandAcceptButton(command: String) = chatRunCommandButton("<green><bold>ACCEPT</bold></green>", command)
 
         /**
@@ -198,6 +213,7 @@ interface VitalUtils<CS, P : CS> {
          *
          * @param command the command to be executed when the decline button is clicked
          */
+        @JvmStatic
         fun chatRunCommandDeclineButton(command: String) = chatRunCommandButton("<red><bold>DECLINE</bold></red>", command)
 
         /**
@@ -213,6 +229,7 @@ interface VitalUtils<CS, P : CS> {
          *         case-insensitive formats, including potential variations with symbols
          *         or spaces between the characters.
          */
+        @JvmStatic
         fun String.toBlacklistedWordRegex() = buildBlacklistedWordRegex(this)
 
         /**
@@ -225,6 +242,7 @@ interface VitalUtils<CS, P : CS> {
          *         including possible variations that may include non-alphanumeric characters
          *         between the word's letters.
          */
+        @JvmStatic
         fun buildBlacklistedWordRegex(word: String): Regex {
             val pattern = word.lowercase().map { Regex.escape(it.toString()) }.joinToString("[\\W_]*")
             return Regex("\\b$pattern\\b", RegexOption.IGNORE_CASE)
@@ -236,6 +254,7 @@ interface VitalUtils<CS, P : CS> {
          *
          * @param blacklistedWords A list of words that should be censored within the string.
          */
+        @JvmStatic
         fun String.toCensoredText(blacklistedWords: List<String>) = getCensoredText(this, blacklistedWords)
 
         /**
@@ -247,6 +266,7 @@ interface VitalUtils<CS, P : CS> {
          * @param blacklistedWords A list of words that should be censored in the input text.
          * @return The censored text where all blacklisted words are replaced with their censored forms.
          */
+        @JvmStatic
         fun getCensoredText(
             text: String,
             blacklistedWords: List<String>,
@@ -649,7 +669,7 @@ interface VitalUtils<CS, P : CS> {
             potionEffectType: PotionEffectType = PotionEffectType.SLOWNESS,
         ) {
             removePotionEffect(potionEffectType)
-            addPotionEffect(PotionEffect(potionEffectType, 2, Int.Companion.MAX_VALUE))
+            addPotionEffect(PotionEffect(potionEffectType, 2, Int.MAX_VALUE))
             teleport(location)
             removePotionEffect(potionEffectType)
         }
@@ -1312,7 +1332,8 @@ interface VitalUtils<CS, P : CS> {
                 val otherTeamSort = otherTeam.name.substringBefore("_")
 
                 // we can now construct the other player's custom nametag on our own scoreboard...
-                val ourOtherTeam = otherPlayer.getCustomNametagTeam(scoreboard, otherTeamSort, otherTeam.prefix(), otherTeam.suffix())
+                val ourOtherTeam =
+                    otherPlayer.getCustomNametagTeam(scoreboard, otherTeamSort, otherTeam.prefix(), otherTeam.suffix())
                 ourOtherTeam.addPlayer(otherPlayer)
             }
         }

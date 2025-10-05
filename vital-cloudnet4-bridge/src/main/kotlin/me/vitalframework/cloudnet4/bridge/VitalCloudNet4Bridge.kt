@@ -28,6 +28,7 @@ interface VitalCloudNet4Bridge<P> {
          * It ensures that all required services are initialized and available for use across
          * the application where dependency management is required.
          */
+        @JvmStatic
         val serviceRegistry = InjectionLayer.ext().instance(ServiceRegistry::class.java)!!
 
         /**
@@ -40,6 +41,7 @@ interface VitalCloudNet4Bridge<P> {
          * The value is guaranteed to be non-null. In case no provider is found for the `PlayerManager` service, it will
          * result in an exception being thrown during initialization.
          */
+        @JvmStatic
         val playerManager = serviceRegistry.defaultInstance(PlayerManager::class.java)!!
     }
 

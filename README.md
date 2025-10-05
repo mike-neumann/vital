@@ -1,8 +1,10 @@
 # 🚀 Vital - The ultimate plugin framework
+
 Vital is the ultimate Minecraft server plugin framework.  
 Delivering fast, easy-to-use, and powerful features, centralized so you don't have to reinvent the wheel.
 
 # ✨ Highlights
+
 - **🧹 No `plugin.yml` anymore!**  
   Vital takes care of all the annoying `plugin.yml` configuration stuff for you.  
   Just write your code and let Vital do the rest.
@@ -10,7 +12,8 @@ Delivering fast, easy-to-use, and powerful features, centralized so you don't ha
 
 - **🖥️ Advanced command system**  
   Delivering an advanced command creation system built using annotations instead of juggling strings around.  
-  Define function-based command handling with advanced exception handling and **automatic tab completion** right out of the box!
+  Define function-based command handling with advanced exception handling and **automatic tab completion** right out of
+  the box!
 
 
 - **📄 Advanced config system**  
@@ -35,7 +38,8 @@ Delivering fast, easy-to-use, and powerful features, centralized so you don't ha
 
 - **🌍 Localization**  
   Built-in support for localization using spring boot's message system.  
-  Works in inventories and even **items** that are **inside-of a player's inventory**, without having to manually update anything!
+  Works in inventories and even **items** that are **inside-of a player's inventory**, without having to manually update
+  anything!
 
 
 - **🗡️ Interactive items**  
@@ -49,7 +53,7 @@ Delivering fast, easy-to-use, and powerful features, centralized so you don't ha
 
 
 - **💻 Multi-Platform support**  
-  Vital supports Spigot, Paper and BungeeCord (and more to come) right out of the box, 
+  Vital supports Spigot, Paper and BungeeCord (and more to come) right out of the box,
   making it the perfect solution for your next project.
 
 
@@ -57,7 +61,7 @@ Delivering fast, easy-to-use, and powerful features, centralized so you don't ha
   It's modular, meaning you may only include the stuff you actually need.
   Only need the base functionality? No problem, just leave it as is.  
   Need a reactive inventory system? Go ahead and include it.  
-  Want everything Vital has to offer?  Go for it, include every module.
+  Want everything Vital has to offer? Go for it, include every module.
   This approach decreases jar size and makes your plugin easier to maintain.
 
 - **🔌 Plug-and-play**  
@@ -65,9 +69,11 @@ Delivering fast, easy-to-use, and powerful features, centralized so you don't ha
   Just drop it in your plugin and start developing.
 
 # 🔧 Requirements
+
 - Java 24 or Kotlin 2.2.0 (JVM 24)
 - Gradle 9.0.0
 
 # 🤝 Want to contribute?
+
 Vital is open source, and we welcome contributions of any kind.  
 Have an idea? Found a bug? Feel free to open an issue or a pull request.

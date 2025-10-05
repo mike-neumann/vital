@@ -15,19 +15,28 @@ abstract class VitalConfigException(
         fileName: String,
         processor: Class<out VitalConfig.Processor<*, *>>,
         cause: Throwable,
-    ) : VitalConfigException("error while injecting fields for config '$fileName' with processor '${processor.simpleName}'", cause)
+    ) : VitalConfigException(
+            "error while injecting fields for config '$fileName' with processor '${processor.simpleName}'",
+            cause,
+        )
 
     class InjectField(
         field: Field,
         value: Any?,
         cause: Throwable,
-    ) : VitalConfigException("error while injecting field '${field.type.simpleName} ${field.name}' with '$value'", cause)
+    ) : VitalConfigException(
+            "error while injecting field '${field.type.simpleName} ${field.name}' with '$value'",
+            cause,
+        )
 
     class CreateFileProcessor(
         fileName: String,
         processor: Class<out VitalConfig.Processor<*, *>>,
         cause: Throwable,
-    ) : VitalConfigException("error while creating config file processor '${processor.simpleName}' for config '$fileName'", cause)
+    ) : VitalConfigException(
+            "error while creating config file processor '${processor.simpleName}' for config '$fileName'",
+            cause,
+        )
 
     class CreateFile(
         fileName: String,

@@ -36,7 +36,15 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
 
         pluginEnvironment = info.environment
         // finally, generate the plugin.yml
-        setupPluginYml(info.environment, className, info.name, info.description, info.version, info.apiVersion, info.author)
+        setupPluginYml(
+            info.environment,
+            className,
+            info.name,
+            info.description,
+            info.version,
+            info.apiVersion,
+            info.author,
+        )
         generatePluginYml(info.environment)
         val packageNames =
             className
@@ -71,7 +79,8 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
             }
 
             Vital.Info.PluginEnvironment.SPIGOT, Vital.Info.PluginEnvironment.PAPER -> {
-                val vitalPluginLoaderImplementationName = if (pluginEnvironment == Vital.Info.PluginEnvironment.PAPER) "Paper" else "Spigot"
+                val vitalPluginLoaderImplementationName =
+                    if (pluginEnvironment == Vital.Info.PluginEnvironment.PAPER) "Paper" else "Spigot"
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine(
                     "main: me.vitalframework.loader.VitalPluginLoader$$vitalPluginLoaderImplementationName",
                 )

@@ -27,8 +27,10 @@ interface StatsCommand<CS> {
     )
 
     fun handleOnCommand(sender: CS) {
-        val serverStatus = if (statisticsService.tps >= statisticsConfig.minTps) "<green>HEALTHY</green>" else "<red>UNHEALTHY</yellow>"
-        val ramUsageInGigaBytes = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024 / 1024
+        val serverStatus =
+            if (statisticsService.tps >= statisticsConfig.minTps) "<green>HEALTHY</green>" else "<red>UNHEALTHY</yellow>"
+        val ramUsageInGigaBytes =
+            (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024 / 1024
 
         sendMessage(sender, "-----> Server-Statistics")
         sendMessage(sender, "Spring version: <yellow>${SpringVersion.getVersion()}")

@@ -2,8 +2,9 @@ package me.vitalframework.inventories
 
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.Vital
-import me.vitalframework.items.itemBuilder
-import me.vitalframework.localization.getTranslatedText
+import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
+import me.vitalframework.items.VitalItemStackBuilder.Companion.itemBuilder
+import me.vitalframework.localization.VitalLocalizationSubModule.Spigot.getTranslatedText
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -13,6 +14,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.springframework.stereotype.Component
 import java.util.UUID
+import kotlin.reflect.KClass
 
 typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
 
@@ -295,6 +297,35 @@ open class VitalInventory {
      *               associated with the inventory.
      */
     protected open fun onClose(player: SpigotPlayer) {}
+
+    companion object {
+        /**
+         * Retrieves the VitalInventory.Info annotation associated with this class.
+         *
+         * @receiver the class for which the annotation is to be retrieved.
+         * @return the VitalInventory.Info annotation of this class.
+         */
+        @JvmStatic
+        fun Class<out VitalInventory>.getInfo(): Info = getRequiredAnnotation<Info>()
+
+        /**
+         * Retrieves the VitalInventory.Info annotation associated with this class.
+         *
+         * @receiver the class for which the annotation is to be retrieved.
+         * @return the VitalInventory.Info annotation of this class.
+         */
+        @JvmStatic
+        fun KClass<out VitalInventory>.getInfo(): Info = java.getInfo()
+
+        /**
+         * Retrieves the VitalInventory.Info annotation associated with this instance.
+         *
+         * @receiver the instance for which the annotation is to be retrieved.
+         * @return the VitalInventory.Info annotation of this instance.
+         */
+        @JvmStatic
+        fun VitalInventory.getInfo(): Info = javaClass.getInfo()
+    }
 
     /**
      * Annotation used to define metadata for inventory types in the Vital framework.

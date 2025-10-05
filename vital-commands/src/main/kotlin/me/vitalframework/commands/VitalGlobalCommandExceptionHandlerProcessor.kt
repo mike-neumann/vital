@@ -1,5 +1,7 @@
 package me.vitalframework.commands
 
+import me.vitalframework.commands.VitalCommand.Companion.getGlobalExceptionHandlerContext
+import me.vitalframework.commands.VitalCommand.Companion.getVitalCommandAdvice
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
@@ -21,8 +23,11 @@ class VitalGlobalCommandExceptionHandlerProcessor(
                     val advice = adviceInstance.javaClass.getAnnotation(VitalCommand.Advice::class.java)!!
                     adviceInstance::class.java.methods
                         .filter { it.getAnnotationsByType(VitalCommand.GlobalExceptionHandler::class.java).size > 0 }
-                        .map { method -> method.getAnnotationsByType(VitalCommand.GlobalExceptionHandler::class.java).map { method to it } }
-                        .flatten()
+                        .map { method ->
+                            method
+                                .getAnnotationsByType(VitalCommand.GlobalExceptionHandler::class.java)
+                                .map { method to it }
+                        }.flatten()
                         .forEach { (method, exceptionHandler) ->
                             globalExceptionHandlers[exceptionHandler.type.java] =
                                 method.getGlobalExceptionHandlerContext(adviceInstance, advice.commandSenderClass.java)
@@ -32,8 +37,11 @@ class VitalGlobalCommandExceptionHandlerProcessor(
     }
 
     companion object {
-        private val globalExceptionHandlers = mutableMapOf<Class<out Throwable>, VitalCommand.GlobalExceptionHandlerContext>()
+        @JvmStatic
+        private val globalExceptionHandlers =
+            mutableMapOf<Class<out Throwable>, VitalCommand.GlobalExceptionHandlerContext>()
 
+        @JvmStatic
         fun getGlobalExceptionHandler(type: Class<out Throwable>) =
             globalExceptionHandlers.entries
                 .find {

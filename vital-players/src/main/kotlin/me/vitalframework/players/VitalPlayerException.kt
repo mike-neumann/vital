@@ -18,7 +18,10 @@ abstract class VitalPlayerException(
         playerClass: Class<*>,
         playerUniqueId: UUID,
         cause: Throwable,
-    ) : VitalPlayerException("error while creating vital player instance '${playerClass.simpleName}' for '$playerUniqueId'", cause)
+    ) : VitalPlayerException(
+            "error while creating vital player instance '${playerClass.simpleName}' for '$playerUniqueId'",
+            cause,
+        )
 
     class AlreadyExists(
         playerClass: Class<*>,

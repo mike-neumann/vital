@@ -1,8 +1,10 @@
 package me.vitalframework.inventories
 
 import me.vitalframework.SpigotPlayer
+import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
 import org.jetbrains.annotations.Range
 import java.util.UUID
+import kotlin.reflect.KClass
 
 abstract class VitalPagedInventory : VitalInventory() {
     private val _pages = mutableMapOf<UUID, Int>()
@@ -41,7 +43,7 @@ abstract class VitalPagedInventory : VitalInventory() {
      * the class, ensuring consistency with the inventory's pagination behavior.
      */
     val fromSlot
-        get() = getVitalPagedInventoryInfo().fromSlot
+        get() = getInfo().fromSlot
 
     /**
      * The ending slot index for a range of slots within the paginated inventory system.
@@ -53,7 +55,7 @@ abstract class VitalPagedInventory : VitalInventory() {
      * outside the class's internal logic.
      */
     val toSlot
-        get() = getVitalPagedInventoryInfo().fromSlot
+        get() = getInfo().fromSlot
 
     /**
      * Represents the amount of content present on the current page.
@@ -171,7 +173,37 @@ abstract class VitalPagedInventory : VitalInventory() {
     protected open fun onPageChange(
         page: Int,
         player: SpigotPlayer,
-    ) {}
+    ) {
+    }
+
+    companion object {
+        /**
+         * Retrieves the VitalPagedInventory.Info annotation associated with this class.
+         *
+         * @receiver the class for which the annotation is to be retrieved.
+         * @return the VitalPagedInventory.Info annotation of this class.
+         */
+        @JvmStatic
+        fun Class<out VitalPagedInventory>.getInfo(): Info = getRequiredAnnotation<Info>()
+
+        /**
+         * Retrieves the VitalPagedInventory.Info annotation associated with this class.
+         *
+         * @receiver the class for which the annotation is to be retrieved.
+         * @return the VitalPagedInventory.Info annotation of this class.
+         */
+        @JvmStatic
+        fun KClass<out VitalPagedInventory>.getInfo(): Info = java.getInfo()
+
+        /**
+         * Retrieves the VitalPagedInventory.Info annotation associated with this instance.
+         *
+         * @receiver the instance for which the annotation is to be retrieved.
+         * @return the VitalPagedInventory.Info annotation of this instance.
+         */
+        @JvmStatic
+        fun VitalPagedInventory.getInfo(): Info = javaClass.getInfo()
+    }
 
     /**
      * Annotation for specifying a range of inventory slots within which an operation or configuration is valid.

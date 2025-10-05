@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemStack
  */
 class VitalConfigItemStack {
     companion object {
+        @JvmStatic
         fun of(itemStack: ItemStack): VitalConfigItemStack {
             val itemMeta = itemStack.itemMeta
             val vitalConfigItemStack =

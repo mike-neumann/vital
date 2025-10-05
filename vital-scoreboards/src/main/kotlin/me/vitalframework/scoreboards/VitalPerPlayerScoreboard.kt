@@ -67,7 +67,9 @@ class VitalPerPlayerScoreboard(
         scoreboard.update()
         val objective =
             scoreboard.bukkitScoreboard.getObjective(
-                PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboard.title)),
+                PlainTextComponentSerializer
+                    .plainText()
+                    .serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboard.title)),
             )
         val lines = applyLines(player)
 
@@ -76,7 +78,9 @@ class VitalPerPlayerScoreboard(
                 objective!!.getScore(
                     LegacyComponentSerializer
                         .legacySection()
-                        .serialize(MiniMessage.miniMessage().deserialize(lines[lineIndex])) + "\u00A7".repeat(lineIndex),
+                        .serialize(
+                            MiniMessage.miniMessage().deserialize(lines[lineIndex]),
+                        ) + "\u00A7".repeat(lineIndex),
                 )
 
             score.score = lines.size - lineIndex

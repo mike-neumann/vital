@@ -88,7 +88,9 @@ class VitalScoreboardTeam internal constructor(
      */
     val bukkitTeam: Team =
         scoreboard.registerNewTeam(
-            PlainTextComponentSerializer.plainText().serialize(LegacyComponentSerializer.legacySection().deserialize(name)),
+            PlainTextComponentSerializer
+                .plainText()
+                .serialize(LegacyComponentSerializer.legacySection().deserialize(name)),
         )
 
     /**

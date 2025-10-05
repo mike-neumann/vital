@@ -2,7 +2,9 @@ package me.vitalframework.items
 
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.Vital
-import me.vitalframework.localization.getTranslatedText
+import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
+import me.vitalframework.items.VitalItemStackBuilder.Companion.itemBuilder
+import me.vitalframework.localization.VitalLocalizationSubModule.Spigot.getTranslatedText
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.block.Action
@@ -12,6 +14,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.springframework.stereotype.Component
 import java.util.UUID
+import kotlin.reflect.KClass
 
 /**
  * Represents a customizable item with unique metadata and behavior within the Vital framework.
@@ -80,8 +83,10 @@ open class VitalItem {
                 afterInit = {
                     it.itemMeta =
                         it.itemMeta.apply {
-                            persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] = true
-                            persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZATION_KEY, PersistentDataType.STRING] = info.name
+                            persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] =
+                                true
+                            persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZATION_KEY, PersistentDataType.STRING] =
+                                info.name
                             persistentDataContainer[VitalNamespacedKey.ITEM_LORE_LOCALIZATION_KEYS, PersistentDataType.LIST.strings()] =
                                 info.lore.toList()
                         }
@@ -90,7 +95,8 @@ open class VitalItem {
                 afterInit = {
                     it.itemMeta =
                         it.itemMeta.apply {
-                            persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] = false
+                            persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] =
+                                false
                         }
                 }
             }
@@ -175,6 +181,35 @@ open class VitalItem {
     open fun onCooldownTick(player: SpigotPlayer) {}
 
     override fun toString(): String = "VitalItem(uniqueId=$uniqueId, initialCooldown=$initialCooldown, playerCooldown=$playerCooldown)"
+
+    companion object {
+        /**
+         * Retrieves the VitalItem.Info annotation associated with this class.
+         *
+         * @receiver the class for which the annotation is to be retrieved.
+         * @return the VitalItem.Info annotation of this class.
+         */
+        @JvmStatic
+        fun Class<out VitalItem>.getInfo(): Info = getRequiredAnnotation<Info>()
+
+        /**
+         * Retrieves the VitalItem.Info annotation associated with this class.
+         *
+         * @receiver the class for which the annotation is to be retrieved.
+         * @return the VitalItem.Info annotation of this class.
+         */
+        @JvmStatic
+        fun KClass<out VitalItem>.getInfo(): Info = java.getInfo()
+
+        /**
+         * Retrieves the VitalItem.Info annotation associated with this instance.
+         *
+         * @receiver the instance for which the annotation is to be retrieved.
+         * @return the VitalItem.Info annotation of this instance.
+         */
+        @JvmStatic
+        fun VitalItem.getInfo(): Info = javaClass.getInfo()
+    }
 
     /**
      * Annotation used to define metadata and behavior for custom items in the Vital framework.

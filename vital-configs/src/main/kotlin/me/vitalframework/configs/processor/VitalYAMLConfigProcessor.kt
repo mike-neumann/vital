@@ -2,8 +2,10 @@ package me.vitalframework.configs.processor
 
 import me.vitalframework.configs.SnakeYamlConstructor
 import me.vitalframework.configs.VitalConfig
+import me.vitalframework.configs.VitalConfig.Companion.getFieldByProperty
+import me.vitalframework.configs.VitalConfig.Companion.getNonPropertyFieldsFromType
+import me.vitalframework.configs.VitalConfig.Companion.getPropertyFieldsFromType
 import me.vitalframework.configs.VitalConfig.Processor
-import me.vitalframework.configs.VitalConfigUtils
 import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.LoaderOptions
 import org.yaml.snakeyaml.TypeDescription
@@ -28,15 +30,19 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
 
     private fun addTypeDescriptors(type: Class<*>) {
         val rootTypeDescription = TypeDescription(type, "!${type.simpleName}")
-        val rootExcludes = VitalConfigUtils.getNonPropertyFieldsFromType(type).map { it.name }.toTypedArray()
+        val rootExcludes = type.getNonPropertyFieldsFromType().map { it.name }.toTypedArray()
 
         rootTypeDescription.setExcludes(*rootExcludes)
         yaml.addTypeDescription(rootTypeDescription)
 
-        for (field in VitalConfigUtils.getPropertyFieldsFromType(type)) {
+        for (field in type.getPropertyFieldsFromType()) {
             val configProperty = field.getAnnotation(VitalConfig.Property::class.java)!!
             val typeDescription = TypeDescription(field.type, "!${field.type.simpleName}")
-            val excludes = VitalConfigUtils.getNonPropertyFieldsFromType(field.type).map { it.name }.toTypedArray()
+            val excludes =
+                field.type
+                    .getNonPropertyFieldsFromType()
+                    .map { it.name }
+                    .toTypedArray()
 
             typeDescription.setExcludes(*excludes)
             yaml.addTypeDescription(typeDescription)
@@ -91,9 +97,9 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
     }
 
     override fun serialize(instance: Any) =
-        VitalConfigUtils
-            .getPropertyFieldsFromType(instance.javaClass)
-            .associate { it.name to VitalConfigUtils.readField(instance, it)!! }
+        instance.javaClass
+            .getPropertyFieldsFromType()
+            .associate { it.name to VitalConfig.readField(instance, it)!! }
 
     override fun deserialize(
         serializedContent: Map<String, Any>,
@@ -104,13 +110,21 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
             val instance = defaultConstructor.newInstance()
             // default constructor was found, inject field properties...
             for ((key, value) in serializedContent) {
-                VitalConfigUtils.getFieldByProperty(type, key)?.let { VitalConfigUtils.injectField(instance, it, value) }
+                type
+                    .getFieldByProperty(key)
+                    ?.let { VitalConfig.injectField(instance, it, value) }
             }
 
             instance
         } catch (_: NoSuchMethodException) {
             // the default constructor was not found, attempt to get constructor matching properties...
-            val constructor = type.getConstructor(*VitalConfigUtils.getPropertyFieldsFromType(type).map { it.javaClass }.toTypedArray())
+            val constructor =
+                type.getConstructor(
+                    *type
+                        .getPropertyFieldsFromType()
+                        .map { it.javaClass }
+                        .toTypedArray(),
+                )
             // constructor found, create a new instance with this constructor...
             constructor.newInstance(serializedContent.values)
         }

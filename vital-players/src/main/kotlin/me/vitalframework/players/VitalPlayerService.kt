@@ -34,8 +34,15 @@ class VitalPlayerService(
         playerClass: Class<T>,
         vitalPlayerClass: Class<out VitalPlayer<*>>,
     ) = try {
-        if (playerRepository.exists(playerUniqueId)) throw VitalPlayerException.AlreadyExists(playerClass, playerUniqueId)
-        playerRepository.save(vitalPlayerClass.getDeclaredConstructor(playerClass).newInstance(playerClass.cast(player)))
+        if (playerRepository.exists(playerUniqueId)) {
+            throw VitalPlayerException.AlreadyExists(
+                playerClass,
+                playerUniqueId,
+            )
+        }
+        playerRepository.save(
+            vitalPlayerClass.getDeclaredConstructor(playerClass).newInstance(playerClass.cast(player)),
+        )
     } catch (e: Exception) {
         throw VitalPlayerException.Create(vitalPlayerClass, playerUniqueId, e)
     }

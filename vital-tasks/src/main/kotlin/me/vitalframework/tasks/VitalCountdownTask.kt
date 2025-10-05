@@ -6,9 +6,11 @@ import me.vitalframework.BungeeTask
 import me.vitalframework.SpigotPlugin
 import me.vitalframework.SpigotRunnable
 import me.vitalframework.SpigotTask
+import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
 import net.md_5.bungee.api.ProxyServer
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
+import kotlin.reflect.KClass
 
 /**
  * Represents a countdown task that provides customizable countdown functionality.
@@ -311,6 +313,35 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      * necessary to ensure a proper restart of the countdown operation.
      */
     fun onRestart() {}
+
+    companion object {
+        /**
+         * Retrieves the VitalCountdownTask.Info annotation associated with this class.
+         *
+         * @receiver the class for which the annotation is to be retrieved.
+         * @return the VitalCountdownTask.Info annotation of this class.
+         */
+        @JvmStatic
+        fun Class<out VitalCountdownTask<*, *, *>>.getInfo(): Info = getRequiredAnnotation<Info>()
+
+        /**
+         * Retrieves the VitalCountdownTask.Info annotation associated with this class.
+         *
+         * @receiver the class for which the annotation is to be retrieved.
+         * @return the VitalCountdownTask.Info annotation of this class.
+         */
+        @JvmStatic
+        fun KClass<out VitalCountdownTask<*, *, *>>.getInfo(): Info = java.getInfo()
+
+        /**
+         * Retrieves the VitalCountdownTask.Info annotation associated with this instance.
+         *
+         * @receiver the instance for which the annotation is to be retrieved.
+         * @return the VitalCountdownTask.Info annotation of this instance.
+         */
+        @JvmStatic
+        fun VitalCountdownTask<*, *, *>.getInfo(): Info = javaClass.getInfo()
+    }
 
     /**
      * Annotation to configure countdown-related tasks.

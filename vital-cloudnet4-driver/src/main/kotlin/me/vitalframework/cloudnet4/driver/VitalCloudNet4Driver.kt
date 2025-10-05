@@ -22,6 +22,7 @@ object VitalCloudNet4Driver {
      * The instance is provided via dependency injection and is expected to be preconfigured
      * to access and manage cloud resources.
      */
+    @JvmStatic
     val cloudServiceProvider
         get() = InjectionLayer.ext().instance(CloudServiceProvider::class.java)!!
 
@@ -29,6 +30,7 @@ object VitalCloudNet4Driver {
      * A constant that provides an instance of the ServiceTaskProvider, initialized via dependency injection.
      * It is used to get service tasks by their respective names.
      */
+    @JvmStatic
     val serviceTaskProvider
         get() = InjectionLayer.ext().instance(ServiceTaskProvider::class.java)!!
 
@@ -38,6 +40,7 @@ object VitalCloudNet4Driver {
      * from the injection layer. It is used to create and configure cloud service instances
      * based on specific requirements and configurations.
      */
+    @JvmStatic
     val cloudServiceFactory
         get() = InjectionLayer.ext().instance(CloudServiceFactory::class.java)!!
 
@@ -50,6 +53,7 @@ object VitalCloudNet4Driver {
      * @param taskName The name of the task to filter the cloud servers by.
      * @return A list of cloud servers corresponding to the specified task name.
      */
+    @JvmStatic
     fun getCloudServers(taskName: String) = cloudServiceProvider.servicesByTask(taskName)
 
     /**
@@ -58,6 +62,7 @@ object VitalCloudNet4Driver {
      * @param serverName the name of the server to retrieve
      * @return the instance of the cloud server, if found
      */
+    @JvmStatic
     fun getCloudServer(serverName: String) = cloudServiceProvider.serviceByName(serverName)
 
     /**
@@ -66,6 +71,7 @@ object VitalCloudNet4Driver {
      * @param taskName The name of the task to retrieve from the service task provider.
      * @return The server task corresponding to the specified task name.
      */
+    @JvmStatic
     fun getServerTask(taskName: String) = serviceTaskProvider.serviceTask(taskName)
 
     /**
@@ -74,6 +80,7 @@ object VitalCloudNet4Driver {
      *
      * @param serverName the name of the server to stop
      */
+    @JvmStatic
     fun stopCloudServer(serverName: String) = getCloudServer(serverName)!!.provider().delete()
 
     /**
@@ -89,6 +96,7 @@ object VitalCloudNet4Driver {
      *                  including all services.
      * @return A list of cloud servers satisfying the given predicate.
      */
+    @JvmStatic
     @JvmOverloads
     inline fun getCloudServers(predicate: (ServiceInfoSnapshot) -> Boolean = { true }) =
         cloudServiceProvider
@@ -100,6 +108,7 @@ object VitalCloudNet4Driver {
      *
      * @param taskName The name of the task for which a cloud server needs to be started.
      */
+    @JvmStatic
     fun startCloudServer(taskName: String) =
         cloudServiceFactory.createCloudService(
             ServiceConfiguration.builder(getServerTask(taskName)!!).build(),

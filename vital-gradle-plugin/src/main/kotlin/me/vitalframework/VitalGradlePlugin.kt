@@ -22,7 +22,10 @@ class VitalGradlePlugin : Plugin<Project> {
         }
 
         target.afterEvaluate {
-            target.applyDependency("implementation", "me.vitalframework:vital-core:${target.getProperty("vitalVersion")}")
+            target.applyDependency(
+                "implementation",
+                "me.vitalframework:vital-core:${target.getProperty("vitalVersion")}",
+            )
             target.applyDependency(
                 "kapt",
                 "me.vitalframework:vital-core-processor:${target.getProperty("vitalVersion")}",
