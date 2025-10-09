@@ -1258,7 +1258,7 @@ interface VitalUtils<CS, P : CS> {
          * @param suffix An optional component to set as the team's suffix. Defaults to null.
          * @return The custom `Team` associated with the player, either newly created or existing.
          */
-        fun SpigotPlayer.getCustomNametagTeam(
+        fun Entity.getCustomNametagTeam(
             scoreboard: Scoreboard,
             sort: String,
             prefix: Component? = null,
@@ -1284,7 +1284,7 @@ interface VitalUtils<CS, P : CS> {
          * @param suffix An optional minimessage string to set as the team's suffix. Defaults to null.
          * @return The custom `Team` associated with the player, either newly created or existing.
          */
-        fun SpigotPlayer.getCustomNametagTeam(
+        fun Entity.getCustomNametagTeam(
             scoreboard: Scoreboard,
             sort: String,
             prefix: String? = null,
@@ -1292,18 +1292,19 @@ interface VitalUtils<CS, P : CS> {
         ) = getCustomNametagTeam(scoreboard, sort, prefix?.toMiniMessageComponent(), suffix?.toMiniMessageComponent())
 
         /**
-         * Sets a custom nametag for a `SpigotPlayer` instance, along with managing the scoreboard teams
+         * Sets a custom nametag for an `Entity` instance, along with managing the scoreboard teams
          * required to properly display the nametag information.
          *
-         * This method creates a team on the player's scoreboard with the specified prefix, suffix,
+         * This method creates a team on the entity's scoreboard with the specified prefix, suffix,
          * and sorting value. It also ensures visibility of other players' nametags by synchronizing
          * all custom nametags across players on the server.
          *
          * @param sort A string value representing the sort order for the custom nametag, used to organize teams.
-         * @param prefix An optional minimessage string to be displayed as the prefix of the player's nametag. Defaults to `null`.
-         * @param suffix An optional minimessage string to be displayed as the suffix of the player's nametag. Defaults to `null`.
+         * @param prefix An optional minimessage string to be displayed as the prefix of the entity's nametag. Defaults to `null`.
+         * @param suffix An optional minimessage string to be displayed as the suffix of the entity's nametag. Defaults to `null`.
          */
-        fun SpigotPlayer.setCustomNametag(
+        fun Entity.setCustomNametag(
+            scoreboard: Scoreboard,
             sort: String,
             prefix: String? = null,
             suffix: String? = null,
@@ -1311,7 +1312,7 @@ interface VitalUtils<CS, P : CS> {
             // first, we need to create a team on our own scoreboard.
             // this will contain the data we set while calling this function.
             val ourTeam = getCustomNametagTeam(scoreboard, sort, prefix, suffix)
-            ourTeam.addPlayer(this)
+            ourTeam.addEntity(this)
 
             // now we have at least ourselves on our scoreboard.
             // to also include everyone else, we need to grab the custom nametags of everyone else...
@@ -1337,6 +1338,24 @@ interface VitalUtils<CS, P : CS> {
                 ourOtherTeam.addPlayer(otherPlayer)
             }
         }
+
+        /**
+         * Sets a custom nametag for a `SpigotPlayer` instance, along with managing the scoreboard teams
+         * required to properly display the nametag information.
+         *
+         * This method creates a team on the player's scoreboard with the specified prefix, suffix,
+         * and sorting value. It also ensures visibility of other players' nametags by synchronizing
+         * all custom nametags across players on the server.
+         *
+         * @param sort A string value representing the sort order for the custom nametag, used to organize teams.
+         * @param prefix An optional minimessage string to be displayed as the prefix of the player's nametag. Defaults to `null`.
+         * @param suffix An optional minimessage string to be displayed as the suffix of the player's nametag. Defaults to `null`.
+         */
+        fun SpigotPlayer.setCustomNametag(
+            sort: String,
+            prefix: String? = null,
+            suffix: String? = null,
+        ) = setCustomNametag(scoreboard, sort, prefix, suffix)
     }
 
     /**
