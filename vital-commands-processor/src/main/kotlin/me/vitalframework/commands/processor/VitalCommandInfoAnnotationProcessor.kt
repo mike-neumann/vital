@@ -24,7 +24,11 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
         annotations: MutableSet<out TypeElement>,
         roundEnv: RoundEnvironment,
     ): Boolean {
-        if (ran) return true
+        // we don't want this to run more than once.
+        if (ran) {
+            return true
+        }
+
         // Make sure the basic processor runs before this one.
         val pluginInfoAnnotationProcessor =
             VitalPluginInfoAnnotationProcessor().apply {
@@ -41,17 +45,24 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
             }
         }
 
-        for (clazz in Reflections("me.vitalframework").getTypesAnnotatedWith(VitalCommand.Info::class.java, true)) {
-            val commandInfo = clazz.getRequiredAnnotation<VitalCommand.Info>()
+        val additionalPackages =
+            pluginInfoAnnotationProcessor.info.scanAdditionalPackages.toMutableList().apply {
+                addAll(Vital.Info.DEFAULT_PACKAGES)
+            }
+        for (additionalPackage in additionalPackages) {
+            for (clazz in Reflections(additionalPackage).getTypesAnnotatedWith(VitalCommand.Info::class.java, true)) {
+                val commandInfo = clazz.getRequiredAnnotation<VitalCommand.Info>()
 
-            if (commandInfo !in commandInfoList) {
-                commandInfoList.add(commandInfo)
+                if (commandInfo !in commandInfoList) {
+                    commandInfoList.add(commandInfo)
+                }
             }
         }
 
-        generatePluginYmlCommands(commandInfoList, pluginInfoAnnotationProcessor.pluginEnvironment)
+        generatePluginYmlCommands(commandInfoList, pluginInfoAnnotationProcessor.info.environment)
 
-        return true.also { ran = true }
+        ran = true
+        return true
     }
 
     private fun generatePluginYmlCommands(

@@ -5,7 +5,7 @@ import org.bukkit.Location
 import java.util.UUID
 
 /**
- * Represents a global implementation of a vital hologram with string-based content.
+ * Represents a global implementation of a Vital hologram with string-based content.
  *
  * A VitalGlobalHologram is a specific type of [VitalHologram] that displays its content as a list of strings.
  * The hologram is identifiable by a unique [id] and is rendered in the game world at a specified [location].

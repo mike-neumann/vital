@@ -10,7 +10,7 @@ abstract class VitalPlayerException(
         playerClass: Class<*>,
         cause: Throwable,
     ) : VitalPlayerException(
-            "invalid vital player class '${playerClass.simpleName}' does not extend '${VitalPlayer::class.java.simpleName}'",
+            "invalid Vital player class '${playerClass.simpleName}' does not extend '${VitalPlayer::class.java.simpleName}'",
             cause,
         )
 
@@ -19,7 +19,7 @@ abstract class VitalPlayerException(
         playerUniqueId: UUID,
         cause: Throwable,
     ) : VitalPlayerException(
-            "error while creating vital player instance '${playerClass.simpleName}' for '$playerUniqueId'",
+            "error while creating Vital player instance '${playerClass.simpleName}' for '$playerUniqueId'",
             cause,
         )
 
@@ -27,6 +27,6 @@ abstract class VitalPlayerException(
         playerClass: Class<*>,
         playerUniqueId: UUID,
     ) : VitalPlayerException(
-            "error while creating vital player instance '${playerClass.simpleName}' for '$playerUniqueId', instance already exists",
+            "error while creating Vital player instance '${playerClass.simpleName}' for '$playerUniqueId', instance already exists",
         )
 }

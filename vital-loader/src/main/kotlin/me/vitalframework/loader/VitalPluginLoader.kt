@@ -2,32 +2,20 @@ package me.vitalframework.loader
 
 import net.md_5.bungee.api.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
-import org.yaml.snakeyaml.DumperOptions
-import org.yaml.snakeyaml.LoaderOptions
-import org.yaml.snakeyaml.Yaml
-import org.yaml.snakeyaml.constructor.Constructor
-import org.yaml.snakeyaml.inspector.TagInspector
-import org.yaml.snakeyaml.representer.Representer
 
 interface VitalPluginLoader {
-    fun <T : Any> enable(
-        vitalClassLoader: VitalClassLoader<T>,
-        pluginYmlFileName: String,
-    ) {
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Any> enable(vitalClassLoader: VitalClassLoader<T>) {
         try {
-            val loaderOptions = LoaderOptions().apply { tagInspector = TagInspector { true } }
-            val dumperOptions = DumperOptions().apply { defaultFlowStyle = DumperOptions.FlowStyle.BLOCK }
-            val pluginYml = vitalClassLoader.getResourceAsStream(pluginYmlFileName)!!
-            val yaml = Yaml(Constructor(loaderOptions), Representer(dumperOptions), dumperOptions, loaderOptions)
-            val data = yaml.load<Map<String, String>>(pluginYml)
-            val mainClass = vitalClassLoader.loadClass(data["real-main"])
+            // we need to manually load in the "Vital" class to avoid any conflicts with our current class loader...
+            // that's also why Vital isn't on the classpath here
             val vital = vitalClassLoader.loadClass("me.vitalframework.Vital")
-            val run = vital.getMethod("run", Any::class.java, Class::class.java, ClassLoader::class.java)
-            run(null, this, mainClass, vitalClassLoader)
+            val run = vital.getMethod("run", Any::class.java, ClassLoader::class.java)
+            run(null, this, vitalClassLoader)
         } catch (e: Exception) {
-            println("!!! an error occurred while loading vital powered plugin !!!")
+            println("!!! an error occurred while loading Vital powered plugin!!!")
             println("please consult the following stack trace for any info")
-            println("if you think this is a bug, please open an issue on github")
+            println("if you think this is a bug, please open an issue on GitHub")
             e.printStackTrace()
         }
     }
@@ -35,18 +23,18 @@ interface VitalPluginLoader {
     class Spigot :
         JavaPlugin(),
         VitalPluginLoader {
-        override fun onEnable() = enable(VitalClassLoader.Spigot(this), "plugin.yml")
+        override fun onEnable() = enable(VitalClassLoader.Spigot(this))
     }
 
     class Paper :
         JavaPlugin(),
         VitalPluginLoader {
-        override fun onEnable() = enable(VitalClassLoader.Paper(this), "plugin.yml")
+        override fun onEnable() = enable(VitalClassLoader.Paper(this))
     }
 
     class Bungee :
         Plugin(),
         VitalPluginLoader {
-        override fun onEnable() = enable(VitalClassLoader.Bungee(this), "bungee.yml")
+        override fun onEnable() = enable(VitalClassLoader.Bungee(this))
     }
 }

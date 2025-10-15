@@ -10,7 +10,7 @@ abstract class VitalPluginInfoAnnotationProcessingException(
     class GeneratePluginYml(
         cause: Throwable,
     ) : VitalPluginInfoAnnotationProcessingException(
-            "error while generating plugin yml, if this error persists, please open an issue on vital's github page",
+            "error while generating plugin yml, if this error persists, please open an issue on Vital's GitHub page",
             cause,
         )
 

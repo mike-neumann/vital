@@ -11,7 +11,7 @@ class VitalGradlePlugin : Plugin<Project> {
         target.plugins.apply("org.jetbrains.kotlin.plugin.spring")
         target.plugins.apply("io.spring.dependency-management")
         target.plugins.apply("org.springframework.boot")
-        // try to exclude the vital core processor when running tests,
+        // try to exclude the Vital core processor when running tests,
         // this will fix "NoMainClass" Exception while running tests.
         try {
             target.configurations.filter { "test" in it.name.lowercase() }.forEach {
@@ -72,7 +72,7 @@ class VitalGradlePlugin : Plugin<Project> {
                                     if (!jarFiles.any { it.isKotlinPackage() }) {
                                         // we want to keep kotlin dependencies as a jar on the root
                                         // otherwise we cannot use kotlin-reflect when our plugin tries to load
-                                        // and start up the vital instance
+                                        // and start up the Vital instance
                                         continue
                                     }
                                 }

@@ -9,7 +9,7 @@ import java.util.UUID
 import java.util.function.Function
 
 /**
- * Represents a vital scoreboard customized per player. Each player has a unique set
+ * Represents a Vital scoreboard customized per player. Each player has a unique set
  * of lines displayed on their scoreboard that is dynamically generated based on the provided
  * line functions.
  *

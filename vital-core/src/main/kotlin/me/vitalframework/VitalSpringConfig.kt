@@ -14,7 +14,7 @@ class VitalSpringConfig {
     @RequiresSpigot
     @Configuration
     class Spigot {
-        // "plugin" is registered when vital starts up, we know it exists, so we can suppress the spring warning here
+        // "plugin" is registered when Vital starts up; we know it exists, so we can suppress the spring warning here
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         @Bean
         fun spigotPlugin(
@@ -26,7 +26,7 @@ class VitalSpringConfig {
     @RequiresBungee
     @Configuration
     class Bungee {
-        // "plugin" is registered when vital starts up, we know it exists, so we can suppress the spring warning here
+        // "plugin" is registered when Vital starts up; we know it exists, so we can suppress the spring warning here
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         @Bean
         fun bungeePlugin(

@@ -16,29 +16,23 @@ import javax.tools.StandardLocation
 @SupportedAnnotationTypes("*")
 class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
     private var ran = false
-    lateinit var pluginEnvironment: Vital.Info.PluginEnvironment
+    lateinit var info: Vital.Info
 
     override fun process(
         annotations: MutableSet<out TypeElement>,
         roundEnv: RoundEnvironment,
     ): Boolean {
-        if (ran) return true
-        // try to resolve the main class, if not found, throw exception
-        val (className, info) =
-            roundEnv
-                .getElementsAnnotatedWith(Vital.Info::class.java)
-                .filter { it.kind == ElementKind.CLASS }
-                .map {
-                    val typeElement = it as TypeElement
-                    val className = typeElement.qualifiedName.toString()
-                    className to it.getAnnotation(Vital.Info::class.java)
-                }.firstOrNull() ?: throw VitalPluginInfoAnnotationProcessingException.NoMainClass()
+        // we don't want this to run more than once.
+        if (ran) {
+            return true
+        }
 
-        pluginEnvironment = info.environment
-        // finally, generate the plugin.yml
+        val (className, info) = getMainClassNameAndInfo(roundEnv) ?: throw VitalPluginInfoAnnotationProcessingException.NoMainClass()
+        writeMetadataFile(className)
+
+        this.info = info
         setupPluginYml(
             info.environment,
-            className,
             info.name,
             info.description,
             info.version,
@@ -46,23 +40,33 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
             info.author,
         )
         generatePluginYml(info.environment)
-        val packageNames =
-            className
-                .split("[.]".toRegex())
-                .dropLastWhile { it.isEmpty() }
-                .toMutableList()
-                .apply { removeLast() }
-        // now we have the package name without the class at the end
-        val packageName = packageNames.joinToString(".")
 
+        val packageName = className.substringBeforeLast(".")
         generatePluginConfigurationClass(packageName)
 
-        return true.also { ran = true }
+        ran = true
+        return true
+    }
+
+    private fun getMainClassNameAndInfo(roundEnv: RoundEnvironment): Pair<String, Vital.Info>? =
+        roundEnv
+            .getElementsAnnotatedWith(Vital.Info::class.java)
+            .filter { it.kind == ElementKind.CLASS }
+            .map {
+                val typeElement = it as TypeElement
+                val className = typeElement.qualifiedName.toString()
+                className to it.getAnnotation(Vital.Info::class.java)
+            }.firstOrNull()
+
+    private fun writeMetadataFile(mainClass: String) {
+        processingEnv.filer
+            .createResource(StandardLocation.CLASS_OUTPUT, "", Vital.Metadata.FILE_NAME)
+            .openWriter()
+            .use { it.write(Vital.Metadata(mainClass).serialize()) }
     }
 
     private fun setupPluginYml(
         pluginEnvironment: Vital.Info.PluginEnvironment,
-        className: String,
         name: String,
         description: String,
         version: String,
@@ -73,7 +77,6 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
             Vital.Info.PluginEnvironment.BUNGEE -> {
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("name: $name")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine($$"main: me.vitalframework.loader.VitalPluginLoader$Bungee")
-                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("real-main: $className")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("version: $version")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("author: ${author.contentToString()}")
             }
@@ -84,7 +87,6 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine(
                     "main: me.vitalframework.loader.VitalPluginLoader$$vitalPluginLoaderImplementationName",
                 )
-                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("real-main: $className")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("name: $name")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("version: $version")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("description: $description")

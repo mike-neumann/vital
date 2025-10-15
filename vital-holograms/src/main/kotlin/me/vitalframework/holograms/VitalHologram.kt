@@ -5,7 +5,7 @@ import org.bukkit.Location
 import java.util.UUID
 
 /**
- * Represents an abstract base class for all vital hologram entities in the system.
+ * Represents an abstract base class for all Vital hologram entities in the system.
  *
  * Holograms are dynamic entities that can display multiple lines of content (of type [T]) in a specific [location].
  * Each hologram is uniquely identified by a [UUID] and is associated with one or more hidden in-game entities

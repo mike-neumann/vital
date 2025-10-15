@@ -784,7 +784,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     /**
      * Represents an abstract base class for defining BungeeCord commands with extended functionality.
      *
-     * This class integrates with the vital command system and provides additional handling
+     * This class integrates with the Vital command system and provides additional handling
      * for BungeeCord-specific command operations, such as registering commands to the proxy
      * and facilitating tab completion. It serves as an entry point for implementing custom
      * commands within a BungeeCord plugin.
