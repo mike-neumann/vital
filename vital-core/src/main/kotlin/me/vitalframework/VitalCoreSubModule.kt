@@ -116,5 +116,44 @@ class VitalCoreSubModule : VitalSubModule() {
          */
         @JvmStatic
         inline fun <reified T : Annotation> Any.getRequiredAnnotations(): List<T> = javaClass.getRequiredAnnotations<T>()
+
+        /**
+         * Retrieves the `Vital.Info` annotation from the current class.
+         *
+         * This method extracts the `Vital.Info` annotation, which contains metadata about a Vital plugin,
+         * such as its name, description, version, and supported environment. It is expected that the class
+         * invoking this method is annotated with `@Vital.Info`. If the annotation is not present, an exception will be thrown.
+         *
+         * @return The `Vital.Info` annotation associated with the class.
+         * @throws RuntimeException If the class is not annotated with `@Vital.Info`.
+         */
+        @JvmStatic
+        fun Class<*>.getVitalInfo() = getRequiredAnnotation<Vital.Info>()
+
+        /**
+         * Retrieves the `Vital.Info` annotation from the current class.
+         *
+         * This method extracts the `Vital.Info` annotation, which contains metadata about a Vital plugin,
+         * such as its name, description, version, and supported environment. It is expected that the class
+         * invoking this method is annotated with `@Vital.Info`. If the annotation is not present, an exception will be thrown.
+         *
+         * @return The `Vital.Info` annotation associated with the class.
+         * @throws RuntimeException If the class is not annotated with `@Vital.Info`.
+         */
+        @JvmStatic
+        fun KClass<*>.getVitalInfo() = java.getVitalInfo()
+
+        /**
+         * Retrieves the `Vital.Info` annotation from the current instance.
+         *
+         * This method extracts the `Vital.Info` annotation, which contains metadata about a Vital plugin,
+         * such as its name, description, version, and supported environment. It is expected that the instance class
+         * invoking this method is annotated with `@Vital.Info`. If the annotation is not present, an exception will be thrown.
+         *
+         * @return The `Vital.Info` annotation associated with the instance.
+         * @throws RuntimeException If the instance class is not annotated with `@Vital.Info`.
+         */
+        @JvmStatic
+        fun Any.getVitalInfo() = javaClass.getVitalInfo()
     }
 }
