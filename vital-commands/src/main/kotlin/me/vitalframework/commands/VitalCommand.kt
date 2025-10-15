@@ -330,18 +330,11 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         val joinedPlayerArgs = args.joinToString(" ")
         if (playerOnly && !isPlayer(sender)) return onCommandRequiresPlayer(sender, joinedPlayerArgs, null)
 
-        // check for the base permission
-        // if the player doesn't even have the base permission set in the info annotation, we can cancel everything here
-        if (permission.isNotBlank() &&
-            !hasPermission(sender, permission)
-        ) {
-            return onCommandRequiresPermission(sender, joinedPlayerArgs, null)
-        }
-
-        // at this point, the player has at least the base permission set
         val matchedArg = getArg(joinedPlayerArgs)
         val returnState =
             when {
+                permission.isNotBlank() && !hasPermission(sender, permission) -> ReturnState.NO_PERMISSION
+
                 matchedArg != null -> {
                     if (matchedArg.permission.isNotBlank() && !hasPermission(sender, matchedArg.permission)) {
                         ReturnState.NO_PERMISSION
