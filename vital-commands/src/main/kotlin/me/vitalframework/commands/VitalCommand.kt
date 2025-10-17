@@ -146,7 +146,28 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     ) {
         val globalContext =
             VitalGlobalCommandExceptionHandlerProcessor.getGlobalExceptionHandler(exception.javaClass)
-                ?: return onCommandError(sender, commandArg, exception)
+                ?: try {
+                    return onCommandError(sender, commandArg, exception)
+                } catch (e: Exception) {
+                    // try to find a global exception handler mapped for the exception that was thrown while handling a command error
+                    val secondGlobalContext =
+                        VitalGlobalCommandExceptionHandlerProcessor.getGlobalExceptionHandler(e.javaClass)
+                            ?: // if we couldn't find a global exception handler for this exception, we are out of options...
+                            // simple rethrow this exception so it is redirected to default exception handling...
+                            throw e
+
+                    // if we DO have a second global exception handler for this exception, we can call it here...
+                    secondGlobalContext.handlerMethod(
+                        secondGlobalContext.adviceInstance,
+                        *secondGlobalContext.getInjectableGlobalExceptionHandlerMethodParameters(
+                            sender,
+                            executedArg,
+                            commandArg,
+                            e,
+                        ),
+                    )
+                    return
+                }
 
         try {
             globalContext.handlerMethod(
