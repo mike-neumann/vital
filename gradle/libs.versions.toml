@@ -12,6 +12,7 @@ adventure-platform = "4.4.1"
 adventure-serializers = "4.24.0"
 cloudnet = "4.0.0-RC13"
 ktlint = "13.0.0"
+bstats = "3.0.2"
 
 [plugins]
 jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -42,6 +43,8 @@ adventure-platform-bungeecord = { group = "net.kyori", name = "adventure-platfor
 adventure-platform-bukkit = { group = "net.kyori", name = "adventure-platform-bukkit", version.ref = "adventure-platform" }
 kotlin-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
 kotlin-coroutines-reactor = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor", version.ref = "kotlin-coroutines" }
+bstats-bukkit = { group = "org.bstats", name = "bstats-bukkit", version.ref = "bstats" }
+bstats-bungee = { group = "org.bstats", name = "bstats-bungeecord", version.ref = "bstats" }
 
 [bundles]
 root-compileOnly = [
@@ -53,6 +56,8 @@ root-api = [
     "spring-boot-starter",
     "kotlin-coroutines-core",
     "kotlin-coroutines-reactor",
+    "bstats-bukkit",
+    "bstats-bungee"
 ]
 root-testImplementation = [
     "paperApi", "brigadier",

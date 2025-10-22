@@ -3,6 +3,7 @@ package me.vitalframework.commands
 import me.vitalframework.commands.VitalCommand.Companion.getGlobalExceptionHandlerContext
 import me.vitalframework.commands.VitalCommand.Companion.getVitalCommandAdvice
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.getBeansWithAnnotation
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
@@ -11,9 +12,9 @@ class VitalGlobalCommandExceptionHandlerProcessor(
     applicationContext: ApplicationContext,
     val commands: List<VitalCommand<*, *>>,
 ) : InitializingBean {
-    private val advices = applicationContext.getBeansWithAnnotation(VitalCommand.Advice::class.java).values
+    private val advices = applicationContext.getBeansWithAnnotation<VitalCommand.Advice>().values
 
-    override fun afterPropertiesSet() {
+    final override fun afterPropertiesSet() {
         for (command in commands) {
             // get all advices for the command sender of the command.
             advices

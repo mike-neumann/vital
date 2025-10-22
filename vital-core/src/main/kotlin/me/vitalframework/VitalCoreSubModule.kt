@@ -24,6 +24,8 @@ typealias SpigotEvent = org.bukkit.event.Event
 typealias BungeeEvent = net.md_5.bungee.api.plugin.Event
 typealias SpigotCancellable = org.bukkit.event.Cancellable
 typealias BungeeCancellable = net.md_5.bungee.api.plugin.Cancellable
+typealias SpigotBStatsMetrics = org.bstats.bukkit.Metrics
+typealias BungeeBStatsMetrics = org.bstats.bungeecord.Metrics
 
 @Component("vital-core")
 class VitalCoreSubModule : VitalSubModule() {

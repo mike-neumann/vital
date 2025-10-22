@@ -93,6 +93,7 @@ object Vital {
         val author: Array<String> = [],
         val environment: PluginEnvironment,
         val scanAdditionalPackages: Array<String> = [],
+        val bstatsPluginId: Int = Int.MIN_VALUE,
     ) {
         companion object {
             val DEFAULT_PACKAGES = arrayOf("me.vitalframework")

@@ -1,6 +1,5 @@
 package me.vitalframework.commands
 
-import jakarta.annotation.PostConstruct
 import me.vitalframework.BungeeCommandSender
 import me.vitalframework.BungeePlayer
 import me.vitalframework.BungeePlugin
@@ -12,6 +11,7 @@ import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.command.Command
+import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -60,7 +60,7 @@ import kotlin.reflect.KClass
 abstract class VitalCommand<P, CS : Any> protected constructor(
     val plugin: P,
     val commandSenderClass: Class<CS>,
-) {
+) : InitializingBean {
     val name: String
     val permission: String
     val playerOnly: Boolean
@@ -775,8 +775,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         plugin: SpigotPlugin,
     ) : VitalCommand<SpigotPlugin, SpigotCommandSender>(plugin, SpigotCommandSender::class.java),
         VitalPluginCommand.Spigot {
-        @PostConstruct
-        fun init() = plugin.getCommand(name)!!.setExecutor(this)
+        override fun afterPropertiesSet() {
+            plugin.getCommand(name)!!.setExecutor(this)
+        }
 
         override fun onCommand(
             sender: SpigotCommandSender,
@@ -816,16 +817,8 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     abstract class Bungee(
         plugin: BungeePlugin,
     ) : VitalCommand<BungeePlugin, BungeeCommandSender>(plugin, BungeeCommandSender::class.java) {
-        private lateinit var command: VitalPluginCommand.Bungee
-
-        @PostConstruct
-        fun init() {
-            setupCommand()
-            plugin.proxy.pluginManager.registerCommand(plugin, command)
-        }
-
-        private fun setupCommand() {
-            this.command =
+        override fun afterPropertiesSet() {
+            val command =
                 object : VitalPluginCommand.Bungee(name) {
                     override fun execute(
                         sender: BungeeCommandSender,
@@ -837,6 +830,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
                         args: Array<String>,
                     ) = this@Bungee.tabComplete(sender, args)
                 }
+            plugin.proxy.pluginManager.registerCommand(plugin, command)
         }
 
         override fun isPlayer(commandSender: BungeeCommandSender) = commandSender is BungeePlayer
