@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class VitalStatisticsService(
-    val statisticsConfig: VitalStatisticsConfig,
+    val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
 ) {
     private val logger = logger()
 
@@ -29,7 +29,7 @@ class VitalStatisticsService(
     fun handleTick() {
         val currentTimeMillis = System.currentTimeMillis()
 
-        if (currentTimeMillis - lastTickTime >= statisticsConfig.maxTaskInactiveTolerance) {
+        if (currentTimeMillis - lastTickTime >= vitalStatisticsConfigurationProperties.maxTaskInactiveTolerance) {
             logger.warn("vital-statistics has detected increased scheduler inconsistency of ${currentTimeMillis - lastTickTime} millis")
             logger.warn("This could indicate bad server-performance / health")
         }
@@ -41,12 +41,12 @@ class VitalStatisticsService(
             ticks = 0
             _lastTps[lastSecondTime] = tps
 
-            if (_lastTps.size > statisticsConfig.maxTpsTaskCache) _lastTps.remove(_lastTps.keys.first())
+            if (_lastTps.size > vitalStatisticsConfigurationProperties.maxTpsTaskCache) _lastTps.remove(_lastTps.keys.first())
 
-            if (tps < statisticsConfig.minTps) {
+            if (tps < vitalStatisticsConfigurationProperties.minTps) {
                 _lastUnhealthyTps[System.currentTimeMillis()] = tps
 
-                if (_lastUnhealthyTps.size > statisticsConfig.maxTpsTaskCache) {
+                if (_lastUnhealthyTps.size > vitalStatisticsConfigurationProperties.maxTpsTaskCache) {
                     _lastUnhealthyTps.remove(
                         _lastUnhealthyTps.keys.first(),
                     )

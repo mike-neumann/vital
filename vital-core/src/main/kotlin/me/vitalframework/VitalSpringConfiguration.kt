@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration
  * Main spring configuration for the implementing plugin.
  * Exposes the plugin as a bean to fix classpath scanning errors when ide scans for beans.
  */
-class VitalSpringConfig {
+class VitalSpringConfiguration {
     @ComponentScan(basePackages = ["me.vitalframework"])
     @RequiresSpigot
     @Configuration

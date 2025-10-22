@@ -14,6 +14,9 @@ abstract class VitalTestCommand :
         }
     }
 
+    override fun afterPropertiesSet() {
+    }
+
     override fun isPlayer(commandSender: CommandSender) = commandSender is Player
 
     override fun hasPermission(

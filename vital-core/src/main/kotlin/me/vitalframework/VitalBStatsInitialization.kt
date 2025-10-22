@@ -1,16 +1,18 @@
 package me.vitalframework
 
-import me.vitalframework.VitalCoreSubModule.Companion.getVitalInfo
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Configuration
 
-object VitalCustomBStatsConfig {
+interface VitalBStatsInitialization : InitializingBean {
     @RequiresSpigot
     @Configuration
     class Spigot(
         private val plugin: SpigotPlugin,
-    ) : InitializingBean {
+        private val vitalBStatsConfigurationProperties: VitalBStatsConfigurationProperties,
+    ) : VitalBStatsInitialization {
         final override fun afterPropertiesSet() {
+            if (!vitalBStatsConfigurationProperties.enabled) return
+
             // so bstats stops whining about their goofy package relocation step
             System.setProperty("bstats.relocatecheck", "false")
 
@@ -18,10 +20,8 @@ object VitalCustomBStatsConfig {
             SpigotBStatsMetrics(plugin, 27673)
 
             // then setup the custom bstats metrics
-            val vitalInfo = Vital.metadata.mainClass.getVitalInfo()
-            val bstatsPluginId = vitalInfo.bstatsPluginId
-            if (bstatsPluginId == Int.MIN_VALUE) return
-            SpigotBStatsMetrics(plugin, bstatsPluginId)
+            if (vitalBStatsConfigurationProperties.pluginId == null) return
+            SpigotBStatsMetrics(plugin, vitalBStatsConfigurationProperties.pluginId!!)
         }
     }
 
@@ -29,8 +29,11 @@ object VitalCustomBStatsConfig {
     @Configuration
     class Bungee(
         private val plugin: BungeePlugin,
-    ) : InitializingBean {
+        private val vitalBStatsConfigurationProperties: VitalBStatsConfigurationProperties,
+    ) : VitalBStatsInitialization {
         final override fun afterPropertiesSet() {
+            if (!vitalBStatsConfigurationProperties.enabled) return
+
             // so bstats stops whining about their goofy package relocation step
             System.setProperty("bstats.relocatecheck", "false")
 
@@ -38,10 +41,8 @@ object VitalCustomBStatsConfig {
             BungeeBStatsMetrics(plugin, 27674)
 
             // then setup the custom bstats metrics
-            val vitalInfo = Vital.metadata.mainClass.getVitalInfo()
-            val bstatsPluginId = vitalInfo.bstatsPluginId
-            if (bstatsPluginId == Int.MIN_VALUE) return
-            BungeeBStatsMetrics(plugin, bstatsPluginId)
+            if (vitalBStatsConfigurationProperties.pluginId == null) return
+            BungeeBStatsMetrics(plugin, vitalBStatsConfigurationProperties.pluginId!!)
         }
     }
 }

@@ -18,8 +18,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 interface StatsCommand<CS> {
-    val statisticsService: VitalStatisticsService
-    val statisticsConfig: VitalStatisticsConfig
+    val vitalStatisticsService: VitalStatisticsService
+    val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties
 
     fun sendMessage(
         sender: CS,
@@ -28,13 +28,19 @@ interface StatsCommand<CS> {
 
     fun handleOnCommand(sender: CS) {
         val serverStatus =
-            if (statisticsService.tps >= statisticsConfig.minTps) "<green>HEALTHY</green>" else "<red>UNHEALTHY</yellow>"
+            if (vitalStatisticsService.tps >=
+                vitalStatisticsConfigurationProperties.minTps
+            ) {
+                "<green>HEALTHY</green>"
+            } else {
+                "<red>UNHEALTHY</yellow>"
+            }
         val ramUsageInGigaBytes =
             (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024 / 1024
 
         sendMessage(sender, "-----> Server-Statistics")
         sendMessage(sender, "Spring version: <yellow>${SpringVersion.getVersion()}")
-        sendMessage(sender, "Server status: <yellow>${statisticsService.tps} TPS ($serverStatus)")
+        sendMessage(sender, "Server status: <yellow>${vitalStatisticsService.tps} TPS ($serverStatus)")
         sendMessage(sender, "RAM usage: <yellow>$ramUsageInGigaBytes GB")
         sendMessage(sender, "Vital sub-modules: <yellow>${Vital.vitalSubModules.size}")
 
@@ -47,22 +53,22 @@ interface StatsCommand<CS> {
 
     fun handleOnHealthTps(sender: CS): VitalCommand.ReturnState {
         sendMessage(sender, "-----> TPS")
-        sendMessage(sender, "TPS: <yellow>${statisticsService.tps}")
+        sendMessage(sender, "TPS: <yellow>${vitalStatisticsService.tps}")
         sendMessage(
             sender,
-            "TPS reports: <yellow>${statisticsService.lastTps.size} of ${statisticsConfig.maxTpsTaskCache}",
+            "TPS reports: <yellow>${vitalStatisticsService.lastTps.size} of ${vitalStatisticsConfigurationProperties.maxTpsTaskCache}",
         )
 
-        for ((time, tps) in statisticsService.lastTps) {
+        for ((time, tps) in vitalStatisticsService.lastTps) {
             sendMessage(sender, "> <yellow>${SimpleDateFormat("HH:mm:ss").format(Date(time))}, $tps TPS")
         }
 
         sendMessage(
             sender,
-            "Bad TPS reports: <yellow>${statisticsService.lastUnhealthyTps.size} of ${statisticsConfig.maxTpsTaskCache}",
+            "Bad TPS reports: <yellow>${vitalStatisticsService.lastUnhealthyTps.size} of ${vitalStatisticsConfigurationProperties.maxTpsTaskCache}",
         )
 
-        for ((time, tps) in statisticsService.lastUnhealthyTps) {
+        for ((time, tps) in vitalStatisticsService.lastUnhealthyTps) {
             sendMessage(sender, "> <yellow>${SimpleDateFormat("HH:mm:ss").format(Date(time))}, $tps TPS")
         }
 
@@ -75,8 +81,8 @@ interface StatsCommand<CS> {
     @Component
     class Spigot(
         plugin: SpigotPlugin,
-        override val statisticsService: VitalStatisticsService,
-        override val statisticsConfig: VitalStatisticsConfig,
+        override val vitalStatisticsService: VitalStatisticsService,
+        override val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
     ) : VitalCommand.Spigot(plugin),
         StatsCommand<SpigotCommandSender> {
         override fun sendMessage(
@@ -101,8 +107,8 @@ interface StatsCommand<CS> {
     @Component
     class Bungee(
         plugin: BungeePlugin,
-        override val statisticsService: VitalStatisticsService,
-        override val statisticsConfig: VitalStatisticsConfig,
+        override val vitalStatisticsService: VitalStatisticsService,
+        override val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
     ) : VitalCommand.Bungee(plugin),
         StatsCommand<BungeeCommandSender> {
         override fun sendMessage(
