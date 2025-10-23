@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service
 class VitalItemService(
     val items: List<VitalItem>,
 ) {
-    fun handleInteraction(e: PlayerInteractEvent) = items.firstOrNull { it == e.item }?.handleInteraction(e)
+    fun handleInteraction(e: PlayerInteractEvent) {
+        items.firstOrNull { it == e.item }?.handleInteraction(e)
+    }
 
     @Scheduled(fixedRate = 50)
     suspend fun handleCooldown() =

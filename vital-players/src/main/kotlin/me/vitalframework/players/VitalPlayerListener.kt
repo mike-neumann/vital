@@ -126,11 +126,15 @@ interface VitalPlayerListener {
         VitalPlayerListener {
         // should always be executed first.
         @SpigotEventHandler(priority = SpigotEventPriority.LOWEST)
-        fun onPlayerJoin(e: PlayerJoinEvent) = createPlayer(e.player, e.player.uniqueId, SpigotPlayer::class.java)
+        fun onPlayerJoin(e: PlayerJoinEvent) {
+            createPlayer(e.player, e.player.uniqueId, SpigotPlayer::class.java)
+        }
 
         // should always be executed last.
         @SpigotEventHandler(priority = SpigotEventPriority.HIGHEST)
-        fun onPlayerQuit(e: PlayerQuitEvent) = destroyPlayer(e.player.uniqueId)
+        fun onPlayerQuit(e: PlayerQuitEvent) {
+            destroyPlayer(e.player.uniqueId)
+        }
     }
 
     /**
@@ -167,10 +171,14 @@ interface VitalPlayerListener {
         VitalPlayerListener {
         // should always be executed first.
         @BungeeEventHandler(priority = BungeeEventPriority.LOWEST)
-        fun onPostLogin(e: PostLoginEvent) = createPlayer(e.player, e.player.uniqueId, BungeePlayer::class.java)
+        fun onPostLogin(e: PostLoginEvent) {
+            createPlayer(e.player, e.player.uniqueId, BungeePlayer::class.java)
+        }
 
         // should always be executed last.
         @BungeeEventHandler(priority = BungeeEventPriority.HIGHEST)
-        fun onPlayerDisconnect(e: PlayerDisconnectEvent) = destroyPlayer(e.player.uniqueId)
+        fun onPlayerDisconnect(e: PlayerDisconnectEvent) {
+            destroyPlayer(e.player.uniqueId)
+        }
     }
 }

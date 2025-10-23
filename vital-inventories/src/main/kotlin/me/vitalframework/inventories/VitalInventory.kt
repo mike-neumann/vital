@@ -31,10 +31,10 @@ typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
  * default configurations for the inventory.
  */
 open class VitalInventory {
+    private val _items = mutableMapOf<Int, ItemStack>()
     private val _previousInventories = mutableMapOf<UUID, VitalInventory>()
     private val _playerInventories = mutableMapOf<UUID, InventoryView>()
-    private val _items = mutableMapOf<Int, ItemStack>()
-    private val _actions = mutableMapOf<Pair<UUID, Int>, InventoryItemClickAction>()
+    private val _actions = mutableMapOf<UUID, MutableMap<Int, InventoryItemClickAction>>()
 
     /**
      * Represents the type of inventory associated with this instance of `VitalInventory`.
@@ -115,7 +115,7 @@ open class VitalInventory {
      * This property is used to manage and retrieve custom click actions
      * registered for individual slots in player-specific inventories.
      */
-    val actions: Map<Pair<UUID, Int>, InventoryItemClickAction>
+    val actions: Map<UUID, Map<Int, InventoryItemClickAction>>
         get() = _actions
 
     /**
@@ -135,7 +135,7 @@ open class VitalInventory {
         action: InventoryItemClickAction = {},
     ) {
         _items[slot] = itemStack
-        _actions[player.uniqueId to slot] = action
+        _actions[player.uniqueId]!![slot] = action
     }
 
     /**
@@ -225,6 +225,7 @@ open class VitalInventory {
             _previousInventories[player.uniqueId] = previousInventory
         }
         _playerInventories[player.uniqueId] = inventoryView
+        _actions[player.uniqueId] = mutableMapOf()
 
         onOpen(player)
         update(player)
@@ -239,7 +240,7 @@ open class VitalInventory {
      *          the slot clicked, and other relevant details.
      */
     fun click(e: InventoryClickEvent) {
-        _actions[e.whoClicked.uniqueId to e.slot]?.invoke(e)
+        _actions[e.whoClicked.uniqueId]?.get(e.slot)?.invoke(e)
         onClick(e)
     }
 
@@ -249,8 +250,16 @@ open class VitalInventory {
      * @param player The Spigot player instance for whom the inventory is being closed.
      */
     open fun close(player: SpigotPlayer) {
+        // the inventory MUST be closed first, to include previous inventory functionality
         _playerInventories.remove(player.uniqueId)
         player.closeInventory()
+
+        // then we can clean up this inventory for the closing player, so we don't leak memory'
+        _previousInventories.remove(player.uniqueId)
+        _actions.remove(player.uniqueId)
+        _items.clear()
+
+        // finally, call the onClose hook to allow for custom behavior during the close process
         onClose(player)
     }
 

@@ -24,10 +24,9 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
 
     fun save(entity: T): T {
         if (exists(entity)) delete(entity)
-        return entity.also {
-            _entities.add(entity)
-            onSave(entity)
-        }
+        _entities.add(entity)
+        onSave(entity)
+        return entity
     }
 
     fun exists(entity: T) = _entities.contains(entity)
@@ -39,7 +38,10 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     @JvmOverloads
     fun getRandom(predicate: (T) -> Boolean = { true }) = _entities.filter(predicate).randomOrNull()
 
-    fun delete(entity: T) = run { _entities.remove(entity).also { onDelete(entity) } }
+    fun delete(entity: T) {
+        _entities.remove(entity)
+        onDelete(entity)
+    }
 
     protected fun onSave(entity: T) {}
 

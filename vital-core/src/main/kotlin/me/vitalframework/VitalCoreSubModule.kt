@@ -94,7 +94,7 @@ class VitalCoreSubModule : VitalSubModule() {
         @JvmStatic
         inline fun <reified T : Annotation> Class<*>.getRequiredAnnotations(): List<T> =
             javaClass.getAnnotationsByType(T::class.java).toList().also {
-                if (it.isEmpty()) throw RuntimeException("${javaClass.getSimpleName()} must be annotated with '@${T::class.java.name}'")
+                if (it.isEmpty()) throw RuntimeException("${javaClass.simpleName} must be annotated with '@${T::class.java.name}'")
             }
 
         /**

@@ -78,14 +78,18 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
         def: Any,
     ) = data.getOrDefault(key, def)
 
-    override fun write(serializedContent: Map<String, Any>) = data.putAll(serializedContent)
+    override fun write(serializedContent: Map<String, Any>) {
+        data.putAll(serializedContent)
+    }
 
     override fun write(instance: Any) {}
 
     override fun write(
         key: String,
         value: Any,
-    ) = run { data[key] = serialize(value) }
+    ) {
+        data[key] = serialize(value)
+    }
 
     override fun save(serializedContent: Map<String, Any>): String {
         data.putAll(serializedContent)

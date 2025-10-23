@@ -26,7 +26,9 @@ class VitalPropertiesConfigProcessor : Processor<Properties, String> {
         def: String,
     ): String? = data.getProperty(key, def)
 
-    override fun write(instance: Any) = write(serialize(instance))
+    override fun write(instance: Any) {
+        write(serialize(instance))
+    }
 
     override fun write(
         key: String,

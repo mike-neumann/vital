@@ -380,9 +380,13 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
 
         override fun createTask() = runnable!!.runTaskTimer(plugin, 0L, ((interval / 1000.0) * 20L).toLong())
 
-        override fun cancelRunnable(): Unit = run { runnable?.cancel() }
+        override fun cancelRunnable() {
+            runnable?.cancel()
+        }
 
-        override fun cancelTask(): Unit = run { task?.cancel() }
+        override fun cancelTask() {
+            task?.cancel()
+        }
     }
 
     /**
@@ -410,8 +414,12 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
 
         override fun createTask() = ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, interval, TimeUnit.MILLISECONDS)!!
 
-        override fun cancelRunnable(): Unit = run { task?.cancel() }
+        override fun cancelRunnable() {
+            task?.cancel()
+        }
 
-        override fun cancelTask(): Unit = run { task?.cancel() }
+        override fun cancelTask() {
+            task?.cancel()
+        }
     }
 }

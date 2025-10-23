@@ -15,7 +15,7 @@ abstract class VitalSubModule : InitializingBean {
 
     final override fun afterPropertiesSet() {
         val vitalSubModuleName = getRequiredAnnotation<Component>().value
-        logger.info("Using '$vitalSubModuleName'")
         Vital.vitalSubModules.add(vitalSubModuleName)
+        logger.info("Vital submodule '$vitalSubModuleName' installed")
     }
 }

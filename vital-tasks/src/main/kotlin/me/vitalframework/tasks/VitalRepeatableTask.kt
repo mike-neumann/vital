@@ -299,9 +299,13 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
 
         override fun createTask() = runnable!!.runTaskTimer(plugin, 0L, (interval / 1000L) * 20L)
 
-        override fun cancelRunnable(): Unit = run { runnable?.cancel() }
+        override fun cancelRunnable() {
+            runnable?.cancel()
+        }
 
-        override fun cancelTask(): Unit = run { task?.cancel() }
+        override fun cancelTask() {
+            task?.cancel()
+        }
     }
 
     /**
@@ -316,10 +320,21 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     ) : VitalRepeatableTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
         override fun createRunnable() = BungeeRunnable { handleTick() }
 
-        override fun createTask() = ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, interval, TimeUnit.MILLISECONDS)!!
+        override fun createTask() =
+            ProxyServer.getInstance().scheduler.schedule(
+                plugin,
+                runnable,
+                0L,
+                interval,
+                TimeUnit.MILLISECONDS,
+            )!!
 
-        override fun cancelRunnable(): Unit = run { task?.cancel() }
+        override fun cancelRunnable() {
+            task?.cancel()
+        }
 
-        override fun cancelTask(): Unit = run { task?.cancel() }
+        override fun cancelTask() {
+            task?.cancel()
+        }
     }
 }

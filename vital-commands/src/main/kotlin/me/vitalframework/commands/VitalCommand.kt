@@ -397,7 +397,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
 
         try {
             when (returnState) {
-                ReturnState.SUCCESS -> run {}
+                ReturnState.SUCCESS -> {}
                 ReturnState.INVALID_ARGS -> onCommandInvalidArgs(sender, joinedPlayerArgs)
                 ReturnState.NO_PERMISSION -> onCommandRequiresPermission(sender, joinedPlayerArgs, matchedArg)
                 ReturnState.ONLY_PLAYER -> onCommandRequiresPlayer(sender, joinedPlayerArgs, matchedArg)
@@ -784,7 +784,10 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
             command: Command,
             label: String,
             args: Array<String>,
-        ) = true.also { execute(sender, args) }
+        ): Boolean {
+            execute(sender, args)
+            return true
+        }
 
         override fun onTabComplete(
             sender: SpigotCommandSender,
@@ -823,7 +826,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
                     override fun execute(
                         sender: BungeeCommandSender,
                         args: Array<String>,
-                    ) = this@Bungee.execute(sender, args)
+                    ) {
+                        this@Bungee.execute(sender, args)
+                    }
 
                     override fun onTabComplete(
                         sender: BungeeCommandSender,

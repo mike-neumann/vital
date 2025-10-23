@@ -154,6 +154,25 @@ abstract class VitalPagedInventory : VitalInventory() {
     }
 
     /**
+     * Opens the inventory for the specified player with support for pagination and an optional reference to the previous inventory.
+     * This implementation allows specifying an initial page and the total content to calculate the maximum number of pages.
+     *
+     * @param player The player for whom the inventory is being opened.
+     * @param previousInventory The player's previous inventory, or null if there is no prior inventory.
+     * @param page The initial page to be opened. Defaults to 1 if not specified.
+     * @param totalContent The total number of content items, used to determine the maximum page. If null, the maximum page remains unchanged.
+     */
+    fun open(
+        player: SpigotPlayer,
+        previousInventory: VitalInventory? = null,
+        page: Int = 1,
+        totalContent: Int? = null,
+    ) {
+        super.open(player, previousInventory)
+        setPage(page, player, totalContent)
+    }
+
+    /**
      * Updates the inventory for a specific player, ensuring their current page is set.
      * Overrides the base implementation to handle page-specific logic.
      *

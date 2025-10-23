@@ -36,7 +36,7 @@ class VitalLocalizationSubModule : VitalSubModule() {
          * - Setting a player's locale to `null` effectively removes their localization preferences.
          */
         @JvmStatic
-        private val playerLocales = mutableMapOf<Any, Locale?>()
+        internal val playerLocales = mutableMapOf<Any, Locale?>()
 
         /**
          * Retrieves a localized message for the given key, arguments, and locale.

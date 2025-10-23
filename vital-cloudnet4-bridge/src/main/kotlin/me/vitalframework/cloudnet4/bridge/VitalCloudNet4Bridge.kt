@@ -29,7 +29,7 @@ interface VitalCloudNet4Bridge<P> {
          * the application where dependency management is required.
          */
         @JvmStatic
-        val serviceRegistry = InjectionLayer.ext().instance(ServiceRegistry::class.java)!!
+        val serviceRegistry get() = InjectionLayer.ext().instance(ServiceRegistry::class.java)!!
 
         /**
          * A globally accessible instance of the `PlayerManager` interface used to manage and interact with player-related
@@ -42,7 +42,7 @@ interface VitalCloudNet4Bridge<P> {
          * result in an exception being thrown during initialization.
          */
         @JvmStatic
-        val playerManager = serviceRegistry.defaultInstance(PlayerManager::class.java)!!
+        val playerManager get() = serviceRegistry.defaultInstance(PlayerManager::class.java)!!
     }
 
     /**

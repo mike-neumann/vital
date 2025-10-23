@@ -8,10 +8,10 @@ interface VitalBStatsInitialization : InitializingBean {
     @Configuration
     class Spigot(
         private val plugin: SpigotPlugin,
-        private val vitalBStatsConfigurationProperties: VitalBStatsConfigurationProperties,
+        private val configurationProperties: VitalBStatsConfigurationProperties,
     ) : VitalBStatsInitialization {
         final override fun afterPropertiesSet() {
-            if (!vitalBStatsConfigurationProperties.enabled) return
+            if (!configurationProperties.enabled) return
 
             // so bstats stops whining about their goofy package relocation step
             System.setProperty("bstats.relocatecheck", "false")
@@ -20,8 +20,8 @@ interface VitalBStatsInitialization : InitializingBean {
             SpigotBStatsMetrics(plugin, 27673)
 
             // then setup the custom bstats metrics
-            if (vitalBStatsConfigurationProperties.pluginId == null) return
-            SpigotBStatsMetrics(plugin, vitalBStatsConfigurationProperties.pluginId!!)
+            if (configurationProperties.pluginId == null) return
+            SpigotBStatsMetrics(plugin, configurationProperties.pluginId!!)
         }
     }
 
@@ -29,10 +29,10 @@ interface VitalBStatsInitialization : InitializingBean {
     @Configuration
     class Bungee(
         private val plugin: BungeePlugin,
-        private val vitalBStatsConfigurationProperties: VitalBStatsConfigurationProperties,
+        private val configurationProperties: VitalBStatsConfigurationProperties,
     ) : VitalBStatsInitialization {
         final override fun afterPropertiesSet() {
-            if (!vitalBStatsConfigurationProperties.enabled) return
+            if (!configurationProperties.enabled) return
 
             // so bstats stops whining about their goofy package relocation step
             System.setProperty("bstats.relocatecheck", "false")
@@ -41,8 +41,8 @@ interface VitalBStatsInitialization : InitializingBean {
             BungeeBStatsMetrics(plugin, 27674)
 
             // then setup the custom bstats metrics
-            if (vitalBStatsConfigurationProperties.pluginId == null) return
-            BungeeBStatsMetrics(plugin, vitalBStatsConfigurationProperties.pluginId!!)
+            if (configurationProperties.pluginId == null) return
+            BungeeBStatsMetrics(plugin, configurationProperties.pluginId!!)
         }
     }
 }
