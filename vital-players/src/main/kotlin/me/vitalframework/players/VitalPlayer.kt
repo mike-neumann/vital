@@ -3,6 +3,7 @@ package me.vitalframework.players
 import me.vitalframework.BungeePlayer
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalEntity
+import java.time.Instant
 import java.util.UUID
 
 /**
@@ -18,6 +19,8 @@ import java.util.UUID
 abstract class VitalPlayer<T>(
     val player: T,
 ) : VitalEntity<UUID> {
+    val joinedAt = Instant.now()
+
     /**
      * Represents a Spigot implementation of the `VitalPlayer` abstraction.
      *
