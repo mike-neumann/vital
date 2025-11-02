@@ -1,5 +1,6 @@
 package me.vitalframework.inventories
 
+import me.vitalframework.Listener
 import me.vitalframework.RequiresSpigot
 import me.vitalframework.SpigotEventHandler
 import me.vitalframework.SpigotPlayer
@@ -8,10 +9,9 @@ import me.vitalframework.VitalListener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.springframework.stereotype.Component
 
 @RequiresSpigot
-@Component
+@Listener
 class VitalInventoryListener(
     plugin: SpigotPlugin,
     val inventories: List<VitalInventory>,

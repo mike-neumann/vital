@@ -1,14 +1,14 @@
 package me.vitalframework.items
 
+import me.vitalframework.Listener
 import me.vitalframework.RequiresSpigot
 import me.vitalframework.SpigotEventHandler
 import me.vitalframework.SpigotPlugin
 import me.vitalframework.VitalListener
 import org.bukkit.event.player.PlayerInteractEvent
-import org.springframework.stereotype.Component
 
 @RequiresSpigot
-@Component
+@Listener
 class VitalItemListener(
     plugin: SpigotPlugin,
     val itemService: VitalItemService,
