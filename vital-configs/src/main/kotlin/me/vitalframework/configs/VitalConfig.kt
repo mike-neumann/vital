@@ -45,7 +45,7 @@ import kotlin.reflect.KClass
  *     are thrown with detailed error descriptions.
  */
 abstract class VitalConfig {
-    val logger = logger<VitalConfig>()
+    val logger = logger()
     val fileName: String
     val processor: Processor<*, Any>
 

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 abstract class VitalSubModule : InitializingBean {
-    private val logger = logger<VitalSubModule>()
+    private val logger = logger()
 
     final override fun afterPropertiesSet() {
         val vitalSubModuleName = getRequiredAnnotation<Component>().value

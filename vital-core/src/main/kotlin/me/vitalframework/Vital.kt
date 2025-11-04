@@ -8,7 +8,7 @@ import org.springframework.util.ClassUtils
 import java.util.Properties
 
 object Vital {
-    private val log = logger<Vital>()
+    private val log = logger()
 
     @JvmStatic
     lateinit var context: ConfigurableApplicationContext

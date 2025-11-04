@@ -7,13 +7,13 @@ import me.vitalframework.SpigotCommandSender
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.SpigotPlugin
 import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
+import me.vitalframework.commands.VitalCommandsSubModule.Companion.extractNonInvocationTargetException
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
-import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
@@ -136,14 +136,16 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
      * @param sender The command sender who initiated the command execution.
      * @param executedArg The argument string associated with the command execution.
      * @param commandArg The argument metadata associated with the command, or null if not applicable.
-     * @param exception The exception that was thrown during command execution.
+     * @param originalException The exception that was thrown during command execution.
      */
     private fun executeGlobalExceptionHandlerMethod(
         sender: CS,
         executedArg: String,
         commandArg: Arg?,
-        exception: Throwable,
+        originalException: Throwable,
     ) {
+        val exception = originalException.extractNonInvocationTargetException()
+
         val globalContext =
             VitalGlobalCommandExceptionHandlerProcessor.getGlobalExceptionHandler(exception.javaClass)
                 ?: try {
@@ -210,16 +212,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         commandArg: Arg?,
     ) {
         // when passing an invocation target exception, we first have to extract the actual exception that occurred.
-        var exception = originalException
-        if (exception is InvocationTargetException) {
-            var extractedException = originalException.targetException
-            while (extractedException is InvocationTargetException) {
-                extractedException = extractedException.targetException
-            }
-
-            exception = extractedException
-        }
-
+        val exception = originalException.extractNonInvocationTargetException()
         val exceptionHandlers = argExceptionHandlers[commandArg] ?: emptyMap()
         // we may or may not have an exception handler mapped for this execution context
         val context =
@@ -239,7 +232,13 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
                 *context.getInjectableArgExceptionHandlerMethodParameters(sender, executedArg, commandArg, exception),
             )
         } catch (e: Exception) {
-            throw VitalCommandException.ExecuteArgExceptionHandlerMethod(context.handlerMethod, context, e)
+            try {
+                // an exception occurred while invoking the arg exception handler, try to find a global one instead
+                executeGlobalExceptionHandlerMethod(sender, executedArg, commandArg, e)
+            } catch (e: Exception) {
+                // finally, if this also fails, we throw our own exception to signalize terminal failure
+                throw VitalCommandException.ExecuteArgExceptionHandlerMethod(context.handlerMethod, context, e)
+            }
         }
     }
 
