@@ -75,9 +75,7 @@ open class VitalItem {
                 enchantments[Enchantment.FORTUNE] = 1
             }
 
-            val usingVitalLocalization = "vital-localization" in Vital.vitalSubModules
-
-            if (usingVitalLocalization && info.localized) {
+            if ("vital-localization" in Vital.vitalSubModules) {
                 name = player.getTranslatedText(info.name)
                 lore = info.lore.map { player.getTranslatedText(it) }.toMutableList()
                 afterInit = {
@@ -239,6 +237,5 @@ open class VitalItem {
         val cooldown: Int = 0,
         val enchanted: Boolean = false,
         val unbreakable: Boolean = true,
-        val localized: Boolean = false,
     )
 }

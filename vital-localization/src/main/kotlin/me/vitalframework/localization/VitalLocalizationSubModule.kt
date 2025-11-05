@@ -92,7 +92,7 @@ class VitalLocalizationSubModule : VitalSubModule() {
 
                 if ("vital-items" in Vital.vitalSubModules) {
                     // update any now non-localized items
-                    for (item in inventory.filter { it != null }) {
+                    for (item in inventory.filterNotNull()) {
                         val itemLocalized =
                             item.itemMeta.persistentDataContainer[
                                 NamespacedKey(
