@@ -19,7 +19,7 @@ import java.util.UUID
 abstract class VitalPlayer<T>(
     val player: T,
 ) : VitalEntity<UUID> {
-    val joinedAt = Instant.now()
+    val joinedAt: Instant = Instant.now()
 
     /**
      * Represents a Spigot implementation of the `VitalPlayer` abstraction.

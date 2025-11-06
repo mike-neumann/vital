@@ -63,7 +63,7 @@ object Vital {
     data class Metadata(
         val mainClassName: String,
     ) {
-        val mainClass get() = Class.forName(mainClassName)
+        val mainClass: Class<*> get() = Class.forName(mainClassName)
 
         /**
          * Serializes this Metadata instance into a properties file string.
