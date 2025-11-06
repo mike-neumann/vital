@@ -5,10 +5,10 @@ import org.bukkit.Location
 import java.util.UUID
 
 /**
- * Represents a global implementation of [VitalHologram] with string-based content.
- * This hologram is visible to all players, when created using [VitalHologramService.createGlobalHologram].
+ * Represents a per-player implementation of [VitalHologram].
+ * This hologram will only be visible to a single player when created using [VitalHologramService.createPerPlayerHologram].
  */
-class VitalGlobalHologram() : VitalHologram<String>() {
+class VitalPerPlayerHologram() : VitalHologram<String>() {
     @VitalConfig.Property(UUID::class)
     override lateinit var id: UUID
 
@@ -24,17 +24,22 @@ class VitalGlobalHologram() : VitalHologram<String>() {
     @VitalConfig.Property(UUID::class)
     override lateinit var lineArmorStandUniqueIds: List<UUID>
 
+    @VitalConfig.Property(UUID::class)
+    lateinit var playerUniqueId: UUID
+
     constructor(
         id: UUID,
         lines: List<String>,
         location: Location,
         armorStandUniqueId: UUID,
         lineArmorStandUniqueIds: List<UUID>,
+        playerUniqueId: UUID,
     ) : this() {
         this.id = id
         this.lines = lines
         this.location = location
         this.armorStandUniqueId = armorStandUniqueId
         this.lineArmorStandUniqueIds = lineArmorStandUniqueIds
+        this.playerUniqueId = playerUniqueId
     }
 }
