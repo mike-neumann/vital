@@ -236,10 +236,17 @@ open class VitalInventory {
      * Handles a click event in the inventory by invoking the corresponding action for the specific
      * player and slot if an action is defined.
      *
+     * [onClick] should be used in favor of this function.
+     * This function is Vital's internal entrypoint for inventory clicks
+     * and should only rarely be called manually in your plugin.
+     * Use this function only if you need an intermediary to [onClick],
+     * such as your own super class for inventories that needs to perform an operation on click,
+     * but doesn't want to block the default [onClick] inheritance chain.
+     *
      * @param e The inventory click event containing information about the player who clicked,
      *          the slot clicked, and other relevant details.
      */
-    fun click(e: InventoryClickEvent) {
+    open fun click(e: InventoryClickEvent) {
         _actions[e.whoClicked.uniqueId]?.get(e.slot)?.invoke(e)
         onClick(e)
     }
