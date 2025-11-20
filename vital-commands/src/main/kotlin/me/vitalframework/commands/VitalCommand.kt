@@ -552,7 +552,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     @Target(AnnotationTarget.CLASS)
     annotation class Info(
         val name: String,
-        val description: String = "A Vital Command",
+        val description: String,
         val aliases: Array<String> = [],
         val usage: String = "",
         val permission: String = "",
@@ -626,7 +626,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.FUNCTION)
     annotation class ArgHandler(
-        val arg: Arg,
+        val arg: Arg = Arg(),
     )
 
     /**

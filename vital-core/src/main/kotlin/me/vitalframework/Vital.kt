@@ -87,11 +87,16 @@ object Vital {
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(
         val name: String,
-        val description: String = "A Vital Plugin",
-        val apiVersion: String = "1.20",
-        val version: String = "1.0",
-        val author: Array<String> = [],
+        val description: String,
+        val apiVersion: String,
+        val version: String,
+        val author: Array<String>,
         val environment: PluginEnvironment,
+        /**
+         * This instructs Vital to scan additional packages for Vital functionality.
+         * If you have to include an external dependency in your plugin that uses Vital,
+         * like Commands, Configs, etc. this will be the place to define those packages
+         */
         val scanAdditionalPackages: Array<String> = [],
     ) {
         companion object {
