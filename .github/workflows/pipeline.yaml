@@ -1,4 +1,3 @@
-name: Vital
 on: push
 permissions:
   contents: read
