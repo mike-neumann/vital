@@ -9,7 +9,7 @@ class VitalCommandsTest {
     @Test
     fun `arg handler return type mapping should fail`() {
         assertThrows<VitalCommandException.InvalidArgHandlerReturnSignature> {
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg() {
@@ -21,7 +21,7 @@ class VitalCommandsTest {
     @Test
     fun `arg handler parameter mapping should fail`() {
         assertThrows<VitalCommandException.InvalidArgHandlerParameterSignature> {
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg(i: Int) = ReturnState.SUCCESS
@@ -32,7 +32,7 @@ class VitalCommandsTest {
     @Test
     fun `arg handler return type mapping should work`() {
         assertDoesNotThrow {
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg() = ReturnState.SUCCESS
@@ -43,7 +43,7 @@ class VitalCommandsTest {
     @Test
     fun `arg handler parameter mapping should work`() {
         assertDoesNotThrow {
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg(
@@ -59,7 +59,7 @@ class VitalCommandsTest {
     @Test
     fun `arg handler parameter mapping with variables should work`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg %PLAYER%"))
                 fun onTestArg(
@@ -83,7 +83,7 @@ class VitalCommandsTest {
     @Test
     fun `arg exception handler mapping should fail`() {
         assertThrows<VitalCommandException.UnmappedArgExceptionHandlerArg> {
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgExceptionHandler("testArg", Exception::class)
                 fun onTestArgException() = ReturnState.SUCCESS
@@ -94,7 +94,7 @@ class VitalCommandsTest {
     @Test
     fun `arg exception handler mapping should work`() {
         assertDoesNotThrow {
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg() = ReturnState.SUCCESS
@@ -108,7 +108,7 @@ class VitalCommandsTest {
     @Test
     fun `arg exception handler parameter mapping should fail`() {
         assertThrows<VitalCommandException.InvalidArgExceptionHandlerMethodSignature> {
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg() = ReturnState.SUCCESS
@@ -122,7 +122,7 @@ class VitalCommandsTest {
     @Test
     fun `arg exception handler parameter mapping should work`() {
         assertDoesNotThrow {
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg() = ReturnState.SUCCESS
@@ -167,7 +167,7 @@ class VitalCommandsTest {
     @Test
     fun `base command should be executed`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg())
                 fun onNoArg(sender: CommandSender): ReturnState {
@@ -186,7 +186,7 @@ class VitalCommandsTest {
     @Test
     fun `arg handler should be executed`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg(sender: CommandSender): ReturnState {
@@ -205,7 +205,7 @@ class VitalCommandsTest {
     @Test
     fun `arg exception handler should not be executed`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg"))
                 fun onTestArg(sender: CommandSender) = ReturnState.SUCCESS
@@ -226,7 +226,7 @@ class VitalCommandsTest {
     @Test
     fun `arg exception handler should be executed`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(arg = Arg("testArg"))
                 fun onTestArg(): ReturnState = throw RuntimeException("test exception")
@@ -248,7 +248,7 @@ class VitalCommandsTest {
     @Test
     fun `tab completions should be empty`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(arg = Arg("testArg"))
                 fun onTestArg() = ReturnState.SUCCESS
@@ -262,7 +262,7 @@ class VitalCommandsTest {
     @Test
     fun `tab completions should contain arg`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(arg = Arg("testArg"))
                 fun onTestArg() = ReturnState.SUCCESS
@@ -277,7 +277,7 @@ class VitalCommandsTest {
     @Test
     fun `tab completions should contain sub arg`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(arg = Arg("testArg testSubArg"))
                 fun onTestArg() = ReturnState.SUCCESS
@@ -292,7 +292,7 @@ class VitalCommandsTest {
     @Test
     fun `tab completions should contain player name`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(arg = Arg("%PLAYER%"))
                 fun onTestArg() = ReturnState.SUCCESS
@@ -307,7 +307,7 @@ class VitalCommandsTest {
     @Test
     fun `tab completions should contain boolean`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(arg = Arg("%BOOLEAN%"))
                 fun onTestArg() = ReturnState.SUCCESS
@@ -323,7 +323,7 @@ class VitalCommandsTest {
     @Test
     fun `tab completions should contain number`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(arg = Arg("%NUMBER%"))
                 fun onTestArg() = ReturnState.SUCCESS
@@ -338,7 +338,7 @@ class VitalCommandsTest {
     @Test
     fun `tab completions should contain all materials`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(arg = Arg("%MATERIAL%"))
                 fun onTestArg() = ReturnState.SUCCESS
@@ -356,7 +356,7 @@ class VitalCommandsTest {
     @Test
     fun `arg handler parameter matching placeholder should be executed`() {
         val testCommand =
-            @VitalCommand.Info("testCommand")
+            @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
                 @ArgHandler(Arg("testArg %PLAYER%"))
                 fun onTestArg(
