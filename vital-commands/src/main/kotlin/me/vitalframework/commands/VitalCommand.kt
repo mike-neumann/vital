@@ -2,17 +2,14 @@ package me.vitalframework.commands
 
 import me.vitalframework.BungeeCommandSender
 import me.vitalframework.BungeePlayer
-import me.vitalframework.BungeePlugin
 import me.vitalframework.SpigotCommandSender
 import me.vitalframework.SpigotPlayer
-import me.vitalframework.SpigotPlugin
 import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
 import me.vitalframework.commands.VitalCommandsSubModule.Companion.extractNonInvocationTargetException
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.command.Command
-import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
 import java.lang.reflect.Method
 import java.util.regex.Pattern
@@ -25,9 +22,7 @@ import kotlin.reflect.KClass
  *
  * The `VitalCommand` is generic and is parameterized by `P` for the plugin and `CS` for the command sender class.
  *
- * @param P The type of the plugin this command is a part of.
  * @param CS The type of the command sender expected for this command.
- * @param plugin The plugin instance associated with this command.
  * @param commandSenderClass The class representing the command sender.
  *
  * This class includes abstract methods that subclasses must implement to customize
@@ -57,10 +52,9 @@ import kotlin.reflect.KClass
  * The class also features annotations to facilitate metadata about the command, such as its name,
  * description, usage, and required permission.
  */
-abstract class VitalCommand<P, CS : Any> protected constructor(
-    val plugin: P,
+abstract class VitalCommand<CS : Any> protected constructor(
     val commandSenderClass: Class<CS>,
-) : InitializingBean {
+) {
     val name: String
     val permission: String
     val playerOnly: Boolean
@@ -761,23 +755,9 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         val exceptionIndex: Int?,
     )
 
-    /**
-     * Abstract implementation of a Spigot command, designed to integrate with Bukkit/Spigot's command system.
-     *
-     * This class provides utilities for handling commands, their execution, and tab completion,
-     * abstracting away repetitive boilerplate while allowing extension for custom behavior.
-     *
-     * @constructor Instantiated with a reference to a Spigot plugin.
-     * @param plugin The plugin instance that the command is part of.
-     */
-    abstract class Spigot(
-        plugin: SpigotPlugin,
-    ) : VitalCommand<SpigotPlugin, SpigotCommandSender>(plugin, SpigotCommandSender::class.java),
+    abstract class Spigot :
+        VitalCommand<SpigotCommandSender>(SpigotCommandSender::class.java),
         VitalPluginCommand.Spigot {
-        override fun afterPropertiesSet() {
-            plugin.getCommand(name)!!.setExecutor(this)
-        }
-
         override fun onCommand(
             sender: SpigotCommandSender,
             command: Command,
@@ -805,38 +785,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
         override fun getAllPlayerNames() = Bukkit.getOnlinePlayers().map { it.name }
     }
 
-    /**
-     * Represents an abstract base class for defining BungeeCord commands with extended functionality.
-     *
-     * This class integrates with the Vital command system and provides additional handling
-     * for BungeeCord-specific command operations, such as registering commands to the proxy
-     * and facilitating tab completion. It serves as an entry point for implementing custom
-     * commands within a BungeeCord plugin.
-     *
-     * @constructor Initializes the command with the specified BungeePlugin instance.
-     * @param plugin The BungeePlugin instance associated with this command.
-     */
-    abstract class Bungee(
-        plugin: BungeePlugin,
-    ) : VitalCommand<BungeePlugin, BungeeCommandSender>(plugin, BungeeCommandSender::class.java) {
-        override fun afterPropertiesSet() {
-            val command =
-                object : VitalPluginCommand.Bungee(name) {
-                    override fun execute(
-                        sender: BungeeCommandSender,
-                        args: Array<String>,
-                    ) {
-                        this@Bungee.execute(sender, args)
-                    }
-
-                    override fun onTabComplete(
-                        sender: BungeeCommandSender,
-                        args: Array<String>,
-                    ) = this@Bungee.tabComplete(sender, args)
-                }
-            plugin.proxy.pluginManager.registerCommand(plugin, command)
-        }
-
+    abstract class Bungee : VitalCommand<BungeeCommandSender>(BungeeCommandSender::class.java) {
         override fun isPlayer(commandSender: BungeeCommandSender) = commandSender is BungeePlayer
 
         override fun hasPermission(
@@ -924,7 +873,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
          * and each value is the corresponding argument definition.
          */
         @JvmStatic
-        fun VitalCommand<*, *>.getMappedArgs() =
+        fun VitalCommand<*>.getMappedArgs() =
             javaClass.methods
                 .filter { it.getAnnotationsByType(ArgHandler::class.java).size > 0 }
                 .map { it.getAnnotationsByType(ArgHandler::class.java).toList() }
@@ -953,7 +902,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
          * and each value represents the prepared handler context for the argument's processing.
          */
         @JvmStatic
-        fun VitalCommand<*, *>.getMappedArgHandlers() =
+        fun VitalCommand<*>.getMappedArgHandlers() =
             javaClass.methods
                 .asSequence()
                 .filter { it.getAnnotationsByType(ArgHandler::class.java).size > 0 }
@@ -1007,7 +956,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
          * types (`Class<out Throwable>`) as keys and exception handler context (`VitalCommand.ArgExceptionHandlerContext`) as values.
          */
         @JvmStatic
-        fun VitalCommand<*, *>.getMappedArgExceptionHandlers(): MutableMap<
+        fun VitalCommand<*>.getMappedArgExceptionHandlers(): MutableMap<
             Arg,
             MutableMap<Class<out Throwable>, ArgExceptionHandlerContext>,
         > {
@@ -1251,7 +1200,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
          * @return the VitalCommand.Info annotation of this class
          */
         @JvmStatic
-        fun Class<out VitalCommand<*, *>>.getInfo(): Info = getRequiredAnnotation<Info>()
+        fun Class<out VitalCommand<*>>.getInfo(): Info = getRequiredAnnotation<Info>()
 
         /**
          * Retrieves the VitalCommand.Info annotation associated with this class.
@@ -1260,7 +1209,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
          * @return the VitalCommand.Info annotation of this class.
          */
         @JvmStatic
-        fun KClass<out VitalCommand<*, *>>.getInfo(): Info = java.getInfo()
+        fun KClass<out VitalCommand<*>>.getInfo(): Info = java.getInfo()
 
         /**
          * Retrieves the VitalCommand.Info annotation associated with this instance.
@@ -1269,7 +1218,7 @@ abstract class VitalCommand<P, CS : Any> protected constructor(
          * @return the VitalCommand.Info annotation of this instance.
          */
         @JvmStatic
-        fun VitalCommand<*, *>.getInfo(): Info = javaClass.getInfo()
+        fun VitalCommand<*>.getInfo(): Info = javaClass.getInfo()
 
         /**
          * Retrieves the VitalCommand.Advice annotation associated with this class.

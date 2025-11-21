@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 class VitalGlobalCommandExceptionHandlerProcessor(
     applicationContext: ApplicationContext,
-    val commands: List<VitalCommand<*, *>>,
+    val commands: List<VitalCommand<*>>,
 ) : InitializingBean {
     private val advices = applicationContext.getBeansWithAnnotation<VitalCommand.Advice>().values
 

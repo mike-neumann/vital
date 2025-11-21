@@ -12,4 +12,4 @@ package me.vitalframework.scoreboards
  * - Interfacing with players, including adding or removing them from the scoreboard.
  * - Handling the visual representation and content of the scoreboard.
  */
-internal interface VitalScoreboard
+interface VitalScoreboard

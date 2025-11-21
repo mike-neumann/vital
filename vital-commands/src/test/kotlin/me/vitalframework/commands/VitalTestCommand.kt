@@ -1,9 +1,6 @@
 package me.vitalframework.commands
 
-abstract class VitalTestCommand :
-    VitalCommand<VitalTestCommand.Plugin, VitalTestCommand.CommandSender>(Plugin(), CommandSender::class.java) {
-    class Plugin
-
+abstract class VitalTestCommand : VitalCommand<VitalTestCommand.CommandSender>(CommandSender::class.java) {
     class Player : CommandSender()
 
     open class CommandSender {
@@ -12,9 +9,6 @@ abstract class VitalTestCommand :
         fun sendMessage(message: String) {
             messages.add(message)
         }
-    }
-
-    override fun afterPropertiesSet() {
     }
 
     override fun isPlayer(commandSender: CommandSender) = commandSender is Player

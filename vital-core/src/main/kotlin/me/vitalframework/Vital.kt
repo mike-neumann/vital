@@ -1,6 +1,7 @@
 package me.vitalframework
 
 import me.vitalframework.VitalCoreSubModule.Companion.logger
+import org.springframework.boot.SpringApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Configuration
@@ -8,7 +9,7 @@ import org.springframework.util.ClassUtils
 import java.util.Properties
 
 object Vital {
-    private val log = logger()
+    private val logger = logger()
 
     @JvmStatic
     lateinit var context: ConfigurableApplicationContext
@@ -26,22 +27,22 @@ object Vital {
         loader: Any,
         classLoader: ClassLoader,
     ) {
-        log.debug("Running Vital via plugin loader '{}' and class loader '{}'...", loader, classLoader)
+        logger.debug("Running Vital via plugin loader '{}' and class loader '{}'...", loader, classLoader)
 
         Thread.currentThread().contextClassLoader = classLoader
         ClassUtils.overrideThreadContextClassLoader(classLoader)
 
-        log.debug("Vital class loader successfully overridden to '{}'", classLoader)
+        logger.debug("Vital class loader successfully overridden to '{}'", classLoader)
 
         // load metadata from "vital-metadata.properties"
         loadMetadata(classLoader)
 
-        log.debug("Loading main class '${metadata.mainClassName}'...")
+        logger.debug("Loading main class '${metadata.mainClassName}'...")
         val mainClass = Class.forName(metadata.mainClassName)
-        log.debug("Main class '${metadata.mainClassName}' successfully loaded")
+        logger.debug("Main class '${metadata.mainClassName}' successfully loaded")
 
         // start up spring boot using the previously generated "PluginConfiguration" class as the main class
-        log.debug("Running spring boot...")
+        logger.debug("Running spring boot...")
         context =
             SpringApplicationBuilder(classLoader.loadClass("${mainClass.packageName}.PluginConfiguration"))
                 // here we register the plugin instance as a bean so we can inject it elsewhere
@@ -51,13 +52,20 @@ object Vital {
                 .run()
     }
 
+    @JvmStatic
+    fun exit() {
+        logger.info("Shutting down Vital...")
+        val exitCode = SpringApplication.exit(context)
+        logger.info("Vital exited with code '$exitCode'")
+    }
+
     private fun loadMetadata(classLoader: ClassLoader) {
-        log.debug("Loading Vital metadata...")
+        logger.debug("Loading Vital metadata...")
 
         val metadataProperties = Properties().apply { load(classLoader.getResourceAsStream(Metadata.FILE_NAME)) }
         metadata = Metadata(metadataProperties[Metadata.Property.MAIN_CLASS].toString())
 
-        log.debug("Vital metadata loaded successfully, {}", metadata)
+        logger.debug("Vital metadata loaded successfully, {}", metadata)
     }
 
     data class Metadata(

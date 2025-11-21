@@ -4,6 +4,7 @@ import me.vitalframework.BungeeCommandSender
 import me.vitalframework.BungeePlayer
 import me.vitalframework.SpigotCommandSender
 import me.vitalframework.SpigotPlayer
+import me.vitalframework.VitalCoreSubModule.Companion.logger
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -36,6 +37,8 @@ import kotlin.random.Random
 
 interface VitalUtils<CS, P : CS> {
     companion object {
+        private val logger = logger()
+
         /**
          * Converts the current string, assumed to be in MiniMessage format, into a component.
          *
@@ -288,6 +291,17 @@ interface VitalUtils<CS, P : CS> {
             }
 
             return result
+        }
+
+        init {
+            try {
+                Class.forName("me.vitalframework.Vital")
+            } catch (_: Exception) {
+                logger.info("Running 'vital-utils' outside of a Vital project")
+                logger.info(
+                    "This functionality is natively supported, but you might want to check out Vital as a whole: https://github.com/mike-neumann/vital",
+                )
+            }
         }
     }
 

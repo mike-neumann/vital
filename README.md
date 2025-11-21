@@ -81,7 +81,21 @@ This is seriously all you need to get started.
         environment = Vital.Info.PluginEnvironment.SPIGOT
 )
 public class MyPlugin {
-    // Want to do something 
+    // This method will be called when Vital is up and running.
+    // The name of the method doesn't matter.
+    // You can also omit the parameter if you don't need it here.
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationReady(ApplicationReadyEvent e) {
+        // Do something here...
+    }
+    
+    // This method will be called when Vital is shutting down.
+    // The name of the method doesn't matter.
+    // You can also omit the parameter if you don't need it here.
+    @EventListener(ContextClosedEvent.class)
+    public void onContextClosed(ContextClosedEvent e) {
+        // Do something here...
+    }
 }
 ```
 
@@ -95,6 +109,11 @@ Add this anywhere in your plugin (A different class / file, it doesn't matter).
 public class MyPluginListener extends VitalListener.Spigot {
     public MyPluginListener(JavaPlugin plugin) {
         super(plugin);
+    }
+    
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e) {
+        // Do something here...
     }
 }
 ```

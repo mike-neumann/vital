@@ -3,14 +3,12 @@ package me.vitalframework.players
 import me.vitalframework.BungeeEventHandler
 import me.vitalframework.BungeeEventPriority
 import me.vitalframework.BungeePlayer
-import me.vitalframework.BungeePlugin
 import me.vitalframework.Listener
 import me.vitalframework.RequiresBungee
 import me.vitalframework.RequiresSpigot
 import me.vitalframework.SpigotEventHandler
 import me.vitalframework.SpigotEventPriority
 import me.vitalframework.SpigotPlayer
-import me.vitalframework.SpigotPlugin
 import me.vitalframework.VitalListener
 import net.md_5.bungee.api.event.PlayerDisconnectEvent
 import net.md_5.bungee.api.event.PostLoginEvent
@@ -86,10 +84,9 @@ interface VitalPlayerListener {
     @RequiresSpigot
     @Listener
     class Spigot(
-        plugin: SpigotPlugin,
         override val playerService: VitalPlayerService,
         override val vitalPlayersConfigurationProperties: VitalPlayersConfigurationProperties,
-    ) : VitalListener.Spigot(plugin),
+    ) : VitalListener.Spigot(),
         VitalPlayerListener {
         // should always be executed first.
         @SpigotEventHandler(priority = SpigotEventPriority.LOWEST)
@@ -108,10 +105,9 @@ interface VitalPlayerListener {
     @RequiresBungee
     @Listener
     class Bungee(
-        plugin: BungeePlugin,
         override val playerService: VitalPlayerService,
         override val vitalPlayersConfigurationProperties: VitalPlayersConfigurationProperties,
-    ) : VitalListener.Bungee(plugin),
+    ) : VitalListener.Bungee(),
         VitalPlayerListener {
         // should always be executed first.
         @BungeeEventHandler(priority = BungeeEventPriority.LOWEST)

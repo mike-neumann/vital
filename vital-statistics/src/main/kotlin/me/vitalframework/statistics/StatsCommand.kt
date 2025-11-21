@@ -1,11 +1,9 @@
 package me.vitalframework.statistics
 
 import me.vitalframework.BungeeCommandSender
-import me.vitalframework.BungeePlugin
 import me.vitalframework.RequiresBungee
 import me.vitalframework.RequiresSpigot
 import me.vitalframework.SpigotCommandSender
-import me.vitalframework.SpigotPlugin
 import me.vitalframework.Vital
 import me.vitalframework.commands.VitalCommand
 import me.vitalframework.utils.VitalUtils.Bungee.sendFormattedMessage
@@ -80,10 +78,9 @@ interface StatsCommand<CS> {
     @RequiresSpigot
     @Component
     class Spigot(
-        plugin: SpigotPlugin,
         override val vitalStatisticsService: VitalStatisticsService,
         override val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
-    ) : VitalCommand.Spigot(plugin),
+    ) : VitalCommand.Spigot(),
         StatsCommand<SpigotCommandSender> {
         override fun sendMessage(
             sender: SpigotCommandSender,
@@ -106,10 +103,9 @@ interface StatsCommand<CS> {
     @RequiresBungee
     @Component
     class Bungee(
-        plugin: BungeePlugin,
         override val vitalStatisticsService: VitalStatisticsService,
         override val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
-    ) : VitalCommand.Bungee(plugin),
+    ) : VitalCommand.Bungee(),
         StatsCommand<BungeeCommandSender> {
         override fun sendMessage(
             sender: BungeeCommandSender,

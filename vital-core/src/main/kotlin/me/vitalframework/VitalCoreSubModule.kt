@@ -1,6 +1,11 @@
 package me.vitalframework
 
+import org.bukkit.Bukkit
 import org.slf4j.LoggerFactory
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.event.EventListener
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
 
@@ -27,8 +32,57 @@ typealias BungeeCancellable = net.md_5.bungee.api.plugin.Cancellable
 typealias SpigotBStatsMetrics = org.bstats.bukkit.Metrics
 typealias BungeeBStatsMetrics = org.bstats.bungeecord.Metrics
 
-@Component("vital-core")
-class VitalCoreSubModule : VitalSubModule() {
+@Component
+class VitalCoreSubModule {
+    val logger = logger()
+
+    @Order(Ordered.LOWEST_PRECEDENCE)
+    @EventListener(ApplicationReadyEvent::class)
+    fun onApplicationReady(e: ApplicationReadyEvent) {
+        logger.info("Vital up and running in '${"%.3f seconds".format(e.timeTaken.toMillis() / 1000.0)}'")
+        logger.info("Thanks for using Vital!")
+    }
+
+    @RequiresSpigot
+    @Component("vital-core")
+    class Spigot(
+        val plugin: SpigotPlugin,
+        val vitalListeners: List<VitalListener.Spigot>,
+    ) : VitalSubModule() {
+        val logger = logger()
+
+        override fun onInstall() {
+            for (vitalListener in vitalListeners) {
+                try {
+                    Bukkit.getPluginManager().registerEvents(vitalListener, plugin)
+                    logger.info("Spigot listener '${vitalListener::class.java.name}' successfully registered")
+                } catch (e: Exception) {
+                    logger.error("Error while registering spigot listener '${vitalListener::class.java.name}'", e)
+                }
+            }
+        }
+    }
+
+    @RequiresBungee
+    @Component("vital-core")
+    class Bungee(
+        val plugin: BungeePlugin,
+        val vitalListeners: List<VitalListener.Bungee>,
+    ) : VitalSubModule() {
+        val logger = logger()
+
+        override fun onInstall() {
+            for (vitalListener in vitalListeners) {
+                try {
+                    plugin.proxy.pluginManager.registerListener(plugin, vitalListener)
+                    logger.info("Bungee listener '${vitalListener::class.java.name}' successfully registered")
+                } catch (e: Exception) {
+                    logger.error("Error while registering bungee listener '${vitalListener::class.java.name}'", e)
+                }
+            }
+        }
+    }
+
     companion object {
         /**
          * Extension function to provide a logger for the calling class.
