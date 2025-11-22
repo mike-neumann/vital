@@ -16,6 +16,31 @@ object Vital {
         private set
 
     @JvmStatic
+    val officialVitalSubModules =
+        listOf(
+            "vital-all",
+            "vital-cloudnet4-bridge",
+            "vital-cloudnet4-driver",
+            "vital-commands",
+            "vital-commands-processor",
+            "vital-configs",
+            "vital-core",
+            "vital-core-processor",
+            "vital-holograms",
+            "vital-inventories",
+            "vital-items",
+            "vital-loader",
+            "vital-localization",
+            "vital-minigames",
+            "vital-players",
+            "vital-scoreboards",
+            "vital-statistics",
+            "vital-tasks",
+            "vital-tests",
+            "vital-utils",
+        )
+
+    @JvmStatic
     val vitalSubModules = mutableListOf<String>()
 
     @JvmStatic
@@ -55,6 +80,12 @@ object Vital {
     @JvmStatic
     fun exit() {
         logger.info("Shutting down Vital...")
+
+        if (context.isClosed) {
+            logger.info("Vital is already being shut down")
+            return
+        }
+
         val exitCode = SpringApplication.exit(context)
         logger.info("Vital exited with code '$exitCode'")
     }

@@ -18,6 +18,15 @@ abstract class VitalSubModule : InitializingBean {
         Vital.vitalSubModules.add(vitalSubModuleName)
 
         try {
+            if (vitalSubModuleName.startsWith("vital-") && vitalSubModuleName !in Vital.officialVitalSubModules) {
+                logger.error("!!! '$vitalSubModuleName' is not an official Vital submodule but is trying to disguise itself as one !!!")
+                logger.error("!!! This does not mean it is trying to cause harm. !!!")
+                logger.error("!!! If you are the developer of '$vitalSubModuleName', please consider renaming your submodule. !!!")
+                logger.error(
+                    "!!! Only official Vital submodules should start with 'vital-', external ones should have their own prefix. !!!",
+                )
+            }
+
             logger.info("Installing Vital submodule '$vitalSubModuleName'...")
             onInstall()
             logger.info("Vital submodule '$vitalSubModuleName' successfully installed")

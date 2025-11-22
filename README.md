@@ -99,7 +99,7 @@ public class MyPlugin {
 }
 ```
 
-This plugin, of course, doesn't do anything yet.  
+This plugin, of course, doesn't do anything yet.
 Want to have a listener?  
 Add this anywhere in your plugin (A different class / file, it doesn't matter).  
 
@@ -107,10 +107,6 @@ Add this anywhere in your plugin (A different class / file, it doesn't matter).
 // This annotation is the magic ingredient for Vital to automatically register your listener.
 @Listener
 public class MyPluginListener extends VitalListener.Spigot {
-    public MyPluginListener(JavaPlugin plugin) {
-        super(plugin);
-    }
-    
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         // Do something here...
@@ -127,10 +123,6 @@ Or a simple command?
         description = "My first Vital command"
 )
 public class MyPluginCommand extends VitalCommand.Spigot {
-    public MyPluginCommand(JavaPlugin plugin) {
-        super(plugin);
-    }
-    
     @ArgHandler
     public ReturnState onNoArgs(Player player) {
         player.sendMessage("Hello from vital-commands");

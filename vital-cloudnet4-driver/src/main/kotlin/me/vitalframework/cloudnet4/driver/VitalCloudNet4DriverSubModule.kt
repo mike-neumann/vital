@@ -13,9 +13,9 @@ class VitalCloudNet4DriverSubModule : VitalSubModule() {
             Class.forName("eu.cloudnetservice.driver.DriverEnvironment")
         } catch (_: Exception) {
             logger.error(
-                "WARNING: 'vital-cloudnet4-driver' has been installed, but the CloudNet 4 driver was not found on the server classpath, calling CloudNet APIs might fail.",
+                "'vital-cloudnet4-driver' has been installed, but the CloudNet 4 driver was not found on the server classpath, calling CloudNet APIs might fail.",
             )
-            logger.error("WARNING: Please make sure you have the CloudNet 4 driver installed on your server.")
+            logger.error("Please make sure you have the CloudNet 4 driver installed on your server.")
         }
     }
 }

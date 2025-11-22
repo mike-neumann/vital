@@ -13,9 +13,9 @@ class VitalCloudNet4BridgeSubModule : VitalSubModule() {
             Class.forName("eu.cloudnetservice.modules.bridge.BridgeDocProperties")
         } catch (_: Exception) {
             logger.error(
-                "WARNING: 'vital-cloudnet4-bridge' has been installed, but the CloudNet 4 bridge was not found on the server classpath, calling CloudNet APIs might fail.",
+                "'vital-cloudnet4-bridge' has been installed, but the CloudNet 4 bridge was not found on the server classpath, calling CloudNet APIs might fail.",
             )
-            logger.error("WARNING: Please make sure you have the CloudNet 4 bridge installed on your server.")
+            logger.error("Please make sure you have the CloudNet 4 bridge installed on your server.")
         }
     }
 }

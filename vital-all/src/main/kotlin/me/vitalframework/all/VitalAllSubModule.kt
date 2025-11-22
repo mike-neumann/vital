@@ -12,7 +12,7 @@ class VitalAllSubModule : VitalSubModule() {
     val logger = logger()
 
     override fun onInstall() {
-        logger.info(
+        logger.warn(
             "'vital-all' has been installed, this includes ALL Vital submodules, even ones that might not support your current server's runtime",
         )
     }
