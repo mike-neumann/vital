@@ -1,3 +1,13 @@
+import org.codehaus.groovy.runtime.ProcessGroovyMethods
+
+fun getGitTag(): String {
+    val tag = ProcessGroovyMethods.getText(ProcessGroovyMethods.execute("git tag --points-at HEAD"))
+    return tag
+        .trim()
+        .let { if(it.startsWith("v")) it.substring(1) else it }
+        .ifBlank { "0.0.0-SNAPSHOT" }
+}
+
 plugins {
     alias(libs.plugins.jvm)
     alias(libs.plugins.kapt)
@@ -15,7 +25,7 @@ repositories {
 
 subprojects {
     group = "me.vitalframework"
-    version = "1.0"
+    version = getGitTag()
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.kapt")
