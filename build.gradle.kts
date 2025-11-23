@@ -5,7 +5,8 @@ fun getGitTag(): String {
     return tag
         .trim()
         .let { if (it.startsWith("v")) it.substring(1) else it }
-        .ifBlank { "0.0.0-SNAPSHOT" }
+        // if no tag is detected, we are running a dev build / not an officially released version
+        .ifBlank { "dev-SNAPSHOT" }
 }
 
 plugins {
