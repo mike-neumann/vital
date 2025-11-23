@@ -4,7 +4,7 @@ fun getGitTag(): String {
     val tag = ProcessGroovyMethods.getText(ProcessGroovyMethods.execute("git tag --points-at HEAD"))
     return tag
         .trim()
-        .let { if(it.startsWith("v")) it.substring(1) else it }
+        .let { if (it.startsWith("v")) it.substring(1) else it }
         .ifBlank { "0.0.0-SNAPSHOT" }
 }
 
