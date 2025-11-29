@@ -1,3 +1,4 @@
 dependencies {
-    api("eu.cloudnetservice.cloudnet:driver:${findProperty("cloudnetVersion")}")
+    api(project(":vital-core"))
+    compileOnly(libs.bundles.cloudnet4.driverApi.compileOnly)
 }

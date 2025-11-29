@@ -2,14 +2,15 @@ package me.vitalframework.holograms
 
 import me.vitalframework.configs.VitalConfig
 import org.bukkit.Location
-import java.util.*
+import java.util.UUID
 
+/**
+ * Represents a global implementation of [VitalHologram] with string-based content.
+ * This hologram is visible to all players, when created using [VitalHologramService.createGlobalHologram].
+ */
 class VitalGlobalHologram() : VitalHologram<String>() {
     @VitalConfig.Property(UUID::class)
     override lateinit var id: UUID
-
-    @VitalConfig.Property(String::class)
-    override lateinit var name: String
 
     @VitalConfig.Property(String::class)
     override lateinit var lines: List<String>
@@ -25,14 +26,12 @@ class VitalGlobalHologram() : VitalHologram<String>() {
 
     constructor(
         id: UUID,
-        name: String,
         lines: List<String>,
         location: Location,
         armorStandUniqueId: UUID,
         lineArmorStandUniqueIds: List<UUID>,
     ) : this() {
         this.id = id
-        this.name = name
         this.lines = lines
         this.location = location
         this.armorStandUniqueId = armorStandUniqueId

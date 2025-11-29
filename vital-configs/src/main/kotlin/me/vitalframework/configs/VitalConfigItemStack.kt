@@ -1,29 +1,48 @@
 package me.vitalframework.configs
 
-import org.bukkit.*
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
+import org.bukkit.Registry
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
+/**
+ * Represents a configurable wrapper for an `ItemStack`, allowing its properties,
+ * such as type, display name, lore, enchantments, and item flags, to be managed
+ * through configuration.
+ *
+ * This class provides utilities to convert an existing `ItemStack` into a
+ * `VitalConfigItemStack` and vice versa.
+ */
 class VitalConfigItemStack {
     companion object {
+        @JvmStatic
         fun of(itemStack: ItemStack): VitalConfigItemStack {
             val itemMeta = itemStack.itemMeta
-            val vitalConfigItemStack = VitalConfigItemStack().apply {
-                type = itemStack.type
+            val vitalConfigItemStack =
+                VitalConfigItemStack().apply {
+                    type = itemStack.type
 
-                displayName = when {
-                    itemMeta!!.displayName != null -> itemMeta.displayName
-                    else -> itemStack.type.name
+                    displayName =
+                        when {
+                            itemMeta!!.displayName != null -> itemMeta.displayName
+                            else -> itemStack.type.name
+                        }
+
+                    lore =
+                        when {
+                            !itemMeta.hasLore() -> mutableListOf()
+                            else -> itemMeta.lore!!.toMutableList()
+                        }
+
+                    enchantments =
+                        mutableMapOf(
+                            *itemMeta.enchants.entries
+                                .map { it.key.key.key to it.value }
+                                .toTypedArray(),
+                        )
+                    itemFlags = itemMeta.itemFlags.toMutableList()
                 }
-
-                lore = when {
-                    !itemMeta.hasLore() -> mutableListOf()
-                    else -> itemMeta.lore!!.toMutableList()
-                }
-
-                enchantments = mutableMapOf(*itemMeta.enchants.entries.map { it.key.key.key to it.value }.toTypedArray())
-                itemFlags = itemMeta.itemFlags.toMutableList()
-            }
 
             return vitalConfigItemStack
         }
@@ -44,17 +63,18 @@ class VitalConfigItemStack {
     @VitalConfig.Property(ItemFlag::class)
     var itemFlags = mutableListOf<ItemFlag>()
 
-    fun toItemStack() = ItemStack(type!!).apply {
-        itemMeta!!.apply {
-            setDisplayName(this@VitalConfigItemStack.displayName)
-            lore = this@VitalConfigItemStack.lore
+    fun toItemStack() =
+        ItemStack(type!!).apply {
+            itemMeta!!.apply {
+                setDisplayName(this@VitalConfigItemStack.displayName)
+                lore = this@VitalConfigItemStack.lore
 
-            for ((key, level) in this@VitalConfigItemStack.enchantments) {
-                addEnchant(Registry.ENCHANTMENT.get(NamespacedKey.minecraft(key))!!, level, true)
+                for ((key, level) in this@VitalConfigItemStack.enchantments) {
+                    addEnchant(Registry.ENCHANTMENT.get(NamespacedKey.minecraft(key))!!, level, true)
+                }
+
+                addItemFlags(*this@VitalConfigItemStack.itemFlags.toTypedArray())
+                itemMeta = this
             }
-
-            addItemFlags(*this@VitalConfigItemStack.itemFlags.toTypedArray())
-            itemMeta = this
         }
-    }
 }

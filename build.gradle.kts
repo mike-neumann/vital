@@ -1,40 +1,53 @@
+import org.codehaus.groovy.runtime.ProcessGroovyMethods
+
+fun getGitTag(): String {
+    val tag = ProcessGroovyMethods.getText(ProcessGroovyMethods.execute("git tag --points-at HEAD"))
+    return tag
+        .trim()
+        .let { if (it.startsWith("v")) it.substring(1) else it }
+        // if no tag is detected, we are running a dev build / not an officially released version
+        .ifBlank { "dev-SNAPSHOT" }
+}
+
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.spring")
-    id("org.springframework.boot")
-    `java-library`
-    `maven-publish`
+    alias(libs.plugins.jvm)
+    alias(libs.plugins.kapt)
+    alias(libs.plugins.spring)
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.javaLibrary)
+    alias(libs.plugins.mavenPublish)
+    alias(libs.plugins.ktlint)
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
 }
 
 subprojects {
     group = "me.vitalframework"
-    version = "1.0"
+    version = getGitTag()
 
-    apply(plugin = "kotlin")
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jetbrains.kotlin.kapt")
     apply(plugin = "org.jetbrains.kotlin.plugin.spring")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
     repositories {
         mavenLocal()
         mavenCentral()
-        maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
         maven("https://libraries.minecraft.net")
+        maven("https://repo.papermc.io/repository/maven-public/")
     }
 
     dependencies {
-        compileOnly("org.spigotmc:spigot-api:${findProperty("spigotApiVersion")}")
-        compileOnly("com.mojang:brigadier:${findProperty("brigadierVersion")}")
-        compileOnly("net.md-5:bungeecord-api:${findProperty("bungeeApiVersion")}")
-
-        api("org.springframework.boot:spring-boot-starter:${findProperty("springBootVersion")}")
-
-        testApi("org.springframework.boot:spring-boot-starter-test:${findProperty("springBootVersion")}")
-        testApi("org.junit.jupiter:junit-jupiter-api:${findProperty("junitVersion")}")
-        testApi("org.spigotmc:spigot-api:${findProperty("spigotApiVersion")}")
-        testApi("com.mojang:brigadier:${findProperty("brigadierVersion")}")
-        testApi("net.md-5:bungeecord-api:${findProperty("bungeeApiVersion")}")
+        compileOnly(rootProject.libs.bundles.root.compileOnly)
+        api(rootProject.libs.bundles.root.api)
+        testImplementation(rootProject.libs.bundles.root.testImplementation)
+        testImplementation(rootProject.libs.bundles.tests.api)
     }
 
     java {
@@ -43,7 +56,7 @@ subprojects {
     }
 
     kotlin {
-        jvmToolchain(21)
+        jvmToolchain(24)
     }
 
     publishing {
@@ -52,10 +65,31 @@ subprojects {
                 groupId = group.toString()
                 artifactId = project.name
                 version = version
-
                 from(components["java"])
             }
         }
+
+        repositories {
+            // TODO: this solution is temporary, so i can pull Vital for my own projects
+            // TODO: release Vital to maven central once i have a stable version
+            if (version.toString().endsWith("-SNAPSHOT")) {
+                maven("http://10.8.0.1:8082/repository/maven-snapshots/") {
+                    isAllowInsecureProtocol = true
+                }
+            } else {
+                maven("http://10.8.0.1:8082/repository/maven-releases/") {
+                    isAllowInsecureProtocol = true
+                }
+            }
+        }
+    }
+
+    configurations.all {
+        exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
+        exclude(group = "ch.qos.logback", module = "logback-core")
+        exclude(group = "ch.qos.logback", module = "logback-classic")
+        exclude(group = "org.slf4j", module = "jul-to-slf4j")
+        exclude(group = "org.slf4j", module = "log4j-over-slf4j")
     }
 
     tasks.compileKotlin {
@@ -67,7 +101,7 @@ subprojects {
         (options as StandardJavadocDocletOptions).tags(
             "apiNote:a:API Note:",
             "implSpec:a:Implementation Requirements:",
-            "implNote:a:Implementation Note:"
+            "implNote:a:Implementation Note:",
         )
     }
 

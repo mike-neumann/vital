@@ -1,5 +1,6 @@
 dependencies {
+    compileOnly(project(":vital-localization"))
     api(project(":vital-core"))
-    api("net.kyori:adventure-text-minimessage:${findProperty("adventureTextSerializerVersion")}")
-    api("net.kyori:adventure-text-serializer-legacy:${findProperty("adventureTextSerializerVersion")}")
+    api(project(":vital-items"))
+    api(libs.bundles.inventories.api)
 }

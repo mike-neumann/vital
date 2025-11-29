@@ -1,38 +1,51 @@
 package me.vitalframework.inventories
 
-import me.vitalframework.*
+import me.vitalframework.Listener
+import me.vitalframework.RequiresSpigot
+import me.vitalframework.SpigotEventHandler
+import me.vitalframework.SpigotPlayer
+import me.vitalframework.VitalListener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
-import org.springframework.stereotype.Component
+import org.bukkit.event.player.PlayerQuitEvent
 
-@Component
-class VitalInventoryListener(plugin: SpigotPlugin) : VitalListener.Spigot(plugin) {
+@RequiresSpigot
+@Listener
+class VitalInventoryListener(
+    val inventories: List<VitalInventory>,
+) : VitalListener.Spigot() {
     @SpigotEventHandler
     fun onPlayerClickInInventory(e: InventoryClickEvent) {
-        val clickedInventory = e.clickedInventory
         val player = e.whoClicked as SpigotPlayer
-        val vitalInventory = Vital.context.getBeansOfType(VitalInventory::class.java).values.firstOrNull { it.hasInventoryOpen(player) }
+        val vitalInventory = inventories.firstOrNull { it.hasInventoryOpen(player) }
 
-        if (clickedInventory == null) {
-            // TODO: navigate to previous menu, currently still buggy
-//            if (vitalInventory != null && vitalInventory.getPreviousInventory() != null) {
-//                vitalInventory.close(player);
-//                vitalInventory.getPreviousInventory().open(player);
-//            }
+        if (e.clickedInventory == null) {
+            val previousInventory = vitalInventory?.previousInventories?.get(player.uniqueId)
+
+            if (vitalInventory != null && previousInventory != null) {
+                vitalInventory.close(player)
+                previousInventory.open(player)
+            }
             return
         }
 
         if (vitalInventory == null || e.currentItem == null) return
 
-        vitalInventory.click(e)
         e.isCancelled = true
+        vitalInventory.click(e)
     }
 
     @SpigotEventHandler
     fun onPlayerCloseInventory(e: InventoryCloseEvent) {
         val player = e.player as SpigotPlayer
-        val vitalInventory = Vital.context.getBeansOfType(VitalInventory::class.java).values.firstOrNull { it.hasInventoryOpen(player) }
-
+        val vitalInventory = inventories.firstOrNull { it.hasInventoryOpen(player) }
         vitalInventory?.close(player)
+    }
+
+    @SpigotEventHandler
+    fun onPlayerQuit(e: PlayerQuitEvent) {
+        for (inventory in inventories) {
+            inventory.close(e.player)
+        }
     }
 }

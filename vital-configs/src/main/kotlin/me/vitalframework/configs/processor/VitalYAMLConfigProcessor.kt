@@ -1,8 +1,15 @@
 package me.vitalframework.configs.processor
 
-import me.vitalframework.configs.*
+import me.vitalframework.configs.SnakeYamlConstructor
+import me.vitalframework.configs.VitalConfig
+import me.vitalframework.configs.VitalConfig.Companion.getFieldByProperty
+import me.vitalframework.configs.VitalConfig.Companion.getNonPropertyFieldsFromType
+import me.vitalframework.configs.VitalConfig.Companion.getPropertyFieldsFromType
 import me.vitalframework.configs.VitalConfig.Processor
-import org.yaml.snakeyaml.*
+import org.yaml.snakeyaml.DumperOptions
+import org.yaml.snakeyaml.LoaderOptions
+import org.yaml.snakeyaml.TypeDescription
+import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.inspector.TagInspector
 import org.yaml.snakeyaml.representer.Representer
 import java.io.InputStream
@@ -23,20 +30,24 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
 
     private fun addTypeDescriptors(type: Class<*>) {
         val rootTypeDescription = TypeDescription(type, "!${type.simpleName}")
-        val rootExcludes = VitalConfigUtils.getNonPropertyFieldsFromType(type).map { it.name }.toTypedArray()
+        val rootExcludes = type.getNonPropertyFieldsFromType().map { it.name }.toTypedArray()
 
         rootTypeDescription.setExcludes(*rootExcludes)
         yaml.addTypeDescription(rootTypeDescription)
 
-        for (field in VitalConfigUtils.getPropertyFieldsFromType(type)) {
-            val configProperty = field.getAnnotation(VitalConfig.Property::class.java)
+        for (field in type.getPropertyFieldsFromType()) {
+            val configProperty = field.getAnnotation(VitalConfig.Property::class.java)!!
             val typeDescription = TypeDescription(field.type, "!${field.type.simpleName}")
-            val excludes = VitalConfigUtils.getNonPropertyFieldsFromType(field.type).map { it.name }.toTypedArray()
+            val excludes =
+                field.type
+                    .getNonPropertyFieldsFromType()
+                    .map { it.name }
+                    .toTypedArray()
 
             typeDescription.setExcludes(*excludes)
             yaml.addTypeDescription(typeDescription)
             // add type descriptors for annotated property types...
-            for (clazz in configProperty.value) {
+            for (clazz in configProperty.types) {
                 addTypeDescriptors(clazz.java)
             }
 
@@ -44,22 +55,41 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
         }
     }
 
-    override fun load(inputStream: InputStream, clazz: Class<*>): Map<String, Any> {
+    override fun load(
+        inputStream: InputStream,
+        clazz: Class<*>,
+    ): Map<String, Any> {
         data.clear()
         // add type descriptors for complex types...
         addTypeDescriptors(clazz)
         val data = yaml.load<Map<String, Any>>(inputStream)
 
-        if (data != null) this.data.putAll(data)
+        if (data != null) {
+            this.data.putAll(data)
+        }
 
         return this.data
     }
 
     override fun read(key: String) = data[key]
-    override fun read(key: String, def: Any) = data.getOrDefault(key, def)
-    override fun write(serializedContent: Map<String, Any>) = data.putAll(serializedContent)
-    override fun write(instance: Any) = run {}
-    override fun write(key: String, value: Any) = run { data[key] = serialize(value) }
+
+    override fun read(
+        key: String,
+        def: Any,
+    ) = data.getOrDefault(key, def)
+
+    override fun write(serializedContent: Map<String, Any>) {
+        data.putAll(serializedContent)
+    }
+
+    override fun write(instance: Any) {}
+
+    override fun write(
+        key: String,
+        value: Any,
+    ) {
+        data[key] = serialize(value)
+    }
 
     override fun save(serializedContent: Map<String, Any>): String {
         data.putAll(serializedContent)
@@ -70,22 +100,36 @@ class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
         return stringWriter.toString()
     }
 
-    override fun serialize(instance: Any) = VitalConfigUtils.getPropertyFieldsFromType(instance.javaClass)
-        .associate { it.name to VitalConfigUtils.readField(instance, it)!! }
+    override fun serialize(instance: Any) =
+        instance.javaClass
+            .getPropertyFieldsFromType()
+            .associate { it.name to VitalConfig.readField(instance, it)!! }
 
-    override fun deserialize(serializedContent: Map<String, Any>, type: Class<*>): Any? = try {
-        val defaultConstructor = type.getConstructor()
-        val instance = defaultConstructor.newInstance()
-        // default constructor was found, inject field properties...
-        for ((key, value) in serializedContent) {
-            VitalConfigUtils.getFieldByProperty(type, key)?.let { VitalConfigUtils.injectField(instance, it, value) }
+    override fun deserialize(
+        serializedContent: Map<String, Any>,
+        type: Class<*>,
+    ): Any? =
+        try {
+            val defaultConstructor = type.getConstructor()
+            val instance = defaultConstructor.newInstance()
+            // default constructor was found, inject field properties...
+            for ((key, value) in serializedContent) {
+                type
+                    .getFieldByProperty(key)
+                    ?.let { VitalConfig.injectField(instance, it, value) }
+            }
+
+            instance
+        } catch (_: NoSuchMethodException) {
+            // the default constructor was not found, attempt to get constructor matching properties...
+            val constructor =
+                type.getConstructor(
+                    *type
+                        .getPropertyFieldsFromType()
+                        .map { it.javaClass }
+                        .toTypedArray(),
+                )
+            // constructor found, create a new instance with this constructor...
+            constructor.newInstance(serializedContent.values)
         }
-
-        instance
-    } catch (e: NoSuchMethodException) {
-        // default constructor not found, attempt to get constructor matching properties...
-        val constructor = type.getConstructor(*VitalConfigUtils.getPropertyFieldsFromType(type).map { it.javaClass }.toTypedArray())
-        // constructor found, create new instance with this constructor...
-        constructor.newInstance(serializedContent.values)
-    }
 }

@@ -1,11 +1,18 @@
 package me.vitalframework.items
 
-import me.vitalframework.*
+import me.vitalframework.Listener
+import me.vitalframework.RequiresSpigot
+import me.vitalframework.SpigotEventHandler
+import me.vitalframework.VitalListener
 import org.bukkit.event.player.PlayerInteractEvent
-import org.springframework.stereotype.Component
 
-@Component
-class VitalItemListener(plugin: SpigotPlugin, val itemService: VitalItemService) : VitalListener.Spigot(plugin) {
+@RequiresSpigot
+@Listener
+class VitalItemListener(
+    val itemService: VitalItemService,
+) : VitalListener.Spigot() {
     @SpigotEventHandler
-    fun onPlayerInteract(e: PlayerInteractEvent) = itemService.handleInteraction(e)
+    fun onPlayerInteract(e: PlayerInteractEvent) {
+        itemService.handleInteraction(e)
+    }
 }

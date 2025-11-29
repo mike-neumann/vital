@@ -1,6 +1,4 @@
 dependencies {
     api(project(":vital-core"))
-    api("net.kyori:adventure-text-minimessage:${findProperty("adventureTextSerializerVersion")}")
-    api("net.kyori:adventure-text-serializer-legacy:${findProperty("adventureTextSerializerVersion")}")
-    api("net.kyori:adventure-text-serializer-plain:${findProperty("adventureTextSerializerVersion")}")
+    api(libs.bundles.scoreboards.api)
 }

@@ -6,7 +6,12 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.TabCompleter
 
 object VitalPluginCommand {
-    interface Spigot : CommandExecutor, TabCompleter
+    interface Spigot :
+        CommandExecutor,
+        TabCompleter
 
-    abstract class Bungee(name: String) : Command(name), TabExecutor
+    abstract class Bungee(
+        name: String,
+    ) : Command(name),
+        TabExecutor
 }

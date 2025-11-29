@@ -1,12 +1,8 @@
 package me.vitalframework.commands
 
-abstract class VitalTestCommand :
-    VitalCommand<VitalTestCommand.Plugin, VitalTestCommand.CommandSender>(
-        Plugin(),
-        CommandSender::class.java
-    ) {
-    class Plugin
+abstract class VitalTestCommand : VitalCommand<VitalTestCommand.CommandSender>(CommandSender::class.java) {
     class Player : CommandSender()
+
     open class CommandSender {
         val messages = mutableListOf<String>()
 
@@ -16,6 +12,11 @@ abstract class VitalTestCommand :
     }
 
     override fun isPlayer(commandSender: CommandSender) = commandSender is Player
-    override fun hasPermission(commandSender: CommandSender, permission: String) = true
+
+    override fun hasPermission(
+        commandSender: CommandSender,
+        permission: String,
+    ) = true
+
     override fun getAllPlayerNames() = listOf("xRa1ny")
 }

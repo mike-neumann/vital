@@ -1,76 +1,125 @@
 package me.vitalframework
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.jetbrains.kotlin.konan.file.File
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 class VitalGradlePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         // needs to be applied before dependency resolution takes place.
-        target.plugins.apply("org.springframework.boot")
         target.plugins.apply("org.jetbrains.kotlin.plugin.spring")
         target.plugins.apply("io.spring.dependency-management")
-        target.plugins.apply("com.gradleup.shadow")
+        target.plugins.apply("org.springframework.boot")
+        // try to exclude the Vital core processor when running tests,
+        // this will fix "NoMainClass" Exception while running tests.
+        try {
+            target.configurations.filter { "test" in it.name.lowercase() }.forEach {
+                it.exclude(mapOf("group" to "me.vitalframework", "module" to "vital-core-processor"))
+            }
+        } catch (_: Exception) {
+            // if we don't have a test task, then we can ignore this step
+        }
 
         target.afterEvaluate {
-            target.applyDependency("implementation", "me.vitalframework:vital-core:${target.getProperty("vitalVersion")}")
             target.applyDependency(
-                "kapt", "me.vitalframework:vital-core-processor:${target.getProperty("vitalVersion")}",
-                "annotationProcessor", "me.vitalframework:vital-core-processor:${target.getProperty("vitalVersion")}"
+                "implementation",
+                "me.vitalframework:vital-core:${target.getProperty("vitalVersion")}",
+            )
+            target.applyDependency(
+                "kapt",
+                "me.vitalframework:vital-core-processor:${target.getProperty("vitalVersion")}",
+                "annotationProcessor",
+                "me.vitalframework:vital-core-processor:${target.getProperty("vitalVersion")}",
             )
 
             if (target.hasDependency("me.vitalframework:vital-commands")) {
                 target.applyDependency(
-                    "kapt", "me.vitalframework:vital-commands-processor:${target.getProperty("vitalVersion")}",
-                    "annotationProcessor", "me.vitalframework:vital-commands-processor:${target.getProperty("vitalVersion")}"
+                    "kapt",
+                    "me.vitalframework:vital-commands-processor:${target.getProperty("vitalVersion")}",
+                    "annotationProcessor",
+                    "me.vitalframework:vital-commands-processor:${target.getProperty("vitalVersion")}",
                 )
             }
 
-            target.tasks.named("build") { it.dependsOn(target.tasks.named("shadowJar")) }
-            target.tasks.named("bootJar") { it.enabled = false }
-            target.tasks.named("shadowJar", ShadowJar::class.java) {
-                // service files are not automatically merged which can cause
-                it.mergeServiceFiles()
-                it.mergeGroovyExtensionModules()
-//            TODO: currently does not work with logger factories on paper...
-//            appendTransform(it, "META-INF/spring.factories")
-//            appendTransform(it, "META-INF/spring.handlers")
-//            appendTransform(it, "META-INF/spring.schemas")
-//            appendTransform(it, "META-INF/spring.tooling")
-//            appendTransform(it, "META-INF/web-fragment.xml")
-//            appendTransform(it, "META-INF/web-fragment.xml")
-                it.appendTransform("META-INF/spring/aot.factories")
-                it.appendTransform("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports")
+            target.tasks.named("bootJar", BootJar::class.java) { bootJar ->
+                bootJar.mainClass.set("")
+                bootJar.archiveFileName.set("${target.name}-old.jar")
+                bootJar.outputs.dir("${DIR_TMP_UNPACKED}${File.separator}${DIR_BOOT_INF_CLASSES}")
+                bootJar.doLast {
+                    val originalJar = bootJar.archiveFile.get().asFile
+                    val unpackDir =
+                        target.layout.buildDirectory.dir(DIR_TMP_UNPACKED).get().asFile.apply {
+                            deleteRecursively()
+                            mkdirs()
+                        }
+                    target.copy {
+                        it.from(target.zipTree(originalJar))
+                        it.into(unpackDir)
+                    }
+                    val bootInfLib = unpackDir.resolve(DIR_BOOT_INF_LIB)
+                    if (bootInfLib.exists()) {
+                        for (file in bootInfLib.listFiles()!!) {
+                            if (file.extension == "jar") {
+                                val jarFiles = target.zipTree(file)
+                                // kotlin and vital-loader dependencies MUST remain on the classpath, so the plugin can load
+                                if (jarFiles.any { it.isKotlinPackage() || it.isVitalLoaderPackage() }) {
+                                    target.copy {
+                                        it.from(jarFiles)
+                                        it.into(unpackDir)
+                                    }
+
+                                    if (!jarFiles.any { it.isKotlinPackage() }) {
+                                        // we want to keep kotlin dependencies as a jar on the root
+                                        // otherwise we cannot use kotlin-reflect when our plugin tries to load
+                                        // and start up the Vital instance
+                                        continue
+                                    }
+                                }
+                            }
+
+                            file.renameTo(unpackDir.resolve(file.name))
+                        }
+                        bootInfLib.deleteRecursively()
+                    }
+                    val bootInfClasses = unpackDir.resolve(DIR_BOOT_INF_CLASSES)
+                    if (bootInfClasses.exists()) {
+                        for (file in bootInfClasses.listFiles()!!) {
+                            file.renameTo(unpackDir.resolve(file.name))
+                        }
+                        bootInfClasses.deleteRecursively()
+                    }
+                    val repackedJar =
+                        target.layout.buildDirectory
+                            .file("${DIR_LIBS}${target.name}.jar")
+                            .get()
+                            .asFile
+                    target.ant.invokeMethod("zip", mapOf("destfile" to repackedJar, "basedir" to unpackDir))
+                }
+            }
+
+            // also exclude logback, as this causes some problems with paper
+            target.configurations.all {
                 it.exclude(
-                    "META-INF/DEPENDENCIES",
-                    "META-INF/LICENSE",
-                    "META-INF/LICENSE.md",
-                    "META-INF/LICENSE.txt",
-                    "META-INF/NOTICE",
-                    "META-INF/NOTICE.md",
-                    "META-INF/NOTICE.txt",
-                    "META-INF/additional-spring-configuration-metadata.json",
-                    "META-INF/license.txt",
-                    "META-INF/notice.txt",
-                    "META-INF/sisu/javax.inject.Named",
-                    "META-INF/spring-configuration-metadata.json",
-                    "META-INF/spring.factories",
-                    "META-INF/spring.handlers",
-                    "META-INF/spring.schemas",
-                    "META-INF/spring.tooling",
-                    "META-INF/web-fragment.xml",
-                    "license.txt",
-                    "notice.txt"
+                    mapOf(
+                        "group" to "ch.qos.logback",
+                        "module" to "logback-core",
+                        "group" to "ch.qos.logback",
+                        "module" to "logback-classic",
+                    ),
                 )
             }
         }
     }
 
-    private fun ShadowJar.appendTransform(resource: String) = transform(AppendingTransformer::class.java) { it.resource.set(resource) }
+    private fun java.io.File.isKotlinPackage() = path.contains("kotlin${File.separator}")
 
-    private fun Project.hasDependency(dependencyNotation: String) = configurations.flatMap { it.allDependencies }
-        .any { "${it.group}:${it.name}:${it.version}".startsWith(dependencyNotation) }
+    private fun java.io.File.isVitalLoaderPackage() = path.contains("me${File.separator}vitalframework${File.separator}loader")
+
+    private fun Project.hasDependency(dependencyNotation: String) =
+        configurations
+            .flatMap { it.allDependencies }
+            .any { "${it.group}:${it.name}:${it.version}".startsWith(dependencyNotation) }
 
     private fun Project.applyDependency(
         configurationName: String,
@@ -83,6 +132,14 @@ class VitalGradlePlugin : Plugin<Project> {
         dependencies.add(fallbackConfigurationName, fallbackDependencyNotation)
     }
 
-    private fun Project.getProperty(propertyName: String) = findProperty(propertyName)
-        ?: throw IllegalStateException("property '$propertyName' not found")
+    private fun Project.getProperty(propertyName: String) =
+        findProperty(propertyName)
+            ?: throw IllegalStateException("property '$propertyName' not found")
+
+    companion object {
+        private val DIR_TMP_UNPACKED = "tmp${File.separator}unpacked"
+        private val DIR_BOOT_INF_LIB = "BOOT-INF${File.separator}lib"
+        private val DIR_BOOT_INF_CLASSES = "BOOT-INF${File.separator}classes"
+        private val DIR_LIBS = "libs${File.separator}"
+    }
 }

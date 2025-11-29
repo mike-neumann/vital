@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  me.vitalframework.VitalSpringConfiguration.Spigot, \
+  me.vitalframework.VitalSpringConfiguration.Bungee

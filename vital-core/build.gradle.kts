@@ -1,4 +1,4 @@
 dependencies {
-    api("org.springframework.boot:spring-boot-loader:${findProperty("springBootVersion")}")
-    api("org.springframework.boot:spring-boot-loader-tools:${findProperty("springBootVersion")}")
+    api(project(":vital-loader"))
+    api(libs.bundles.core.api)
 }
