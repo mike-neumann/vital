@@ -1,54 +1,54 @@
-# 🚀 Vital - The ultimate Minecraft server plugin framework
+# Vital - The ultimate Minecraft server plugin framework
 
 Vital helps you to easily create Minecraft server plugins for Spigot, Paper and BungeeCord by providing you with APIs that make your life easier.  
 Powered by Spring Boot at its core, Vital is designed to work for small projects as well as large ones, with the possibility to include only the modules / functionalitites you need for your project.  
 This makes your plugin smaller and easier to maintain while also having a clean and structured codebase; it's a win-win for everyone!
 
-## ✨ Highlights
+## Highlights
 
-- 🧹 **No `plugin.yml` anymore!**  
+- **No `plugin.yml` anymore!**  
 Vital takes care of all the annoying plugin setup for you.  
 Just write your code and let Vital do the rest.
 
 
-- 🖥️**Advanced command system**  
+- **Advanced command system**  
 Vital offers the `vital-commands` and `vital-commands-processor` module to easily create commands for your plugin.  
 Define function-based command handling with advanced exception handling and **automatic tab completion** right out of the box!
 
 
-- 📄 **Advanced config system**  
+- **Advanced config system**  
 With `vital-configs` you don't need to handle plugin configs yourself anymore.  
 Create typed and easy-to-use configs using classes instead of juggling with raw strings!
 
 
-- 🧮 **Easy-to-use scoreboard system**  
+- **Easy-to-use scoreboard system**  
 Using `vital-scoreboards` you can easily create scoreboards for your players, without needing many lines of code!  
 Create **dynamic** and **updatable** scoreboards with a single line of code!
 
 
-- 🌍 **Localization support**  
+- **Localization support**  
 Vital offers built-in support for localization, so multilingual plugins can be easily created.  
 Works in inventories and even **items** that are **already inside a player's inventory, without having to manually update anything!**  
 Gotta tell you it works like magic
 
 
-- 🗡️ **Interactive items**  
+- **Interactive items**  
 You can easily create interactive items with `vital-items`!  
 Native support for **cooldowns**, **localization**, **left-click** and **right-click** events!
 
 
-- 🔁 **Multiplatform support**  
+- **Multiplatform support**  
 Vital is designed to work with Spigot, Paper and BungeeCord right out of the box.  
 All modules are cross-platforms (Except those that don't make sense, like inventories for BungeeCord, etc.).
 
 
-- 🧰 **Utilities, even for non-Vital projects!**  
+- **Utilities, even for non-Vital projects!**  
 Interested in Vital but can't fully commit to it yet?  
 You can still use Vital's utilities by using `vital-utils`!  
 There you can find all kinds of utilities, like sending formatted (MiniMessage) titles, messages, actionbar, etc.
 
 
-- 📦 **Module system**  
+- **Module system**  
 Vital's module system allows you to include only the modules you need for your project.  
 This makes your plugin smaller and easier to maintain.  
 Just want to use Vital as is? No problem, just use `vital-core`.  
@@ -56,17 +56,17 @@ Want an interactive inventory system? Go ahead and use `vital-inventories`.
 You can even integrate custom modules made by others if you want to!
 
 
-- 🔌 **Plug and play**  
+- **Plug and play**  
 Vital is designed to work right out of the box, no hidden configuration steps needed.  
 Just drop it in your plugin and start developing.
 
 
-- 📊 **Native support for bStats**  
+- **Native support for bStats**  
 Vital natively supports bStats, so you can easily track your plugin's performance!  
 Just register your plugin on https://bstats.org/ and configure your plugin id in Vital!
 
 
-## 👀 Sneak Peak
+## Sneak Peak
 
 The following code snippet shows a full Vital plugin.  
 This is seriously all you need to get started.
