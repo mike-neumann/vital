@@ -5,12 +5,16 @@ abstract class VitalPluginInfoAnnotationProcessingException(
     cause: Throwable? = null,
 ) : RuntimeException(message, cause) {
     class NoMainClass :
-        VitalPluginInfoAnnotationProcessingException("No Main Plugin Class Found! Main Plugin Class Must Be Annotated With '@Vital.Info'")
+        VitalPluginInfoAnnotationProcessingException("No main plugin class found! Main plugin class must be annotated with '@Vital.Info'.")
+
+    class MultipleMainClasses(vararg classNames: String) :
+        VitalPluginInfoAnnotationProcessingException("Multiple main plugin classes found: '[${classNames.joinToString()}]' only one of them must be annotated with '@Vital.Info'. " +
+                "Easiest fix: Remove all other '@Vital.Info' annotations from your classes, so only one class with it exists.")
 
     class GeneratePluginYml(
         cause: Throwable,
     ) : VitalPluginInfoAnnotationProcessingException(
-            "error while generating plugin yml, if this error persists, please open an issue on Vital's GitHub page",
+            "Error while generating plugin yml, if this error persists, please open an issue on Vital's GitHub page",
             cause,
         )
 

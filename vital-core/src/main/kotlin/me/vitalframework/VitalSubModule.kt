@@ -14,7 +14,7 @@ abstract class VitalSubModule : InitializingBean {
     private val logger = logger()
 
     final override fun afterPropertiesSet() {
-        val vitalSubModuleName = getRequiredAnnotation<Component>().value
+        val vitalSubModuleName = javaClass.getRequiredAnnotation<Component>().value
         Vital.vitalSubModules.add(vitalSubModuleName)
 
         try {

@@ -1237,14 +1237,5 @@ abstract class VitalCommand<CS : Any> protected constructor(
          */
         @JvmStatic
         fun KClass<*>.getVitalCommandAdvice(): Advice = java.getVitalCommandAdvice()
-
-        /**
-         * Retrieves the VitalCommand.Advice annotation associated with this instance.
-         *
-         * @receiver the instance for which the annotation is to be retrieved.
-         * @return the VitalCommand.Advice annotation of this instance.
-         */
-        @JvmStatic
-        fun Any.getVitalCommandAdvice(): Advice = javaClass.getVitalCommandAdvice()
     }
 }

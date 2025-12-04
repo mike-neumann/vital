@@ -27,7 +27,12 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
             return true
         }
 
-        val (className, info) = getMainClassNameAndInfo(roundEnv) ?: throw VitalPluginInfoAnnotationProcessingException.NoMainClass()
+        val mainClassNamesAndInfo = getMainClassNamesAndInfo(roundEnv)
+        if (mainClassNamesAndInfo.size > 1) {
+            throw VitalPluginInfoAnnotationProcessingException.MultipleMainClasses(*mainClassNamesAndInfo.map { it.first }.toTypedArray())
+        }
+
+        val (className, info) = mainClassNamesAndInfo.firstOrNull() ?: throw VitalPluginInfoAnnotationProcessingException.NoMainClass()
         writeMetadataFile(className)
 
         this.info = info
@@ -48,7 +53,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         return true
     }
 
-    private fun getMainClassNameAndInfo(roundEnv: RoundEnvironment): Pair<String, Vital.Info>? =
+    private fun getMainClassNamesAndInfo(roundEnv: RoundEnvironment): List<Pair<String, Vital.Info>> =
         roundEnv
             .getElementsAnnotatedWith(Vital.Info::class.java)
             .filter { it.kind == ElementKind.CLASS }
@@ -56,7 +61,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
                 val typeElement = it as TypeElement
                 val className = typeElement.qualifiedName.toString()
                 className to it.getAnnotation(Vital.Info::class.java)
-            }.firstOrNull()
+            }
 
     private fun writeMetadataFile(mainClass: String) {
         processingEnv.filer

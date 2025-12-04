@@ -125,19 +125,6 @@ class VitalCoreSubModule {
         inline fun <reified T : Annotation> KClass<*>.getRequiredAnnotation() = java.getRequiredAnnotation<T>()
 
         /**
-         * Retrieves the required annotation of a specified type from the current object's class.
-         *
-         * This function checks whether the current object's class is annotated with the specified annotation.
-         * If the annotation is not present, an exception is thrown.
-         *
-         * @param T The type of annotation to retrieve. Must extend [Annotation].
-         * @return The annotation of type [T] if it exists on the object's class.
-         * @throws RuntimeException If the object's class is not annotated with the specified annotation type.
-         */
-        @JvmStatic
-        inline fun <reified T : Annotation> Any.getRequiredAnnotation() = javaClass.getRequiredAnnotation<T>()
-
-        /**
          * Retrieves all annotations of a specified type applied to the current class.
          * Throws a RuntimeException if no annotations of the specified type are found.
          *
@@ -161,17 +148,6 @@ class VitalCoreSubModule {
          */
         @JvmStatic
         inline fun <reified T : Annotation> KClass<*>.getRequiredAnnotations(): List<T> = java.getRequiredAnnotations<T>()
-
-        /**
-         * Retrieves all annotations of a specified type applied to the current object's class.
-         * Throws a RuntimeException if no annotations of the specified type are found.
-         *
-         * @param T The type of annotations to retrieve. Must extend [Annotation].
-         * @return A list of annotations of type [T] present on the current object's class.
-         * @throws RuntimeException if no annotations of type [T] are found on the class.
-         */
-        @JvmStatic
-        inline fun <reified T : Annotation> Any.getRequiredAnnotations(): List<T> = javaClass.getRequiredAnnotations<T>()
 
         /**
          * Retrieves the `Vital.Info` annotation from the current class.
@@ -198,18 +174,5 @@ class VitalCoreSubModule {
          */
         @JvmStatic
         fun KClass<*>.getVitalInfo() = java.getVitalInfo()
-
-        /**
-         * Retrieves the `Vital.Info` annotation from the current instance.
-         *
-         * This method extracts the `Vital.Info` annotation, which contains metadata about a Vital plugin,
-         * such as its name, description, version, and supported environment. It is expected that the instance class
-         * invoking this method is annotated with `@Vital.Info`. If the annotation is not present, an exception will be thrown.
-         *
-         * @return The `Vital.Info` annotation associated with the instance.
-         * @throws RuntimeException If the instance class is not annotated with `@Vital.Info`.
-         */
-        @JvmStatic
-        fun Any.getVitalInfo() = javaClass.getVitalInfo()
     }
 }
