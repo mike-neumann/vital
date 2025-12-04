@@ -18,10 +18,20 @@ plugins {
 repositories {
     mavenLocal()
     mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://libraries.minecraft.net/")
 }
 
 dependencies {
-    // TODO: If you want to include more Vital submodules, like commands, etc.
+    // TODO: Comment in, if you're using Spigot.
+    // compileOnly("org.spigotmc:spigot-api:1.21.7-R0.1-SNAPSHOT")
+
+    // TODO: Comment in, if you're using Paper.
+    // compileOnly("io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT")
+
+    // TODO: Comment in, if you're using BungeeCord.
+    // compileOnly("net.md-5:bungeecord-api:1.21-R0.3")
+
     // You don't need to specify the version for any official Vital submodules, those are automatically managed by the Vital Gradle Plugin we defined above.
     implementation("me.vitalframework:vital-commands")
     implementation("me.vitalframework:vital-inventories")
