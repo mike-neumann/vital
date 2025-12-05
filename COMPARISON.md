@@ -1,17 +1,24 @@
 # Comparing Vital with other Platforms
 
 Here you will find small comparisons between Vital and other platforms regarding certain implementations.  
+**These comparisons are NOT meant to teach you how Vital works.**
 
-# Spigot/Paper vs Vital
+## Main class
 
-## Main class:  
+<table>
+<tr>
+<th>Spigot</th>
+<th>Vital</th>
+</tr>
 
-### Spigot:  
+<tr>
+<td>
+
 ```java
 public class MyPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
-        
+
     }
     
     @Override
@@ -20,7 +27,9 @@ public class MyPlugin extends JavaPlugin {
     }
 }
 ```
-Then for Spigot and Paper you also need a `plugin.yml` file:  
+
+Then for Spigot and Paper you also need a `plugin.yml` file:
+
 ```yaml
 # plugin.yml
 name: MyPlugin
@@ -30,8 +39,10 @@ api-version: 1.21
 author: [MyName]
 main: me.myplugin.MyPlugin
 ```
+</td>
 
-### Vital
+<td>
+
 ```java
 @Vital.Info(
         name = "MyPlugin",
@@ -56,23 +67,37 @@ public class MyPlugin {
     }
 }
 ```
-When using Vital, you don't need to create a `plugin.yml` file, Vital does that for you.  
+
+When using Vital, you don't need to create a `plugin.yml` file.  
 All plugin-related configurations are done via annotations.  
+You also don't have to register any listeners or commands anymore!
+</td>
+</tr>
+</table>
 
 ## Commands
 
-### Spigot
+<table>
+<tr>
+<th>Spigot</th>
+<th>Vital</th>
+</tr>
+
+<tr>
+<td>
 
 ```java
 public class MyCommand extends CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // If our command should be player only, we need to cancel execution early here.
+        // If our command should be player only, 
+        // we need to cancel execution early here.
         if (!(sender instanceof Player)) {
             return true;
         }
-        
-        // In Spigot, to handle each argument, you need to manually check the "args" array for length and content.
+
+        // In Spigot, to handle each argument, 
+        // you need to manually check the "args" array for length and content.
         if (args.length == 0) {
             // Execute something when just calling "/mycommand"
         } else {
@@ -80,7 +105,8 @@ public class MyCommand extends CommandExecutor {
                 // We have exactly one argument, but we don't know what it is.
                 // We need to check the content of the argument.
                 if (args[0].equalsIgnoreCase("arg1")) {
-                    // now we need to check if the sender has permission to execute this command.
+                    // now we need to check 
+                    // if the sender has permission to execute this command.
                     if (!sender.hasPermission("permission.node.required.to.run.this.arg")) {
                         return true;
                     }
@@ -90,17 +116,22 @@ public class MyCommand extends CommandExecutor {
                     // We have executed something else.
                 }
             } else {
-                // We have more than one argument, and we still don't know what they are.
+                // We have more than one argument, 
+                // and we still don't know what they are.
             }
         }
         
-        // As you can see, we have a pyramid of doom already, and we are not even doing anything yet...
-        // And if we include values in arguments, the logic gets even more messed up...
+        // As you can see, we have a pyramid of doom already, 
+        // and we are not even doing anything yet...
+        // And if we include values in arguments, 
+        // the logic gets even more messed up...
     }
 }
 ```
+</td>
 
-### Vital
+<td>
+
 ```java
 // This "sets up" the command.
 @VitalCommand.Info(
@@ -112,10 +143,12 @@ public class MyCommand extends CommandExecutor {
         playerOnly = true
 )
 public class MyCommand extends VitalCommand.Spigot {
-    // @ArgHandler tells Vital that this method should be called when the command is executed with no arguments.
+    // @ArgHandler tells Vital that this method should be called
+    // when the command is executed with no arguments.
     @ArgHandler
     public ReturnState onNoArg(Player player) {
-        // We can safely pass a player reference to this method because up top, we have defined that the command is player-only.
+        // We can safely pass a player reference to this method because up top, 
+        // we have defined that the command is player-only.
 
         // Here we define what the result of this command execution should be.
         // In almost all cases, this can be ReturnState.SUCCESS.
@@ -126,14 +159,17 @@ public class MyCommand extends VitalCommand.Spigot {
     // Same things go for this method here.
     @ArgHandler(arg = @Arg(name = "arg1", permission = "permission.node.required.to.run.this.arg", playerOnly = true))
     public ReturnState onArg1(Player player) {
-        // We can safely pass a player reference to this method because up top, we have defined that the arg is player-only.
+        // We can safely pass a player reference to this method because up top, 
+        // we have defined that the arg is player-only.
         return ReturnState.SUCCESS;
     }
     
     @ArgHandler(arg = @Arg(name = "arg1 <value1>"))
     public ReturnState onArg1Value1(Player player, String[] values) {
         // Just like above, but now we also have a value.
-        // The value is passed to the "values" array, and because we defined exactly one inside our arg handler annotation, this will ALWAYS be one argument here.
+        // The value is passed to the "values" array, 
+        // and because we defined exactly one inside our arg handler annotation, 
+        // this will ALWAYS be one argument here.
         final var value1 = values[0];
         
         // Now we can do whatever we want with the value.
@@ -143,14 +179,24 @@ public class MyCommand extends VitalCommand.Spigot {
 }
 ```
 As you can see, Vital offers a more concise way of handling commands.  
-Stuff is waay more readable, structured and less error-prone.  
+Stuff is waay more readable, structured and less error-prone.
 
-There is also native exception handling in Vital, but that goes a bit too deep for a short comparison.  
-
+There is also native exception handling in Vital, 
+but that goes a bit too deep for a short comparison.
+</td>
+</tr>
+</table>
 
 ## Listeners
 
-### Spigot
+<table>
+<tr>
+<th>Spigot</th>
+<th>Vital</th>
+</tr>
+
+<tr>
+<td>
 
 ```java
 public class MyListener implements Listener {
@@ -158,15 +204,16 @@ public class MyListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent e) {
         // Do something here...
     }
-    
+
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
         // Do something here...
     }
 }
 ```
+</td>
 
-### Vital
+<td>
 
 ```java
 @Listener
@@ -183,11 +230,22 @@ public class MyListener extends VitalListener.Spigot {
 }
 ```
 
-Listeners are pretty much the same in Vital, as they are already pretty lightweight in Spigot / Paper.  
+Listeners are pretty much the same in Vital,
+as they are already pretty lightweight in Spigot / Paper.
+</td>
+</tr>
+</table>
 
 ## Scoreboards
 
-### Spigot
+<table>
+<tr>
+<th>Spigot</th>
+<th>Vital</th>
+</tr>
+
+<tr>
+<td>
 
 ```java
 public void setScoreboard(Player player) {
@@ -216,8 +274,9 @@ public void setScoreboard(Player player) {
     // Not very developer-friendly...
 }
 ```
+</td>
 
-### Vital
+<td>
 
 Global scoreboards (Should be used when you want to display the same scoreboard on all players, so no player-specific data)
 
@@ -232,10 +291,12 @@ public void setGlobalScoreboard(Player player) {
     
     scoreboard.addPlayer(player);
 
-    // If some background data has changed on the player object, you can easily update it.
+    // If some background data has changed on the player object, 
+    // you can easily update it.
     scoreboard.update(player);
     
-    // Or update it for all players that are added to this scoreboard if you want to.
+    // Or update it for all players that are added to this scoreboard 
+    // if you want to.
     scoreboard.update();
 }
 ```
@@ -253,15 +314,14 @@ public void setScoreboard(Player player) {
     
     scoreboard.addPlayer(player);
 
-    // If some background data has changed on the player object, you can easily update it.
+    // If some background data has changed on the player object, 
+    // you can easily update it.
     scoreboard.update(player);
 }
 ```
 
 A perfect example of how Vital can simplify your code.  
 As demonstrated above, you can easily create scoreboards with Vital, without having to worry about the details of Bukkit's Scoreboard API.
-
-
-# BungeeCord vs Vital
-
-
+</td>
+</tr>
+</table>

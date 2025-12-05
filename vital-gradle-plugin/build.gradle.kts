@@ -17,7 +17,6 @@ dependencies {
     api(libs.bundles.gradlePlugin.api)
 }
 
-
 tasks.jar {
     manifest {
         attributes["Implementation-Version"] = project.version
