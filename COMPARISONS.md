@@ -326,3 +326,5 @@ As demonstrated above, you can easily create scoreboards with Vital, without hav
 </td>
 </tr>
 </table>
+
+## More to come...

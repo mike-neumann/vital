@@ -1,4 +1,4 @@
-# Vital [![](bmc-button.svg)](https://buymeacoffee.com/mike.neumann)
+# Vital [![Buy me a coffee](bmc-button.svg)](https://buymeacoffee.com/mike.neumann)
 
 A modular Minecraft plugin framework for Spigot, Paper, and BungeeCord.  
 It simplifies development by handling setup, commands, localization, and more. 
@@ -14,7 +14,6 @@ It offers easy-to-use APIs and cross-platform support, making plugins smaller an
 - **Localization** – Built-in support for multilingual plugins.
 - **Interactable items** – Create interactable items with ease.
 - **Modular** – Only use the necessary features for a lightweight plugin.
-
 
 ## Comparisons
 
