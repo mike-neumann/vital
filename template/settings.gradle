@@ -1,7 +1,4 @@
-// TODO: Delete this file, if you're not using Kotlin for your Gradle build.
-
-// TODO: This will define the name of your project, change it to your plugin's name.
-rootProject.name = "template"
+// TODO: Delete this file, if you're not using Groovy for your Gradle build.
 
 // This right here is important.
 // It will configure where Gradle will look for plugins.
@@ -14,3 +11,6 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+// TODO: This will define the name of your project, change it to your plugin's name.
+rootProject.setName 'template'

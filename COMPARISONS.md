@@ -1,6 +1,7 @@
-# Comparing Vital with other Platforms
+# Comparisons
 
-Here you will find small comparisons between Vital and other platforms regarding certain implementations.  
+Here you will find small comparisons between Spigot and Vital regarding certain implementations.
+
 **These comparisons are NOT meant to teach you how Vital works.**
 
 ## Main class

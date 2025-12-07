@@ -15,7 +15,7 @@ import org.springframework.context.event.EventListener
     "1.0.0",
     ["Me"],
     // TODO: Change this to your actual plugin environment: SPIGOT, PAPER or BUNGEE
-    Vital.Info.PluginEnvironment.SPIGOT
+    Vital.Info.PluginEnvironment.PAPER
 )
 class MyKotlinPlugin {
     private val logger = logger()
@@ -23,12 +23,12 @@ class MyKotlinPlugin {
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
         val info = MyKotlinPlugin::class.getVitalInfo()
-        logger.info("Vital plugin '${info.name}' version '${info.version}' successfully loaded!")
+        logger.info("Kotlin Vital plugin '${info.name}' version '${info.version}' successfully loaded!")
     }
 
     @EventListener(ContextClosedEvent::class)
     fun onContextClosed() {
         val info = MyKotlinPlugin::class.getVitalInfo()
-        logger.info("Vital plugin '${info.name}' version '${info.version}' successfully unloaded!")
+        logger.info("Kotlin Vital plugin '${info.name}' version '${info.version}' successfully unloaded!")
     }
 }

@@ -15,7 +15,7 @@ import org.springframework.context.event.EventListener;
         version = "1.0.0",
         author = {"Me"},
         // TODO: Change this to your actual plugin environment: SPIGOT, PAPER or BUNGEE
-        environment = Vital.Info.PluginEnvironment.SPIGOT
+        environment = Vital.Info.PluginEnvironment.PAPER
 )
 public class MyJavaPlugin {
     private final Logger logger = VitalCoreSubModule.logger(this);
@@ -23,12 +23,12 @@ public class MyJavaPlugin {
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
         final var info = VitalCoreSubModule.getVitalInfo(MyJavaPlugin.class);
-        logger.info("Vital plugin '{}' version '{}' successfully loaded!", info.name(), info.version());
+        logger.info("Java Vital plugin '{}' version '{}' successfully loaded!", info.name(), info.version());
     }
 
     @EventListener(ContextClosedEvent.class)
     public void onContextClosed() {
         final var info = VitalCoreSubModule.getVitalInfo(MyJavaPlugin.class);
-        logger.info("Vital plugin '{}' version '{}' successfully unloaded!", info.name(), info.version());
+        logger.info("Java Vital plugin '{}' version '{}' successfully unloaded!", info.name(), info.version());
     }
 }

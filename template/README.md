@@ -9,7 +9,7 @@ Just follow these easy steps to get started:
 3. Choose your desired programming language by following the TODOs in the codebase.
 4. Done!
 
-Now you can build your plugin and throw it on a server if you want to test if it starts up.  
+Now you can build your plugin and throw it on a server.  
 Simply build it by running `./gradlew build` or `gradlew.bat build` if you're under Windows in the project's directory.  
 The plugin JAR will be located in `build/libs/plugin-name.jar`.  
 
