@@ -1,24 +1,8 @@
-<div style="display: flex; align-items: center; justify-content: center;">
-    <img src="vital.png" alt="Vital" style="width: 35%;"/>
-    <p>
-        <span style="font-size: 4em; font-weight: bold;">Vital</span>
-        <br>
-        A modular Minecraft plugin framework for Spigot, Paper, and BungeeCord.
-        <br>
-        It simplifies development by handling setup, commands, localization, and more. It offers easy-to-use APIs and cross-platform support, making plugins smaller and easier to maintain.
-    </p>
-</div>
+# Vital [![](bmc-button.svg)](https://buymeacoffee.com/mike.neumann)
 
-<div style="text-align: center;">
-    <!--
-    <a href="TODO">
-        <img src="discord.png" alt="Discord Server" height="56">
-    </a>
-    -->
-    <a href="https://buymeacoffee.com/mike.neumann">
-        <img src="buymeacoffee.png" alt="Buy Me a Coffee" height="56">
-    </a>
-</div>
+A modular Minecraft plugin framework for Spigot, Paper, and BungeeCord.  
+It simplifies development by handling setup, commands, localization, and more. 
+It offers easy-to-use APIs and cross-platform support, making plugins smaller and easier to maintain.
 
 ---
 
