@@ -32,7 +32,6 @@ public class MyPlugin extends JavaPlugin {
 Then for Spigot and Paper you also need a `plugin.yml` file:
 
 ```yaml
-# plugin.yml
 name: MyPlugin
 version: 1.0.0
 description: MyPlugin description
@@ -129,6 +128,19 @@ public class MyCommand extends CommandExecutor {
     }
 }
 ```
+
+Then you need to update your `plugin.yml` file:
+```yaml
+name: MyPlugin
+version: 1.0.0
+description: MyPlugin description
+api-version: 1.21
+author: [MyName]
+main: me.myplugin.MyPlugin
+
+commands:
+  mycommand:
+```
 </td>
 
 <td>
@@ -184,6 +196,8 @@ Stuff is waay more readable, structured and less error-prone.
 
 There is also native exception handling in Vital, 
 but that goes a bit too deep for a short comparison.
+
+The `plugin.yml` is managed by Vital, so you don't have to worry about it anymore.
 </td>
 </tr>
 </table>
@@ -212,6 +226,16 @@ public class MyListener implements Listener {
     }
 }
 ```
+
+And then you'd have to manually register the listener.
+
+```java
+@Override
+public void onEnable() {
+    getServer().getPluginManager().registerEvents(new MyListener(), this);
+    // and repeat for every other listener in your project...
+}
+```
 </td>
 
 <td>
@@ -233,6 +257,8 @@ public class MyListener extends VitalListener.Spigot {
 
 Listeners are pretty much the same in Vital,
 as they are already pretty lightweight in Spigot / Paper.
+
+In Vital, you don't have to register listeners anymore.
 </td>
 </tr>
 </table>
