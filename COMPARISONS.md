@@ -275,7 +275,33 @@ In Vital, you don't have to register listeners anymore.
 <td>
 
 ```java
-public void setScoreboard(Player player) {
+public void setGlobalScoreboard(Player player) {
+    final var scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+    final var objective = scoreboard.registerNewObjective(
+            "myObjective",
+            Criteria.DUMMY,
+            Component.text("Display Name")
+    );
+    objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+    objective.getScore("Line 3").setScore(2);
+    objective.getScore("Line 2").setScore(1);
+    objective.getScore("Line 1").setScore(0);
+
+    // To update the scoreboard, you need to remove all entries first...
+    for (final var entry : scoreboard.getEntries()) {
+        scoreboard.resetScores(entry);
+    }
+
+    // And then re-add the content...
+    objective.getScore("Line 3").setScore(2);
+    objective.getScore("Line 2").setScore(1);
+    objective.getScore("Line 1").setScore(0);
+
+    // Not very developer-friendly...
+}
+
+public void setPerPlayerScoreboard(Player player) {
     final var scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
     final var objective = scoreboard.registerNewObjective(
             "myObjective", 
