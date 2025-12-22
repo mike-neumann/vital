@@ -192,10 +192,10 @@ public class MyCommand extends VitalCommand.Spigot {
 }
 ```
 As you can see, Vital offers a more concise way of handling commands.  
-Stuff is waay more readable, structured and less error-prone.
+Stuff is waay more readable, structured and less error-prone.  
 
 There is also native exception handling in Vital, 
-but that goes a bit too deep for a short comparison.
+but that goes a bit too deep for a short comparison.  
 
 The `plugin.yml` is managed by Vital, so you don't have to worry about it anymore.
 </td>
@@ -227,7 +227,7 @@ public class MyListener implements Listener {
 }
 ```
 
-And then you'd have to manually register the listener.
+And then you'd have to manually register the listener.  
 
 ```java
 @Override
@@ -256,9 +256,9 @@ public class MyListener extends VitalListener.Spigot {
 ```
 
 Listeners are pretty much the same in Vital,
-as they are already pretty lightweight in Spigot / Paper.
+as they are already pretty lightweight in Spigot / Paper.  
 
-In Vital, you don't have to register listeners anymore.
+In Vital, you don't have to register listeners anymore.  
 </td>
 </tr>
 </table>
@@ -331,7 +331,7 @@ public void setPerPlayerScoreboard(Player player) {
 
 <td>
 
-Global scoreboards (Should be used when you want to display the same scoreboard on all players, so no player-specific data)
+Global scoreboards (Should be used when you want to display the same scoreboard on all players, so no player-specific data).  
 
 ```java
 public void setGlobalScoreboard(Player player) {
@@ -354,7 +354,7 @@ public void setGlobalScoreboard(Player player) {
 }
 ```
 
-Per-player scoreboards (Should be used when you want to display a scoreboard for each player individually)
+Per-player scoreboards (Should be used when you want to display a scoreboard for each player individually).  
 
 ```java
 public void setScoreboard(Player player) {
@@ -374,7 +374,7 @@ public void setScoreboard(Player player) {
 ```
 
 A perfect example of how Vital can simplify your code.  
-As demonstrated above, you can easily create scoreboards with Vital, without having to worry about the details of Bukkit's Scoreboard API.
+As demonstrated above, you can easily create scoreboards with Vital, without having to worry about the details of Bukkit's Scoreboard API.  
 </td>
 </tr>
 </table>
