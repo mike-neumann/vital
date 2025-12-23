@@ -67,7 +67,7 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
 
     private fun generatePluginYmlCommands(
         commandInfos: MutableList<VitalCommand.Info>,
-        pluginEnvironment: Vital.Info.PluginEnvironment,
+        pluginEnvironment: Vital.PluginEnvironment,
     ) {
         try {
             // Create the new `plugin.yml` file resource as the basic processor left it uncreated.
