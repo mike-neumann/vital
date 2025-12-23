@@ -3,7 +3,6 @@ package me.vitalframework.scoreboards
 import me.vitalframework.SpigotPlayer
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
 import java.util.UUID
 
@@ -105,18 +104,11 @@ class VitalGlobalScoreboard(
      * of the scoreboard reflects the current state of the specified `lines`.
      */
     fun updateContent() {
-        scoreboardContent.update()
-        val objective =
-            scoreboardContent.bukkitScoreboard.getObjective(
-                PlainTextComponentSerializer
-                    .plainText()
-                    .serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboardContent.title())),
-            )
-
+        val objective = scoreboardContent.update()
         for (lineIndex in lines.indices) {
             val line = lines[lineIndex]()
             val score =
-                objective!!.getScore(
+                objective.getScore(
                     LegacyComponentSerializer
                         .legacySection()
                         .serialize(MiniMessage.miniMessage().deserialize(line)) + "\u00A7".repeat(lineIndex),
