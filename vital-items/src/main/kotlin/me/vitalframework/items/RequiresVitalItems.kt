@@ -1,7 +1,7 @@
 package me.vitalframework.items
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Component
 
 /**
  * Convenience-annotation to mark a class to only be loaded as a bean, when the vital-items submodule is used.

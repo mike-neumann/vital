@@ -3,7 +3,6 @@ package me.vitalframework.cloudnet4.bridge
 import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
-import org.springframework.stereotype.Component
 
 /**
  * Defines the official vital-cloudnet4-bridge submodule, which is displayed when Vital starts.

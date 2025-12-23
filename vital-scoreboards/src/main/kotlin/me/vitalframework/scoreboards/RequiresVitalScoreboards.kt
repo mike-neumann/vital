@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
  * Must be used in combination with [Component].
  *
  * ```java
- * @RequiresVitalScoreboard
+ * @RequiresVitalScoreboards
  * @Component
  * public class MyVitalScoreboardsBean {
  *   // ...

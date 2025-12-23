@@ -13,7 +13,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataType
 import org.springframework.context.MessageSource
-import org.springframework.stereotype.Component
 import java.util.Locale
 
 /**

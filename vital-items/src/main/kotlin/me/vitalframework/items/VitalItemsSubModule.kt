@@ -3,7 +3,6 @@ package me.vitalframework.items
 import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
-import org.springframework.stereotype.Component
 
 /**
  * Defines the official vital-items submodule, which is displayed when Vital starts.

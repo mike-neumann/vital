@@ -15,7 +15,7 @@ import me.vitalframework.tasks.VitalCountdownTask
  *
  * ```java
  * @MinigameState
- * public class MyCountdownMinigameState extends VitalCountdownMinigameState {#
+ * public class MyCountdownMinigameState extends VitalCountdownMinigameState {
  *   public MyCountdownMinigameState(JavaPlugin plugin) {
  *     super(plugin);
  *   }

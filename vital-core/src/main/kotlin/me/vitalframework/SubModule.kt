@@ -13,5 +13,5 @@ import org.springframework.stereotype.Component
 @Retention(AnnotationRetention.RUNTIME)
 annotation class SubModule(
     @get:AliasFor(annotation = Component::class)
-    val value: String
+    val value: String,
 )

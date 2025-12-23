@@ -1,7 +1,5 @@
 package me.vitalframework
 
-import org.springframework.stereotype.Component
-
 /**
  * A volatile in-memory repository to store "temporary" data in a Spring-like repository implementation.
  * It can store implementations of [VitalEntity] and the means to get, save and delete them.

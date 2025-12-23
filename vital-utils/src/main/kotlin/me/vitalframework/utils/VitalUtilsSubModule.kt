@@ -2,7 +2,6 @@ package me.vitalframework.utils
 
 import me.vitalframework.SubModule
 import me.vitalframework.VitalSubModule
-import org.springframework.stereotype.Component
 
 /**
  * Defines the official vital-utils submodule, which is displayed when Vital starts.

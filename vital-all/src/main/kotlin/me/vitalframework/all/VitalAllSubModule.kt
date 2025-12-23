@@ -5,7 +5,6 @@ import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
-import org.springframework.stereotype.Component
 
 /**
  * Defines the official vital-all submodule, which is displayed when Vital starts.

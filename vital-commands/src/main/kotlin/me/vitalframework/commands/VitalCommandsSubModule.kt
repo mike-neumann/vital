@@ -8,7 +8,6 @@ import me.vitalframework.SpigotPlugin
 import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
-import org.springframework.stereotype.Component
 import java.lang.reflect.InvocationTargetException
 
 /**
