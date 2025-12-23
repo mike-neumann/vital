@@ -3,7 +3,6 @@ package me.vitalframework
 import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.stereotype.Component
 
 /**
  * Defines a valid Vital submodule.
@@ -13,7 +12,7 @@ abstract class VitalSubModule : InitializingBean {
     private val logger = logger()
 
     final override fun afterPropertiesSet() {
-        val vitalSubModuleName = javaClass.getRequiredAnnotation<Component>().value
+        val vitalSubModuleName = javaClass.getRequiredAnnotation<SubModule>().value
         Vital.vitalSubModules.add(vitalSubModuleName)
 
         try {
