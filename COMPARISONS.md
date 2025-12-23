@@ -87,7 +87,7 @@ You also don't have to register any listeners or commands anymore!
 <td>
 
 ```java
-public class MyCommand extends CommandExecutor {
+public class MyCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         // If our command should be player only, 
