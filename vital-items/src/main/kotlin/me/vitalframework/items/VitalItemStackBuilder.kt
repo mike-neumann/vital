@@ -28,10 +28,10 @@ open class VitalItemStackBuilder {
          * Convenience-function to create new [ItemStack] instances using the Builder-Pattern.
          *
          * ```java
-         * VitalItemStackBuilder.itemBuilder(null, it -> {
-         *   it.set...();
-         *   it.set...();
-         *   it.set...();
+         * VitalItemStackBuilder.itemBuilder(null, builder -> {
+         *   builder.set...();
+         *   builder.set...();
+         *   builder.set...();
          *   return kotlin.Unit.INSTANCE;
          * });
          * ```

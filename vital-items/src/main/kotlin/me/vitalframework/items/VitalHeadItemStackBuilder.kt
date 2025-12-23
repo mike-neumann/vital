@@ -18,10 +18,10 @@ class VitalHeadItemStackBuilder : VitalItemStackBuilder() {
          * Convenience-function to create new head [ItemStack] instances using the Builder-Pattern.
          *
          * ```java
-         * VitalHeadItemStackBuilder.headBuilder(null, it -> {
-         *   it.set...();
-         *   it.set...();
-         *   it.set...();
+         * VitalHeadItemStackBuilder.headBuilder(null, builder -> {
+         *   builder.set...();
+         *   builder.set...();
+         *   builder.set...();
          *   return kotlin.Unit.INSTANCE;
          * });
          * ```

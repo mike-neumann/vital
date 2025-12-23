@@ -6,7 +6,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
 import java.util.UUID
-import java.util.function.Function
 
 /**
  * Defines a per-player based scoreboard implementation within the Vital-Framework.
@@ -16,17 +15,17 @@ import java.util.function.Function
  * @Bean
  * public VitalPerPlayerScoreboard myPerPlayerScoreboard() {
  *   return new VitalPerPlayerScoreboard(
- *     "MyPerPlayerScoreboard",
- *     it -> "Line 1 for " + it.getName(),
- *     it -> "Line 2 for " + it.getName(),
- *     it -> "Line 3 for " + it.getName()
+ *     player -> "MyPerPlayerScoreboard",
+ *     player -> "Line 1 for " + player.getName(),
+ *     player -> "Line 2 for " + player.getName(),
+ *     player -> "Line 3 for " + player.getName()
  *   );
  * }
  * ```
  */
 class VitalPerPlayerScoreboard(
-    val title: String,
-    vararg var lines: Function<SpigotPlayer, String>,
+    val title: (SpigotPlayer) -> String,
+    vararg var lines: (SpigotPlayer) -> String,
 ) : VitalScoreboard {
     private val _scoreboardContent = mutableMapOf<UUID, VitalScoreboardContent>()
 
@@ -76,7 +75,7 @@ class VitalPerPlayerScoreboard(
             scoreboard.bukkitScoreboard.getObjective(
                 PlainTextComponentSerializer
                     .plainText()
-                    .serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboard.title)),
+                    .serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboard.title())),
             )
         val lines = applyLines(player)
 
@@ -102,7 +101,7 @@ class VitalPerPlayerScoreboard(
      */
     fun addPlayer(player: SpigotPlayer) {
         if (player.uniqueId in _scoreboardContent) return
-        _scoreboardContent[player.uniqueId] = VitalScoreboardContent(title)
+        _scoreboardContent[player.uniqueId] = VitalScoreboardContent { title(player) }
         update(player)
     }
 
@@ -124,5 +123,5 @@ class VitalPerPlayerScoreboard(
      *
      * @param player The player for whom the scoreboard lines are being applied.
      */
-    private fun applyLines(player: SpigotPlayer) = lines.map { it.apply(player) }
+    private fun applyLines(player: SpigotPlayer) = lines.map { it(player) }
 }

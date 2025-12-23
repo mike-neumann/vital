@@ -6,7 +6,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
 import java.util.UUID
-import java.util.function.Supplier
 
 /**
  * Defines a global scoreboard implementation within the Vital-Framework.
@@ -16,7 +15,7 @@ import java.util.function.Supplier
  * @Bean
  * public VitalGlobalScoreboard myGlobalScoreboard() {
  *   return new VitalGlobalScoreboard(
- *     "MyGlobalScoreboard",
+ *     () -> "MyGlobalScoreboard",
  *     () -> "Line 1",
  *     () -> "Line 2",
  *     () -> "Line 3"
@@ -25,8 +24,8 @@ import java.util.function.Supplier
  * ```
  */
 class VitalGlobalScoreboard(
-    title: String,
-    vararg var lines: Supplier<String>,
+    title: () -> String,
+    vararg var lines: () -> String,
 ) : VitalScoreboard {
     private val _players = mutableListOf<UUID>()
 
@@ -111,12 +110,11 @@ class VitalGlobalScoreboard(
             scoreboardContent.bukkitScoreboard.getObjective(
                 PlainTextComponentSerializer
                     .plainText()
-                    .serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboardContent.title)),
+                    .serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboardContent.title())),
             )
 
         for (lineIndex in lines.indices) {
-            val lineSupplier = lines[lineIndex]
-            val line = lineSupplier.get()
+            val line = lines[lineIndex]()
             val score =
                 objective!!.getScore(
                     LegacyComponentSerializer
