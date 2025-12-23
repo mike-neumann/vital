@@ -10,25 +10,8 @@ import org.bukkit.persistence.PersistentDataType
 import java.util.UUID
 
 /**
- * A builder class for creating and configuring item stacks with customizable properties.
- *
- * This class provides a flexible way to define and modify item stack attributes such as type, name,
- * lore, enchantments, and other metadata. It allows for precise customization of items within the
- * Vital framework or for general Bukkit/Spigot development.
- *
- * Properties defined in this class can be adjusted to match specific item requirements, enabling
- * developers to create items with unique visual or functional characteristics.
- *
- * ### Features:
- * - Ability to set the type of the item (default is `Material.COBBLESTONE`).
- * - Option to specify a custom display name for the item.
- * - Configurable stack size through the `amount` property.
- * - Option to make the item unbreakable.
- * - Support for adding lore (descriptive text) to the item.
- * - Management of `ItemFlag` properties to customize the item's appearance and behavior.
- * - Ability to add enchantments and specify their levels.
- *
- * This class serves as a base for configuring items in a modular and readable way.
+ * Convenience-class to build [ItemStack] instances using the Builder-Pattern.
+ * Check the function to view how to use it.
  */
 open class VitalItemStackBuilder {
     var type = Material.COBBLESTONE
@@ -42,14 +25,16 @@ open class VitalItemStackBuilder {
 
     companion object {
         /**
-         * Constructs an `ItemStack` using the provided initialization logic
-         * defined within the `VitalItemStackBuilder`.
+         * Convenience-function to create new [ItemStack] instances using the Builder-Pattern.
          *
-         * @param init A lambda function with a `VitalItemStackBuilder` receiver,
-         * allowing customization of the item stack properties (e.g., type, name,
-         * lore, enchantments, etc.).
-         * @return The constructed `ItemStack` instance with the specified
-         * properties applied.
+         * ```java
+         * VitalItemStackBuilder.itemBuilder(null, it -> {
+         *   it.set...();
+         *   it.set...();
+         *   it.set...();
+         *   return kotlin.Unit.INSTANCE;
+         * });
+         * ```
          */
         @JvmStatic
         inline fun itemBuilder(

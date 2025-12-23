@@ -17,15 +17,40 @@ import java.util.UUID
 import kotlin.reflect.KClass
 
 /**
- * Represents a customizable item with unique metadata and behavior within the Vital framework.
+ * Defines an interactable item within the Vital-Framework.
  *
- * This class provides a base structure for creating items with cooldown functionality and custom
- * interactions. It includes handling for left-click, right-click, and cooldown-specific events.
+ * ```java
+ * @VitalItem.Info(
+ *   name = "MyItem",
+ *   type = Material.STONE
+ * )
+ * public class MyItem extends VitalItem {
+ *   @Override
+ *   public void onLeftClick(PlayerInteractEvent e) {
+ *     // ...
+ *   }
  *
- * Classes inheriting from `VitalItem` must be annotated with `@Info` to define the item’s metadata,
- * such as its type, name, lore, amount, and other properties.
+ *   @Override
+ *   public void onRightClick(PlayerInteractEvent e) {
+ *     // ...
+ *   }
  *
- * The class also ensures that each item is uniquely identifiable through its persistent data container.
+ *   @Override
+ *   public void onCooldown(PlayerInteractEvent e) {
+ *     // ...
+ *   }
+ *
+ *   @Override
+ *   public void onCooldownExpire(Player player) {
+ *     // ...
+ *   }
+ *
+ *   @Override
+ *   public void onCooldownTick(Player player) {
+ *     // ...
+ *   }
+ * }
+ * ```
  */
 open class VitalItem {
     val uniqueId: UUID = UUID.randomUUID()

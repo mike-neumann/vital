@@ -15,6 +15,9 @@ import org.yaml.snakeyaml.representer.Representer
 import java.io.InputStream
 import java.io.StringWriter
 
+/**
+ * Defines a YAML-File processor for a [VitalConfig] instance.
+ */
 class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
     private val yaml: Yaml
     override val data = mutableMapOf<String, Any>()

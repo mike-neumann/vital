@@ -297,7 +297,7 @@ interface VitalUtils<CS, P : CS> {
             try {
                 Class.forName("me.vitalframework.Vital")
             } catch (_: Exception) {
-                logger.info("Running 'vital-utils' outside of a Vital project")
+                logger.info("Running 'vital-utils' outside of a Vital project.")
                 logger.info(
                     "This functionality is natively supported, but you might want to check out Vital as a whole: https://github.com/mike-neumann/vital",
                 )

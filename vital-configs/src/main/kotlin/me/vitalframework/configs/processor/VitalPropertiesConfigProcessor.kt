@@ -8,6 +8,9 @@ import java.io.InputStream
 import java.io.StringWriter
 import java.util.Properties
 
+/**
+ * Defines a Properties-File processor for a [VitalConfig] instance.
+ */
 class VitalPropertiesConfigProcessor : Processor<Properties, String> {
     override val data = Properties()
 

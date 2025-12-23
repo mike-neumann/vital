@@ -1,25 +1,28 @@
 package me.vitalframework.minigames
 
+import me.vitalframework.SpigotListener
 import me.vitalframework.SpigotPlugin
 import me.vitalframework.tasks.VitalCountdownTask
 
 /**
- * Represents an abstract base class for minigame states that operate with a countdown timer.
- * This class combines countdown task management with the concept of defining different
- * states for a minigame, offering both countdown behavior and lifecycle hooks for the state.
+ * Defines a countdown minigame state within the Vital-Framework.
+ * A countdown minigame state can be any state within a running or preparing minigame, which contains a countdown.
+ * Every countdown state will by default be a [VitalMinigameState], [SpigotListener] and [VitalCountdownTask].
  *
- * The class extends `VitalCountdownTask.Spigot` to provide countdown functionalities specifically
- * tailored for a Spigot-based environment and implements the `VitalBaseMinigameState` interface,
- * enabling seamless integration with a minigame's state management system.
+ * Listener-events will be scoped to the currently active state.
+ * Meaning the event-handlers defined within a single state will only trigger, when that state is active.
+ * The current minigame state can be managed by [VitalMinigameService].
  *
- * Subclasses are expected to define specific behaviors for their minigame state, using
- * the countdown management features provided by the superclass and handling their custom
- * logic during the enabled/disabled state transitions.
- *
- * @constructor Creates a new instance of `VitalCountdownMinigameState`.
- * @param plugin The Spigot plugin instance used to manage tasks and register listeners.
+ * ```java
+ * @MinigameState
+ * public class MyCountdownMinigameState extends VitalCountdownMinigameState {#
+ *   public MyCountdownMinigameState(JavaPlugin plugin) {
+ *     super(plugin);
+ *   }
+ * }
+ * ```
  */
 abstract class VitalCountdownMinigameState(
     plugin: SpigotPlugin,
 ) : VitalCountdownTask.Spigot(plugin),
-    VitalBaseMinigameState
+    VitalMinigameState

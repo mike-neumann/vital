@@ -1,10 +1,15 @@
 package me.vitalframework.items
 
+import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
 import org.springframework.stereotype.Component
 
-@Component("vital-items")
+/**
+ * Defines the official vital-items submodule, which is displayed when Vital starts.
+ * It contains the Vital item system, which can be used to create dynamic an interactable class-based items.
+ */
+@SubModule("vital-items")
 class VitalItemsSubModule(
     val vitalItems: List<VitalItem>,
 ) : VitalSubModule() {

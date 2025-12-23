@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component
  * Defines a valid Vital submodule.
  * Will be displayed when Vital starts, to show what extra functionality will be available.
  */
-@Component
 abstract class VitalSubModule : InitializingBean {
     private val logger = logger()
 
@@ -46,6 +45,6 @@ abstract class VitalSubModule : InitializingBean {
      * Ensure that this method does not perform any blocking or long-running operations, as it is
      * invoked during the initialization sequence of the Vital framework.
      */
-    fun onInstall() {
+    open fun onInstall() {
     }
 }

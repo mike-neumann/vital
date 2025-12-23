@@ -1,10 +1,15 @@
 package me.vitalframework.holograms
 
+import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
 import org.springframework.stereotype.Component
 
-@Component("vital-holograms")
+/**
+ * Defines the official vital-holograms submodule, which is displayed when Vital starts.
+ * It contains the Vital holograms system, which can be used to create global and per-player based holograms.
+ */
+@SubModule("vital-holograms")
 class VitalHologramsSubModule : VitalSubModule() {
     val logger = logger()
 

@@ -7,26 +7,24 @@ import org.bukkit.inventory.meta.SkullMeta
 import java.util.UUID
 
 /**
- * A specialized builder class for creating player head items in Bukkit/Spigot.
- * Extends the functionality of [VitalItemStackBuilder] by adding support for setting
- * the owning player property on player heads.
- *
- * This builder can be used in conjunction with the `headBuilder` utility function to
- * simplify the construction of customized player head items.
- *
- * @property owningPlayer The [OfflinePlayer] whose player head will be represented by the resulting item.
+ * Convenience-class to build head [ItemStack] instances using the Builder-Pattern.
+ * Check the function to view how to use it.
  */
 class VitalHeadItemStackBuilder : VitalItemStackBuilder() {
     var owningPlayer: OfflinePlayer? = null
 
     companion object {
         /**
-         * Builds an `ItemStack` of type `Material.PLAYER_HEAD` configured with properties
-         * defined by the provided initialization block.
+         * Convenience-function to create new head [ItemStack] instances using the Builder-Pattern.
          *
-         * @param init A lambda receiver used to configure properties of the `VitalHeadItemStackBuilder`.
-         * @return A configured `ItemStack` of type `Material.PLAYER_HEAD` with properties and metadata
-         *         (e.g., name, lore, enchantments, owning player) applied from the builder.
+         * ```java
+         * VitalHeadItemStackBuilder.headBuilder(null, it -> {
+         *   it.set...();
+         *   it.set...();
+         *   it.set...();
+         *   return kotlin.Unit.INSTANCE;
+         * });
+         * ```
          */
         @JvmStatic
         inline fun headBuilder(

@@ -5,14 +5,26 @@ import me.vitalframework.BungeePlugin
 import me.vitalframework.RequiresBungee
 import me.vitalframework.RequiresSpigot
 import me.vitalframework.SpigotPlugin
+import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
 import org.springframework.stereotype.Component
 import java.lang.reflect.InvocationTargetException
 
+/**
+ * Defines the official vital-commands submodule.
+ * This class defines each platform-specific submodule, which is displayed when Vital starts.
+ *
+ * Each platform specific implementation contains the Vital commands system to create advanced commands,
+ * in a declarative annotation-based way.
+ * It enables typesafe commands with an easy-to-read API.
+ */
 class VitalCommandsSubModule {
+    /**
+     * Defines the official Spigot vital-commands submodule, which is displayed when Vital starts.
+     */
     @RequiresSpigot
-    @Component("vital-commands")
+    @SubModule("vital-commands")
     class Spigot(
         val plugin: SpigotPlugin,
         val vitalCommands: List<VitalCommand.Spigot>,
@@ -42,8 +54,11 @@ class VitalCommandsSubModule {
         }
     }
 
+    /**
+     * Defines the official BungeeCord vital-commands submodule, which is displayed when Vital starts.
+     */
     @RequiresBungee
-    @Component("vital-commands")
+    @SubModule("vital-commands")
     class Bungee(
         val plugin: BungeePlugin,
         val vitalCommands: List<VitalCommand.Bungee>,

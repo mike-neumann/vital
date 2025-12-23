@@ -16,33 +16,30 @@ import kotlin.io.path.writeText
 import kotlin.reflect.KClass
 
 /**
- * Represents an abstract configuration class that provides functionality for
- * managing configuration files. Implementations of this class are expected to
- * define configurations handled with a specific processor.
+ * Defines a config within the Vital-Framework.
+ * A config class defines the structure and datatypes of a singular configuration file stored on the filesystem.
+ * It's data can be loaded from the filesystem into the class to expose a developer-friendly api to access it.
  *
- * The class features automatic initialization of configuration fields based
- * on annotations and processes configuration file loading, saving, and injecting
- * field values seamlessly.
+ * Each field annotated with [VitalConfig.Property] will be defined as a valid property for serialization and deserialization.
  *
- * It uses a processor specified via the `Info` annotation to handle
- * serialization and deserialization of configuration data. The handling of
- * configuration fields is achieved through the `Property` annotation.
+ * The consuming class must be annotated with [VitalConfig.Info].
  *
- * Main responsibilities:
- * - Loading configuration values from a file or input stream.
- * - Saving current configuration values to a file.
- * - Dynamically injecting field values into the configuration object.
+ * ```java
+ * @VitalConfig.Info(
+ *   name = "my-vital-config.yaml",
+ *   processor = VitalYAMLConfigProcessor.class
+ * )
+ * public class MyVitalConfig extends VitalConfig {
+ *   @Property(String.class)
+ *   private String myString;
  *
- * Subclasses should annotate their implementation with the `Info` annotation
- * to provide details about the configuration such as its name and the processor
- * used. Fields within the configuration can be annotated with the `Property`
- * annotation to indicate they should be handled as part of the configuration.
+ *   @Property(String.class)
+ *   private List<String> myStringList;
  *
- * @constructor Initializes the configuration by loading its content from the
- *     specified file or an empty default if the file doesn't exist. Uses the
- *     processor defined in the `Info` annotation to manage the configuration
- *     file's content. If initialization fails at any point, specific exceptions
- *     are thrown with detailed error descriptions.
+ *   @Property(String.class, Long.class)
+ *   private Map<String, Long> myStringLongMap;
+ * }
+ * ```
  */
 abstract class VitalConfig {
     val logger = logger()

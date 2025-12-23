@@ -9,13 +9,20 @@ import java.util.UUID
 import java.util.function.Function
 
 /**
- * Represents a Vital scoreboard customized per player. Each player has a unique set
- * of lines displayed on their scoreboard that is dynamically generated based on the provided
- * line functions.
+ * Defines a per-player based scoreboard implementation within the Vital-Framework.
+ * Per-played scoreboards should be used when displaying data, that is tied to a specific player on the server.
  *
- * @property title The title of the scoreboard displayed at the top.
- * @property lines A variable number of functions that generate the content for each scoreboard
- * line based on the player's context.
+ * ```java
+ * @Bean
+ * public VitalPerPlayerScoreboard myPerPlayerScoreboard() {
+ *   return new VitalPerPlayerScoreboard(
+ *     "MyPerPlayerScoreboard",
+ *     it -> "Line 1 for " + it.getName(),
+ *     it -> "Line 2 for " + it.getName(),
+ *     it -> "Line 3 for " + it.getName()
+ *   );
+ * }
+ * ```
  */
 class VitalPerPlayerScoreboard(
     val title: String,

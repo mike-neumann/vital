@@ -32,7 +32,12 @@ typealias BungeeCancellable = net.md_5.bungee.api.plugin.Cancellable
 typealias SpigotBStatsMetrics = org.bstats.bukkit.Metrics
 typealias BungeeBStatsMetrics = org.bstats.bungeecord.Metrics
 
-@Component
+/**
+ * Defines the official vital-core submodule, which is displayed when Vital starts.
+ * It contains the core components of the Vital-Framework.
+ * This submodule is the base of all other Vital submodules.
+ */
+@SubModule("vital-core")
 class VitalCoreSubModule {
     val logger = logger()
 
@@ -44,7 +49,7 @@ class VitalCoreSubModule {
     }
 
     @RequiresSpigot
-    @Component("vital-core")
+    @SubModule("vital-core")
     class Spigot(
         val plugin: SpigotPlugin,
         val vitalListeners: List<VitalListener.Spigot>,
@@ -64,7 +69,7 @@ class VitalCoreSubModule {
     }
 
     @RequiresBungee
-    @Component("vital-core")
+    @SubModule("vital-core")
     class Bungee(
         val plugin: BungeePlugin,
         val vitalListeners: List<VitalListener.Bungee>,

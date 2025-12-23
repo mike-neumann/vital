@@ -1,19 +1,21 @@
 package me.vitalframework.items
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.stereotype.Component;
 
 /**
- * This annotation is used to indicate that a particular class or function has a dependency
- * on the `VitalItemsSubModule` class from the `me.vitalframework.items` package.
+ * Convenience-annotation to mark a class to only be loaded as a bean, when the vital-items submodule is used.
+ * If not running with the vital-items submodule, the annotated bean will not be instantiated by spring.
  *
- * It acts as a conditional check and ensures that the annotated class or function
- * is only eligible for execution or registration if the `VitalItemsSubModule` class
- * is present in the classpath.
+ * Must be used in combination with [Component].
  *
- * This annotation is typically used in environments where conditional loading of
- * components based on the presence of specific libraries is required.
- *
- * It can be applied to classes or functions and is retained at runtime.
+ * ```java
+ * @RequiresVitalItems
+ * @Component
+ * public class MyVitalItemsBean {
+ *   // ...
+ * }
+ * ```
  */
 @ConditionalOnClass(name = ["me.vitalframework.items.VitalItemsSubModule"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

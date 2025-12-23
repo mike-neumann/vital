@@ -1,10 +1,15 @@
 package me.vitalframework.minigames
 
+import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
 import org.springframework.stereotype.Component
 
-@Component("vital-minigames")
+/**
+ * Defines the official vital-minigames submodule, which is displayed when Vital starts.
+ * It contains the Vital minigames system, which ban be used to create minigames.
+ */
+@SubModule("vital-minigames")
 class VitalMinigamesSubModule : VitalSubModule() {
     val logger = logger()
 

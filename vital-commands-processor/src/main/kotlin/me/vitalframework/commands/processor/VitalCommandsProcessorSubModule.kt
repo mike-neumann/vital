@@ -1,10 +1,16 @@
 package me.vitalframework.commands.processor
 
+import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
 import org.springframework.stereotype.Component
 
-@Component("vital-commands-processor")
+/**
+ * Defines the official vital-commands-processor submodule, which is displayed when Vital starts.
+ * This submodule should never be used in the final plugin jar.
+ * It should only exist during project compilation.
+ */
+@SubModule("vital-commands-processor")
 class VitalCommandsProcessorSubModule : VitalSubModule() {
     val logger = logger()
 

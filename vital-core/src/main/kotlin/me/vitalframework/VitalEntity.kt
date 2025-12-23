@@ -1,12 +1,22 @@
 package me.vitalframework
 
 /**
- * Represents a Vital entity within the system, identified by a unique identifier of type [T].
+ * Defines an entity managed by a [VitalRepository] instance.
+ * The entity may be identified by the given generic type.
  *
- * Classes implementing this interface must define a property for the entity's unique identifier.
- * This interface is designed to provide a common contract for entities managed within the Vital framework.
+ * ```java
+ * public class MyEntity implements VitalEntity<UUID> {
+ *   private UUID id;
  *
- * @param T The type of the identifier used by the entity.
+ *   public UUID getId() {
+ *     return id;
+ *   }
+ *
+ *   public void setId(UUID id) {
+ *     this.id = id;
+ *   }
+ * }
+ * ```
  */
 interface VitalEntity<T> {
     var id: T

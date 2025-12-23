@@ -1,15 +1,21 @@
 package me.vitalframework
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.stereotype.Component
 
 /**
- * Indicates that the annotated class, function, or property is dependent on the Spigot API.
+ * Convenience-annotation to mark a class to only be loaded as a bean, when running as a Spigot plugin.
+ * If not running as a Spigot plugin, the annotated bean will not be instantiated by spring.
  *
- * This annotation is used as a conditional for Spring Boot, ensuring that beans, configurations,
- * or methods are only processed if the Spigot `JavaPlugin` class is available on the classpath.
+ * Must be used in combination with [Component].
  *
- * Commonly applied to components or configurations that are specifically meant to function
- * within a Spigot server environment.
+ * ```java
+ * @RequiresSpigot
+ * @Component
+ * public class MySpigotBean {
+ *   // ...
+ * }
+ * ```
  */
 @ConditionalOnClass(name = ["org.bukkit.plugin.java.JavaPlugin"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
