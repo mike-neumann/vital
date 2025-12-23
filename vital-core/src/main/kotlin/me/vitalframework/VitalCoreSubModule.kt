@@ -32,11 +32,12 @@ typealias SpigotBStatsMetrics = org.bstats.bukkit.Metrics
 typealias BungeeBStatsMetrics = org.bstats.bungeecord.Metrics
 
 /**
- * Defines the official vital-core submodule, which is displayed when Vital starts.
- * It contains the core components of the Vital-Framework.
+ * Defines the official vital-core submodule.
+ * This class defines each platform-specific submodule, which is displayed when Vital starts.
+ *
+ * Each platform-specific implementation contains the core components of the Vital-Framework.
  * This submodule is the base of all other Vital submodules.
  */
-@SubModule("vital-core")
 class VitalCoreSubModule {
     val logger = logger()
 
