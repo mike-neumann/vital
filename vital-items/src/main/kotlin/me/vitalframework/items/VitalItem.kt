@@ -235,20 +235,7 @@ open class VitalItem {
     }
 
     /**
-     * Annotation used to define metadata and behavior for custom items in the Vital framework.
-     * This metadata is used to configure item properties, such as name, lore, amount, type, flags,
-     * cooldown, and special attributes.
-     *
-     * @property name The display name of the item.
-     * @property lore The descriptive text associated with the item, used to provide additional
-     *                information or context to the player.
-     * @property amount Specifies the number of items the stack will contain by default.
-     * @property type The material type of the item (e.g., COBBLESTONE, DIAMOND_SWORD).
-     * @property itemFlags Flags that apply to the item, such as hiding certain attributes
-     *                     (e.g., enchantments, unbreakable state, etc.).
-     * @property cooldown Defines the cooldown duration in ticks between interactions with the item.
-     * @property enchanted Indicates whether the item appears to be enchanted (visual enchantment effect).
-     * @property unbreakable When true, the item cannot take durability damage.
+     * Defines the info for a [VitalItem].
      */
     @Component
     @Target(AnnotationTarget.CLASS)

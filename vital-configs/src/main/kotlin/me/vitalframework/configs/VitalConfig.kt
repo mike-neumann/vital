@@ -259,14 +259,7 @@ abstract class VitalConfig {
     }
 
     /**
-     * Annotation used to provide metadata for configuration classes.
-     *
-     * @property name Specifies the name or path of the configuration file associated with the annotated class.
-     * This name is typically used when saving or loading the configuration.
-     *
-     * @property processor Indicates the processor class responsible for managing the configuration format
-     * (e.g., YAML, JSON, Properties). The processor class must implement the `Processor` interface
-     * and handle the serialization and deserialization of the associated data.
+     * Defines the info for a [VitalConfig].
      */
     @Component
     @Target(AnnotationTarget.CLASS)

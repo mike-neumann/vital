@@ -1,6 +1,5 @@
 [versions]
 kotlin = "2.2.0"
-kotlin-coroutines = "1.10.2"
 spring-boot = "3.5.4"
 spring-dependencyManagement = "1.1.7"
 paperApi = "1.21.7-R0.1-SNAPSHOT"
@@ -41,8 +40,6 @@ adventure-text-serializer-legacy = { group = "net.kyori", name = "adventure-text
 adventure-text-serializer-plain = { group = "net.kyori", name = "adventure-text-serializer-plain", version.ref = "adventure-serializers" }
 adventure-platform-bungeecord = { group = "net.kyori", name = "adventure-platform-bungeecord", version.ref = "adventure-platform" }
 adventure-platform-bukkit = { group = "net.kyori", name = "adventure-platform-bukkit", version.ref = "adventure-platform" }
-kotlin-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
-kotlin-coroutines-reactor = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor", version.ref = "kotlin-coroutines" }
 bstats-bukkit = { group = "org.bstats", name = "bstats-bukkit", version.ref = "bstats" }
 bstats-bungee = { group = "org.bstats", name = "bstats-bungeecord", version.ref = "bstats" }
 
@@ -54,8 +51,6 @@ root-compileOnly = [
 ]
 root-api = [
     "spring-boot-starter",
-    "kotlin-coroutines-core",
-    "kotlin-coroutines-reactor",
     "bstats-bukkit",
     "bstats-bungee"
 ]

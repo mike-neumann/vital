@@ -1,19 +1,21 @@
 package me.vitalframework.utils
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.stereotype.Component
 
 /**
- * Indicates that the annotated class or function requires the presence of the `VitalUtilsSubModule` class
- * from the `me.vitalframework.utils` package on the classpath.
+ * Convenience-annotation to mark a class to only be loaded as a bean, when the vital-utils submodule is used.
+ * If not running with the vital-utils submodule, the annotated bean will not be instantiated by spring.
  *
- * This annotation can be used to conditionally activate certain components or logic
- * based on the availability of the specified class.
+ * Must be used in combination with [Component].
  *
- * It is primarily used in environments where optional dependencies are supported,
- * allowing components to adapt their behavior dynamically based on the presence
- * or absence of certain classes.
- *
- * This annotation is retained at runtime and can be targeted at classes or functions.
+ * ```java
+ * @RequiresVitalUtils
+ * @Component
+ * public class MyVitalUtilsBean {
+ *   // ...
+ * }
+ * ```
  */
 @ConditionalOnClass(name = ["me.vitalframework.utils.VitalUtilsSubModule"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

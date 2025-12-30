@@ -1,20 +1,21 @@
 package me.vitalframework.players
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.stereotype.Component
 
 /**
- * Indicates that the annotated class or method requires the `VitalPlayers` submodule to be present.
+ * Convenience-annotation to mark a class to only be loaded as a bean, when the vital-players submodule is used.
+ * If not running with the vital-players submodule, the annotated bean will not be instantiated by spring.
  *
- * This annotation acts as a conditional check to ensure compatibility with the `VitalPlayersSubModule`.
- * It can be applied to classes or methods where functionality depends on the availability of the
- * `VitalPlayers` components in the runtime environment.
+ * Must be used in combination with [Component].
  *
- * Usage of this annotation ensures that the annotated component will only be loaded if the required
- * submodule is available, preventing runtime errors caused by missing dependencies.
- *
- * Applicable targets: Classes and functions.
- *
- * Retention policy: Runtime.
+ * ```java
+ * @RequiresVitalPlayers
+ * @Component
+ * public class MyVitalPlayersBean {
+ *   // ...
+ * }
+ * ```
  */
 @ConditionalOnClass(name = ["me.vitalframework.players.VitalPlayersSubModule"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

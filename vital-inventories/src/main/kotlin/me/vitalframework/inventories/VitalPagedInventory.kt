@@ -209,7 +209,8 @@ abstract class VitalPagedInventory : VitalInventory() {
     }
 
     /**
-     * Annotation for specifying a range of inventory slots within which an operation or configuration is valid.
+     * Defines the info for a [VitalPagedInventory].
+     * This annotation must be used on-top of [VitalInventory.Info].
      */
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)

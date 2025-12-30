@@ -1,15 +1,21 @@
 package me.vitalframework.tasks
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.stereotype.Component
 
 /**
- * An annotation used to conditionally enable a class or function only if the specified class
- * `me.vitalframework.tasks.VitalTasksSubModule` is present on the classpath. This can be used
- * to control the activation of components or beans based on the availability of the VitalTasks
- * submodule in a project.
+ * Convenience-annotation to mark a class to only be loaded as a bean, when the vital-tasks submodule is used.
+ * If not running with the vital-tasks submodule, the annotated bean will not be instantiated by spring.
  *
- * This annotation is typically applied to classes or functions to conditionally load
- * them into an application context when the required module or functionality exists.
+ * Must be used in combination with [Component].
+ *
+ * ```java
+ * @RequiresVitalTasks
+ * @Component
+ * public class MyVitalTasksBean {
+ *   // ...
+ * }
+ * ```
  */
 @ConditionalOnClass(name = ["me.vitalframework.tasks.VitalTasksSubModule"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

@@ -1,14 +1,21 @@
 package me.vitalframework.statistics
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.stereotype.Component
 
 /**
- * Indicates that the annotated class or method depends on the presence of the `VitalStatisticsSubModule` class.
+ * Convenience-annotation to mark a class to only be loaded as a bean, when the vital-statistics submodule is used.
+ * If not running with the vital-statistics submodule, the annotated bean will not be instantiated by spring.
  *
- * This annotation is used to conditionally load classes or methods when the `VitalStatisticsSubModule` component
- * is present in the application context, enabling integration with Vital Framework's statistics submodule.
+ * Must be used in combination with [Component].
  *
- * Can be applied at the class or function level and retains the annotation metadata at runtime.
+ * ```java
+ * @RequiresVitalStatistics
+ * @Component
+ * public class MyVitalStatisticsBean {
+ *   // ...
+ * }
+ * ```
  */
 @ConditionalOnClass(name = ["me.vitalframework.statistics.VitalStatisticsSubModule"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

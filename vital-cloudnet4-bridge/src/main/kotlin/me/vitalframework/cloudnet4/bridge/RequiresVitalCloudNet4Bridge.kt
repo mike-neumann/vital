@@ -1,21 +1,21 @@
 package me.vitalframework.cloudnet4.bridge
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.stereotype.Component
 
 /**
- * Annotation to indicate that a specific class or function requires the presence of the
- * `CloudNet4BridgeSubModule` within the application context.
+ * Convenience-annotation to mark a class to only be loaded as a bean, when the vital-cloudnet4-bridge submodule is used.
+ * If not running with the vital-cloudnet4-bridge submodule, the annotated bean will not be instantiated by spring.
  *
- * This annotation should be used when certain components rely on the integration provided
- * by the `CloudNet4BridgeSubModule`. The component or functionality annotated with this
- * will only be loaded or executed if the `CloudNet4BridgeSubModule` class is available on
- * the classpath.
+ * Must be used in combination with [Component].
  *
- * The presence of this annotation ensures that any dependencies related to the
- * `CloudNet4BridgeSubModule` are already initialized and accessible within the context,
- * preventing potential issues caused by missing integrations.
- *
- * Targets: Can be applied to classes or functions requiring CloudNet4Bridge integration.
+ * ```java
+ * @RequiresVitalCloudnet4Bridge
+ * @Component
+ * public class MyVitalCloudnet4BridgeBean {
+ *   // ...
+ * }
+ * ```
  */
 @ConditionalOnClass(name = ["me.vitalframework.cloudnet4.bridge.VitalCloudNet4BridgeSubModule"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

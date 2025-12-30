@@ -1,10 +1,8 @@
 package me.vitalframework.statistics
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import me.vitalframework.RequiresBungee
 import me.vitalframework.RequiresSpigot
-import org.springframework.scheduling.annotation.Scheduled
+import me.vitalframework.tasks.VitalScheduled
 import org.springframework.stereotype.Component
 
 interface VitalStatisticsTask {
@@ -15,11 +13,10 @@ interface VitalStatisticsTask {
     class Spigot(
         override val statisticsService: VitalStatisticsService,
     ) : VitalStatisticsTask {
-        @Scheduled(fixedRate = 50)
-        suspend fun handleTask() =
-            withContext(Dispatchers.IO) {
-                statisticsService.handleTick()
-            }
+        @VitalScheduled(fixedDelay = 50)
+        fun handleTask() {
+            statisticsService.handleTick()
+        }
     }
 
     @RequiresBungee
@@ -27,10 +24,9 @@ interface VitalStatisticsTask {
     class Bungee(
         override val statisticsService: VitalStatisticsService,
     ) : VitalStatisticsTask {
-        @Scheduled(fixedRate = 50)
-        suspend fun handleTask() =
-            withContext(Dispatchers.IO) {
-                statisticsService.handleTick()
-            }
+        @VitalScheduled(fixedDelay = 50)
+        fun handleTask() {
+            statisticsService.handleTick()
+        }
     }
 }
