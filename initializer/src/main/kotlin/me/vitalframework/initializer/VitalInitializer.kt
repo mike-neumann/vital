@@ -22,7 +22,8 @@ fun main() {
     println()
     println("Welcome to the Vital-Initializer!")
     println("This script will automatically generate a working plugin after setup is complete.")
-    println("You can press 'CONTROL+C' at any time to cancel.")
+    println("If you're running through the terminal, you can press 'CONTROL+C' at any time to cancel.")
+    println("If you're running through IntelliJ, you can press the red Stop-Button at the top-right to cancel at any time.")
     println()
 
     println("What should be the name of your plugin?")
@@ -141,7 +142,7 @@ fun generatePlugin(
     }
 
     println("Plugin successfully generated to '$target' in ${time}ms.")
-    println("Copy this generated plugin into your preferred project-location and open it in your IDE.")
+    println("Move this generated plugin into your preferred project-location and open it in your IDE.")
     println()
     println("NOTE: Although this generated plugin will work with basically all IDEs, it only contains run-configurations for IntelliJ.")
     println("NOTE: If you're not using IntelliJ, you have to manually create run-configurations for your IDE, sorry.")
