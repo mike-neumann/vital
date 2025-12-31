@@ -1,6 +1,7 @@
 import org.codehaus.groovy.runtime.ProcessGroovyMethods
 
 plugins {
+    application
     alias(libs.plugins.kotlin.jvm)
 }
 
@@ -22,4 +23,13 @@ repositories {
 
 kotlin {
     jvmToolchain(24)
+}
+
+application {
+    mainClass = "me.vitalframework.initializer.VitalInitializerKt"
+}
+
+tasks.run {
+    workingDir = projectDir
+    standardInput = System.`in`
 }

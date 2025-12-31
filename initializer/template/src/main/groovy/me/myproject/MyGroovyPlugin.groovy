@@ -4,17 +4,14 @@ import me.vitalframework.Vital
 import me.vitalframework.VitalCoreSubModule
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.ContextClosedEvent
-import org.springframework.context.event.EventListener
 
-// TODO: You can delete the whole "groovy" directory, if you don't want to use Groovy for your plugin.
 @Vital.Info(
-    name = "MyGroovyPlugin",
-    description = "MyGroovyPluginDescription",
-    apiVersion = "1.21",
-    version = "1.0.0",
-    author = ["Me"],
-    // TODO: Change this to your actual plugin environment: SPIGOT, PAPER or BUNGEE
-    environment = Vital.Info.PluginEnvironment.PAPER
+    name = "{name}",
+    description = "{description}",
+    apiVersion = "{apiVersion}",
+    version = "{version}",
+    author = [{author}],
+    environment = {pluginEnvironment}
 )
 class MyGroovyPlugin {
     private final def logger = VitalCoreSubModule.logger(this)
