@@ -9,6 +9,23 @@ import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlin.system.measureTimeMillis
 
+fun <T> readln(prompt: String, answers: List<String> = emptyList(), transform: (String) -> T): T {
+    println("$prompt${if (answers.isEmpty()) "" else " [${answers.joinToString()}]."}")
+    var answer: T? = null
+    do {
+        print(" > ")
+        val input = readln()
+        try {
+            answer = transform(input)
+        } catch (_: IllegalArgumentException) {
+            println("Invalid answer.")
+        }
+    } while (answer == null)
+    println()
+
+    return answer
+}
+
 fun main() {
     println()
     println("""
@@ -26,69 +43,37 @@ fun main() {
     println("If you're running through IntelliJ, you can press the red Stop-Button at the top-right to cancel at any time.")
     println()
 
-    println("What should be the name of your plugin?")
-    print(" > ")
-    val name = readln().trim().replace(" ", "-")
-    println()
-
-    println("What should be the description of your plugin?")
-    print(" > ")
-    val description = readln().trim()
-    println()
-
-    println("What should be the version of your plugin?")
-    print(" > ")
-    val version = readln().trim()
-    println()
-
-    println("What should be the api-version of your plugin?")
-    print(" > ")
-    val apiVersion = readln().trim()
-    println()
-
-    println("What should be the authors of your plugin? (separated by spaces).")
-    print(" > ")
-    val authors = readln().trim().split(" ")
-    println()
-
-    println("What kind of plugin do you wish to create? [${PluginEnvironment.entries.joinToString { it.name }}].")
-    var pluginEnvironment: PluginEnvironment? = null
-    do {
-        print(" > ")
-        val answer = readln()
-        try {
-            pluginEnvironment = PluginEnvironment.valueOf(answer.uppercase())
-        } catch (_: IllegalArgumentException) {
-            println("Invalid plugin environment, please provide a valid answer.")
+    val name = readln("What should be the name of your plugin?") {
+        it.trim().also {
+            if (it.contains(" ")) {
+                println("WARNING: Plugin names cannot contain spaces. Your plugin name will be converted to '${it.replace(" ", "-")}'.")
+                println("Press enter to continue.")
+                readln()
+            }
+        }.replace(" ", "-")
+    }
+    val description = readln("What should be the description of your plugin?") { it.trim() }
+    val version = readln("What should be the version of your plugin?") {
+        it.trim().also {
+            if (!it.matches("[A-Za-z0-9]+\\.[A-Za-z0-9]+\\.[A-Za-z0-9]+".toRegex())) {
+                println("WARNING: Looks like you're not using semantic versioning (SemVer) for your plugin!")
+                println("WARNING: In software development, it is recommended to use semantic versioning (SemVer). https://www.geeksforgeeks.org/software-engineering/introduction-semantic-versioning/")
+                println("Press enter to continue.")
+                readln()
+            }
         }
-    } while (pluginEnvironment == null)
-    println()
-
-    println("What should be the programming language for your plugin? [${ProgrammingLanguage.entries.joinToString { it.name }}].")
-    var programmingLanguage: ProgrammingLanguage? = null
-    do {
-        print(" > ")
-        val answer = readln()
-        try {
-            programmingLanguage = ProgrammingLanguage.valueOf(answer.uppercase())
-        } catch (_: IllegalArgumentException) {
-            println("Invalid programming language, please provide a valid answer.")
+    }
+    val apiVersion = readln("What should be the api-version of your plugin? (e.g. 1.21, 1.20, etc.)") {
+        it.trim().also {
+            if (!it.matches("[0-9]\\.[0-9]+".toRegex())) {
+                throw IllegalArgumentException()
+            }
         }
-    } while (programmingLanguage == null)
-    println()
-
-    println("What should be the programming language of the Gradle DSL? [${GradleDslProgrammingLanguage.entries.joinToString { it.name }}].")
-    var gradleDslProgrammingLanguage: GradleDslProgrammingLanguage? = null
-    do {
-        print(" > ")
-        val answer = readln()
-        try {
-            gradleDslProgrammingLanguage = GradleDslProgrammingLanguage.valueOf(answer.uppercase())
-        } catch (_: IllegalArgumentException) {
-            println("Invalid programming language, please provide a valid answer.")
-        }
-    } while (gradleDslProgrammingLanguage == null)
-    println()
+    }
+    val authors = readln("What should be the authors of your plugin? (separated by spaces).") { it.trim().split(" ") }
+    val pluginEnvironment = readln("What kind of plugin do you want to create?", PluginEnvironment.entries.map { it.name }) { PluginEnvironment.valueOf(it.uppercase()) }
+    val programmingLanguage = readln("What should be the programming language for your plugin?", ProgrammingLanguage.entries.map { it.name }) { ProgrammingLanguage.valueOf(it.uppercase()) }
+    val gradleDslProgrammingLanguage = readln("What should be the programming language of the Gradle DSL?", GradleDslProgrammingLanguage.entries.map { it.name }) { GradleDslProgrammingLanguage.valueOf(it.uppercase()) }
 
     println()
     println("Vital-Initializer will use the following configuration to generate your plugin:")
@@ -103,7 +88,6 @@ fun main() {
     println()
     println("Press enter to continue.")
     readln()
-    println()
 
     generatePlugin(name, description, authors, version, apiVersion, pluginEnvironment, programmingLanguage, gradleDslProgrammingLanguage)
 }
@@ -158,7 +142,7 @@ fun setupGradleDsl(target: Path, gradleDslProgrammingLanguage: GradleDslProgramm
             val settingsGradle = target.resolve("settings.gradle.kts")
 
             val finalBuildGradle = buildGradle.readText()
-                .replace("{plugins}", when (programmingLanguage) {
+                .replace($$"${plugins}", when (programmingLanguage) {
                     ProgrammingLanguage.JAVA -> "java"
                     ProgrammingLanguage.GROOVY -> "groovy"
                     ProgrammingLanguage.KOTLIN -> """
@@ -166,18 +150,18 @@ fun setupGradleDsl(target: Path, gradleDslProgrammingLanguage: GradleDslProgramm
                             kotlin("kapt") version "2.2.0"
                     """.trimIndent()
                 })
-                .replace("{version}", version)
-                .replace("{pluginEnvironment}", when (pluginEnvironment) {
+                .replace($$"${version}", version)
+                .replace($$"${pluginEnvironment}", when (pluginEnvironment) {
                     PluginEnvironment.SPIGOT -> """compileOnly("org.spigotmc:spigot-api:1.21.7-R0.1-SNAPSHOT")"""
                     PluginEnvironment.PAPER -> """compileOnly("io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT")"""
                     PluginEnvironment.BUNGEE -> """compileOnly("net.md-5:bungeecord-api:1.21-R0.3")"""
                 })
-                .replace("{additionalDependencies}", when (programmingLanguage) {
+                .replace($$"${additionalDependencies}", when (programmingLanguage) {
                     ProgrammingLanguage.JAVA -> ""
                     ProgrammingLanguage.KOTLIN -> ""
                     ProgrammingLanguage.GROOVY -> """implementation("org.apache.groovy:groovy:5.0.0")"""
                 })
-                .replace("{additionalConfigurations}", when (programmingLanguage) {
+                .replace($$"${additionalConfigurations}", when (programmingLanguage) {
                     ProgrammingLanguage.JAVA -> ""
                     ProgrammingLanguage.KOTLIN -> """
                         kotlin {
@@ -191,7 +175,7 @@ fun setupGradleDsl(target: Path, gradleDslProgrammingLanguage: GradleDslProgramm
                     """.trimIndent()
                 })
             val finalSettingsGradle = settingsGradle.readText()
-                .replace("{name}", name)
+                .replace($$"${name}", name)
 
             buildGradle.writeText(finalBuildGradle)
             settingsGradle.writeText(finalSettingsGradle)
@@ -204,7 +188,7 @@ fun setupGradleDsl(target: Path, gradleDslProgrammingLanguage: GradleDslProgramm
             val settingsGradle = target.resolve("settings.gradle")
 
             val finalBuildGradle = buildGradle.readText()
-                .replace("{plugins}", when (programmingLanguage) {
+                .replace($$"${plugins}", when (programmingLanguage) {
                     ProgrammingLanguage.JAVA -> "java"
                     ProgrammingLanguage.GROOVY -> "groovy"
                     ProgrammingLanguage.KOTLIN -> """
@@ -212,18 +196,18 @@ fun setupGradleDsl(target: Path, gradleDslProgrammingLanguage: GradleDslProgramm
                             kotlin("kapt) version "2.2.0"
                     """.trimIndent()
                 })
-                .replace("{version}", version)
-                .replace("{pluginEnvironment}", when (pluginEnvironment) {
+                .replace($$"${version}", version)
+                .replace($$"${pluginEnvironment}", when (pluginEnvironment) {
                     PluginEnvironment.SPIGOT -> """compileOnly("org.spigotmc:spigot-api:1.21.7-R0.1-SNAPSHOT")"""
                     PluginEnvironment.PAPER -> """compileOnly("io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT")"""
                     PluginEnvironment.BUNGEE -> """compileOnly("net.md-5:bungeecord-api:1.21-R0.3")"""
                 })
-                .replace("{additionalDependencies}", when (programmingLanguage) {
+                .replace($$"${additionalDependencies}", when (programmingLanguage) {
                     ProgrammingLanguage.JAVA -> ""
                     ProgrammingLanguage.KOTLIN -> ""
                     ProgrammingLanguage.GROOVY -> """implementation("org.apache.groovy:groovy:5.0.0")"""
                 })
-                .replace("{additionalConfigurations}", when (programmingLanguage) {
+                .replace($$"${additionalConfigurations}", when (programmingLanguage) {
                     ProgrammingLanguage.JAVA -> ""
                     ProgrammingLanguage.KOTLIN -> """
                         kotlin {
@@ -238,7 +222,7 @@ fun setupGradleDsl(target: Path, gradleDslProgrammingLanguage: GradleDslProgramm
                 })
 
             val finalSettingsGradle = settingsGradle.readText()
-                .replace("{name}", name)
+                .replace($$"${name}", name)
 
             buildGradle.writeText(finalBuildGradle)
             settingsGradle.writeText(finalSettingsGradle)
@@ -254,12 +238,12 @@ fun setupProgrammingLanguage(target: Path, programmingLanguage: ProgrammingLangu
 
             val pluginMainClass = target.resolve("src/main/java/me/myproject/MyJavaPlugin.java")
             val finalPluginMainClass = pluginMainClass.readText()
-                .replace("{name}", name)
-                .replace("{description}", description)
-                .replace("{version}", version)
-                .replace("{apiVersion}", apiVersion)
-                .replace("{author}", authors.joinToString(", ") { "\"$it\"" })
-                .replace("{pluginEnvironment}", "Vital.PluginEnvironment.${pluginEnvironment}")
+                .replace($$"${name}", name)
+                .replace($$"${description}", description)
+                .replace($$"${version}", version)
+                .replace($$"${apiVersion}", apiVersion)
+                .replace($$"${author}", authors.joinToString(", ") { "\"$it\"" })
+                .replace($$"${pluginEnvironment}", "Vital.PluginEnvironment.${pluginEnvironment}")
 
             pluginMainClass.writeText(finalPluginMainClass)
         }
@@ -269,12 +253,12 @@ fun setupProgrammingLanguage(target: Path, programmingLanguage: ProgrammingLangu
 
             val pluginMainClass = target.resolve("src/main/kotlin/me/myproject/MyKotlinPlugin.kt")
             val finalPluginMainClass = pluginMainClass.readText()
-                .replace("{name}", name)
-                .replace("{description}", description)
-                .replace("{version}", version)
-                .replace("{apiVersion}", apiVersion)
-                .replace("{author}", authors.joinToString(", ") { "\"$it\"" })
-                .replace("{pluginEnvironment}", "Vital.PluginEnvironment.${pluginEnvironment}")
+                .replace($$"${name}", name)
+                .replace($$"${description}", description)
+                .replace($$"${version}", version)
+                .replace($$"${apiVersion}", apiVersion)
+                .replace($$"${author}", authors.joinToString(", ") { "\"$it\"" })
+                .replace($$"${pluginEnvironment}", "Vital.PluginEnvironment.${pluginEnvironment}")
 
             pluginMainClass.writeText(finalPluginMainClass)
         }
@@ -284,12 +268,12 @@ fun setupProgrammingLanguage(target: Path, programmingLanguage: ProgrammingLangu
 
             val pluginMainClass = target.resolve("src/main/groovy/me/myproject/MyGroovyPlugin.groovy")
             val finalPluginMainClass = pluginMainClass.readText()
-                .replace("{name}", name)
-                .replace("{description}", description)
-                .replace("{version}", version)
-                .replace("{apiVersion}", apiVersion)
-                .replace("{author}", authors.joinToString(", ") { "\"$it\"" })
-                .replace("{pluginEnvironment}", "Vital.PluginEnvironment.${pluginEnvironment}")
+                .replace($$"${name}", name)
+                .replace($$"${description}", description)
+                .replace($$"${version}", version)
+                .replace($$"${apiVersion}", apiVersion)
+                .replace($$"${author}", authors.joinToString(", ") { "\"$it\"" })
+                .replace($$"${pluginEnvironment}", "Vital.PluginEnvironment.${pluginEnvironment}")
 
             pluginMainClass.writeText(finalPluginMainClass)
         }

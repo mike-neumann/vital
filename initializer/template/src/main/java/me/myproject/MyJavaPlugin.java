@@ -8,12 +8,12 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
 
 @Vital.Info(
-        name = "{name}",
-        description = "{description}",
-        apiVersion = "{apiVersion}",
-        version = "{version}",
-        author = {{author}},
-        environment = {pluginEnvironment}
+        name = "${name}",
+        description = "${description}",
+        apiVersion = "${apiVersion}",
+        version = "${version}",
+        author = {${author}},
+        environment = ${pluginEnvironment}
 )
 public class MyJavaPlugin {
     private final Logger logger = VitalCoreSubModule.logger(this);

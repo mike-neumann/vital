@@ -1,5 +1,5 @@
 plugins {
-    {plugins}
+    ${plugins}
 
     id 'me.vitalframework.vital-gradle-plugin' version 'dev-SNAPSHOT'
 }
@@ -15,8 +15,8 @@ repositories {
 }
 
 dependencies {
-    {pluginEnvironment}
-    {additionalDependencies}
+    ${pluginEnvironment}
+    ${additionalDependencies}
 }
 
-{additionalConfigurations}
+${additionalConfigurations}

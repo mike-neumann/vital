@@ -6,12 +6,12 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.ContextClosedEvent
 
 @Vital.Info(
-    name = "{name}",
-    description = "{description}",
-    apiVersion = "{apiVersion}",
-    version = "{version}",
-    author = [{author}],
-    environment = {pluginEnvironment}
+    name = "${name}",
+    description = "${description}",
+    apiVersion = "${apiVersion}",
+    version = "${version}",
+    author = [${author}],
+    environment = ${pluginEnvironment}
 )
 class MyGroovyPlugin {
     private final def logger = VitalCoreSubModule.logger(this)

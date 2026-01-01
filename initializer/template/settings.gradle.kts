@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "{name}"
+rootProject.name = "${name}"

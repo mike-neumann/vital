@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.setName '{name}'
+rootProject.setName '${name}'

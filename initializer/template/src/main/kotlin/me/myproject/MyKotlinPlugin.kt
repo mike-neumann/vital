@@ -8,12 +8,12 @@ import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.event.EventListener
 
 @Vital.Info(
-    "{name}",
-    "{description}",
-    "{apiVersion}",
-    "{version}",
-    [{author}],
-    {pluginEnvironment}
+    "${name}",
+    "${description}",
+    "${apiVersion}",
+    "${version}",
+    [${author}],
+    ${pluginEnvironment}
 )
 class MyKotlinPlugin {
     private val logger = logger()
