@@ -4,5 +4,6 @@
 target
 gradle
 build
+initializer/generated
 
 *.iml
