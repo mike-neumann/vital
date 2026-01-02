@@ -20,3 +20,8 @@ Vital offers easy-to-use APIs and cross-platform support right out-of-the-box, m
 
 Not convinced yet?  
 Check out some comparisons between Vital and Spigot [here](COMPARISONS.md).
+
+## Get started
+
+To quickly get started with a Vital project, you can use the [Vital-Initializer](initializer/README.md).  
+It will help you generate a fully working server-plugin, that is built with Vital.
