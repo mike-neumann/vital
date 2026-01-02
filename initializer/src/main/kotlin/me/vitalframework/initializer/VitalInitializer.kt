@@ -108,19 +108,19 @@ fun generatePlugin(
     val parent = Path.of("generated").createDirectories().absolute()
     val target = parent.resolve(name).absolute()
 
-    val targetFile = target.toFile()
-    if (targetFile.exists()) {
-        println("Target file '${targetFile}' already exists, deleting it.")
-        target.toFile().deleteRecursively()
-    }
-
-    for (file in Files.walk(template)) {
-        val templateFile = template.relativize(file)
-        val targetFile = target.resolve(templateFile).createDirectories()
-        Files.copy(template.resolve(templateFile), targetFile, StandardCopyOption.REPLACE_EXISTING)
-    }
-
     val time = measureTimeMillis {
+        val targetFile = target.toFile()
+        if (targetFile.exists()) {
+            println("Target file '${targetFile}' already exists, deleting it.")
+            target.toFile().deleteRecursively()
+        }
+
+        for (file in Files.walk(template)) {
+            val templateFile = template.relativize(file)
+            val targetFile = target.resolve(templateFile).createDirectories()
+            Files.copy(template.resolve(templateFile), targetFile, StandardCopyOption.REPLACE_EXISTING)
+        }
+
         setupGradleDsl(target, gradleDslProgrammingLanguage, programmingLanguage, version, pluginEnvironment, name)
         setupProgrammingLanguage(target, programmingLanguage, name, description, version, apiVersion, authors, pluginEnvironment)
     }
@@ -128,8 +128,7 @@ fun generatePlugin(
     println("Plugin successfully generated to '$target' in ${time}ms.")
     println("Move this generated plugin into your preferred project-location and open it in your IDE.")
     println()
-    println("NOTE: Although this generated plugin will work with basically all IDEs, it only contains run-configurations for IntelliJ.")
-    println("NOTE: If you're not using IntelliJ, you have to manually create run-configurations for your IDE, sorry.")
+    println("NOTE: Although this generated plugin should work with all IDEs, it only contains pre-configured run-configurations for IntelliJ.")
 }
 
 fun setupGradleDsl(target: Path, gradleDslProgrammingLanguage: GradleDslProgrammingLanguage, programmingLanguage: ProgrammingLanguage, version: String, pluginEnvironment: PluginEnvironment, name: String) {
