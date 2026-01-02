@@ -1,10 +1,14 @@
 package me.vitalframework.scoreboards
 
+import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
-import org.springframework.stereotype.Component
 
-@Component("vital-scoreboards")
+/**
+ * Defines the official vital-scoreboards submodule, which is displayed when Vital starts.
+ * It contains the Vital scoreboards system, which can be used to create global and per-player based dynamic and updatable scoreboards.
+ */
+@SubModule("vital-scoreboards")
 class VitalScoreboardsSubModule(
     val vitalScoreboards: List<VitalScoreboard>,
 ) : VitalSubModule() {

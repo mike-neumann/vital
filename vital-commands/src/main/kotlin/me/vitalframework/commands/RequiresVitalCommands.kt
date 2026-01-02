@@ -1,16 +1,21 @@
 package me.vitalframework.commands
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.stereotype.Component
 
 /**
- * Annotation to indicate that a class or function requires the presence of the
- * VitalCommandsSubModule class on the classpath to be processed or executed.
+ * Convenience-annotation to mark a class to only be loaded as a bean, when the vital-commands submodule is used.
+ * If not running with the vital-commands submodule, the annotated bean will not be instatiated by spring.
  *
- * This annotation serves as a conditional mechanism, ensuring that the annotated
- * component is only loaded or operated when the VitalCommandsSubModule is available
- * in the runtime environment.
+ * Must be used in combination with [Component].
  *
- * The annotation can be applied at the class or function level.
+ * ```java
+ * @RequiresVitalCommands
+ * @Component
+ * public class MyVitalCommandsBean {
+ *   // ...
+ * }
+ * ```
  */
 @ConditionalOnClass(name = ["me.vitalframework.commands.VitalCommandsSubModule"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

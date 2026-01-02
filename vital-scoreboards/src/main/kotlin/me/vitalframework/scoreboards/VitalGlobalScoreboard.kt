@@ -3,29 +3,28 @@ package me.vitalframework.scoreboards
 import me.vitalframework.SpigotPlayer
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
 import java.util.UUID
-import java.util.function.Supplier
 
 /**
- * Represents a global scoreboard in the Vital framework.
+ * Defines a global scoreboard implementation within the Vital-Framework.
+ * Global scoreboards should be used when displaying data, that is not tied to a specific player.
  *
- * The `VitalGlobalScoreboard` manages the state and content of a scoreboard shared across all its associated players.
- * It allows for dynamically updating the scoreboard content and managing the players that view the scoreboard.
- *
- * This class leverages the following key elements:
- * - A centralized scoreboard content represented by `VitalScoreboardContent`.
- * - Reactive updates to manage synchronization of displayed data.
- * - Functions for handling players, including adding, removing, and updating their individual scoreboards.
- *
- * @constructor Creates a `VitalGlobalScoreboard` instance with a specified title and dynamic lines.
- * @param title The title of the scoreboard.
- * @param lines A vararg of `Supplier<String>` instances that dynamically provide the lines of the scoreboard.
+ * ```java
+ * @Bean
+ * public VitalGlobalScoreboard myGlobalScoreboard() {
+ *   return new VitalGlobalScoreboard(
+ *     () -> "MyGlobalScoreboard",
+ *     () -> "Line 1",
+ *     () -> "Line 2",
+ *     () -> "Line 3"
+ *   );
+ * }
+ * ```
  */
 class VitalGlobalScoreboard(
-    title: String,
-    vararg var lines: Supplier<String>,
+    title: () -> String,
+    vararg var lines: () -> String,
 ) : VitalScoreboard {
     private val _players = mutableListOf<UUID>()
 
@@ -105,19 +104,11 @@ class VitalGlobalScoreboard(
      * of the scoreboard reflects the current state of the specified `lines`.
      */
     fun updateContent() {
-        scoreboardContent.update()
-        val objective =
-            scoreboardContent.bukkitScoreboard.getObjective(
-                PlainTextComponentSerializer
-                    .plainText()
-                    .serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboardContent.title)),
-            )
-
+        val objective = scoreboardContent.update()
         for (lineIndex in lines.indices) {
-            val lineSupplier = lines[lineIndex]
-            val line = lineSupplier.get()
+            val line = lines[lineIndex]()
             val score =
-                objective!!.getScore(
+                objective.getScore(
                     LegacyComponentSerializer
                         .legacySection()
                         .serialize(MiniMessage.miniMessage().deserialize(line)) + "\u00A7".repeat(lineIndex),

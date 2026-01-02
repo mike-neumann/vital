@@ -25,8 +25,6 @@ import java.util.UUID
  * manage their lifecycle events, and facilitate player interactions within specific
  * environments (e.g., Spigot or Bungee). It relies on a `VitalPlayerService` for backend operations.
  */
-@Order(Ordered.HIGHEST_PRECEDENCE)
-@Listener
 interface VitalPlayerListener {
     /**
      * The service instance responsible for managing player-related operations

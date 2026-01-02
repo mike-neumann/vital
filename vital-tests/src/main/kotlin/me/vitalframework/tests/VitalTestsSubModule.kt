@@ -1,10 +1,15 @@
 package me.vitalframework.tests
 
+import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
-import org.springframework.stereotype.Component
 
-@Component("vital-tests")
+/**
+ * Defines the official vital-tests submodule, which is displayed when Vital starts.
+ * This submodule should never be used in the final plugin jar.
+ * It should only exist during project testing.
+ */
+@SubModule("vital-tests")
 class VitalTestsSubModule : VitalSubModule() {
     val logger = logger()
 

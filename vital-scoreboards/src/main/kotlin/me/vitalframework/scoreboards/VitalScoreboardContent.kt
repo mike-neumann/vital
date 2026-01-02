@@ -6,6 +6,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
+import org.bukkit.scoreboard.Objective
 
 /**
  * Represents the content of a scoreboard within the Vital framework, providing functionality
@@ -16,7 +17,7 @@ import org.bukkit.scoreboard.DisplaySlot
  * The title determines the display name of the scoreboard's objective.
  */
 class VitalScoreboardContent internal constructor(
-    title: String,
+    title: () -> String,
 ) {
     private val _teams = mutableListOf<VitalScoreboardTeam>()
 
@@ -69,7 +70,12 @@ class VitalScoreboardContent internal constructor(
      * - Resets scores for all existing entries in the scoreboard.
      * - Calls the `update` method for each team associated with the scoreboard.
      */
-    fun update() {
+    fun update(): Objective {
+        for (objective in bukkitScoreboard.objectives) {
+            objective.unregister()
+        }
+
+        val title = title()
         val objective =
             bukkitScoreboard.getObjective(
                 PlainTextComponentSerializer
@@ -93,6 +99,8 @@ class VitalScoreboardContent internal constructor(
         for (team in _teams) {
             team.update()
         }
+
+        return objective
     }
 
     /**

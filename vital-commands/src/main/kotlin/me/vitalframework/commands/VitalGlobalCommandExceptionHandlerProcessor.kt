@@ -19,7 +19,11 @@ class VitalGlobalCommandExceptionHandlerProcessor(
             // get all advices for the command sender of the command.
             advices
                 .filter {
-                    command.commandSenderClass.isAssignableFrom(it.getVitalCommandAdvice().commandSenderClass.java)
+                    command.commandSenderClass.isAssignableFrom(
+                        it.javaClass
+                            .getVitalCommandAdvice()
+                            .commandSenderClass.java,
+                    )
                 }.forEach { adviceInstance ->
                     val advice = adviceInstance.javaClass.getAnnotation(VitalCommand.Advice::class.java)!!
                     adviceInstance::class.java.methods

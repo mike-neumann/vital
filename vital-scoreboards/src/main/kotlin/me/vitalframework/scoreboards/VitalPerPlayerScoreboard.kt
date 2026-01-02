@@ -3,23 +3,28 @@ package me.vitalframework.scoreboards
 import me.vitalframework.SpigotPlayer
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
 import java.util.UUID
-import java.util.function.Function
 
 /**
- * Represents a Vital scoreboard customized per player. Each player has a unique set
- * of lines displayed on their scoreboard that is dynamically generated based on the provided
- * line functions.
+ * Defines a per-player based scoreboard implementation within the Vital-Framework.
+ * Per-played scoreboards should be used when displaying data, that is tied to a specific player on the server.
  *
- * @property title The title of the scoreboard displayed at the top.
- * @property lines A variable number of functions that generate the content for each scoreboard
- * line based on the player's context.
+ * ```java
+ * @Bean
+ * public VitalPerPlayerScoreboard myPerPlayerScoreboard() {
+ *   return new VitalPerPlayerScoreboard(
+ *     player -> "MyPerPlayerScoreboard",
+ *     player -> "Line 1 for " + player.getName(),
+ *     player -> "Line 2 for " + player.getName(),
+ *     player -> "Line 3 for " + player.getName()
+ *   );
+ * }
+ * ```
  */
 class VitalPerPlayerScoreboard(
-    val title: String,
-    vararg var lines: Function<SpigotPlayer, String>,
+    val title: (SpigotPlayer) -> String,
+    vararg var lines: (SpigotPlayer) -> String,
 ) : VitalScoreboard {
     private val _scoreboardContent = mutableMapOf<UUID, VitalScoreboardContent>()
 
@@ -62,20 +67,14 @@ class VitalPerPlayerScoreboard(
      */
     private fun updateContent(player: SpigotPlayer) {
         if (player.uniqueId !in _scoreboardContent) return
-        val scoreboard = _scoreboardContent[player.uniqueId]!!
 
-        scoreboard.update()
-        val objective =
-            scoreboard.bukkitScoreboard.getObjective(
-                PlainTextComponentSerializer
-                    .plainText()
-                    .serialize(LegacyComponentSerializer.legacySection().deserialize(scoreboard.title)),
-            )
+        val scoreboard = _scoreboardContent[player.uniqueId]!!
+        val objective = scoreboard.update()
         val lines = applyLines(player)
 
         for (lineIndex in lines.indices) {
             val score =
-                objective!!.getScore(
+                objective.getScore(
                     LegacyComponentSerializer
                         .legacySection()
                         .serialize(
@@ -95,7 +94,7 @@ class VitalPerPlayerScoreboard(
      */
     fun addPlayer(player: SpigotPlayer) {
         if (player.uniqueId in _scoreboardContent) return
-        _scoreboardContent[player.uniqueId] = VitalScoreboardContent(title)
+        _scoreboardContent[player.uniqueId] = VitalScoreboardContent { title(player) }
         update(player)
     }
 
@@ -117,5 +116,5 @@ class VitalPerPlayerScoreboard(
      *
      * @param player The player for whom the scoreboard lines are being applied.
      */
-    private fun applyLines(player: SpigotPlayer) = lines.map { it.apply(player) }
+    private fun applyLines(player: SpigotPlayer) = lines.map { it(player) }
 }

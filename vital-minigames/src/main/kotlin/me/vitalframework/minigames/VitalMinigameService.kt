@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service
 @Service
 class VitalMinigameService(
     val plugin: SpigotPlugin,
-    val minigameStates: List<VitalBaseMinigameState>,
+    val minigameStates: List<VitalMinigameState>,
 ) {
     /**
      * Represents the currently active state of the minigame.
@@ -32,7 +32,7 @@ class VitalMinigameService(
      * The state can be updated only through internal mechanisms, ensuring that proper
      * cleanup and initialization routines are followed when transitioning between states.
      */
-    final var minigameState: VitalBaseMinigameState? = null
+    final var minigameState: VitalMinigameState? = null
         private set
 
     /**
@@ -45,7 +45,7 @@ class VitalMinigameService(
      *         otherwise `false`.
      * @param T The type of the minigame state to check against.
      */
-    final inline fun <reified T : VitalBaseMinigameState> isMinigameState() = isMinigameState(T::class.java)
+    final inline fun <reified T : VitalMinigameState> isMinigameState() = isMinigameState(T::class.java)
 
     /**
      * Checks whether the current minigame state matches the specified type.
@@ -54,7 +54,7 @@ class VitalMinigameService(
      * @return `true` if the current minigame state exists and matches the specified type, `false` otherwise.
      */
     @PublishedApi
-    internal fun <T : VitalBaseMinigameState> isMinigameState(type: Class<T>) = minigameState != null && type == minigameState!!.javaClass
+    internal fun <T : VitalMinigameState> isMinigameState(type: Class<T>) = minigameState != null && type == minigameState!!.javaClass
 
     /**
      * Sets the current minigame state to the specified type `T`.
@@ -72,7 +72,7 @@ class VitalMinigameService(
      * @param T The type of the minigame state to be set, which must be a subclass of `VitalBaseMinigameState`.
      * @throws IllegalStateException If the specified state type is not found in `minigameStates`.
      */
-    final inline fun <reified T : VitalBaseMinigameState> setMinigameState() = setMinigameState(T::class.java)
+    final inline fun <reified T : VitalMinigameState> setMinigameState() = setMinigameState(T::class.java)
 
     /**
      * Updates the current minigame state to the one associated with the specified type.
@@ -83,7 +83,7 @@ class VitalMinigameService(
      *             This is used to find the matching state in the `minigameStates` list.
      */
     @PublishedApi
-    internal fun <T : VitalBaseMinigameState> setMinigameState(type: Class<T>) =
+    internal fun <T : VitalMinigameState> setMinigameState(type: Class<T>) =
         setMinigameState(minigameStates.find { it.javaClass == type }!!)
 
     /**
@@ -93,7 +93,7 @@ class VitalMinigameService(
      *
      * @param minigameState The new minigame state to be set. It must extend `VitalBaseMinigameState`.
      */
-    fun setMinigameState(minigameState: VitalBaseMinigameState) {
+    fun setMinigameState(minigameState: VitalMinigameState) {
         if (this.minigameState != null) {
             if (this.minigameState is VitalCountdownMinigameState) {
                 (this.minigameState as VitalCountdownMinigameState).stop()

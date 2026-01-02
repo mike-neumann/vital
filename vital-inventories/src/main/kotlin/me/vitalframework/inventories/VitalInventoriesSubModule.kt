@@ -1,10 +1,14 @@
 package me.vitalframework.inventories
 
+import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
-import org.springframework.stereotype.Component
 
-@Component("vital-inventories")
+/**
+ * Defines the official vital-inventories submodule, which is displayed when Vital starts.
+ * It contains the Vital inventory system, which can be used to create dynamic and updatable global and per-player based inventory menus.
+ */
+@SubModule("vital-inventories")
 class VitalInventoriesSubModule(
     val vitalInventories: List<VitalInventory>,
 ) : VitalSubModule() {

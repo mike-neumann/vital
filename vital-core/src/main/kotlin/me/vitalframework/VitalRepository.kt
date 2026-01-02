@@ -1,22 +1,18 @@
 package me.vitalframework
 
-import org.springframework.stereotype.Component
-
 /**
- * An in-memory repository implementation that provides volatile data storage.
+ * A volatile in-memory repository to store "temporary" data in a Spring-like repository implementation.
+ * It can store implementations of [VitalEntity] and the means to get, save and delete them.
  *
- * This repository maintains data only during runtime and does not persist data
- * between application restarts. It is designed to work with entities that implement
- * [VitalEntity] interface.
+ * Useful for temporary data, that should be wiped when the server restarts.
  *
- * Important: This is a custom repository implementation and should not be confused
- * with Spring Boot repositories. Do not annotate implementations of this class
- * with Spring's @Repository annotation as it will interfere with internal
- * functionality.
+ * ```java
+ * @Component
+ * public class MyRepository extends VitalRepository<MyEntity> {
  *
- * @param T The type of entity this repository manages, must implement [VitalEntity]
+ * }
+ * ```
  */
-@Component
 abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     private val _entities = mutableListOf<T>()
     val entities: List<T>

@@ -27,7 +27,12 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
             return true
         }
 
-        val (className, info) = getMainClassNameAndInfo(roundEnv) ?: throw VitalPluginInfoAnnotationProcessingException.NoMainClass()
+        val mainClassNamesAndInfo = getMainClassNamesAndInfo(roundEnv)
+        if (mainClassNamesAndInfo.size > 1) {
+            throw VitalPluginInfoAnnotationProcessingException.MultipleMainClasses(*mainClassNamesAndInfo.map { it.first }.toTypedArray())
+        }
+
+        val (className, info) = mainClassNamesAndInfo.firstOrNull() ?: throw VitalPluginInfoAnnotationProcessingException.NoMainClass()
         writeMetadataFile(className)
 
         this.info = info
@@ -48,7 +53,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         return true
     }
 
-    private fun getMainClassNameAndInfo(roundEnv: RoundEnvironment): Pair<String, Vital.Info>? =
+    private fun getMainClassNamesAndInfo(roundEnv: RoundEnvironment): List<Pair<String, Vital.Info>> =
         roundEnv
             .getElementsAnnotatedWith(Vital.Info::class.java)
             .filter { it.kind == ElementKind.CLASS }
@@ -56,7 +61,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
                 val typeElement = it as TypeElement
                 val className = typeElement.qualifiedName.toString()
                 className to it.getAnnotation(Vital.Info::class.java)
-            }.firstOrNull()
+            }
 
     private fun writeMetadataFile(mainClass: String) {
         processingEnv.filer
@@ -66,7 +71,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
     }
 
     private fun setupPluginYml(
-        pluginEnvironment: Vital.Info.PluginEnvironment,
+        pluginEnvironment: Vital.PluginEnvironment,
         name: String,
         description: String,
         version: String,
@@ -74,16 +79,16 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         author: Array<String>,
     ) {
         when (pluginEnvironment) {
-            Vital.Info.PluginEnvironment.BUNGEE -> {
+            Vital.PluginEnvironment.BUNGEE -> {
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("name: $name")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine($$"main: me.vitalframework.loader.VitalPluginLoader$Bungee")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("version: $version")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("author: ${author.contentToString()}")
             }
 
-            Vital.Info.PluginEnvironment.SPIGOT, Vital.Info.PluginEnvironment.PAPER -> {
+            Vital.PluginEnvironment.SPIGOT, Vital.PluginEnvironment.PAPER -> {
                 val vitalPluginLoaderImplementationName =
-                    if (pluginEnvironment == Vital.Info.PluginEnvironment.PAPER) "Paper" else "Spigot"
+                    if (pluginEnvironment == Vital.PluginEnvironment.PAPER) "Paper" else "Spigot"
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine(
                     "main: me.vitalframework.loader.VitalPluginLoader$$vitalPluginLoaderImplementationName",
                 )
@@ -96,7 +101,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         }
     }
 
-    private fun generatePluginYml(pluginEnvironment: Vital.Info.PluginEnvironment) =
+    private fun generatePluginYml(pluginEnvironment: Vital.PluginEnvironment) =
         try {
             // scan for the vital-commands-processor dependency.
             Class.forName("me.vitalframework.commands.processor.VitalCommandInfoAnnotationProcessor")

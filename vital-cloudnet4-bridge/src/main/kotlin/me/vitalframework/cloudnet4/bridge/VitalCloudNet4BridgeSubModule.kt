@@ -1,10 +1,14 @@
 package me.vitalframework.cloudnet4.bridge
 
+import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
-import org.springframework.stereotype.Component
 
-@Component("vital-cloudnet4-bridge")
+/**
+ * Defines the official vital-cloudnet4-bridge submodule, which is displayed when Vital starts.
+ * It contains a wrapper around the CloudNet4-Bridge-API to interact with your CloudNet system in a developer-friendly way.
+ */
+@SubModule("vital-cloudnet4-bridge")
 class VitalCloudNet4BridgeSubModule : VitalSubModule() {
     val logger = logger()
 

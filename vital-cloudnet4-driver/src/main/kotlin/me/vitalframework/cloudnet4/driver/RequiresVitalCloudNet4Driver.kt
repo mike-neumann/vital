@@ -1,19 +1,21 @@
 package me.vitalframework.cloudnet4.driver
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.stereotype.Component
 
 /**
- * Annotation indicating that the annotated class or function requires the presence
- * of the `CloudNet4DriverSubModule` within the application context.
+ * Convenience-annotation to mark a class to only be loaded as a bean, when the vital-cloudnet4-driver submodule is used.
+ * If not running with the vital-cloudnet4-driver submodule, the annotated bean will not be instantiated by spring.
  *
- * The `CloudNet4DriverSubModule` is a Vital submodule that integrates with the CloudNet 4 driver,
- * providing functionalities for managing and interacting with the CloudNet infrastructure.
+ * Must be used in combination with [Component].
  *
- * This annotation can be used to conditionally enable components or features based on the presence
- * of the CloudNet 4 driver submodule within the environment.
- *
- * The annotation is typically applied at the class or function level and contributes
- * to the configuration and functionality of the application.
+ * ```java
+ * @RequiresVitalCloudnet4Driver
+ * @Component
+ * public class MyVitalCloudnet4DriverBean {
+ *   // ...
+ * }
+ * ```
  */
 @ConditionalOnClass(name = ["me.vitalframework.cloudnet4.driver.VitalCloudNet4DriverSubModule"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

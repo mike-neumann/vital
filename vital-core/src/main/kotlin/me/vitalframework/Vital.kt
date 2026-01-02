@@ -121,6 +121,35 @@ object Vital {
         }
     }
 
+    /**
+     * Defines all plugin environments supported by Vital.
+     */
+    enum class PluginEnvironment(
+        val ymlFileName: String,
+    ) {
+        SPIGOT("plugin.yml"),
+        PAPER("plugin.yml"),
+        BUNGEE("bungee.yml"),
+    }
+
+    /**
+     * Defines the info for a Vital-powered plugin.
+     * The data defined in this annotation will be used to generate the final plugin jar.
+     * A plugin must always have exactly 1 main class that is annotated with this annotation.
+     *
+     * ```java
+     * @Vital.Info(
+     *   name = "name",
+     *   description = "description",
+     *   apiVersion = "1.21",
+     *   version = "1.0.0",
+     *   author = {"author1", "author2"},
+     *   environment = Vital.PluginEnvironment.PAPER
+     * )
+     * public class MyPlugin {
+     * }
+     * ```
+     */
     @Configuration
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
@@ -140,14 +169,6 @@ object Vital {
     ) {
         companion object {
             val DEFAULT_PACKAGES = arrayOf("me.vitalframework")
-        }
-
-        enum class PluginEnvironment(
-            val ymlFileName: String,
-        ) {
-            SPIGOT("plugin.yml"),
-            PAPER("plugin.yml"),
-            BUNGEE("bungee.yml"),
         }
     }
 }

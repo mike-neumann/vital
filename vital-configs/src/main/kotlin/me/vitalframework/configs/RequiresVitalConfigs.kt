@@ -1,16 +1,21 @@
 package me.vitalframework.configs
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.stereotype.Component
 
 /**
- * This annotation is used to conditionally enable specific configurations or components
- * within an application when the `VitalConfigsSubModule` class is present on the classpath.
+ * Convenience-annotation to mark a class to only be loaded as a bean, when the vital-configs submodule is used.
+ * If not running with the vital-configs submodule, the annotated bean will not be instantiated by spring.
  *
- * It serves as a mechanism for integrating with the Vital Framework by ensuring
- * that the required submodule dependency is available before applying the annotated component.
+ * Must be used in combination with [Component].
  *
- * Apply this annotation to classes or functions to denote their dependency
- * on the presence of the `VitalConfigsSubModule`.
+ * ```java
+ * @RequiresVitalConfigs
+ * @Component
+ * public class MyVitalConfigsBean {
+ *   // ...
+ * }
+ * ```
  */
 @ConditionalOnClass(name = ["me.vitalframework.configs.VitalConfigsSubModule"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

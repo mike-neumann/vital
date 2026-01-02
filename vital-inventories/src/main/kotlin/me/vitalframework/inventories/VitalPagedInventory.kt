@@ -6,53 +6,46 @@ import org.jetbrains.annotations.Range
 import java.util.UUID
 import kotlin.reflect.KClass
 
+/**
+ * Defines a pageable inventory menu within the Vital-Framework.
+ * A pageable inventory can be used to display an inventory, whose content may extend to multiple inventory pages.
+ * Useful for creating "scrollable" content inside an inventory GUI, or a shop, selector, etc.
+ *
+ * ```java
+ * public class MyPagedInventory extends VitalPagedInventory {
+ *   @Override
+ *   public void onPageChange(Int page, Player player) {
+ *     // This function is called when a specific player changes the page of his inventory.
+ *   }
+ *
+ *   // ...
+ * }
+ * ```
+ */
 abstract class VitalPagedInventory : VitalInventory() {
     private val _pages = mutableMapOf<UUID, Int>()
 
     /**
-     * A read-only map that associates each player's unique identifier (UUID) with their current page number.
-     *
-     * This property is used to track the current page state for each player interacting with the inventory system.
-     * The map's keys represent the players, and the values represent the page numbers the players are currently viewing.
-     *
-     * The map is derived from the internal `_pages` field and provides no direct modification capabilities,
-     * ensuring external immutability of the page state.
+     * All [SpigotPlayer]s as their [UUID] and their current page.
+     * If no [SpigotPlayer]s have this inventory open, the map will be empty.
      */
     val pages: Map<UUID, Int>
         get() = _pages
 
     /**
-     * Represents the maximum number of pages available in the paginated inventory system.
-     *
-     * This variable is dynamically updated based on the total amount of content
-     * and defines the upper limit of pages that can be navigated.
-     *
-     * The value is initialized to 1 and can only be modified internally.
+     * The max page this inventory supports.
      */
     var maxPage = 1
         private set
 
     /**
-     * Represents the starting slot index for the current page of the inventory.
-     *
-     * This variable is used internally to determine the first slot where content
-     * should be placed when rendering a paged inventory for a player. The value
-     * is updated dynamically based on the current page and the inventory layout.
-     *
-     * The setter is private, restricting modifications to the internal logic of
-     * the class, ensuring consistency with the inventory's pagination behavior.
+     * The slot from which the "paged content", so content that will change depending on the page the inventors is on.
      */
     val fromSlot
         get() = getInfo().fromSlot
 
     /**
-     * The ending slot index for a range of slots within the paginated inventory system.
-     *
-     * This value determines the last slot considered in a given range, typically used when
-     * slicing inventory content to display the correct subset for a player's current page.
-     *
-     * The value is automatically managed, and private setters ensure it cannot be modified directly
-     * outside the class's internal logic.
+     * The slot to which the "paged content" goes, so content
      */
     val toSlot
         get() = getInfo().fromSlot
@@ -198,37 +191,26 @@ abstract class VitalPagedInventory : VitalInventory() {
     companion object {
         /**
          * Retrieves the VitalPagedInventory.Info annotation associated with this class.
-         *
-         * @receiver the class for which the annotation is to be retrieved.
-         * @return the VitalPagedInventory.Info annotation of this class.
          */
         @JvmStatic
         fun Class<out VitalPagedInventory>.getInfo(): Info = getRequiredAnnotation<Info>()
 
         /**
          * Retrieves the VitalPagedInventory.Info annotation associated with this class.
-         *
-         * @receiver the class for which the annotation is to be retrieved.
-         * @return the VitalPagedInventory.Info annotation of this class.
          */
         @JvmStatic
         fun KClass<out VitalPagedInventory>.getInfo(): Info = java.getInfo()
 
         /**
          * Retrieves the VitalPagedInventory.Info annotation associated with this instance.
-         *
-         * @receiver the instance for which the annotation is to be retrieved.
-         * @return the VitalPagedInventory.Info annotation of this instance.
          */
         @JvmStatic
         fun VitalPagedInventory.getInfo(): Info = javaClass.getInfo()
     }
 
     /**
-     * Annotation for specifying a range of inventory slots within which an operation or configuration is valid.
-     *
-     * @property fromSlot Specifies the starting slot of the range, which must be between 0 and 9 inclusive.
-     * @property toSlot Specifies the ending slot of the range, which must be between 0 and 9 inclusive.
+     * Defines the info for a [VitalPagedInventory].
+     * This annotation must be used on-top of [VitalInventory.Info].
      */
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)

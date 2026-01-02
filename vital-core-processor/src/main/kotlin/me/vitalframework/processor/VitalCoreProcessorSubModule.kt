@@ -1,10 +1,15 @@
 package me.vitalframework.processor
 
+import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
-import org.springframework.stereotype.Component
 
-@Component("vital-core-processor")
+/**
+ * Defines the official vital-core-processor submodule, which is displayed when Vital starts.
+ * This submodule should never be used in the final plugin jar.
+ * It should only exist during project compilation.
+ */
+@SubModule("vital-core-processor")
 class VitalCoreProcessorSubModule : VitalSubModule() {
     val logger = logger()
 

@@ -17,15 +17,40 @@ import java.util.UUID
 import kotlin.reflect.KClass
 
 /**
- * Represents a customizable item with unique metadata and behavior within the Vital framework.
+ * Defines an interactable item within the Vital-Framework.
  *
- * This class provides a base structure for creating items with cooldown functionality and custom
- * interactions. It includes handling for left-click, right-click, and cooldown-specific events.
+ * ```java
+ * @VitalItem.Info(
+ *   name = "MyItem",
+ *   type = Material.STONE
+ * )
+ * public class MyItem extends VitalItem {
+ *   @Override
+ *   public void onLeftClick(PlayerInteractEvent e) {
+ *     // ...
+ *   }
  *
- * Classes inheriting from `VitalItem` must be annotated with `@Info` to define the item’s metadata,
- * such as its type, name, lore, amount, and other properties.
+ *   @Override
+ *   public void onRightClick(PlayerInteractEvent e) {
+ *     // ...
+ *   }
  *
- * The class also ensures that each item is uniquely identifiable through its persistent data container.
+ *   @Override
+ *   public void onCooldown(PlayerInteractEvent e) {
+ *     // ...
+ *   }
+ *
+ *   @Override
+ *   public void onCooldownExpire(Player player) {
+ *     // ...
+ *   }
+ *
+ *   @Override
+ *   public void onCooldownTick(Player player) {
+ *     // ...
+ *   }
+ * }
+ * ```
  */
 open class VitalItem {
     val uniqueId: UUID = UUID.randomUUID()
@@ -210,20 +235,7 @@ open class VitalItem {
     }
 
     /**
-     * Annotation used to define metadata and behavior for custom items in the Vital framework.
-     * This metadata is used to configure item properties, such as name, lore, amount, type, flags,
-     * cooldown, and special attributes.
-     *
-     * @property name The display name of the item.
-     * @property lore The descriptive text associated with the item, used to provide additional
-     *                information or context to the player.
-     * @property amount Specifies the number of items the stack will contain by default.
-     * @property type The material type of the item (e.g., COBBLESTONE, DIAMOND_SWORD).
-     * @property itemFlags Flags that apply to the item, such as hiding certain attributes
-     *                     (e.g., enchantments, unbreakable state, etc.).
-     * @property cooldown Defines the cooldown duration in ticks between interactions with the item.
-     * @property enchanted Indicates whether the item appears to be enchanted (visual enchantment effect).
-     * @property unbreakable When true, the item cannot take durability damage.
+     * Defines the info for a [VitalItem].
      */
     @Component
     @Target(AnnotationTarget.CLASS)

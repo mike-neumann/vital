@@ -1,18 +1,21 @@
 package me.vitalframework.scoreboards
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.stereotype.Component
 
 /**
- * Indicates that the annotated class or function requires the VitalScoreboardsSubModule
- * to be present on the classpath in order to function correctly.
+ * Convenience-annotation to mark a class to only be loaded as a bean, when the vital-scoreboards submodule is used.
+ * If not running with the vital-scoreboards submodule, the annotated bean will not be instantiated by spring.
  *
- * This annotation is used as a conditional mechanism for enabling or configuring
- * specific features that depend on the presence of VitalScoreboards within the
- * application's environment. If the required module is not available, the annotated
- * class or function will not be loaded or executed.
+ * Must be used in combination with [Component].
  *
- * It is particularly useful in modular or dynamically-configured applications where
- * specific components should only activate when the necessary dependencies are available.
+ * ```java
+ * @RequiresVitalScoreboards
+ * @Component
+ * public class MyVitalScoreboardsBean {
+ *   // ...
+ * }
+ * ```
  */
 @ConditionalOnClass(name = ["me.vitalframework.scoreboards.VitalScoreboardsSubModule"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

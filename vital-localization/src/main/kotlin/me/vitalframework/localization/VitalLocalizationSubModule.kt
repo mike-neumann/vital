@@ -4,6 +4,7 @@ package me.vitalframework.localization
 
 import me.vitalframework.BungeePlayer
 import me.vitalframework.SpigotPlayer
+import me.vitalframework.SubModule
 import me.vitalframework.Vital
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
@@ -12,10 +13,13 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataType
 import org.springframework.context.MessageSource
-import org.springframework.stereotype.Component
 import java.util.Locale
 
-@Component("vital-localization")
+/**
+ * Defines the official vital-localization submodule, which is displayed when Vital starts.
+ * It contains the Vital i18n system, which can be used to create multilingual plugins using the spring implementation.
+ */
+@SubModule("vital-localization")
 class VitalLocalizationSubModule : VitalSubModule() {
     companion object {
         private val logger = logger()

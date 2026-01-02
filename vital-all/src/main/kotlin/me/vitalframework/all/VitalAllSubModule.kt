@@ -1,13 +1,19 @@
 package me.vitalframework.all
 
+import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
-import org.springframework.stereotype.Component
 
+/**
+ * Defines the official vital-all submodule, which is displayed when Vital starts.
+ * Including this submodule in your plugin will enable you to use all of Vital's functionalities.
+ * It also includes submodules, which may not work for your platform.
+ * You need to exclude those dependencies manually.
+ */
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@Component("vital-all")
+@SubModule("vital-all")
 class VitalAllSubModule : VitalSubModule() {
     val logger = logger()
 

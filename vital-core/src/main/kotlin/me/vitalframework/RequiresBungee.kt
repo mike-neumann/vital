@@ -1,15 +1,21 @@
 package me.vitalframework
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.stereotype.Component
 
 /**
- * Indicates that the annotated class or method is dependent on the BungeeCord API.
- * This annotation acts as a conditional for Spring Boot, ensuring that a bean
- * or configuration is only initialized if the BungeeCord `Plugin` class is available
- * on the classpath.
+ * Convenience-annotation to mark a class to only be loaded as a bean, when running as a BungeeCord plugin.
+ * If not running as a BungeeCord plugin, the annotated bean will not be instantiated by spring.
  *
- * Used to dynamically include or exclude beans and configurations in environments
- * where the BungeeCord platform dependency is present.
+ * Must be used in combination with [Component].
+ *
+ * ```java
+ * @RequiresBungee
+ * @Component
+ * public class MyBungeeBean {
+ *   // ...
+ * }
+ * ```
  */
 @ConditionalOnClass(name = ["net.md_5.bungee.api.plugin.Plugin"])
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

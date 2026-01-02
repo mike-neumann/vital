@@ -344,13 +344,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     }
 
     /**
-     * Annotation to configure countdown-related tasks.
-     *
-     * This annotation is used to define configuration properties for countdown tasks,
-     * such as the initial countdown duration and the interval between ticks.
-     *
-     * @property countdown The initial countdown duration in milliseconds.
-     * @property interval The interval between tick events in milliseconds. Defaults to 1000 milliseconds.
+     * Defines the info for a [VitalCountdownTask].
      */
     @Component
     @Target(AnnotationTarget.CLASS)

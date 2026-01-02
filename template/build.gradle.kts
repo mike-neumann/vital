@@ -1,0 +1,58 @@
+// TODO: Delete this file, if you're not using Kotlin for your Gradle build.
+
+group = "me.myproject"
+version = "1.0.0"
+
+plugins {
+    // TODO: Remove this, if you're not using Java for your plugin.
+    java
+
+    // TODO: Remove this, if you're not using Groovy for your plugin.
+    groovy
+
+    // TODO: Remove this, if you're not using Kotlin for your plugin.
+    kotlin("jvm") version "2.2.0"
+    kotlin("kapt") version "2.2.0"
+
+    // DO NOT REMOVE THIS!
+    // This will automatically set everything up for your project, so you don't have to do it manually.
+    id("me.vitalframework.vital-gradle-plugin") version "dev-SNAPSHOT"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://libraries.minecraft.net/")
+}
+
+dependencies {
+    // TODO: Remove this, if you're not using Spigot for your plugin.
+    compileOnly("org.spigotmc:spigot-api:1.21.7-R0.1-SNAPSHOT")
+
+    // TODO: Remove this, if you're not using Paper for your plugin.
+    compileOnly("io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT")
+
+    // TODO: Remove this, if you're not using BungeeCord for your plugin.
+    compileOnly("net.md-5:bungeecord-api:1.21-R0.3")
+
+    // TODO: Remove this, if you're not using Groovy for your plugin.
+    implementation("org.apache.groovy:groovy:5.0.0")
+
+    // You don't need to specify the version for any official Vital submodules, those are automatically managed by the Vital Gradle Plugin we defined above.
+    implementation("me.vitalframework:vital-commands")
+    implementation("me.vitalframework:vital-inventories")
+    implementation("me.vitalframework:vital-items")
+    implementation("me.vitalframework:vital-localization")
+    implementation("me.vitalframework:vital-scoreboards")
+}
+
+// TODO: Remove this, if you're not using Kotlin for your plugin.
+kotlin {
+    jvmToolchain(24)
+}
+
+// TODO: Remove this, if you're not using Groovy for your plugin.
+tasks.compileGroovy {
+    groovyOptions.javaAnnotationProcessing = true
+}

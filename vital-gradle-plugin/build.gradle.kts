@@ -16,3 +16,9 @@ dependencies {
     api(project(":vital-core"))
     api(libs.bundles.gradlePlugin.api)
 }
+
+tasks.jar {
+    manifest {
+        attributes["Implementation-Version"] = project.version
+    }
+}

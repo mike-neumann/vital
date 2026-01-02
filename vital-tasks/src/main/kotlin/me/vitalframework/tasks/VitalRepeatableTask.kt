@@ -88,18 +88,8 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
         get() = runnable != null && task != null
 
     /**
-     * Starts the execution of the task.
-     *
-     * This method initiates the task's lifecycle if it is not already running.
-     * It first checks whether the task is currently active using the `running` property.
-     * If the task is not running, it performs the following steps:
-     *
-     * 1. Invokes the `onStart` method to trigger any preparation logic before the task begins.
-     * 2. Calls the `createRunnable` method to create a new instance of the task's runnable.
-     * 3. Calls the `createTask` method to initialize the associated task instance.
-     *
-     * Once these steps are completed, the task enters the running state.
-     * This method does nothing if the task is already active.
+     * Starts this task if not already [running], by creating a [runnable] using [createRunnable] and a [task] by using [createTask].
+     * Also calls [onStart] to expose an entry-point for developers.
      */
     fun start() {
         if (running) return
@@ -109,18 +99,8 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     }
 
     /**
-     * Stops the currently running task, if active.
-     *
-     * This method ensures that the task's lifecycle is cleanly terminated. If the task is not running,
-     * the method will return immediately. Otherwise, it will:
-     *
-     * - Invoke the `onStop` method, allowing subclasses to perform any necessary cleanup or lifecycle logic.
-     * - Cancel the runnable associated with the task by invoking the `cancelRunnable` method.
-     * - Cancel the scheduled task by invoking the `cancelTask` method.
-     * - Set the `runnable` and `task` fields to `null`, marking the task as no longer active.
-     *
-     * This method adheres to the lifecycle of the task, ensuring proper termination of related resources
-     * and operations.
+     * Stops the currently active [runnable] and [task] if [running].
+     * Also calls [onStop] to expose an entry-point for developers.
      */
     fun stop() {
         if (!running) return
@@ -132,17 +112,8 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     }
 
     /**
-     * Processes a single tick of the task if ticking is allowed.
-     *
-     * This method checks whether `allowTick` is true before proceeding. If ticking is allowed,
-     * it delegates further processing to the `onTick` method. The functionality executed within
-     * `onTick` depends on the specific implementation in the subclass.
-     *
-     * The `handleTick` method plays an integral role in the lifecycle of the task, ensuring that
-     * periodic or scheduled logic is executed at the right time. It is typically invoked by the
-     * task scheduler’s ticking mechanism.
-     *
-     * Usage of this function is implicit within the task flow rather than being called directly.
+     * Handles a task-tick by checking if this task currently allows ticks via [allowTick].
+     * Then calls the [onTick]-function to expose an entry-point for developers.
      */
     fun handleTick() {
         if (!allowTick) return
@@ -150,81 +121,38 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     }
 
     /**
-     * Creates a new instance of the runnable associated with the task.
-     *
-     * This method is abstract and must be implemented by subclasses to provide
-     * a specific implementation of a runnable. The created runnable typically
-     * defines the logic to be executed periodically or as part of the task's lifecycle.
-     *
-     * @return The runnable instance associated with this task.
+     * Creates the [runnable]-instance for this repeatable task.
      */
     abstract fun createRunnable(): R
 
     /**
-     * Creates and initializes a task instance.
-     *
-     * This method is abstract and must be implemented by subclasses to provide
-     * the specific logic for constructing the task object. It is called during
-     * the `start` process to define the task that will be executed. The task
-     * returned is typically managed within the lifecycle of the broader task system.
-     *
-     * @return An instance of the task to be executed, as defined by the implementation.
+     * Creates the [task]-instance for this repeatable task.
      */
     abstract fun createTask(): T
 
     /**
-     * Cancels the currently active runnable associated with the task.
-     *
-     * This method is an abstract function to be implemented by subclasses, which should define the
-     * specific logic for stopping and cleaning up the execution of the runnable. The function is
-     * invoked as part of the task's stoppage process, typically within the `stop` method, to ensure
-     * the runnable is properly terminated.
+     * Cancels the currently active [runnable].
      */
     abstract fun cancelRunnable()
 
     /**
-     * Cancels the currently scheduled task associated with this instance.
-     *
-     * This method is an abstract function and must be implemented by subclasses
-     * to provide the specific logic for halting the execution of the task. Typically,
-     * it is used to cleanly stop any ongoing processes or operations initiated by
-     * a task that was started.
-     *
-     * Called as part of the stop process to ensure resources or operations linked
-     * to the task are properly terminated and released.
+     * Cancels the currently active [task].
      */
     abstract fun cancelTask()
 
     /**
-     * Hook method invoked when the task is about to start.
-     *
-     * This method is meant to initialize or prepare any necessary resources
-     * or logic before the task begins execution. It is called within the
-     * `start` function before the task's runnable and scheduled task are created.
-     *
-     * Subclasses can optionally override this method to provide specific behavior
-     * during the start process.
+     * Called when this task is started ia [start].
      */
     fun onStart() {}
 
     /**
-     * Called on every tick of the task when ticking is allowed.
-     *
-     * This method is executed during the periodic execution of the associated task.
-     * It is triggered as part of the task's continuous lifecycle and can be utilized
-     * to perform actions or updates that need to occur on each interval.
-     *
-     * This function is invoked by the task scheduler's ticking mechanism and works
-     * alongside the tick handling flow of the task when `allowTick` is true.
+     * Called on every task-tick.
+     * Internally, this function is called, when [handleTick] is called.
      */
     fun onTick() {}
 
     /**
-     * Invoked when the task is being stopped.
-     *
-     * This method serves as a lifecycle hook for performing any necessary cleanup or actions
-     * when the task is stopped. It is typically called before cancelling the runnable and task
-     * associated with this object.
+     * Called when this task is stopped via [stop].
      */
     fun onStop() {}
 
@@ -258,16 +186,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     }
 
     /**
-     * Annotation used to provide metadata for a class that represents a task with a periodic execution cycle.
-     *
-     * This annotation is applied to task-related classes to define the interval at which the task's
-     * periodic or scheduled logic should execute. The value specified in the `interval` parameter
-     * represents the execution interval in milliseconds.
-     *
-     * Classes annotated with `Info` typically serve as components within a larger task management system,
-     * leveraging their defined intervals to schedule and control task execution cycles.
-     *
-     * @property interval The interval, in milliseconds, at which the task is executed.
+     * Defines the info for a [VitalRepeatableTask].
      */
     @Component
     @Target(AnnotationTarget.CLASS)
@@ -277,17 +196,21 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     )
 
     /**
-     * A concrete implementation of `VitalRepeatableTask` specific to the Spigot platform.
+     * Defines a Spigot repeatable task within the Vital-Framework.
      *
-     * This class provides platform-specific implementations for managing tasks within a
-     * Spigot-based environment. It utilizes `SpigotRunnable` and `SpigotTask` to schedule
-     * and execute periodic or repeating logic.
+     * ```java
+     * @VitalRepeatableTask.Info()
+     * public class MyRepeatableTask extends VitalRepeatableTask.Spigot {
+     *   @Override
+     *   public void onStart() {}
      *
-     * The task's lifecycle is managed through methods like `createRunnable`, `createTask`,
-     * `cancelRunnable`, and `cancelTask`. These methods ensure that task execution
-     * adheres to the scheduling and cancellation behaviors specific to Spigot.
+     *   @Override
+     *   public void onTick() {}
      *
-     * @param plugin The Spigot plugin instance to associate with this task.
+     *   @Override
+     *   public void onStop() {}
+     * }
+     * ```
      */
     open class Spigot(
         plugin: SpigotPlugin,
