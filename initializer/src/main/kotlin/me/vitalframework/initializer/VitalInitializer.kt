@@ -169,7 +169,7 @@ fun setupGradleDsl(target: Path, gradleDslProgrammingLanguage: GradleDslProgramm
                     """.trimIndent()
                     ProgrammingLanguage.GROOVY -> """
                         tasks.compileGroovy {
-                            groovyOptions.javaAnnotationProcessing = true
+                            groovyOptions.isJavaAnnotationProcessing = true
                         }
                     """.trimIndent()
                 })
@@ -188,34 +188,34 @@ fun setupGradleDsl(target: Path, gradleDslProgrammingLanguage: GradleDslProgramm
 
             val finalBuildGradle = buildGradle.readText()
                 .replace($$"${plugins}", when (programmingLanguage) {
-                    ProgrammingLanguage.JAVA -> "java"
-                    ProgrammingLanguage.GROOVY -> "groovy"
+                    ProgrammingLanguage.JAVA -> "id 'java'"
+                    ProgrammingLanguage.GROOVY -> "id 'groovy'"
                     ProgrammingLanguage.KOTLIN -> """
-                        kotlin("jvm") version "2.2.0"
-                            kotlin("kapt) version "2.2.0"
+                        id 'org.jetbrains.kotlin.jvm' version '2.2.0'
+                            id 'org.jetbrains.kotlin.kapt' version '2.2.0'
                     """.trimIndent()
                 })
                 .replace($$"${version}", version)
                 .replace($$"${pluginEnvironment}", when (pluginEnvironment) {
-                    PluginEnvironment.SPIGOT -> """compileOnly("org.spigotmc:spigot-api:1.21.7-R0.1-SNAPSHOT")"""
-                    PluginEnvironment.PAPER -> """compileOnly("io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT")"""
-                    PluginEnvironment.BUNGEE -> """compileOnly("net.md-5:bungeecord-api:1.21-R0.3")"""
+                    PluginEnvironment.SPIGOT -> "compileOnly 'org.spigotmc:spigot-api:1.21.7-R0.1-SNAPSHOT'"
+                    PluginEnvironment.PAPER -> "compileOnly 'io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT'"
+                    PluginEnvironment.BUNGEE -> "compileOnly 'net.md-5:bungeecord-api:1.21-R0.3'"
                 })
                 .replace($$"${additionalDependencies}", when (programmingLanguage) {
                     ProgrammingLanguage.JAVA -> ""
                     ProgrammingLanguage.KOTLIN -> ""
-                    ProgrammingLanguage.GROOVY -> """implementation("org.apache.groovy:groovy:5.0.0")"""
+                    ProgrammingLanguage.GROOVY -> "implementation 'org.apache.groovy:groovy:5.0.0'"
                 })
                 .replace($$"${additionalConfigurations}", when (programmingLanguage) {
                     ProgrammingLanguage.JAVA -> ""
                     ProgrammingLanguage.KOTLIN -> """
                         kotlin {
-                            jvmToolchain(24)
+                            jvmToolchain 24
                         }
                     """.trimIndent()
                     ProgrammingLanguage.GROOVY -> """
                         tasks.compileGroovy {
-                            groovyOptions.javaAnnotationProcessing = true
+                            groovyOptions.javaAnnotationProcessing true
                         }
                     """.trimIndent()
                 })

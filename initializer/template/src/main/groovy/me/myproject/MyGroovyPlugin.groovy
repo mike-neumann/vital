@@ -4,6 +4,7 @@ import me.vitalframework.Vital
 import me.vitalframework.VitalCoreSubModule
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.ContextClosedEvent
+import org.springframework.context.event.EventListener
 
 @Vital.Info(
     name = "${name}",

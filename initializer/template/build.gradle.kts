@@ -1,11 +1,10 @@
 plugins {
     ${plugins}
-
     id("me.vitalframework.vital-gradle-plugin") version "dev-SNAPSHOT"
 }
 
 group = "me.myproject"
-version = "{version}"
+version = "${version}"
 
 repositories {
     mavenLocal()
