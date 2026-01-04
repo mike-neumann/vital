@@ -20,12 +20,12 @@ class MyGroovyPlugin {
     @EventListener(ApplicationReadyEvent)
     final def onApplicationReady() {
         final def info = VitalCoreSubModule.getVitalInfo(MyGroovyPlugin)
-        logger.info("Groovy Vital plugin '${info.name()}' version '${info.version()}' successfully loaded!")
+        logger.info("Groovy Vital plugin '${r"${info.name()}"}' version '${r"${info.version()}"}' successfully loaded!")
     }
 
     @EventListener(ContextClosedEvent)
     final def onContextClosed() {
         final def info = VitalCoreSubModule.getVitalInfo(MyGroovyPlugin)
-        logger.info("Groovy Vital plugin '${info.name()}' version '${info.version()}' successfully unloaded!")
+        logger.info("Groovy Vital plugin '${r"${info.name()}"}' version '${r"${info.version()}"}' successfully unloaded!")
     }
 }

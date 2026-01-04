@@ -29,7 +29,7 @@ fun <T> readln(prompt: String, answers: List<String> = emptyList(), transform: (
     return answer
 }
 
-private fun createFreemarkerConfiguration() = Configuration(Configuration.VERSION_2_3_34).apply {
+fun createFreemarkerConfiguration() = Configuration(Configuration.VERSION_2_3_34).apply {
     setDirectoryForTemplateLoading(File("template"))
     defaultEncoding = "UTF-8"
     templateExceptionHandler = TemplateExceptionHandler.RETHROW_HANDLER

@@ -21,12 +21,12 @@ class MyKotlinPlugin {
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
         val info = MyKotlinPlugin::class.getVitalInfo()
-        logger.info("Kotlin Vital plugin '${info.name}' version '${info.version}' successfully loaded!")
+        logger.info("Kotlin Vital plugin '${r"${info.name}"}' version '${r"${info.version}"}' successfully loaded!")
     }
 
     @EventListener(ContextClosedEvent::class)
     fun onContextClosed() {
         val info = MyKotlinPlugin::class.getVitalInfo()
-        logger.info("Kotlin Vital plugin '${info.name}' version '${info.version}' successfully unloaded!")
+        logger.info("Kotlin Vital plugin '${r"${info.name}"}' version '${r"${info.version}"}' successfully unloaded!")
     }
 }

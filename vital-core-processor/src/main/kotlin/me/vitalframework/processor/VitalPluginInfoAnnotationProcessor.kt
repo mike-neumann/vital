@@ -83,7 +83,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("name: $name")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine($$"main: me.vitalframework.loader.VitalPluginLoader$Bungee")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("version: $version")
-                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("author: ${author.contentToString()}")
+                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("author: \"${author.joinToString(", ")}\"")
             }
 
             Vital.PluginEnvironment.SPIGOT, Vital.PluginEnvironment.PAPER -> {
@@ -96,7 +96,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("version: $version")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("description: $description")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("api-version: $apiVersion")
-                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("author: ${author.contentToString()}")
+                VitalPluginInfoHolder.PLUGIN_INFO.appendLine("author: [${author.joinToString(", ") { "\"${it}\"" }}]")
             }
         }
     }

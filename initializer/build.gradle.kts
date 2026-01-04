@@ -23,6 +23,7 @@ repositories {
 
 dependencies {
     implementation(libs.bundles.implementation)
+    testImplementation(libs.bundles.testImplementation)
 }
 
 kotlin {
@@ -36,4 +37,8 @@ application {
 tasks.run {
     workingDir = projectDir
     standardInput = System.`in`
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

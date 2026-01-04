@@ -1,5 +1,15 @@
 plugins {
-    ${plugins}
+    <#if programmingLanguage == "JAVA">
+        id 'java'
+    </#if>
+    <#if programmingLanguage == "GROOVY">
+        id 'groovy'
+    </#if>
+    <#if programmingLanguage == "KOTLIN">
+        id 'org.jetbrains.kotlin.jvm' version '2.2.0'
+        id 'org.jetbrains.kotlin.kapt' version '2.2.0'
+    </#if>
+
     id 'me.vitalframework.vital-gradle-plugin' version 'dev-SNAPSHOT'
 }
 
@@ -18,8 +28,29 @@ repositories {
 }
 
 dependencies {
-    ${pluginEnvironment}
-    ${additionalDependencies}
+    <#if programmingLanguage == "GROOVY">
+        implementation 'org.apache.groovy:groovy:5.0.0'
+    </#if>
+
+    <#if pluginEnvironment == "SPIGOT">
+        compileOnly 'org.spigotmc:spigot-api:1.21.7-R0.1-SNAPSHOT'
+    </#if>
+    <#if pluginEnvironment == "PAPER">
+        compileOnly 'io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT'
+    </#if>
+    <#if pluginEnvironment == "BUNGEE">
+        compileOnly 'net.md-5:bungeecord-api:1.21-R0.3'
+    </#if>
 }
 
-${additionalConfigurations}
+<#if programmingLanguage == "GROOVY">
+    tasks.compileGroovy {
+        groovyOptions.javaAnnotationProcessing true
+    }
+</#if>
+
+<#if programmingLanguage == "KOTLIN">
+    kotlin {
+        jvmToolchain 24
+    }
+</#if>
