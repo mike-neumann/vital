@@ -21,6 +21,10 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation(libs.bundles.implementation)
+}
+
 kotlin {
     jvmToolchain(24)
 }

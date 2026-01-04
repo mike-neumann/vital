@@ -2,7 +2,6 @@
 .gradle
 
 target
-gradle
 build
 initializer/generated
 

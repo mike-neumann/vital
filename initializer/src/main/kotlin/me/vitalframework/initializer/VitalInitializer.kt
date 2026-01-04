@@ -1,12 +1,15 @@
 package me.vitalframework.initializer
 
+import freemarker.template.Configuration
+import freemarker.template.TemplateExceptionHandler
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import kotlin.io.path.absolute
 import kotlin.io.path.createDirectories
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
+import kotlin.io.path.name
+import kotlin.io.path.writer
 import kotlin.system.measureTimeMillis
 
 fun <T> readln(prompt: String, answers: List<String> = emptyList(), transform: (String) -> T): T {
@@ -26,7 +29,18 @@ fun <T> readln(prompt: String, answers: List<String> = emptyList(), transform: (
     return answer
 }
 
+private fun createFreemarkerConfiguration() = Configuration(Configuration.VERSION_2_3_34).apply {
+    setDirectoryForTemplateLoading(File("template"))
+    defaultEncoding = "UTF-8"
+    templateExceptionHandler = TemplateExceptionHandler.RETHROW_HANDLER
+    logTemplateExceptions = false
+    wrapUncheckedExceptions = true
+    fallbackOnNullLoopVariable = false
+}
+
 fun main() {
+    val freemarkerConfiguration = createFreemarkerConfiguration()
+
     println()
     println("""
  __     __  _   _             _     ___           _   _     _           _   _                     
@@ -75,38 +89,30 @@ fun main() {
     val programmingLanguage = readln("What should be the programming language for your plugin?", ProgrammingLanguage.entries.map { it.name }) { ProgrammingLanguage.valueOf(it.uppercase()) }
     val gradleDslProgrammingLanguage = readln("What should be the programming language of the Gradle DSL?", GradleDslProgrammingLanguage.entries.map { it.name }) { GradleDslProgrammingLanguage.valueOf(it.uppercase()) }
 
+    val dataModel = DataModel(name, description, version, apiVersion, authors, pluginEnvironment, programmingLanguage, gradleDslProgrammingLanguage)
     println()
     println("Vital-Initializer will use the following configuration to generate your plugin:")
-    println("Name: '$name'.")
-    println("Description: '$description'.")
-    println("Authors: '$authors'.")
-    println("Version: '$version'.")
-    println("API Version: '$apiVersion'.")
-    println("Plugin Environment: '$pluginEnvironment'.")
-    println("Programming Language: '$programmingLanguage'.")
-    println("Gradle DSL Programming Language: '$gradleDslProgrammingLanguage'.")
+    println("Name: '${dataModel.name}'.")
+    println("Description: '${dataModel.description}'.")
+    println("Authors: '${dataModel.authors}'.")
+    println("Version: '${dataModel.version}'.")
+    println("API Version: '${dataModel.apiVersion}'.")
+    println("Plugin Environment: '${dataModel.pluginEnvironment}'.")
+    println("Programming Language: '${dataModel.programmingLanguage}'.")
+    println("Gradle DSL Programming Language: '${dataModel.gradleDslProgrammingLanguage}'.")
     println()
     println("Press enter to continue.")
     readln()
 
-    generatePlugin(name, description, authors, version, apiVersion, pluginEnvironment, programmingLanguage, gradleDslProgrammingLanguage)
+    generatePlugin(freemarkerConfiguration, dataModel)
 }
 
-fun generatePlugin(
-    name: String,
-    description: String,
-    authors: List<String>,
-    version: String,
-    apiVersion: String,
-    pluginEnvironment: PluginEnvironment,
-    programmingLanguage: ProgrammingLanguage,
-    gradleDslProgrammingLanguage: GradleDslProgrammingLanguage
-) {
+fun generatePlugin(freemarkerConfiguration: Configuration, dataModel: DataModel) {
     println("Generating plugin, please wait.")
 
     val template = Path.of("template").absolute()
     val parent = Path.of("generated").createDirectories().absolute()
-    val target = parent.resolve(name).absolute()
+    val target = parent.resolve(dataModel.name).absolute()
 
     val time = measureTimeMillis {
         val targetFile = target.toFile()
@@ -121,8 +127,8 @@ fun generatePlugin(
             Files.copy(template.resolve(templateFile), targetFile, StandardCopyOption.REPLACE_EXISTING)
         }
 
-        setupGradleDsl(target, gradleDslProgrammingLanguage, programmingLanguage, version, pluginEnvironment, name)
-        setupProgrammingLanguage(target, programmingLanguage, name, description, version, apiVersion, authors, pluginEnvironment)
+        setupGradleDsl(target, freemarkerConfiguration, dataModel)
+        setupProgrammingLanguage(target, freemarkerConfiguration, dataModel)
     }
 
     println("Plugin successfully generated to '$target' in ${time}ms.")
@@ -131,150 +137,60 @@ fun generatePlugin(
     println("NOTE: Although this generated plugin should work with all IDEs, it only contains pre-configured run-configurations for IntelliJ.")
 }
 
-fun setupGradleDsl(target: Path, gradleDslProgrammingLanguage: GradleDslProgrammingLanguage, programmingLanguage: ProgrammingLanguage, version: String, pluginEnvironment: PluginEnvironment, name: String) {
-    when (gradleDslProgrammingLanguage) {
+fun setupGradleDsl(target: Path, freemarkerConfiguration: Configuration, dataModel: DataModel) {
+    when (dataModel.gradleDslProgrammingLanguage) {
         GradleDslProgrammingLanguage.KOTLIN -> {
             Files.delete(target.resolve("build.gradle"))
             Files.delete(target.resolve("settings.gradle"))
 
             val buildGradle = target.resolve("build.gradle.kts")
+            val buildGradleTemplate = freemarkerConfiguration.getTemplate(buildGradle.name)
+            buildGradleTemplate.process(dataModel, buildGradle.writer())
+
             val settingsGradle = target.resolve("settings.gradle.kts")
-
-            val finalBuildGradle = buildGradle.readText()
-                .replace($$"${plugins}", when (programmingLanguage) {
-                    ProgrammingLanguage.JAVA -> "java"
-                    ProgrammingLanguage.GROOVY -> "groovy"
-                    ProgrammingLanguage.KOTLIN -> """
-                        kotlin("jvm") version "2.2.0"
-                            kotlin("kapt") version "2.2.0"
-                    """.trimIndent()
-                })
-                .replace($$"${version}", version)
-                .replace($$"${pluginEnvironment}", when (pluginEnvironment) {
-                    PluginEnvironment.SPIGOT -> """compileOnly("org.spigotmc:spigot-api:1.21.7-R0.1-SNAPSHOT")"""
-                    PluginEnvironment.PAPER -> """compileOnly("io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT")"""
-                    PluginEnvironment.BUNGEE -> """compileOnly("net.md-5:bungeecord-api:1.21-R0.3")"""
-                })
-                .replace($$"${additionalDependencies}", when (programmingLanguage) {
-                    ProgrammingLanguage.JAVA -> ""
-                    ProgrammingLanguage.KOTLIN -> ""
-                    ProgrammingLanguage.GROOVY -> """implementation("org.apache.groovy:groovy:5.0.0")"""
-                })
-                .replace($$"${additionalConfigurations}", when (programmingLanguage) {
-                    ProgrammingLanguage.JAVA -> ""
-                    ProgrammingLanguage.KOTLIN -> """
-                        kotlin {
-                            jvmToolchain(24)
-                        }
-                    """.trimIndent()
-                    ProgrammingLanguage.GROOVY -> """
-                        tasks.compileGroovy {
-                            groovyOptions.isJavaAnnotationProcessing = true
-                        }
-                    """.trimIndent()
-                })
-            val finalSettingsGradle = settingsGradle.readText()
-                .replace($$"${name}", name)
-
-            buildGradle.writeText(finalBuildGradle)
-            settingsGradle.writeText(finalSettingsGradle)
+            val settingsGradleTemplate = freemarkerConfiguration.getTemplate(settingsGradle.name)
+            settingsGradleTemplate.process(dataModel, settingsGradle.writer())
         }
         GradleDslProgrammingLanguage.GROOVY -> {
             Files.delete(target.resolve("build.gradle.kts"))
             Files.delete(target.resolve("settings.gradle.kts"))
 
             val buildGradle = target.resolve("build.gradle")
+            val buildGradleTemplate = freemarkerConfiguration.getTemplate(buildGradle.name)
+            buildGradleTemplate.process(dataModel, buildGradle.writer())
+
             val settingsGradle = target.resolve("settings.gradle")
-
-            val finalBuildGradle = buildGradle.readText()
-                .replace($$"${plugins}", when (programmingLanguage) {
-                    ProgrammingLanguage.JAVA -> "id 'java'"
-                    ProgrammingLanguage.GROOVY -> "id 'groovy'"
-                    ProgrammingLanguage.KOTLIN -> """
-                        id 'org.jetbrains.kotlin.jvm' version '2.2.0'
-                            id 'org.jetbrains.kotlin.kapt' version '2.2.0'
-                    """.trimIndent()
-                })
-                .replace($$"${version}", version)
-                .replace($$"${pluginEnvironment}", when (pluginEnvironment) {
-                    PluginEnvironment.SPIGOT -> "compileOnly 'org.spigotmc:spigot-api:1.21.7-R0.1-SNAPSHOT'"
-                    PluginEnvironment.PAPER -> "compileOnly 'io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT'"
-                    PluginEnvironment.BUNGEE -> "compileOnly 'net.md-5:bungeecord-api:1.21-R0.3'"
-                })
-                .replace($$"${additionalDependencies}", when (programmingLanguage) {
-                    ProgrammingLanguage.JAVA -> ""
-                    ProgrammingLanguage.KOTLIN -> ""
-                    ProgrammingLanguage.GROOVY -> "implementation 'org.apache.groovy:groovy:5.0.0'"
-                })
-                .replace($$"${additionalConfigurations}", when (programmingLanguage) {
-                    ProgrammingLanguage.JAVA -> ""
-                    ProgrammingLanguage.KOTLIN -> """
-                        kotlin {
-                            jvmToolchain 24
-                        }
-                    """.trimIndent()
-                    ProgrammingLanguage.GROOVY -> """
-                        tasks.compileGroovy {
-                            groovyOptions.javaAnnotationProcessing true
-                        }
-                    """.trimIndent()
-                })
-
-            val finalSettingsGradle = settingsGradle.readText()
-                .replace($$"${name}", name)
-
-            buildGradle.writeText(finalBuildGradle)
-            settingsGradle.writeText(finalSettingsGradle)
+            val settingsGradleTemplate = freemarkerConfiguration.getTemplate(settingsGradle.name)
+            settingsGradleTemplate.process(dataModel, settingsGradle.writer())
         }
     }
 }
 
-fun setupProgrammingLanguage(target: Path, programmingLanguage: ProgrammingLanguage, name: String, description: String, version: String, apiVersion: String, authors: List<String>, pluginEnvironment: PluginEnvironment) {
-    when (programmingLanguage) {
+fun setupProgrammingLanguage(target: Path, freemarkerConfiguration: Configuration, dataModel: DataModel) {
+    when (dataModel.programmingLanguage) {
         ProgrammingLanguage.JAVA -> {
             target.resolve("src/main/groovy").toFile().deleteRecursively()
             target.resolve("src/main/kotlin").toFile().deleteRecursively()
 
             val pluginMainClass = target.resolve("src/main/java/me/myproject/MyJavaPlugin.java")
-            val finalPluginMainClass = pluginMainClass.readText()
-                .replace($$"${name}", name)
-                .replace($$"${description}", description)
-                .replace($$"${version}", version)
-                .replace($$"${apiVersion}", apiVersion)
-                .replace($$"${author}", authors.joinToString(", ") { "\"$it\"" })
-                .replace($$"${pluginEnvironment}", "Vital.PluginEnvironment.${pluginEnvironment}")
-
-            pluginMainClass.writeText(finalPluginMainClass)
+            val pluginMainClassTemplate = freemarkerConfiguration.getTemplate("src/main/java/me/myproject/MyJavaPlugin.java")
+            pluginMainClassTemplate.process(dataModel, pluginMainClass.writer())
         }
         ProgrammingLanguage.KOTLIN -> {
             target.resolve("src/main/groovy").toFile().deleteRecursively()
             target.resolve("src/main/java").toFile().deleteRecursively()
 
             val pluginMainClass = target.resolve("src/main/kotlin/me/myproject/MyKotlinPlugin.kt")
-            val finalPluginMainClass = pluginMainClass.readText()
-                .replace($$"${name}", name)
-                .replace($$"${description}", description)
-                .replace($$"${version}", version)
-                .replace($$"${apiVersion}", apiVersion)
-                .replace($$"${author}", authors.joinToString(", ") { "\"$it\"" })
-                .replace($$"${pluginEnvironment}", "Vital.PluginEnvironment.${pluginEnvironment}")
-
-            pluginMainClass.writeText(finalPluginMainClass)
+            val pluginMainClassTemplate = freemarkerConfiguration.getTemplate("src/main/kotlin/me/myproject/MyKotlinPlugin.kt")
+            pluginMainClassTemplate.process(dataModel, pluginMainClass.writer())
         }
         ProgrammingLanguage.GROOVY -> {
             target.resolve("src/main/java").toFile().deleteRecursively()
             target.resolve("src/main/kotlin").toFile().deleteRecursively()
 
             val pluginMainClass = target.resolve("src/main/groovy/me/myproject/MyGroovyPlugin.groovy")
-            val finalPluginMainClass = pluginMainClass.readText()
-                .replace($$"${name}", name)
-                .replace($$"${description}", description)
-                .replace($$"${version}", version)
-                .replace($$"${apiVersion}", apiVersion)
-                .replace($$"${author}", authors.joinToString(", ") { "\"$it\"" })
-                .replace($$"${pluginEnvironment}", "Vital.PluginEnvironment.${pluginEnvironment}")
-
-            pluginMainClass.writeText(finalPluginMainClass)
+            val pluginMainClassTemplate = freemarkerConfiguration.getTemplate("src/main/groovy/me/myproject/MyGroovyPlugin.groovy")
+            pluginMainClassTemplate.process(dataModel, pluginMainClass.writer())
         }
     }
 }

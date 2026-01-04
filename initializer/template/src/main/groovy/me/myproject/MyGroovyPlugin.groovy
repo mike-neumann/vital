@@ -11,8 +11,8 @@ import org.springframework.context.event.EventListener
     description = "${description}",
     apiVersion = "${apiVersion}",
     version = "${version}",
-    author = [${author}],
-    environment = ${pluginEnvironment}
+    author = [${authors?map(it -> "\"" + it +  "\"")?join(", ")}],
+    environment = Vital.PluginEnvironment.${pluginEnvironment}
 )
 class MyGroovyPlugin {
     private final def logger = VitalCoreSubModule.logger(this)

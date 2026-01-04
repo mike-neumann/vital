@@ -12,8 +12,8 @@ import org.springframework.context.event.EventListener
     "${description}",
     "${apiVersion}",
     "${version}",
-    [${author}],
-    ${pluginEnvironment}
+    [${authors?map(it -> "\"" + it +  "\"")?join(", ")}],
+    Vital.PluginEnvironment.${pluginEnvironment}
 )
 class MyKotlinPlugin {
     private val logger = logger()
