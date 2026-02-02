@@ -1,12 +1,20 @@
 import org.codehaus.groovy.runtime.ProcessGroovyMethods
+import java.io.IOException
 
 fun getGitTag(): String {
-    val tag = ProcessGroovyMethods.getText(ProcessGroovyMethods.execute("git tag --points-at HEAD"))
-    return tag
-        .trim()
-        .let { if (it.startsWith("v")) it.substring(1) else it }
-        // if no tag is detected, we are running a dev build / not an officially released version
-        .ifBlank { "dev-SNAPSHOT" }
+    try {
+        val tag = ProcessGroovyMethods.getText(ProcessGroovyMethods.execute("git tag --points-at HEAD"))
+        return tag
+            .trim()
+            .let { if (it.startsWith("v")) it.substring(1) else it }
+            // if no tag is detected, we are running a dev build / not an officially released version
+            .ifBlank { "dev-SNAPSHOT" }
+    } catch (_: IOException) {
+        logger.warn(
+            "Failed to extract Vital version from git tag. This could be because git is not installed on this system. Will fall back to 'dev-SNAPSHOT'.",
+        )
+        return "dev-SNAPSHOT"
+    }
 }
 
 plugins {
