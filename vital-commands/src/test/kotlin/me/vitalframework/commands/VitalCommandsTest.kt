@@ -169,7 +169,7 @@ class VitalCommandsTest {
         val testCommand =
             @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(Arg())
+                @ArgHandler
                 fun onNoArg(sender: CommandSender): ReturnState {
                     sender.sendMessage("onNoArg")
                     return ReturnState.SUCCESS
@@ -228,7 +228,7 @@ class VitalCommandsTest {
         val testCommand =
             @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("testArg"))
+                @ArgHandler(Arg("testArg"))
                 fun onTestArg(): ReturnState = throw RuntimeException("test exception")
 
                 @ArgExceptionHandler("testArg", type = RuntimeException::class)
@@ -250,7 +250,7 @@ class VitalCommandsTest {
         val testCommand =
             @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("testArg"))
+                @ArgHandler(Arg("testArg"))
                 fun onTestArg() = ReturnState.SUCCESS
             }
         val sender = VitalTestCommand.Player()
@@ -264,7 +264,7 @@ class VitalCommandsTest {
         val testCommand =
             @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("testArg"))
+                @ArgHandler(Arg("testArg"))
                 fun onTestArg() = ReturnState.SUCCESS
             }
         val sender = VitalTestCommand.Player()
@@ -279,7 +279,7 @@ class VitalCommandsTest {
         val testCommand =
             @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("testArg testSubArg"))
+                @ArgHandler(Arg("testArg testSubArg"))
                 fun onTestArg() = ReturnState.SUCCESS
             }
         val sender = VitalTestCommand.Player()
@@ -294,7 +294,7 @@ class VitalCommandsTest {
         val testCommand =
             @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("%PLAYER%"))
+                @ArgHandler(Arg("%PLAYER%"))
                 fun onTestArg() = ReturnState.SUCCESS
             }
         val sender = VitalTestCommand.Player()
@@ -309,7 +309,7 @@ class VitalCommandsTest {
         val testCommand =
             @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("%BOOLEAN%"))
+                @ArgHandler(Arg("%BOOLEAN%"))
                 fun onTestArg() = ReturnState.SUCCESS
             }
         val sender = VitalTestCommand.Player()
@@ -325,7 +325,7 @@ class VitalCommandsTest {
         val testCommand =
             @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("%NUMBER%"))
+                @ArgHandler(Arg("%NUMBER%"))
                 fun onTestArg() = ReturnState.SUCCESS
             }
         val sender = VitalTestCommand.Player()
@@ -340,7 +340,7 @@ class VitalCommandsTest {
         val testCommand =
             @VitalCommand.Info("testCommand", "testCommand")
             object : VitalTestCommand() {
-                @ArgHandler(arg = Arg("%MATERIAL%"))
+                @ArgHandler(Arg("%MATERIAL%"))
                 fun onTestArg() = ReturnState.SUCCESS
             }
         val sender = VitalTestCommand.Player()

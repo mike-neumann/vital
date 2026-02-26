@@ -4,6 +4,7 @@ import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
 import org.jetbrains.annotations.Range
 import java.util.UUID
+import kotlin.math.ceil
 import kotlin.reflect.KClass
 
 /**
@@ -11,10 +12,14 @@ import kotlin.reflect.KClass
  * A pageable inventory can be used to display an inventory, whose content may extend to multiple inventory pages.
  * Useful for creating "scrollable" content inside an inventory GUI, or a shop, selector, etc.
  *
+ * By default, the class will be a bean.
+ *
  * ```java
+ * @VitalPagedInventory.Info(fromSlot = 0, toSlot = 9)
+ * @VitalInventory.Info(type = VitalInventory.Type.GENERIC_9X1, name = "MyPagedInventory")
  * public class MyPagedInventory extends VitalPagedInventory {
  *   @Override
- *   public void onPageChange(Int page, Player player) {
+ *   public void onPageChange(int page, Player player) {
  *     // This function is called when a specific player changes the page of his inventory.
  *   }
  *
@@ -32,11 +37,14 @@ abstract class VitalPagedInventory : VitalInventory() {
     val pages: Map<UUID, Int>
         get() = _pages
 
+    private val _maxPages = mutableMapOf<UUID, Int>()
+
     /**
-     * The max page this inventory supports.
+     * All [SpigotPlayer]s as their [UUID] and their max page.
+     * If no [SpigotPlayer]s have this inventory open, the map will be empty.
      */
-    var maxPage = 1
-        private set
+    val maxPages: Map<UUID, Int>
+        get() = _maxPages
 
     /**
      * The slot from which the "paged content", so content that will change depending on the page the inventors is on.
@@ -48,7 +56,7 @@ abstract class VitalPagedInventory : VitalInventory() {
      * The slot to which the "paged content" goes, so content
      */
     val toSlot
-        get() = getInfo().fromSlot
+        get() = getInfo().toSlot
 
     /**
      * Represents the amount of content present on the current page.
@@ -65,16 +73,11 @@ abstract class VitalPagedInventory : VitalInventory() {
      *
      * @param totalContent the total number of content items that need to be paginated
      */
-    fun updateMaxPage(totalContent: Int) {
-        var newMaxPage = totalContent.toDouble() / pageContentAmount.toDouble()
-
-        if (newMaxPage > 1) {
-            newMaxPage += 1
-        } else {
-            newMaxPage = 1.0
-        }
-
-        maxPage = newMaxPage.toInt()
+    fun updateMaxPage(
+        playerUniqueId: UUID,
+        totalContent: Int,
+    ) {
+        _maxPages[playerUniqueId] = ceil((totalContent.toDouble() / pageContentAmount.toDouble())).toInt()
     }
 
     /**
@@ -89,14 +92,20 @@ abstract class VitalPagedInventory : VitalInventory() {
         player: SpigotPlayer,
         totalContent: Int? = null,
     ) {
-        if (totalContent != null) {
-            updateMaxPage(totalContent)
+        // Clear old slots.
+        for (slot in fromSlot..toSlot) {
+            setItem(player, slot, null)
         }
+
+        if (totalContent != null) {
+            updateMaxPage(player.uniqueId, totalContent)
+        }
+
         val newPage =
             if (page <= 0) {
                 1
-            } else if (page >= maxPage) {
-                maxPage
+            } else if (page >= (_maxPages[player.uniqueId] ?: 0)) {
+                _maxPages[player.uniqueId] ?: 0
             } else {
                 page
             }
@@ -117,12 +126,12 @@ abstract class VitalPagedInventory : VitalInventory() {
     protected fun <T> sliceForPage(
         player: SpigotPlayer,
         list: List<T>,
-    ): List<T> {
+    ): List<Pair<Int, T>> {
         val startIndex = (pageContentAmount * ((_pages[player.uniqueId] ?: 1) - 1))
         val endIndex = startIndex + pageContentAmount
         if (startIndex >= list.size || startIndex < 0) return mutableListOf()
-        if (endIndex >= list.size) return list.subList(startIndex, list.size)
-        return list.subList(startIndex, endIndex)
+        if (endIndex >= list.size) return (fromSlot..toSlot).zip(list.subList(startIndex, list.size))
+        return (fromSlot..toSlot).zip(list.subList(startIndex, endIndex))
     }
 
     final override fun close(player: SpigotPlayer) {

@@ -2,14 +2,13 @@ package me.vitalframework.tasks
 
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import org.springframework.beans.factory.config.BeanPostProcessor
+import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.core.env.Environment
-import org.springframework.stereotype.Component
 import java.lang.reflect.Method
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-@Component
-class VitalScheduler(
+open class VitalScheduler(
     val environment: Environment,
 ) : BeanPostProcessor {
     private val logger = logger()
@@ -20,7 +19,7 @@ class VitalScheduler(
         beanName: String,
     ): Any? {
         for (method in bean.javaClass.methods) {
-            val annotation = method.getAnnotation(VitalScheduled::class.java)
+            val annotation = AnnotationUtils.getAnnotation(method, VitalScheduled::class.java)
             if (annotation != null) {
                 schedule(bean, method, annotation)
             }

@@ -435,7 +435,7 @@ abstract class VitalCommand<CS : Any> protected constructor(
     @Target(AnnotationTarget.CLASS)
     annotation class Info(
         val name: String,
-        val description: String,
+        val description: String = "A Vital Command",
         val aliases: Array<String> = [],
         val usage: String = "",
         val permission: String = "",

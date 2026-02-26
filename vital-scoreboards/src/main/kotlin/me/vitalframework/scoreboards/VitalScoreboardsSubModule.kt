@@ -28,7 +28,9 @@ class VitalScoreboardsSubModule(
             logger.info("Scoreboard '${vitalScoreboard::class.java.name}' successfully registered")
         }
 
-        logger.info("Please take note that only globally registered scoreboards are shown here.")
-        logger.info("If your scoreboard is not displayed here, you likely haven't exposed it as a bean.")
+        if (vitalScoreboards.isNotEmpty()) {
+            logger.info("Please take note that only globally registered scoreboards are shown here.")
+            logger.info("If your scoreboard is not displayed here, you likely haven't exposed it as a bean.")
+        }
     }
 }

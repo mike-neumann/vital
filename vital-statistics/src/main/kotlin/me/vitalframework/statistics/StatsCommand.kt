@@ -10,12 +10,16 @@ import me.vitalframework.utils.VitalUtils.Bungee.sendFormattedMessage
 import me.vitalframework.utils.VitalUtils.Spigot.sendFormattedMessage
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
+import org.springframework.context.annotation.Conditional
 import org.springframework.core.SpringVersion
-import org.springframework.stereotype.Component
 import java.text.SimpleDateFormat
 import java.util.Date
 
 interface StatsCommand<CS> {
+    companion object {
+        const val PERMISSION = "me.vitalframework.command.vital-stats"
+    }
+
     val vitalStatisticsService: VitalStatisticsService
     val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties
 
@@ -75,8 +79,8 @@ interface StatsCommand<CS> {
         return VitalCommand.ReturnState.SUCCESS
     }
 
-    @RequiresSpigot
-    @Component
+    @Conditional(RequiresSpigot::class)
+    @VitalCommand.Info("vital-stats", permission = PERMISSION)
     class Spigot(
         override val vitalStatisticsService: VitalStatisticsService,
         override val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
@@ -87,7 +91,7 @@ interface StatsCommand<CS> {
             message: String,
         ) = sender.sendFormattedMessage(message)
 
-        @ArgHandler(Arg())
+        @ArgHandler
         fun onNoArg(sender: SpigotCommandSender): ReturnState {
             sender.sendFormattedMessage("MC Version: <yellow>${Bukkit.getVersion()}")
             sender.sendFormattedMessage("Bukkit Version: <yellow>${Bukkit.getBukkitVersion()}")
@@ -96,12 +100,12 @@ interface StatsCommand<CS> {
             return ReturnState.SUCCESS
         }
 
-        @ArgHandler(arg = Arg("tps"))
+        @ArgHandler(Arg("tps"))
         fun onTps(sender: SpigotCommandSender) = handleOnHealthTps(sender)
     }
 
-    @RequiresBungee
-    @Component
+    @Conditional(RequiresBungee::class)
+    @VitalCommand.Info("vital-stats", permission = PERMISSION)
     class Bungee(
         override val vitalStatisticsService: VitalStatisticsService,
         override val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
@@ -112,7 +116,7 @@ interface StatsCommand<CS> {
             message: String,
         ) = sender.sendFormattedMessage(message)
 
-        @ArgHandler(Arg())
+        @ArgHandler
         fun onNoArg(sender: BungeeCommandSender): ReturnState {
             sender.sendFormattedMessage("Bungee version: <yellow>${ProxyServer.getInstance().version}")
             handleOnCommand(sender)
@@ -120,7 +124,7 @@ interface StatsCommand<CS> {
             return ReturnState.SUCCESS
         }
 
-        @ArgHandler(arg = Arg("tps"))
+        @ArgHandler(Arg("tps"))
         fun onTps(sender: BungeeCommandSender) = handleOnHealthTps(sender)
     }
 }

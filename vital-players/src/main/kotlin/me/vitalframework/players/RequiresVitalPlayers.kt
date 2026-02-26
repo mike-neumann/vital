@@ -1,23 +1,29 @@
 package me.vitalframework.players
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.context.annotation.Condition
+import org.springframework.context.annotation.ConditionContext
+import org.springframework.context.annotation.Conditional
+import org.springframework.core.type.AnnotatedTypeMetadata
 import org.springframework.stereotype.Component
+import org.springframework.util.ClassUtils
 
 /**
- * Convenience-annotation to mark a class to only be loaded as a bean, when the vital-players submodule is used.
+ * Convenience-condition to mark a class to only be loaded as a bean, when the vital-players submodule is used.
  * If not running with the vital-players submodule, the annotated bean will not be instantiated by spring.
  *
- * Must be used in combination with [Component].
+ * Must be used in combination with [Conditional] and any [Component] stereotype.
  *
  * ```java
- * @RequiresVitalPlayers
+ * @Conditional(RequiresVitalPlayers.class)
  * @Component
  * public class MyVitalPlayersBean {
  *   // ...
  * }
  * ```
  */
-@ConditionalOnClass(name = ["me.vitalframework.players.VitalPlayersSubModule"])
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class RequiresVitalPlayers
+class RequiresVitalPlayers : Condition {
+    override fun matches(
+        context: ConditionContext,
+        metadata: AnnotatedTypeMetadata,
+    ): Boolean = ClassUtils.isPresent("me.vitalframework.players.VitalPlayersSubModule", context.classLoader)
+}

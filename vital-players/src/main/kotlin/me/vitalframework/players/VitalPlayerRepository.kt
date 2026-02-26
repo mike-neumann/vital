@@ -1,21 +1,13 @@
 package me.vitalframework.players
 
 import me.vitalframework.VitalRepository
-import org.springframework.stereotype.Component
 import java.util.UUID
 
 /**
- * Repository class for managing `VitalPlayer` entities in-memory.
+ * The global repository for in-memory data management for [VitalPlayer] instances.
+ * When using "vital-players", a custom [VitalPlayer] instance defined by the "vital.players.vital-player-class-name" is created and stored here.
+ * This repository can be used to retrieve all managed [VitalPlayer] instances.
  *
- * This class extends `VitalRepository` to provide a runtime storage solution
- * specifically tailored to `VitalPlayer` instances. It supports operations such as
- * saving, retrieving, deleting, and checking the existence of `VitalPlayer` entities.
- *
- * The entities managed by this repository adhere to the generic `VitalPlayer` type,
- * parameterized by their specific player type and identified by a `UUID`.
- *
- * This repository is designed to work seamlessly within the Vital framework and is
- * used by services such as `VitalPlayerService` to manage player-related logic.
+ * Manual mutation of this repository is discouraged.
  */
-@Component
 class VitalPlayerRepository : VitalRepository<VitalPlayer<*>, UUID>()

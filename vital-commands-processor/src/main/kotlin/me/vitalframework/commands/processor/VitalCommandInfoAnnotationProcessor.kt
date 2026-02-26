@@ -15,7 +15,7 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.tools.StandardLocation
 
-@SupportedSourceVersion(SourceVersion.RELEASE_21)
+@SupportedSourceVersion(SourceVersion.RELEASE_24)
 @SupportedAnnotationTypes("*")
 class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
     private var ran = false
@@ -38,10 +38,10 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
         val commandInfoList = mutableListOf<VitalCommand.Info>()
         // Scan for all commands annotated with `VitalCommandInfo.
         for (element in roundEnv.getElementsAnnotatedWith(VitalCommand.Info::class.java)) {
-            val commandInfo = element.getAnnotation(VitalCommand.Info::class.java)
+            val commandInfo = element.getAnnotation(VitalCommand.Info::class.java)!!
 
             if (commandInfo !in commandInfoList) {
-                commandInfoList.add(commandInfo!!)
+                commandInfoList.add(commandInfo)
             }
         }
 

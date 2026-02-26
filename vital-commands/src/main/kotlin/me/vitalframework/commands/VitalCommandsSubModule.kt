@@ -8,6 +8,10 @@ import me.vitalframework.SpigotPlugin
 import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Conditional
 import java.lang.reflect.InvocationTargetException
 
 /**
@@ -18,12 +22,20 @@ import java.lang.reflect.InvocationTargetException
  * in a declarative annotation-based way.
  * It enables typesafe commands with an easy-to-read API.
  */
+@SubModule("vital-commands")
 class VitalCommandsSubModule {
+    @ConditionalOnMissingBean
+    @Bean
+    fun vitalGlobalCommandExceptionHandlerProcessor(
+        applicationContext: ApplicationContext,
+        vitalCommands: List<VitalCommand<*>>,
+    ) = VitalGlobalCommandExceptionHandlerProcessor(applicationContext, vitalCommands)
+
     /**
      * Defines the official Spigot vital-commands submodule, which is displayed when Vital starts.
      */
-    @RequiresSpigot
-    @SubModule("vital-commands")
+    @Conditional(RequiresSpigot::class)
+    @SubModule("vital-commands.spigot")
     class Spigot(
         val plugin: SpigotPlugin,
         val vitalCommands: List<VitalCommand.Spigot>,
@@ -35,7 +47,7 @@ class VitalCommandsSubModule {
                 Class.forName("org.bukkit.Bukkit")
             } catch (_: Exception) {
                 logger.error(
-                    "'vital-commands' has been installed, but the Bukkit runtime was not found on the server classpath, calling Bukkit APIs might fail.",
+                    "'vital-commands' for Spigot has been installed, but the Bukkit runtime was not found on the server classpath, calling Bukkit APIs might fail.",
                 )
                 logger.error(
                     "Please make sure you are running 'vital-commands' in the correct server environment, e.g. Spigot, Paper, Bungee.",
@@ -56,8 +68,8 @@ class VitalCommandsSubModule {
     /**
      * Defines the official BungeeCord vital-commands submodule, which is displayed when Vital starts.
      */
-    @RequiresBungee
-    @SubModule("vital-commands")
+    @Conditional(RequiresBungee::class)
+    @SubModule("vital-commands.bungee")
     class Bungee(
         val plugin: BungeePlugin,
         val vitalCommands: List<VitalCommand.Bungee>,
@@ -70,7 +82,7 @@ class VitalCommandsSubModule {
                     Class.forName("net.md_5.bungee.api.ProxyServer")
                 } catch (_: Exception) {
                     logger.error(
-                        "'vital-commands' has been installed, but the BungeeCord runtime was not found on the server classpath, calling BungeeCord APIs might fail.",
+                        "'vital-commands' for BungeeCord has been installed, but the BungeeCord runtime was not found on the server classpath, calling BungeeCord APIs might fail.",
                     )
                     logger.error(
                         "Please make sure you are running 'vital-commands' in the correct server environment, e.g. Spigot, Paper, Bungee.",

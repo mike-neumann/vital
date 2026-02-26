@@ -27,9 +27,20 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
 
     fun exists(entity: T) = _entities.contains(entity)
 
-    fun exists(id: ID) = _entities.any { it.id == id }
+    fun existsById(id: ID) = _entities.any { it.id == id }
 
-    fun get(id: ID) = _entities.find { it.id == id }
+    inline fun <reified T : VitalEntity<ID>> findById(id: ID) = findById(T::class.java, id)
+
+    fun <T : VitalEntity<ID>> findById(
+        type: Class<T>,
+        id: ID,
+    ) = _entities
+        .filterIsInstance(type)
+        .find { it.id == id }
+
+    inline fun <reified T : VitalEntity<ID>> findAll() = findAll(T::class.java)
+
+    fun <T : VitalEntity<ID>> findAll(type: Class<T>) = _entities.filterIsInstance(type)
 
     @JvmOverloads
     fun getRandom(predicate: (T) -> Boolean = { true }) = _entities.filter(predicate).randomOrNull()

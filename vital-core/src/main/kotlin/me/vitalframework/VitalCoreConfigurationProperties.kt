@@ -1,11 +1,11 @@
 package me.vitalframework
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.context.annotation.Configuration
+import org.springframework.stereotype.Component
 
 @ConfigurationProperties(prefix = "vital.core")
-@Configuration
-data class VitalCoreConfigurationProperties(
+@Component
+class VitalCoreConfigurationProperties(
     val bstats: BStats = BStats(),
 ) {
     data class BStats(

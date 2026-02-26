@@ -13,6 +13,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.Difficulty
@@ -29,101 +30,61 @@ import org.bukkit.potion.PotionEffectType
 import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.scoreboard.Team
 import org.jetbrains.annotations.Range
+import java.util.Timer
+import java.util.TimerTask
 import java.util.UUID
+import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
 interface VitalUtils<CS, P : CS> {
+    /**
+     * Defines utilities for general purposes across multiple platforms.
+     */
     companion object {
         private val logger = logger()
 
         /**
-         * Converts the current string, assumed to be in MiniMessage format, into a component.
-         *
-         * This method uses the MiniMessage library to deserialize the string input,
-         * transforming it into a Component instance that can be used in applications requiring
-         * formatted or styled text rendering.
-         *
-         * @receiver The string input in MiniMessage format to be converted into a component.
-         * @return The deserialized Component representation of the MiniMessage string.
+         * Converts the given [String] into a [Component] using [MiniMessage.deserialize].
          */
         @JvmStatic
         fun String.toMiniMessageComponent() = MiniMessage.miniMessage().deserialize(this)
 
         /**
-         * Converts the current Component object to a legacy Minecraft chat string representation using section symbol (§).
-         *
-         * The legacy string format is commonly used for in-game messages and supports color codes
-         * with the section symbol (§) as the prefix. This method allows for compatibility with older
-         * message and title systems that rely on the legacy formatting style.
-         *
-         * @receiver Component instance to be serialized into the legacy section string format.
-         * @return A string representation of the component in legacy format.
+         * Converts the given [Component] into a [String] with legacy section (§) formatting.
          */
         @JvmStatic
         fun Component.toLegacySectionString() = LegacyComponentSerializer.legacySection().serialize(this)
 
         /**
-         * Serializes the current component into a legacy-format string using the ampersand (&) as the color code prefix.
-         *
-         * This method converts the `Component` into its legacy text representation, commonly used in older
-         * Minecraft versions or contexts which do not support modern text styling formats like MiniMessage.
-         * The ampersand character is used to indicate color and formatting codes in the resulting string.
-         *
-         * @receiver The `Component` instance to be serialized.
-         * @return A string representing the serialized component in the legacy ampersand format.
+         * Converts the given [Component] into a [String] with legacy ampersand (&) formatting.
          */
         @JvmStatic
         fun Component.toLegacyAmpersandString() = LegacyComponentSerializer.legacyAmpersand().serialize(this)
 
         /**
-         * Converts a `Component` instance to BungeeCord-compatible components.
-         *
-         * This function uses the BungeeComponentSerializer to serialize the
-         * provided `Component` into a format that can be used with BungeeCord's chat
-         * API, allowing compatibility with Spigot or Paper implementations that use
-         * BungeeCord-based components for messaging.
-         *
-         * @receiver The `Component` to be serialized into BungeeCord-compatible components.
-         * @return An array of `BaseComponent` representing the BungeeCord-compatible serialized format of the `Component`.
+         * Converts the given [Component] into an [Array] of [BaseComponent], usable on BungeeCord systems.
          */
         @JvmStatic
         fun Component.toBungeeComponent() = BungeeComponentSerializer.get().serialize(this)
 
         /**
-         * Converts the current `Component` instance into a plain text string representation.
-         *
-         * This method uses the `PlainTextComponentSerializer` to serialize the component,
-         * effectively stripping away any formatting or additional metadata, leaving only the
-         * raw text content.
-         *
-         * @return The plain text string representation of the component.
+         * Converts the given [Component] into a plain text [String] with no formatting.
          */
         @JvmStatic
         fun Component.toPlainTextString() = PlainTextComponentSerializer.plainText().serialize(this)
 
         /**
-         * Converts the `Component` instance into a MiniMessage-formatted string.
-         *
-         * This method uses the MiniMessage serialization functionality to produce
-         * a string representation of the component, preserving its formatting and style
-         * as defined within the `Component`.
-         *
-         * @receiver The `Component` to be serialized into a MiniMessage-formatted string.
-         * @return A MiniMessage-compatible string representation of the `Component`.
+         * Converts the given [Component] into a [String] with MiniMessage formatting.
          */
         @JvmStatic
         fun Component.toMiniMessageString() = MiniMessage.miniMessage().serialize(this)
 
         /**
-         * Creates a chat button with hover text, clickable text, and a specific click action.
-         *
-         * @param hover the text to be displayed when the user hovers over the button
-         * @param text the text displayed on the button
-         * @param click the action or command triggered when the button is clicked
-         * @param action the type of click action to be performed
+         * Creates a chat button [String] in MiniMessage formatting.
+         * Can be used to create interactable text in chat.
          */
         @JvmStatic
         fun chatButton(
@@ -134,10 +95,7 @@ interface VitalUtils<CS, P : CS> {
         ) = "<hover:show_text:'$hover'><click:${action.name.lowercase()}:'$click'>$text</click></hover>"
 
         /**
-         * Creates a chat button that executes a specified command when clicked.
-         *
-         * @param text The display text for the button in the chat.
-         * @param command The command to be executed when the button is clicked.
+         * Creates a chat button [String] in MiniMessage formatting, that when clicked, executes the given command.
          */
         @JvmStatic
         fun chatRunCommandButton(
@@ -146,14 +104,7 @@ interface VitalUtils<CS, P : CS> {
         ) = chatButton(command, text, command, ClickEvent.Action.RUN_COMMAND)
 
         /**
-         * Creates a chat button that suggests a command to the user upon clicking.
-         *
-         * The button is styled with the provided text and command, and clicking it suggests the command
-         * in the user's chat input field. This functionality allows for streamlined interaction where
-         * commands can be pre-filled for execution.
-         *
-         * @param text the text displayed on the button
-         * @param command the command to suggest when the button is clicked
+         * Creates a chat button [String] in MiniMessage formatting, that when clicked, inserts the given command into the player's chat.
          */
         @JvmStatic
         fun chatSuggestCommandButton(
@@ -162,88 +113,63 @@ interface VitalUtils<CS, P : CS> {
         ) = chatButton(command, text, command, ClickEvent.Action.SUGGEST_COMMAND)
 
         /**
-         * Creates a formatted "YES" button in green and bold text that, when clicked, executes a specified chat command.
-         *
-         * @param command The chat command to be executed when the button is clicked.
+         * Creates a chat button [String] in MiniMessage formatting, with the text "YES" in bold green, that when clicked, executes the given command.
          */
         @JvmStatic
         fun chatRunCommandYesButton(command: String) = chatRunCommandButton("<green><bold>YES</bold></green>", command)
 
         /**
-         * Creates a formatted chat button with the text "NO" styled in red and bold, which executes the specified command when clicked.
-         *
-         * @param command The command to execute when the button is clicked.
+         * Creates a chat button [String] in MiniMessage formatting, with the text "NO" in bold red, that when clicked, executes the given command.
          */
         @JvmStatic
         fun chatRunCommandNoButton(command: String) = chatRunCommandButton("<red><bold>NO</bold></red>", command)
 
         /**
-         * Creates a chat button labeled "OK" that executes the specified command when clicked.
-         * The button is styled with green bold text.
-         *
-         * @param command The command to be executed when the "OK" button is clicked.
+         * Creates a chat button [String] in MiniMessage formatting, with the text "OK" in bold green, that when clicked, executes the given command.
          */
         @JvmStatic
         fun chatRunCommandOkButton(command: String) = chatRunCommandButton("<green><bold>OK</bold></green>", command)
 
         /**
-         * Creates a red "✕" button in chat that, when clicked, executes the specified command.
-         *
-         * @param command The command to execute when the button is clicked.
+         * Creates a chat button [String] in MiniMessage formatting, with the text "x" in bold red, that when clicked, executes the given command.
          */
         @JvmStatic
         fun chatRunCommandXButton(command: String) = chatRunCommandButton("<red><bold>✕</bold></red>", command)
 
         /**
-         * Creates a checkmark button in chat that executes a given command when clicked.
-         *
-         * @param command The command to be executed when the button is clicked.
+         * Creates a chat button [String] in MiniMessage formatting, with a checkmark, that when clicked, executed the given command.
          */
         @JvmStatic
         fun chatRunCommandCheckmarkButton(command: String) = chatRunCommandButton("<green><bold>✓</bold></green>", command)
 
         /**
-         * Creates a chat button with the label "ACCEPT" styled in green and bold, which executes the specified command
-         * when clicked by the player.
-         *
-         * @param command The command to be executed when the "ACCEPT" button is clicked.
+         * Creates a chat button [String] in MiniMessage formatting, with the text "ACCEPT" in bold green, that when clicked, executes the given command.
          */
         @JvmStatic
         fun chatRunCommandAcceptButton(command: String) = chatRunCommandButton("<green><bold>ACCEPT</bold></green>", command)
 
         /**
-         * Creates a formatted decline button with a red, bold "DECLINE" label that triggers the specified command when clicked.
-         *
-         * @param command the command to be executed when the decline button is clicked
+         * Creates a chat button [String] in MiniMessage formatting, with the text "DECLINE" in bold red, that when clicked, executes the given command.
          */
         @JvmStatic
         fun chatRunCommandDeclineButton(command: String) = chatRunCommandButton("<red><bold>DECLINE</bold></red>", command)
 
         /**
-         * Converts the current string into a regular expression that matches the string
-         * as a blacklisted word. The resulting regex is case-insensitive and allows for
-         * non-alphanumeric characters between the characters of the word.
-         *
-         * This method is useful for detecting variations of a word that might include
-         * special characters or different casing while maintaining its integrity as a match.
-         *
-         * @receiver The word to be converted into a regular expression.
-         * @return A regular expression instance that matches the blacklisted word in
-         *         case-insensitive formats, including potential variations with symbols
-         *         or spaces between the characters.
+         * Converts the given [String] into a [Regex], that matches the given [String] in multiple permutations, that may be possible when wanting to block specific words.
+         * Blocked permutations include:
+         * - Case insensitivity.
+         * - Non-alphanumeric permutations between letters.
+         * - Choosing specific characters between letters, that look like the targeting letter.
          */
         @JvmStatic
         fun String.toBlacklistedWordRegex() = buildBlacklistedWordRegex(this)
 
         /**
-         * Builds a regular expression pattern to detect a given word in a case-insensitive manner,
-         * ignoring special characters and non-alphanumeric symbols between characters.
-         *
-         * @param word The word to create a regex pattern for. It is expected to be a string
-         *             representing the blacklisted word.
-         * @return A compiled regular expression that matches the word case-insensitively,
-         *         including possible variations that may include non-alphanumeric characters
-         *         between the word's letters.
+         * Builds a [Regex] with the given [String], that matches the given [String] in multiple permutations, that may be possible when wanting to block specific words.
+         * BLocked permutations include:
+         * - Case insensitivity.
+         * - Non-alphanumeric permutations between letters.
+         * - Choosing specific characters between letters, that look like the targeting letter.
          */
         @JvmStatic
         fun buildBlacklistedWordRegex(word: String): Regex {
@@ -252,22 +178,15 @@ interface VitalUtils<CS, P : CS> {
         }
 
         /**
-         * Converts the current string to a censored version by replacing all occurrences of
-         * the provided blacklisted words with their censored forms.
-         *
-         * @param blacklistedWords A list of words that should be censored within the string.
+         * Converts the given [String] into its censored version, where each blacklisted word in [blacklistedWords] is replaced by its censored version.
+         * E. G. "fuck" -> "f***".
          */
         @JvmStatic
         fun String.toCensoredText(blacklistedWords: List<String>) = getCensoredText(this, blacklistedWords)
 
         /**
-         * Replaces all occurrences of blacklisted words in the given text with a censored version.
-         * Each blacklisted word is replaced with its first character followed by asterisks, e.g., "test" becomes "t***".
-         * Single-character blacklisted words are replaced with a single asterisk.
-         *
-         * @param text The input text to be censored.
-         * @param blacklistedWords A list of words that should be censored in the input text.
-         * @return The censored text where all blacklisted words are replaced with their censored forms.
+         * Converts the given [String] into its censored version, where each blacklisted word in [blacklistedWords] is replaced by its censored version.
+         * E. G. "fuck" -> "f***".
          */
         @JvmStatic
         fun getCensoredText(
@@ -512,6 +431,55 @@ interface VitalUtils<CS, P : CS> {
             it.spigot().sendMessage(*message.toMiniMessageComponent().toBungeeComponent())
         }
 
+        private val loopedSounds = mutableMapOf<UUID, MutableMap<String, TimerTask>>()
+
+        /**
+         * Plays and the given [sound] on this player and loops after the specified [length]ms has expired.
+         */
+        fun SpigotPlayer.playLoopedSound(
+            sound: String,
+            length: Long,
+            volume: Float,
+            pitch: Float,
+        ) {
+            val loopedSound = Timer().scheduleAtFixedRate(0L, length) { playSound(this@playLoopedSound, sound, volume, pitch) }
+
+            if (!loopedSounds.containsKey(uniqueId)) {
+                loopedSounds[uniqueId] = mutableMapOf(sound to loopedSound)
+            } else {
+                loopedSounds[uniqueId]!![sound] = loopedSound
+            }
+        }
+
+        /**
+         * Stops a possibly active sound loop for the current player and the given [sound].
+         * If the current player does not have the sound active, this function does nothing.
+         */
+        fun SpigotPlayer.stopLoopedSound(sound: String) {
+            if (!loopedSounds.containsKey(uniqueId)) {
+                return
+            }
+
+            val loopedSound = loopedSounds[uniqueId]!![sound]
+            if (loopedSound != null) {
+                loopedSound.cancel()
+                loopedSounds[uniqueId]!!.remove(sound)
+            }
+
+            if (loopedSounds[uniqueId]!!.isEmpty()) {
+                loopedSounds
+            }
+
+            stopSound(sound)
+        }
+
+        /**
+         * Stops all possibly active looped sounds for the current player.
+         */
+        fun SpigotPlayer.stopAllLoopedSounds() {
+            loopedSounds[uniqueId]?.keys?.forEach { stopLoopedSound(it) }
+        }
+
         /**
          * Broadcasts a sound to all players satisfying the given predicate.
          *
@@ -683,7 +651,7 @@ interface VitalUtils<CS, P : CS> {
             potionEffectType: PotionEffectType = PotionEffectType.SLOWNESS,
         ) {
             removePotionEffect(potionEffectType)
-            addPotionEffect(PotionEffect(potionEffectType, 2, Int.MAX_VALUE))
+            addPotionEffect(PotionEffect(potionEffectType, 5, Int.MAX_VALUE))
             teleport(location)
             removePotionEffect(potionEffectType)
         }
@@ -1350,6 +1318,11 @@ interface VitalUtils<CS, P : CS> {
                 val ourOtherTeam =
                     otherPlayer.getCustomNametagTeam(scoreboard, otherTeamSort, otherTeam.prefix(), otherTeam.suffix())
                 ourOtherTeam.addPlayer(otherPlayer)
+
+                // At this point, OUR scoreboard contains the content of the other player's scoreboard.
+                // But the other player must also receive OUR scoreboard.
+                val otherOurTeam = otherPlayer.getCustomNametagTeam(otherPlayer.scoreboard, sort, prefix, suffix)
+                otherOurTeam.addEntity(this)
             }
         }
 

@@ -9,6 +9,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.InventoryView
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
@@ -21,6 +22,8 @@ typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
 /**
  * Defines an inventory menu within the Vital-Framework.
  * An inventory menu is a GUI used to display information to a player, and process a player's inputs.
+ *
+ * By default, the class will be a bean.
  *
  * ```java
  * @VitalInventory.Info(
@@ -46,7 +49,7 @@ typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
  * ```
  */
 open class VitalInventory {
-    private val _items = mutableMapOf<Int, ItemStack>()
+    private val _items = mutableMapOf<UUID, MutableMap<Int, ItemStack?>>()
     private val _previousInventories = mutableMapOf<UUID, VitalInventory>()
     private val _playerInventories = mutableMapOf<UUID, InventoryView>()
     private val _actions = mutableMapOf<UUID, MutableMap<Int, InventoryItemClickAction>>()
@@ -84,10 +87,10 @@ open class VitalInventory {
         get() = _playerInventories
 
     /**
-     * All [ItemStack]s and their set slot for this inventory.
+     * All [SpigotPlayer]s as a [UUID] and their slot to [ItemStack] mapping for this inventory.
      * If the [setItem] function was never called during inventory setup in [onUpdate], this map will be empty.
      */
-    val items: Map<Int, ItemStack>
+    val items: Map<UUID, Map<Int, ItemStack?>>
         get() = _items
 
     /**
@@ -102,13 +105,22 @@ open class VitalInventory {
      */
     @JvmOverloads
     fun setItem(
-        slot: Int,
-        itemStack: ItemStack,
         player: SpigotPlayer,
+        slot: Int,
+        item: ItemStack?,
         action: InventoryItemClickAction = {},
     ) {
-        _items[slot] = itemStack
-        _actions[player.uniqueId]!![slot] = action
+        if (_items.containsKey(player.uniqueId)) {
+            _items[player.uniqueId]!![slot] = item
+        } else {
+            _items[player.uniqueId] = mutableMapOf(slot to item)
+        }
+
+        if (_actions.containsKey(player.uniqueId)) {
+            _actions[player.uniqueId]!![slot] = action
+        } else {
+            _actions[player.uniqueId] = mutableMapOf(slot to action)
+        }
     }
 
     /**
@@ -146,7 +158,7 @@ open class VitalInventory {
             )
         }
 
-        for ((i, item) in _items) {
+        for ((i, item) in _items[player.uniqueId]!!) {
             inventory.setItem(i, item)
         }
     }
@@ -161,6 +173,7 @@ open class VitalInventory {
         previousInventory: VitalInventory? = null,
     ) {
         previousInventory?.close(player)
+        player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW)
         val inventoryView =
             type.menuType.create(
                 player,
@@ -173,7 +186,6 @@ open class VitalInventory {
             _previousInventories[player.uniqueId] = previousInventory
         }
         _playerInventories[player.uniqueId] = inventoryView
-        _actions[player.uniqueId] = mutableMapOf()
 
         onOpen(player)
         update(player)
@@ -199,7 +211,7 @@ open class VitalInventory {
         // then we can clean up this inventory for the closing player, so we don't leak memory'
         _previousInventories.remove(player.uniqueId)
         _actions.remove(player.uniqueId)
-        _items.clear()
+        _items.remove(player.uniqueId)
 
         // finally, call the onClose hook to allow for custom behavior during the close process
         onClose(player)

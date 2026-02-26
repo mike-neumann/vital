@@ -1,8 +1,13 @@
 package me.vitalframework.inventories
 
+import me.vitalframework.RequiresSpigot
 import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Conditional
+import org.springframework.context.annotation.Configuration
 
 /**
  * Defines the official vital-inventories submodule, which is displayed when Vital starts.
@@ -27,5 +32,14 @@ class VitalInventoriesSubModule(
         for (vitalInventory in vitalInventories) {
             logger.info("Inventory '${vitalInventory::class.java.name}' successfully registered")
         }
+    }
+
+    @Conditional(RequiresSpigot::class)
+    @Configuration
+    class Spigot {
+        @ConditionalOnMissingBean
+        @Bean
+        fun vitalInventoryListener(vitalInventories: List<VitalInventory>): VitalInventoryListener =
+            VitalInventoryListener(vitalInventories)
     }
 }

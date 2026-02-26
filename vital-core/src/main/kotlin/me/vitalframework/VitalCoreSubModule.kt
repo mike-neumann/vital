@@ -3,8 +3,10 @@ package me.vitalframework
 import org.bukkit.Bukkit
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.annotation.Conditional
 import org.springframework.context.event.EventListener
 import org.springframework.core.Ordered
+import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.core.annotation.Order
 import kotlin.reflect.KClass
 
@@ -48,7 +50,7 @@ class VitalCoreSubModule {
         logger.info("Thanks for using Vital!")
     }
 
-    @RequiresSpigot
+    @Conditional(RequiresSpigot::class)
     @SubModule("vital-core")
     class Spigot(
         val plugin: SpigotPlugin,
@@ -68,7 +70,7 @@ class VitalCoreSubModule {
         }
     }
 
-    @RequiresBungee
+    @Conditional(RequiresBungee::class)
     @SubModule("vital-core")
     class Bungee(
         val plugin: BungeePlugin,
@@ -113,7 +115,7 @@ class VitalCoreSubModule {
          */
         @JvmStatic
         inline fun <reified T : Annotation> Class<*>.getRequiredAnnotation() =
-            getAnnotation(T::class.java)
+            AnnotationUtils.findAnnotation(this, T::class.java)
                 ?: throw RuntimeException("$simpleName must be annotated with '@${T::class.java.name}'")
 
         /**

@@ -3,6 +3,7 @@ package me.vitalframework
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 
 /**
@@ -11,8 +12,8 @@ import org.springframework.context.annotation.Configuration
  */
 class VitalSpringConfiguration {
     @ComponentScan(basePackages = ["me.vitalframework"])
-    @RequiresSpigot
-    @Configuration
+    @Conditional(RequiresSpigot::class)
+    @Configuration(proxyBeanMethods = false)
     class Spigot {
         // "plugin" is registered when Vital starts up; we know it exists, so we can suppress the spring warning here
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -23,8 +24,8 @@ class VitalSpringConfiguration {
     }
 
     @ComponentScan(basePackages = ["me.vitalframework"])
-    @RequiresBungee
-    @Configuration
+    @Conditional(RequiresBungee::class)
+    @Configuration(proxyBeanMethods = false)
     class Bungee {
         // "plugin" is registered when Vital starts up; we know it exists, so we can suppress the spring warning here
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")

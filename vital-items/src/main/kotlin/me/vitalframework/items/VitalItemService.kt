@@ -1,23 +1,19 @@
 package me.vitalframework.items
 
-import me.vitalframework.RequiresSpigot
 import me.vitalframework.tasks.VitalScheduled
 import org.bukkit.Bukkit
 import org.bukkit.event.player.PlayerInteractEvent
-import org.springframework.stereotype.Service
 
-@RequiresSpigot
-@Service
-class VitalItemService(
-    val items: List<VitalItem>,
+open class VitalItemService(
+    val vitalItems: List<VitalItem>,
 ) {
     fun handleInteraction(e: PlayerInteractEvent) {
-        items.firstOrNull { it == e.item }?.handleInteraction(e)
+        vitalItems.firstOrNull { it == e.item }?.handleInteraction(e)
     }
 
     @VitalScheduled(fixedDelay = 50)
     fun handleCooldown() {
-        for (item in items) {
+        for (item in vitalItems) {
             for ((uniqueId, _) in item.playerCooldown.filter { it.value > 0 }) {
                 val player = Bukkit.getPlayer(uniqueId) ?: continue
 

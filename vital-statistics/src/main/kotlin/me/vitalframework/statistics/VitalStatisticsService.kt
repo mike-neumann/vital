@@ -1,10 +1,9 @@
 package me.vitalframework.statistics
 
 import me.vitalframework.VitalCoreSubModule.Companion.logger
-import org.springframework.stereotype.Service
+import me.vitalframework.tasks.VitalScheduled
 
-@Service
-class VitalStatisticsService(
+open class VitalStatisticsService(
     val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
 ) {
     private val logger = logger()
@@ -17,15 +16,16 @@ class VitalStatisticsService(
     val lastUnhealthyTps: Map<Long, Int>
         get() = _lastUnhealthyTps
 
-    final var lastTickTime = 0L
+    var lastTickTime = 0L
         private set
-    final var lastSecondTime = 0L
+    var lastSecondTime = 0L
         private set
-    final var ticks = 0
+    var ticks = 0
         private set
-    final var tps = 0
+    var tps = 0
         private set
 
+    @VitalScheduled(fixedDelay = 50)
     fun handleTick() {
         val currentTimeMillis = System.currentTimeMillis()
 

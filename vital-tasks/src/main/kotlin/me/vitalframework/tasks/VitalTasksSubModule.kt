@@ -3,6 +3,9 @@ package me.vitalframework.tasks
 import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.context.annotation.Bean
+import org.springframework.core.env.Environment
 import org.springframework.scheduling.annotation.EnableScheduling
 
 /**
@@ -26,4 +29,8 @@ class VitalTasksSubModule(
             logger.info("Countdown task '${vitalCountdownTask::class.java.name}' successfully registered")
         }
     }
+
+    @ConditionalOnMissingBean
+    @Bean
+    fun vitalScheduler(environment: Environment): VitalScheduler = VitalScheduler(environment)
 }

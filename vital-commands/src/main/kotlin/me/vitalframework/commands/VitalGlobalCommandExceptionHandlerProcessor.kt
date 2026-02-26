@@ -5,10 +5,9 @@ import me.vitalframework.commands.VitalCommand.Companion.getVitalCommandAdvice
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.getBeansWithAnnotation
 import org.springframework.context.ApplicationContext
-import org.springframework.stereotype.Component
+import org.springframework.core.annotation.AnnotationUtils
 
-@Component
-class VitalGlobalCommandExceptionHandlerProcessor(
+open class VitalGlobalCommandExceptionHandlerProcessor(
     applicationContext: ApplicationContext,
     val commands: List<VitalCommand<*>>,
 ) : InitializingBean {
@@ -16,28 +15,33 @@ class VitalGlobalCommandExceptionHandlerProcessor(
 
     final override fun afterPropertiesSet() {
         for (command in commands) {
+            val adviceInstances =
+                advices
+                    .filter {
+                        command.commandSenderClass.isAssignableFrom(
+                            it.javaClass
+                                .getVitalCommandAdvice()
+                                .commandSenderClass.java,
+                        )
+                    }
+
             // get all advices for the command sender of the command.
-            advices
-                .filter {
-                    command.commandSenderClass.isAssignableFrom(
-                        it.javaClass
-                            .getVitalCommandAdvice()
-                            .commandSenderClass.java,
-                    )
-                }.forEach { adviceInstance ->
-                    val advice = adviceInstance.javaClass.getAnnotation(VitalCommand.Advice::class.java)!!
+            for (adviceInstance in adviceInstances) {
+                val advice = AnnotationUtils.getAnnotation(adviceInstance.javaClass, VitalCommand.Advice::class.java)!!
+                val methodsAndExceptionsHandlers =
                     adviceInstance::class.java.methods
                         .filter { it.getAnnotationsByType(VitalCommand.GlobalExceptionHandler::class.java).size > 0 }
-                        .map { method ->
+                        .flatMap { method ->
                             method
                                 .getAnnotationsByType(VitalCommand.GlobalExceptionHandler::class.java)
                                 .map { method to it }
-                        }.flatten()
-                        .forEach { (method, exceptionHandler) ->
-                            globalExceptionHandlers[exceptionHandler.type.java] =
-                                method.getGlobalExceptionHandlerContext(adviceInstance, advice.commandSenderClass.java)
                         }
+
+                for ((method, exceptionHandler) in methodsAndExceptionsHandlers) {
+                    globalExceptionHandlers[exceptionHandler.type.java] =
+                        method.getGlobalExceptionHandlerContext(adviceInstance, advice.commandSenderClass.java)
                 }
+            }
         }
     }
 

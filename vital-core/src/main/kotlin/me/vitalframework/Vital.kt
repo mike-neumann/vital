@@ -22,6 +22,8 @@ object Vital {
             "vital-cloudnet4-bridge",
             "vital-cloudnet4-driver",
             "vital-commands",
+            "vital-commands.spigot",
+            "vital-commands.bungee",
             "vital-commands-processor",
             "vital-configs",
             "vital-core",
@@ -150,7 +152,7 @@ object Vital {
      * }
      * ```
      */
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(

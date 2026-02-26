@@ -1,10 +1,10 @@
 package me.vitalframework.players
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.context.annotation.Configuration
+import org.springframework.stereotype.Component
 
 @ConfigurationProperties(prefix = "vital.players")
-@Configuration
+@Component
 class VitalPlayersConfigurationProperties {
     lateinit var playerClassName: String
 

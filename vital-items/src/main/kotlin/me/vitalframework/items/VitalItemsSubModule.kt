@@ -1,8 +1,13 @@
 package me.vitalframework.items
 
+import me.vitalframework.RequiresSpigot
 import me.vitalframework.SubModule
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalSubModule
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Conditional
+import org.springframework.context.annotation.Configuration
 
 /**
  * Defines the official vital-items submodule, which is displayed when Vital starts.
@@ -27,5 +32,17 @@ class VitalItemsSubModule(
         for (vitalItem in vitalItems) {
             logger.info("Item '${vitalItem::class.java.name}' successfully registered")
         }
+    }
+
+    @Conditional(RequiresSpigot::class)
+    @Configuration
+    class Spigot {
+        @ConditionalOnMissingBean
+        @Bean
+        fun vitalItemService(vitalItems: List<VitalItem>): VitalItemService = VitalItemService(vitalItems)
+
+        @ConditionalOnMissingBean
+        @Bean
+        fun vitalItemListener(vitalItemService: VitalItemService): VitalItemListener = VitalItemListener(vitalItemService)
     }
 }

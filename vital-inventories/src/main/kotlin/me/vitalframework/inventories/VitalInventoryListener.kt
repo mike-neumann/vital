@@ -1,7 +1,5 @@
 package me.vitalframework.inventories
 
-import me.vitalframework.Listener
-import me.vitalframework.RequiresSpigot
 import me.vitalframework.SpigotEventHandler
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalListener
@@ -9,8 +7,6 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
-@RequiresSpigot
-@Listener
 class VitalInventoryListener(
     val inventories: List<VitalInventory>,
 ) : VitalListener.Spigot() {

@@ -7,13 +7,12 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.ArmorStand
-import org.springframework.stereotype.Service
+import org.bukkit.inventory.ItemStack
 import java.util.UUID
 
 /**
  * Service class to create and delete instances of [VitalHologram].
  */
-@Service
 class VitalHologramService(
     private val plugin: SpigotPlugin,
     private val vitalPerPlayerHologramProviders: List<VitalHologramProvider<VitalPerPlayerHologram>>,
@@ -22,7 +21,7 @@ class VitalHologramService(
      * Creates a hologram at the given [location] which displays all given [lines] that is visible to all players on the server.
      */
     fun createGlobalHologram(
-        lines: List<String>,
+        lines: List<VitalHologram.Line>,
         location: Location,
     ): VitalGlobalHologram {
         val armorStand =
@@ -40,7 +39,7 @@ class VitalHologramService(
      */
     fun createPerPlayerHologram(
         player: SpigotPlayer,
-        lines: List<String>,
+        lines: List<VitalHologram.Line>,
         location: Location,
     ): VitalPerPlayerHologram {
         val armorStand =
@@ -88,7 +87,7 @@ class VitalHologramService(
      */
     fun hideHologram(
         player: SpigotPlayer,
-        hologram: VitalHologram<*>,
+        hologram: VitalHologram,
     ) {
         hideHologram(player, hologram.armorStandUniqueId, hologram.lineArmorStandUniqueIds)
     }
@@ -117,7 +116,7 @@ class VitalHologramService(
      */
     fun showHologram(
         player: SpigotPlayer,
-        hologram: VitalHologram<*>,
+        hologram: VitalHologram,
     ) {
         showHologram(player, hologram.armorStandUniqueId, hologram.lineArmorStandUniqueIds)
     }
@@ -142,7 +141,7 @@ class VitalHologramService(
     /**
      * Deletes the given [hologram].
      */
-    fun deleteHologram(hologram: VitalHologram<*>) {
+    fun deleteHologram(hologram: VitalHologram) {
         deleteHologram(hologram.armorStandUniqueId, hologram.lineArmorStandUniqueIds)
     }
 
@@ -152,14 +151,14 @@ class VitalHologramService(
      *
      * Additionally, an [action] can be performed for each spawned armor stand.
      */
-    private fun List<String>.createArmorStands(
+    private fun List<VitalHologram.Line>.createArmorStands(
         location: Location,
         action: (ArmorStand) -> Unit = {},
     ): List<ArmorStand> =
         reversed().mapIndexed { i, line ->
             // convert the minimessage formatted line into a legacy section formatted line.
             val formattedLine =
-                LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(line))
+                LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(line.text ?: ""))
 
             val armorStand =
                 location.world!!
@@ -167,8 +166,21 @@ class VitalHologramService(
                         it.isVisible = false
                         it.isInvisible = true
                         it.isMarker = true
-                        it.isCustomNameVisible = true
-                        it.customName(MiniMessage.miniMessage().deserialize(formattedLine))
+
+                        if (formattedLine.isNotEmpty()) {
+                            it.isCustomNameVisible = true
+                            it.customName(MiniMessage.miniMessage().deserialize(formattedLine))
+                        }
+
+                        if (line.material != null) {
+                            it.addPassenger(
+                                it.world.dropItem(it.location, ItemStack(line.material)) {
+                                    it.isUnlimitedLifetime = true
+                                    it.setCanPlayerPickup(false)
+                                    it.setCanMobPickup(false)
+                                },
+                            )
+                        }
                     }
             action(armorStand)
             armorStand

@@ -21,6 +21,9 @@ import kotlin.reflect.KClass
  * task execution, offering flexibility through abstract methods for specific
  * implementations.
  *
+ * By default, the class will not be a bean.
+ * If dependency injection is wanted or needed, apply the [Component] annotation.
+ *
  * @param P The plugin or context instance associated with the task.
  * @param R The type of the runnable defining the task's logic.
  * @param T The type of the task instance used to schedule or manage execution.
@@ -143,18 +146,18 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     /**
      * Called when this task is started ia [start].
      */
-    fun onStart() {}
+    open fun onStart() {}
 
     /**
      * Called on every task-tick.
      * Internally, this function is called, when [handleTick] is called.
      */
-    fun onTick() {}
+    open fun onTick() {}
 
     /**
      * Called when this task is stopped via [stop].
      */
-    fun onStop() {}
+    open fun onStop() {}
 
     companion object {
         /**
@@ -188,7 +191,6 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     /**
      * Defines the info for a [VitalRepeatableTask].
      */
-    @Component
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(
@@ -220,7 +222,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
                 override fun run() = handleTick()
             }
 
-        override fun createTask() = runnable!!.runTaskTimer(plugin, 0L, (interval / 1000L) * 20L)
+        override fun createTask() = runnable!!.runTaskTimer(plugin, 0L, ((interval.toFloat() / 1_000f) * 20f).toLong())
 
         override fun cancelRunnable() {
             runnable?.cancel()

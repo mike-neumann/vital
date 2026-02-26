@@ -8,12 +8,12 @@ import java.util.UUID
  * Represents a per-player implementation of [VitalHologram].
  * This hologram will only be visible to a single player when created using [VitalHologramService.createPerPlayerHologram].
  */
-class VitalPerPlayerHologram() : VitalHologram<String>() {
+class VitalPerPlayerHologram() : VitalHologram() {
     @VitalConfig.Property(UUID::class)
     override lateinit var id: UUID
 
     @VitalConfig.Property(String::class)
-    override lateinit var lines: List<String>
+    override lateinit var lines: List<Line>
 
     @VitalConfig.Property(Location::class)
     override lateinit var location: Location
@@ -29,7 +29,7 @@ class VitalPerPlayerHologram() : VitalHologram<String>() {
 
     constructor(
         id: UUID,
-        lines: List<String>,
+        lines: List<Line>,
         location: Location,
         armorStandUniqueId: UUID,
         lineArmorStandUniqueIds: List<UUID>,

@@ -13,146 +13,81 @@ import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
 /**
- * Represents a countdown task that provides customizable countdown functionality.
+ * Defines a countdown task within the Vital-Framework.
+ * A countdown is a [VitalRepeatableTask], with an internal [countdown], decrementing its value by 1 on every tick until it reaches 0.
+ * Once the [countdown] reaches 0, its respective [onExpire] function will be called, so consumers can implement their own custom behavior.
  *
- * This class serves as a framework for executing countdown-based logic in a controlled manner.
- * It manages the lifecycle of the countdown, including operations such as starting, stopping,
- * and resetting the countdown, as well as handling events that occur on each tick, task expiration,
- * and various lifecycle transitions.
- *
- * The class provides the following configurable behaviors:
- * - Custom logic for task lifecycle events, such as onStart, onStop, onTick, onExpire, etc.
- * - Abstract methods to define specific runnable and task implementations.
- * - Methods to control the state of the countdown task, including start, stop, reset, and restart.
- *
- * Subclasses are expected to provide concrete implementations for the abstract methods to define
- * the specific execution behavior and lifecycle management of the countdown task.
- *
- * @param T The type of the task that executes the countdown.
- * @param R The type of the runnable associated with the countdown process.
+ * By default, the class will not be a bean.
+ * If dependency injection is wanted or needed, apply the [Component] annotation.
  */
 abstract class VitalCountdownTask<P, R : Runnable, T>(
     val plugin: P,
 ) {
     /**
-     * Represents the initial countdown value for the countdown task.
-     *
-     * This value determines the starting point of the countdown and is used
-     * to reset or restart the task to its initial state. The countdown process
-     * begins from this value and decrements over time until it reaches zero.
+     * The initial countdown of this countdown task.
+     * Will be set to [Info.countdown] upon instantiation.
      */
     val initialCountdown
         get() = getInfo().countdown
 
     /**
-     * Represents the current countdown value in the `VitalCountdownTask`.
-     *
-     * This variable holds the remaining time of the countdown process in milliseconds.
-     * It is decremented during each tick of the countdown operation, stopping when it reaches zero.
-     *
-     * The `countdown` variable can be reset to its initial value through the `reset()` method,
-     * or modified directly for custom configurations. Changes to this value affect the
-     * countdown's behavior and duration.
-     *
-     * @property countdown The remaining time for the countdown process.
+     * The countdown of this countdown task.
+     * Will be set to [initialCountdown] upon instantiation.
      */
     var countdown = initialCountdown
 
     /**
-     * The interval between each tick of the countdown process, measured in milliseconds.
-     *
-     * This variable defines the delay duration between successive executions of the task's tick logic.
-     * Modifying this value affects how frequently the countdown task updates during its execution.
-     *
-     * It is recommended to adjust the interval value based on the application's requirements for
-     * responsiveness and performance.
+     * The interval between [onTick] calls of this countdown task.
      */
     var interval = getInfo().interval
 
     /**
-     * Indicates whether the countdown task is allowed to tick or proceed with its operations.
-     *
-     * This variable is checked within the `handleTick()` method to determine if the countdown
-     * should continue. If set to `false`, the ticking logic will exit early without performing
-     * any updates or changes to the countdown state. This allows for temporary pausing or
-     * suspending of the countdown process without completely stopping or resetting the task.
-     *
-     * By default, this property is initialized to `true`, meaning ticking is permitted unless
-     * explicitly disabled.
+     * If this countdown task currently allows ticks.
      */
     var allowTick = true
 
     /**
-     * A private mutable property that holds the reference to the runnable instance associated with the countdown task.
-     *
-     * This property is used internally to manage the lifecycle and execution logic of the countdown process.
-     * It is initialized and updated when the task starts or restarts, and is set to null when the task stops or is canceled.
-     *
-     * Access to modify this property is restricted to internal operations within the class to maintain control
-     * over the task's flow and ensure proper synchronization between the runnable's lifecycle and the task's state.
+     * The runnable of this countdown task.
      */
     var runnable: R? = null
         private set
 
     /**
-     * Holds the reference to the current countdown task.
-     *
-     * This property represents the active task instance associated with the countdown process.
-     * It is nullable and is assigned a value when a task is created or started.
-     * It will be set to null when the task is stopped or canceled to ensure proper cleanup.
-     *
-     * This variable is privately set to prevent direct modifications from outside the class,
-     * ensuring controlled state management through the class's methods.
+     * The task object of this countdown task.
      */
     var task: T? = null
         private set
 
     /**
-     * Indicates whether the countdown task is currently running.
-     *
-     * This property evaluates to `true` if both `runnable` and `task` are not null,
-     * signifying that the task is actively executing or ready to execute. Otherwise, it returns `false`,
-     * indicating that the countdown process is not in progress.
+     * If this countdown task is currently running.
      */
     val running
         get() = runnable != null && task != null
 
     /**
-     * Starts the countdown task.
-     *
-     * This method initializes and begins the countdown operation if it is not already running.
-     * When invoked, it first verifies if the task is currently active. If the task is inactive,
-     * it performs the following steps:
-     *
-     * - Invokes the `onStart()` method, allowing subclasses to define custom behavior at the start of the task.
-     * - Creates a runnable instance using `createRunnable()`, responsible for executing the countdown process.
-     * - Creates a countdown task instance using `createTask()`, which manages the task's lifecycle.
-     *
-     * Later operations that depend on the countdown or the task should use this method
-     * to ensure the task is properly initialized and functional before commencement.
+     * Starts this countdown task by setting its internal [runnable] using [createRunnable] and [task] using [createTask] and calling [onStart].
+     * If [running] is true, this function will pass.
      */
     fun start() {
-        if (running) return
+        if (running) {
+            return
+        }
+
         onStart()
         runnable = createRunnable()
         task = createTask()
     }
 
     /**
-     * Stops the countdown task if it is currently running.
-     *
-     * This method ensures that the task's resources are properly released and
-     * any ongoing processes associated with the task are terminated. It performs
-     * the following operations:
-     * - Calls `onStop()` to handle any custom stopping logic.
-     * - Cancels the runnable using `cancelRunnable()`.
-     * - Cancels the countdown task using `cancelTask()`.
-     * - Sets the runnable and task references to `null`.
-     *
-     * If the task is not currently running, the method exits without performing any actions.
+     * Stops this countdown task by setting its [runnable] and [task] back to null
+     * and calling the following functions in their respective order: [onStop], [cancelRunnable], [cancelTask].
+     * If [running] is false, this function will pass.
      */
     fun stop() {
-        if (!running) return
+        if (!running) {
+            return
+        }
+
         onStop()
         cancelRunnable()
         cancelTask()
@@ -161,14 +96,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     }
 
     /**
-     * Resets the state of the countdown task to its initial configuration.
-     *
-     * This method reassigns the `countdown` value to the initial countdown value
-     * stored in `initialCountdown` and invokes the `onReset` method to perform
-     * any custom behavior defined for the reset operation.
-     *
-     * Subclasses can override `onReset` to define specific actions that should
-     * take place when the task is reset.
+     * Resets this countdown task by setting its internal countdown to [initialCountdown] and calling [onReset].
      */
     fun reset() {
         countdown = initialCountdown
@@ -176,12 +104,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     }
 
     /**
-     * Restarts the countdown task.
-     *
-     * The restart process involves stopping the currently active task, resetting its state,
-     * and starting it again. This ensures that the countdown restarts from its initial configuration.
-     * Any additional behavior specific to restarting the task is handled in the `onRestart` method.
-     * Subclasses may override `onRestart` to implement custom restart logic.
+     * Restarts this countdown task by calling the following functions in their respective order: [stop], [reset], [start], [onRestart].
      */
     fun restart() {
         stop()
@@ -191,21 +114,16 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     }
 
     /**
-     * Handles the countdown logic for each tick of the task.
-     *
-     * This method is responsible for managing the countdown behavior, including checking whether
-     * ticking is allowed, decrementing the countdown value, triggering the tick logic, and
-     * handling task expiration when the countdown reaches zero.
-     *
-     * Behavior:
-     * - If ticking is not allowed (controlled by `allowTick`), the method exits without performing any actions.
-     * - If the countdown value has reached or dropped below zero, it stops the countdown task by invoking `stop()`,
-     *   triggers the expiration logic with `onExpire()`, and exits.
-     * - If ticking is allowed and the countdown is active, the method invokes `onTick()` to handle tick-specific
-     *   logic and decreases the countdown value by one.
+     * Handles a countdown task tick.
+     * Will pass if [allowTick] is false.
+     * Calls [stop] and [onExpire] when this countdown task's countdown expires.
+     * On every tick, calls [onTick] while decrementing its internal countdown by 1.
      */
     fun handleTick() {
-        if (!allowTick) return
+        if (!allowTick) {
+            return
+        }
+
         if (countdown <= 0) {
             stop()
             onExpire()
@@ -217,102 +135,54 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     }
 
     /**
-     * Creates and returns a runnable instance associated with the countdown task.
-     *
-     * Subclasses should implement this method to provide a specific runnable,
-     * which defines the core execution logic of the countdown process.
-     *
-     * @return The runnable instance responsible for executing the countdown logic.
+     * Creates the runnable for this countdown task's task.
      */
     abstract fun createRunnable(): R
 
     /**
-     * Creates and returns a new instance of a countdown task.
-     *
-     * This method is abstract and should be implemented in subclasses to define
-     * the specific type and behavior of the countdown task being created. The created
-     * task instance should be used to manage and execute the countdown process.
-     *
-     * @return A new instance of the countdown task.
+     * Creates the task for this countdown task.
      */
     abstract fun createTask(): T
 
     /**
-     * Cancels the runnable associated with the countdown task.
-     *
-     * This method is responsible for stopping any ongoing executions
-     * of the runnable that was created for managing the countdown process.
-     * It can be overridden to implement specific behavior for cancelling the runnable
-     * in subclasses. Typically, this would involve ensuring that any scheduled
-     * or running instances of the runnable are properly terminated.
+     * Cancels this countdown task's timer runnable.
      */
     abstract fun cancelRunnable()
 
     /**
-     * Cancels the countdown task.
-     *
-     * This method is used to terminate the currently running countdown task.
-     * Subclasses should provide the implementation to ensure the task is properly canceled,
-     * releasing any associated resources and stopping any active processes related to the task.
+     * Cancels this countdown task's timer.
      */
     abstract fun cancelTask()
 
     /**
-     * Invoked when the countdown task is started.
-     *
-     * This method is intended to handle any logic required when the countdown task begins.
-     * Override this method in subclasses to implement specific actions or setup to be
-     * performed at the start of the countdown.
+     * Called when this countdown task is started via [start].
      */
-    fun onStart() {}
+    open fun onStart() {}
 
     /**
-     * This method is called periodically during the countdown process.
-     *
-     * It is invoked at specific intervals defined by the countdown configuration and
-     * is usually used to implement any actions or updates that occur on each tick
-     * of the countdown. Override this method in a subclass to define custom behavior
-     * for each tick.
+     * Called when this countdown task's timer is ticked with the set [interval].
      */
-    fun onTick() {}
+    open fun onTick() {}
 
     /**
-     * Called when the countdown task is stopped.
-     *
-     * This method is executed during the task's stopping process,
-     * allowing the implementation to perform cleanup,
-     * release resources, or execute custom logic.
-     * Override this method in subclasses if specific actions
-     * need to be taken when the task is stopped.
+     * Called when this countdown task is stopped via [stop].
      */
-    fun onStop() {}
+    open fun onStop() {}
 
     /**
-     * Invoked when the countdown task expires.
-     *
-     * This method is called when the countdown reaches its end and is no longer active.
-     * Implementations can define behavior to execute upon expiration, such as cleanup operations,
-     * triggering specific events, or transitioning to a subsequent state.
+     * Called when this countdown task's countdown expires.
      */
-    fun onExpire() {}
+    open fun onExpire() {}
 
     /**
-     * Called when the countdown task is reset.
-     *
-     * This method is triggered during the reset operation to allow custom behavior
-     * to be implemented. Override this method in subclasses to define actions to
-     * be performed specifically when the task is reset to its initial state.
+     * Called when this countdown task is reset via [reset].
      */
-    fun onReset() {}
+    open fun onReset() {}
 
     /**
-     * Invoked when the countdown task is restarted.
-     *
-     * This method is intended to handle any logic required during the restart of the task,
-     * such as reinitializing state, resetting configurations, or performing specific actions
-     * necessary to ensure a proper restart of the countdown operation.
+     * Called when this countdown task is restarted via [restart].
      */
-    fun onRestart() {}
+    open fun onRestart() {}
 
     companion object {
         /**
@@ -346,7 +216,6 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     /**
      * Defines the info for a [VitalCountdownTask].
      */
-    @Component
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(

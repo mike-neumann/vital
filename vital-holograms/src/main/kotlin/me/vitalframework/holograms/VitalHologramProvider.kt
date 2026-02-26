@@ -6,6 +6,6 @@ package me.vitalframework.holograms
  *
  * Vital currently only uses hologram providers to correctly display [VitalPerPlayerHologram]'s.
  */
-fun interface VitalHologramProvider<T : VitalHologram<*>> {
+fun interface VitalHologramProvider<T : VitalHologram> {
     fun provide(): List<T>
 }

@@ -9,11 +9,11 @@ import me.vitalframework.SpigotListener
  *
  * Listener-events will be scoped to the currently active state.
  * Meaning the event-handlers defined within a single state will only trigger, when that state is active.
- * The current minigame state can be managed by [VitalMinigameService].
+ * The current minigame state can be managed by [VitalGlobalMinigameService].
  *
  * ```java
  * @MinigameState
- * public class MyMinigameState implements VitalMinigameState {
+ * public class MyGlobalMinigameState implements VitalGlobalMinigameState {
  *   @Override
  *   public void onEnable() {
  *     // ...
@@ -26,18 +26,14 @@ import me.vitalframework.SpigotListener
  * }
  * ```
  */
-interface VitalMinigameState : SpigotListener {
+interface VitalGlobalMinigameState : SpigotListener {
     /**
-     * This method is invoked to enable the state of the minigame.
-     * It is typically called when a new minigame state is set within the system, allowing
-     * for any necessary setup or initialization specific to the activated minigame state.
+     * Called when this state is enabled via [VitalGlobalMinigameService.setState].
      */
     fun onEnable() {}
 
     /**
-     * Invoked when the minigame state is being disabled.
-     * This method is typically used for cleanup operations and to release any resources
-     * or listeners associated with the state before it is removed or replaced.
+     * Called when this state is disabled by switching to a new state using [VitalGlobalMinigameService.setState].
      */
     fun onDisable() {}
 }

@@ -12,7 +12,7 @@ import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 import javax.tools.StandardLocation
 
-@SupportedSourceVersion(SourceVersion.RELEASE_21)
+@SupportedSourceVersion(SourceVersion.RELEASE_24)
 @SupportedAnnotationTypes("*")
 class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
     private var ran = false
@@ -60,7 +60,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
             .map {
                 val typeElement = it as TypeElement
                 val className = typeElement.qualifiedName.toString()
-                className to it.getAnnotation(Vital.Info::class.java)
+                className to it.getAnnotation(Vital.Info::class.java)!!
             }
 
     private fun writeMetadataFile(mainClass: String) {

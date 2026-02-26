@@ -2,6 +2,7 @@ package me.vitalframework
 
 import me.vitalframework.VitalCoreSubModule.Companion.logger
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 
 interface VitalBStatsInitialization<T> : InitializingBean {
@@ -40,8 +41,8 @@ interface VitalBStatsInitialization<T> : InitializingBean {
 
     fun startCustomBStats(pluginId: Int)
 
-    @RequiresSpigot
-    @Configuration
+    @Conditional(RequiresSpigot::class)
+    @Configuration(proxyBeanMethods = false)
     class Spigot(
         override val plugin: SpigotPlugin,
         override val vitalCoreConfigurationProperties: VitalCoreConfigurationProperties,
@@ -59,8 +60,8 @@ interface VitalBStatsInitialization<T> : InitializingBean {
         }
     }
 
-    @RequiresBungee
-    @Configuration
+    @Conditional(RequiresBungee::class)
+    @Configuration(proxyBeanMethods = false)
     class Bungee(
         override val plugin: BungeePlugin,
         override val vitalCoreConfigurationProperties: VitalCoreConfigurationProperties,

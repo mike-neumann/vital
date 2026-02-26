@@ -1,23 +1,29 @@
 package me.vitalframework
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.context.annotation.Condition
+import org.springframework.context.annotation.ConditionContext
+import org.springframework.context.annotation.Conditional
+import org.springframework.core.type.AnnotatedTypeMetadata
 import org.springframework.stereotype.Component
+import org.springframework.util.ClassUtils
 
 /**
- * Convenience-annotation to mark a class to only be loaded as a bean, when running as a Spigot plugin.
+ * Convenience-condition to mark a class to only be loaded as a bean, when running as a Spigot plugin.
  * If not running as a Spigot plugin, the annotated bean will not be instantiated by spring.
  *
- * Must be used in combination with [Component].
+ * Must be used in combination with [Conditional] and any [Component] stereotype.
  *
  * ```java
- * @RequiresSpigot
+ * @Conditional(RequiresSpigot.class)
  * @Component
  * public class MySpigotBean {
  *   // ...
  * }
  * ```
  */
-@ConditionalOnClass(name = ["org.bukkit.plugin.java.JavaPlugin"])
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class RequiresSpigot
+class RequiresSpigot : Condition {
+    override fun matches(
+        context: ConditionContext,
+        metadata: AnnotatedTypeMetadata,
+    ): Boolean = ClassUtils.isPresent("org.bukkit.plugin.java.JavaPlugin", context.classLoader)
+}

@@ -150,11 +150,17 @@ open class VitalItem {
     // this does not work with items if the server restarts
     // the uniqueId field is volatile and will be regenerated
     override fun equals(other: Any?): Boolean {
-        if (other !is ItemStack && other !is VitalItem) return false
+        if (other !is ItemStack && other !is VitalItem) {
+            return false
+        }
+
         if (other is ItemStack) {
-            if (other.itemMeta == null) return false
-            return uniqueId ==
-                UUID.fromString(other.itemMeta.persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING])
+            if (other.itemMeta == null) {
+                return false
+            }
+
+            val itemUuid = other.itemMeta.persistentDataContainer[VitalNamespacedKey.ITEM_UUID, PersistentDataType.STRING]
+            return uniqueId == itemUuid?.let { UUID.fromString(it) }
         }
 
         return uniqueId == (other as VitalItem).uniqueId
@@ -241,12 +247,12 @@ open class VitalItem {
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(
+        val type: Material,
         val name: String,
         val lore: Array<String> = [],
-        val amount: Int = 1,
-        val type: Material,
-        val itemFlags: Array<ItemFlag> = [],
         val cooldown: Int = 0,
+        val itemFlags: Array<ItemFlag> = [],
+        val amount: Int = 1,
         val enchanted: Boolean = false,
         val unbreakable: Boolean = true,
     )

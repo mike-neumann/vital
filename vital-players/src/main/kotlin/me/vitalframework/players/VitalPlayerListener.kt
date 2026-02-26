@@ -3,19 +3,15 @@ package me.vitalframework.players
 import me.vitalframework.BungeeEventHandler
 import me.vitalframework.BungeeEventPriority
 import me.vitalframework.BungeePlayer
-import me.vitalframework.Listener
-import me.vitalframework.RequiresBungee
-import me.vitalframework.RequiresSpigot
 import me.vitalframework.SpigotEventHandler
 import me.vitalframework.SpigotEventPriority
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalListener
 import net.md_5.bungee.api.event.PlayerDisconnectEvent
 import net.md_5.bungee.api.event.PostLoginEvent
+import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.springframework.core.Ordered
-import org.springframework.core.annotation.Order
 import java.util.UUID
 
 /**
@@ -31,7 +27,7 @@ interface VitalPlayerListener {
      * within the Vital framework. Provides access to player creation, destruction,
      * and retrieval functionalities.
      */
-    val playerService: VitalPlayerService
+    val vitalPlayerService: VitalPlayerService
 
     /**
      * Provides configuration properties related to vital players within the system.
@@ -58,7 +54,7 @@ interface VitalPlayerListener {
         playerUniqueId: UUID,
         playerClass: Class<T>,
     ) = try {
-        playerService.createPlayer(
+        vitalPlayerService.createPlayer(
             player,
             playerUniqueId,
             playerClass,
@@ -76,45 +72,41 @@ interface VitalPlayerListener {
      *
      * @param playerUniqueId The unique identifier of the player to be destroyed.
      */
-    fun destroyPlayer(playerUniqueId: UUID) = playerService.destroyPlayer(playerUniqueId)
+    fun destroyPlayer(playerUniqueId: UUID) = vitalPlayerService.deletePlayer(playerUniqueId)
 
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    @RequiresSpigot
-    @Listener
     class Spigot(
-        override val playerService: VitalPlayerService,
+        override val vitalPlayerService: VitalPlayerService,
         override val vitalPlayersConfigurationProperties: VitalPlayersConfigurationProperties,
     ) : VitalListener.Spigot(),
         VitalPlayerListener {
         // should always be executed first.
-        @SpigotEventHandler(priority = SpigotEventPriority.LOWEST)
+        @SpigotEventHandler(SpigotEventPriority.LOWEST)
         fun onPlayerJoin(e: PlayerJoinEvent) {
             createPlayer(e.player, e.player.uniqueId, SpigotPlayer::class.java)
         }
 
         // should always be executed last.
-        @SpigotEventHandler(priority = SpigotEventPriority.HIGHEST)
+        @SpigotEventHandler(SpigotEventPriority.HIGHEST)
         fun onPlayerQuit(e: PlayerQuitEvent) {
+            // before destroying the vital player instance, we must first close the active inventory.
+            e.player.closeInventory(InventoryCloseEvent.Reason.DISCONNECT)
             destroyPlayer(e.player.uniqueId)
         }
     }
 
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    @RequiresBungee
-    @Listener
     class Bungee(
-        override val playerService: VitalPlayerService,
+        override val vitalPlayerService: VitalPlayerService,
         override val vitalPlayersConfigurationProperties: VitalPlayersConfigurationProperties,
     ) : VitalListener.Bungee(),
         VitalPlayerListener {
         // should always be executed first.
-        @BungeeEventHandler(priority = BungeeEventPriority.LOWEST)
+        @BungeeEventHandler(BungeeEventPriority.LOWEST)
         fun onPostLogin(e: PostLoginEvent) {
             createPlayer(e.player, e.player.uniqueId, BungeePlayer::class.java)
         }
 
         // should always be executed last.
-        @BungeeEventHandler(priority = BungeeEventPriority.HIGHEST)
+        @BungeeEventHandler(BungeeEventPriority.HIGHEST)
         fun onPlayerDisconnect(e: PlayerDisconnectEvent) {
             destroyPlayer(e.player.uniqueId)
         }

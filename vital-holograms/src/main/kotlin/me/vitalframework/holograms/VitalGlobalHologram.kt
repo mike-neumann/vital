@@ -8,12 +8,12 @@ import java.util.UUID
  * Represents a global implementation of [VitalHologram] with string-based content.
  * This hologram is visible to all players, when created using [VitalHologramService.createGlobalHologram].
  */
-class VitalGlobalHologram() : VitalHologram<String>() {
+class VitalGlobalHologram() : VitalHologram() {
     @VitalConfig.Property(UUID::class)
     override lateinit var id: UUID
 
     @VitalConfig.Property(String::class)
-    override lateinit var lines: List<String>
+    override lateinit var lines: List<Line>
 
     @VitalConfig.Property(Location::class)
     override lateinit var location: Location
@@ -26,7 +26,7 @@ class VitalGlobalHologram() : VitalHologram<String>() {
 
     constructor(
         id: UUID,
-        lines: List<String>,
+        lines: List<Line>,
         location: Location,
         armorStandUniqueId: UUID,
         lineArmorStandUniqueIds: List<UUID>,
