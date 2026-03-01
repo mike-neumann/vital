@@ -417,19 +417,12 @@ interface VitalUtils<CS, P : CS> {
             .filter(predicate)
             .forEach(action)
 
-        override fun SpigotCommandSender.sendFormattedMessage(message: String) =
-            spigot().sendMessage(
-                // must be used since, both version (paper and spigot) support the bungeeapi implementations...
-                *message.toMiniMessageComponent().toBungeeComponent(),
-            )
+        override fun SpigotCommandSender.sendFormattedMessage(message: String) = sendMessage(message.toMiniMessageComponent())
 
         override fun broadcastFormattedMessage(
             message: String,
             predicate: (SpigotPlayer) -> Boolean,
-        ) = broadcastAction(predicate) {
-            // must be used since, both version (paper and spigot) support the bungeeapi implementations...
-            it.spigot().sendMessage(*message.toMiniMessageComponent().toBungeeComponent())
-        }
+        ) = broadcastAction(predicate) { it.sendMessage(message.toMiniMessageComponent()) }
 
         private val loopedSounds = mutableMapOf<UUID, MutableMap<String, TimerTask>>()
 
@@ -625,11 +618,7 @@ interface VitalUtils<CS, P : CS> {
                 it.activePotionEffects.map { it.type }.forEach { type: PotionEffectType -> it.removePotionEffect(type) }
             }
 
-        override fun SpigotPlayer.sendFormattedActionBar(message: String) =
-            spigot().sendMessage(
-                ChatMessageType.ACTION_BAR,
-                *message.toMiniMessageComponent().toBungeeComponent(),
-            )
+        override fun SpigotPlayer.sendFormattedActionBar(message: String) = sendActionBar(message.toMiniMessageComponent())
 
         override fun broadcastFormattedActionBar(
             message: String,

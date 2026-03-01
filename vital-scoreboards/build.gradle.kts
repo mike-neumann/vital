@@ -1,4 +1,4 @@
 dependencies {
+    compileOnlyApi(libs.bundles.scoreboards.compileOnlyApi)
     api(project(":vital-core"))
-    api(libs.bundles.scoreboards.api)
 }
