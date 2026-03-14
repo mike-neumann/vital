@@ -3,6 +3,7 @@ package me.vitalframework.minigames
 import me.vitalframework.SpigotEventHandler
 import me.vitalframework.SpigotListener
 import me.vitalframework.SpigotPlugin
+import me.vitalframework.VitalCoreSubModule.Companion.logger
 import me.vitalframework.VitalEntity
 import me.vitalframework.tasks.VitalCountdownTask
 import me.vitalframework.tasks.VitalRepeatableTask
@@ -35,6 +36,8 @@ open class VitalMinigameInstance(
     val world: World,
 ) : VitalEntity<UUID>,
     SpigotListener {
+    private val logger = logger()
+
     /**
      * Holds the currently active state of this instance.
      * All event handlers defined on this state are active while this state is active.
@@ -47,21 +50,27 @@ open class VitalMinigameInstance(
      * Registers all declared event handlers for this state and then calls [onRegister].
      */
     fun register() {
+        logger.debug("Registering VitalMinigameInstance with id '{}'.", id)
         // Register all event handlers for this instance.
         registerEventHandlers(this) { _, event ->
             // This event handler should only be invoked when the event originates from this instance world.
             getWorld(event)?.name == world.name
         }
 
+        logger.debug("Successfully registered event handlers for VitalMinigameInstance with id '{}'. Calling onRegister", id)
         onRegister()
+        logger.debug("Call to onRegister for VitalMinigameInstance with id '{}' returned successfully.", id)
     }
 
     /**
      * Unregisters all registered event handlers from this state and then calls [onUnregister].
      */
     fun unregister() {
+        logger.debug("Unregistering VitalMinigameInstance with id '{}'.", id)
         HandlerList.unregisterAll(this)
+        logger.debug("Successfully unregistered event handlers from VitalMinigameInstance with id '{}'. Calling onUnregister.", id)
         onUnregister()
+        logger.debug("Call to onUnregister for VitalMinigameInstance with id '{}' returned successfully.", id)
     }
 
     /**
@@ -98,40 +107,82 @@ open class VitalMinigameInstance(
         instance: T,
         predicate: (T, Event) -> Boolean,
     ) {
+        logger.debug("Registering event handlers for VitalMinigameInstance with id '{}'.", instance)
+
         val methods =
             instance.javaClass.methods
-                .filter { AnnotationUtils.isAnnotationDeclaredLocally(SpigotEventHandler::class.java, it.javaClass) }
+                .filter { AnnotationUtils.findAnnotation(it, SpigotEventHandler::class.java) != null }
                 .filter { Void.TYPE.isAssignableFrom(it.returnType) }
                 .filter { it.parameters.size == 1 }
                 .filter { Event::class.java.isAssignableFrom(it.parameters[0].type) }
 
+        logger.debug("Found '{}' event handlers for VitalMinigameInstance with id '{}'.", methods.size, id)
         for (method in methods) {
             val eventClass = method.parameters[0].type as Class<out Event>
-            val annotation = AnnotationUtils.getAnnotation(method, SpigotEventHandler::class.java)!!
+            val annotation = AnnotationUtils.findAnnotation(method, SpigotEventHandler::class.java)!!
 
+            logger.debug("Registering event handler for event '{}' for VitalMinigameInstance with id '{}'.", method.name, id)
             Bukkit.getPluginManager().registerEvent(
                 eventClass,
                 instance,
                 annotation.priority,
                 { listener, event ->
+                    logger.debug("Caught event '{}' for listener '{}' for VitalMinigameInstance with id '{}'.", event, listener, id)
+
                     // The current event class type must match with the specified method parameter type,
                     // or else we will run into type mismatch problems.
                     if (!eventClass.isAssignableFrom(event.javaClass)) {
+                        logger.debug(
+                            "Event '{}' for listener '{}' for VitalMinigameInstance with id '{}' is not assignable to '{}'. This event will be ignored.",
+                            eventClass,
+                            listener,
+                            id,
+                            event.javaClass,
+                        )
                         return@registerEvent
                     }
 
+                    logger.debug(
+                        "Event '{}' for listener '{}' for VitalMinigameInstance with id '{}' has passed assignable check. Checking against predicate.",
+                        event.javaClass,
+                        listener,
+                        id,
+                    )
+
                     // Filter out any event that does not pass for our defined predicate.
                     if (!predicate(listener as T, event)) {
+                        logger.debug(
+                            "Predicate for event '{}' for listener '{}' for VitalMinigameInstance with id '{}' did not pass. This event will be ignored.",
+                            event.javaClass,
+                            listener,
+                            id,
+                        )
                         return@registerEvent
                     }
+
+                    logger.debug(
+                        "Event handler for event '{}' for listener '{}' for VitalMinigameInstance with id '{}' will be called.",
+                        event.javaClass,
+                        listener,
+                        id,
+                    )
 
                     // The event that occurred here, was fired in the same world as our instance.
                     // we can safely execute its event handler here to scope the event to this instance and its currently active state.
                     method(listener, event)
+
+                    logger.debug(
+                        "Event handler for event '{}' for listener '{}' for VitalMinigameInstance with id '{}' returned successfully.",
+                        event.javaClass,
+                        listener,
+                        id,
+                    )
                 },
                 plugin,
             )
         }
+
+        logger.debug("Successfully registered '{}' event handlers for VitalMinigameInstance with id '{}'.", methods.size, id)
     }
 
     /**

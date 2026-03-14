@@ -45,6 +45,16 @@ class VitalPerPlayerScoreboard(
         get() = _scoreboardContent
 
     /**
+     * Updates the scoreboard content for all players by calling [update] for every player.
+     */
+    fun update() {
+        for (playerUniqueId in _scoreboardContent.keys) {
+            val player = Bukkit.getPlayer(playerUniqueId) ?: continue
+            update(player)
+        }
+    }
+
+    /**
      * Updates the scoreboard content for the specified player.
      * If the player is registered in the scoreboard content, their active scoreboard is reset.
      * The method ensures that the player's scoreboard is updated with the latest content

@@ -12,6 +12,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataType
+import org.springframework.beans.factory.getBean
 import org.springframework.context.MessageSource
 import java.util.Locale
 
@@ -52,16 +53,16 @@ class VitalLocalizationSubModule : VitalSubModule() {
          * @return The localized message for the given key and locale, or the key itself if localization fails.
          */
         @JvmStatic
-        fun getMessage(
+        fun t(
             locale: Locale?,
             key: String,
-            args: Array<Any?>,
+            vararg args: Any?,
         ): String =
             if (locale == null) {
                 key
             } else {
                 try {
-                    Vital.context.getBean(MessageSource::class.java).getMessage(key, args, locale)
+                    Vital.context.getBean<MessageSource>().getMessage(key, arrayOf(*args), locale)
                 } catch (_: Exception) {
                     key
                 }
@@ -144,7 +145,7 @@ class VitalLocalizationSubModule : VitalSubModule() {
                                     displayName(
                                         MiniMessage
                                             .miniMessage()
-                                            .deserialize(getTranslatedText(localizationKey))
+                                            .deserialize(t(localizationKey))
                                             .decoration(TextDecoration.ITALIC, false),
                                     )
                                 }
@@ -155,7 +156,7 @@ class VitalLocalizationSubModule : VitalSubModule() {
                                         loreLocalizationKeys.map {
                                             MiniMessage
                                                 .miniMessage()
-                                                .deserialize(getTranslatedText(it))
+                                                .deserialize(t(it))
                                                 .decoration(TextDecoration.ITALIC, false)
                                         },
                                     )
@@ -178,10 +179,10 @@ class VitalLocalizationSubModule : VitalSubModule() {
          * @return The translated and formatted text for the given key and arguments.
          */
         @JvmStatic
-        fun SpigotPlayer.getTranslatedText(
+        fun SpigotPlayer.t(
             key: String,
             vararg args: Any?,
-        ): String = getMessage(vitalLocale, key, arrayOf(*args))
+        ): String = t(vitalLocale, key, *args)
     }
 
     object Bungee {
@@ -218,9 +219,9 @@ class VitalLocalizationSubModule : VitalSubModule() {
          * @return A string containing the localized message if available; otherwise, the key itself.
          */
         @JvmStatic
-        fun BungeePlayer.getTranslatedText(
+        fun BungeePlayer.t(
             key: String,
             vararg args: Any?,
-        ): String = getMessage(vitalLocale, key, arrayOf(*args))
+        ): String = t(vitalLocale, key, *args)
     }
 }

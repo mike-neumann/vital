@@ -4,7 +4,7 @@ import me.vitalframework.SpigotPlayer
 import me.vitalframework.Vital
 import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
 import me.vitalframework.items.VitalItemStackBuilder.Companion.itemBuilder
-import me.vitalframework.localization.VitalLocalizationSubModule.Spigot.getTranslatedText
+import me.vitalframework.localization.VitalLocalizationSubModule.Spigot.t
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -178,7 +178,7 @@ open class VitalInventory {
             type.menuType.create(
                 player,
                 MiniMessage.miniMessage().deserialize(
-                    if ("vital-localization" in Vital.vitalSubModules) player.getTranslatedText(name) else name,
+                    if ("vital-localization" in Vital.vitalSubModules) player.t(name) else name,
                 ),
             )
 

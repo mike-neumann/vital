@@ -43,11 +43,19 @@ open class VitalMinigameInstanceService(
                 val instanceId = UUID.randomUUID()
                 val instanceWorldFile = templateWorldFile.copyTo(Bukkit.getWorldContainer().resolve("${templateWorldName}_$instanceId"))
 
+                val templateWorld = Bukkit.getWorld(templateWorldName)!!
                 // Finally actually load the world.
                 Bukkit.getScheduler().runTask(
                     plugin,
                     Runnable {
-                        action(loadWorld(instanceWorldFile.name))
+                        action(
+                            Bukkit.createWorld(
+                                WorldCreator(instanceWorldFile.name)
+                                    .copy(templateWorld)
+                                    .keepSpawnLoaded(TriState.FALSE)
+                                    .generateStructures(false),
+                            ),
+                        )
                     },
                 )
             },
@@ -146,5 +154,18 @@ open class VitalMinigameInstanceService(
                 afterDeleteAction(instance)
             },
         )
+    }
+
+    /**
+     * Unregisters all existing game instances by calling [unregisterInstance] for every one.
+     */
+    @JvmOverloads
+    fun unregisterAllInstances(
+        beforeDeleteAction: (VitalMinigameInstance) -> Unit = {},
+        afterDeleteAction: (VitalMinigameInstance) -> Unit = {},
+    ) {
+        for (instance in vitalMinigameInstanceRepository.findAll<VitalMinigameInstance>()) {
+            unregisterInstance(instance, beforeDeleteAction, afterDeleteAction)
+        }
     }
 }

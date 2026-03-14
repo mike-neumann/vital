@@ -4,7 +4,7 @@ import me.vitalframework.SpigotPlayer
 import me.vitalframework.Vital
 import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
 import me.vitalframework.items.VitalItemStackBuilder.Companion.itemBuilder
-import me.vitalframework.localization.VitalLocalizationSubModule.Spigot.getTranslatedText
+import me.vitalframework.localization.VitalLocalizationSubModule.Spigot.t
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.block.Action
@@ -101,8 +101,8 @@ open class VitalItem {
             }
 
             if ("vital-localization" in Vital.vitalSubModules) {
-                name = player.getTranslatedText(info.name)
-                lore = info.lore.map { player.getTranslatedText(it) }.toMutableList()
+                name = player.t(info.name)
+                lore = info.lore.map { player.t(it) }.toMutableList()
                 afterInit = {
                     it.itemMeta =
                         it.itemMeta.apply {
