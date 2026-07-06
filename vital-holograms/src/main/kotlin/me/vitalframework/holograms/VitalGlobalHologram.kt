@@ -5,8 +5,9 @@ import org.bukkit.Location
 import java.util.UUID
 
 /**
- * Represents a global implementation of [VitalHologram] with string-based content.
- * This hologram is visible to all players, when created using [VitalHologramService.createGlobalHologram].
+ * Global hologram used to display information that is always the same for every player.
+ * This hologram can't display any unique text for different players.
+ * E.g., if you need to display language specific text, use [VitalPerPlayerHologram].
  */
 class VitalGlobalHologram() : VitalHologram() {
     @VitalConfig.Property(UUID::class)

@@ -3,7 +3,7 @@ package me.vitalframework.minigames
 import me.vitalframework.SpigotEventHandler
 import me.vitalframework.SpigotListener
 import me.vitalframework.SpigotPlugin
-import me.vitalframework.VitalCoreSubModule.Companion.logger
+import me.vitalframework.VitalCoreModule.Companion.logger
 import me.vitalframework.VitalEntity
 import me.vitalframework.tasks.VitalCountdownTask
 import me.vitalframework.tasks.VitalRepeatableTask
@@ -74,19 +74,19 @@ open class VitalMinigameInstance(
     }
 
     /**
-     * Called when this instance is registered on the global [VitalMinigameInstanceService] bean.
+     * Lifecycle function; called when this instance is registered on the global [VitalMinigameInstanceService] bean.
      * Can be used to perform custom logic during instance registration.
      */
     open fun onRegister() {}
 
     /**
-     * Called when this instance is unregistered on the global [VitalMinigameInstanceService] bean.
+     * Lifecycle function; called when this instance is unregistered on the global [VitalMinigameInstanceService] bean.
      * Can be used to perform custom logic during instance unregistration.
      */
     open fun onUnregister() {}
 
     /**
-     * Returns the world in which the specified event occurred, or null if it cannot be determined.
+     * Internal function; gets the world in which the specified event occurred, or null if it cannot be determined.
      */
     private fun getWorld(e: Event): World? =
         when (e) {
@@ -100,7 +100,7 @@ open class VitalMinigameInstance(
         }
 
     /**
-     * Registers all event handler methods of the provided state.
+     * Internal function; registers all event handler methods of the provided state.
      * All registered event handlers will only be called, when the given state is active on this game instance.
      */
     private fun <T : SpigotListener> registerEventHandlers(

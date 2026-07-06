@@ -4,7 +4,7 @@ import me.vitalframework.BungeeCommandSender
 import me.vitalframework.BungeePlayer
 import me.vitalframework.SpigotCommandSender
 import me.vitalframework.SpigotPlayer
-import me.vitalframework.VitalCoreSubModule.Companion.logger
+import me.vitalframework.VitalCoreModule.Companion.logger
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.minimessage.MiniMessage

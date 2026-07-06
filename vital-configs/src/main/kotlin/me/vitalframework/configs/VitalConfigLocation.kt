@@ -5,17 +5,8 @@ import org.bukkit.Location
 import org.bukkit.WorldCreator
 
 /**
- * Represents a configuration-compatible wrapper for Minecraft Location.
- *
- * This class allows storing and retrieving location data in a form that can
- * be serialized and deserialized using the VitalConfig framework.
- *
- * The class provides functionality to:
- * - Store Minecraft world, coordinates (x, y, z), and rotation (yaw, pitch).
- * - Convert stored data back into a Location instance.
- *
- * The companion object provides a utility function to create an instance of
- * this class from a Location object.
+ * Wrapper class to store a [Location] in a [VitalConfig].
+ * Normal Bukkit locations can't be serialized, that's why this class exists.
  */
 class VitalConfigLocation {
     companion object {

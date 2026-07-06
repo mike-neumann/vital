@@ -18,8 +18,8 @@ open class VitalItemStackBuilder {
     var name: String? = null
     var amount = 1
     var unbreakable = false
-    var lore = mutableListOf<String>()
-    var itemFlags = mutableListOf<ItemFlag>()
+    var lore = arrayOf<String>()
+    var itemFlags = arrayOf<ItemFlag>()
     var enchantments = mutableMapOf<Enchantment, Int>()
     var afterInit: (ItemStack) -> Unit = {}
 

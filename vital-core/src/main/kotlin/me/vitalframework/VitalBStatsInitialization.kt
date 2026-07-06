@@ -1,10 +1,18 @@
 package me.vitalframework
 
-import me.vitalframework.VitalCoreSubModule.Companion.logger
+import me.vitalframework.VitalCoreModule.Companion.logger
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 
+/**
+ * Internal interface; setups up bStats for Spigot and BungeeCord.
+ * By default, Vital enables bStats and sends its own metrics to it.
+ * To also include metrics for your own plugin, you must configure `vital.core.bstats.plugin-id` to your plugin id you got from bStats.
+ *
+ * To opt-out of bStats metrics, set `vital.core.bstats.enabled` to `false`.
+ * Vital will no longer send any metrics to bStats.
+ */
 interface VitalBStatsInitialization<T> : InitializingBean {
     val plugin: T
     val vitalCoreConfigurationProperties: VitalCoreConfigurationProperties
@@ -28,7 +36,7 @@ interface VitalBStatsInitialization<T> : InitializingBean {
         startVitalBStats()
 
         if (vitalCoreConfigurationProperties.bstats.pluginId == null) {
-            logger.info("bStats enabled, but no plugin id provided; Vital will only send its own analytics to bStats...")
+            logger.info("bStats enabled, but no plugin id provided; Vital will only send its own analytics to bStats.")
             logger.info("To enable bStats metrics for your plugin, set 'vital.core.bstats.pluginId' in your application configuration")
             logger.info("Please follow the bStats documentation for more information")
             return

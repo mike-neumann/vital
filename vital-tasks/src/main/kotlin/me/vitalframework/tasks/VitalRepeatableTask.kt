@@ -6,187 +6,143 @@ import me.vitalframework.BungeeTask
 import me.vitalframework.SpigotPlugin
 import me.vitalframework.SpigotRunnable
 import me.vitalframework.SpigotTask
-import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalHasInfo
 import net.md_5.bungee.api.ProxyServer
-import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
-import kotlin.reflect.KClass
 
 /**
- * Abstract class representing a repeatable task with lifecycle management.
+ * Defines a repeatable task within the Vital framework.
+ * A task may perform repeated actions with a set interval.
  *
- * This generic class is designed to manage tasks that operate on a repeatable
- * schedule, providing hooks and lifecycle control for starting, stopping,
- * and processing ticks. It maintains the states and operations required for
- * task execution, offering flexibility through abstract methods for specific
- * implementations.
+ * ```java
+ * @VitalRepeatableTask.Info(interval = 1_000)
+ * public class MyRepeatableTask extends VitalRepeatableTask.Spigot {
+ *     public MyRepeatableTask(JavaPlugin plugin) {
+ *         super(plugin);
+ *     }
  *
- * By default, the class will not be a bean.
- * If dependency injection is wanted or needed, apply the [Component] annotation.
- *
- * @param P The plugin or context instance associated with the task.
- * @param R The type of the runnable defining the task's logic.
- * @param T The type of the task instance used to schedule or manage execution.
+ *     @Override
+ *     public void onTick() {
+ *         // ...
+ *     }
+ * }
+ * ```
  */
 abstract class VitalRepeatableTask<P, R : Runnable, T>(
     val plugin: P,
-) {
-    /**
-     * Represents the interval duration in milliseconds.
-     * This variable defines the time span or delay used for scheduling repetitive tasks, setting timeouts, or controlling execution intervals in a process.
-     */
-    var interval = getInfo().interval
+) : VitalHasInfo {
+    override val info = mutableMapOf(Info::class.java to javaClass.getRequiredAnnotation<Info>())
 
     /**
-     * Controls whether the task is allowed to process ticks.
-     *
-     * The `allowTick` variable serves as a gatekeeper within the task lifecycle, determining
-     * whether periodic operations (ticks) should occur. When set to `true`, the task processes
-     * its ticks as scheduled. If set to `false`, ticking is disabled, and related operations
-     * are skipped during the `handleTick` execution.
-     *
-     * This variable plays an integral role in the task's execution flow, allowing dynamic
-     * control over its behavior. It can be modified as needed to temporarily enable or
-     * disable ticking without stopping or restarting the entire task.
+     * Controls if this task can currently tick and call the [onTick] lifecycle function.
      */
     var allowTick = true
 
     /**
-     * Represents the current runnable instance associated with the task.
-     *
-     * This property holds the instance of the runnable that defines the logic to be executed
-     * during the lifecycle of the task. It is set during the initialization of the task
-     * (via the `start` function) and is cleared when the task is stopped (via the `stop` function).
-     *
-     * The property is private-set, meaning it can only be modified from within the class
-     * it is declared in, ensuring controlled assignment of the runnable.
-     *
-     * A null value indicates that no runnable is currently active or the task has been stopped.
+     * The internal task that runs to call the [onTick] lifecycle function.
+     * This field will be `null` if this task is currently not running.
      */
     var runnable: R? = null
         private set
 
     /**
-     * Represents the currently active scheduled task instance associated with the lifecycle of this object.
-     *
-     * This property is used internally to store a reference to the task created by the `createTask` method
-     * when the `start` method is invoked. It is set to `null` when there is no active task, such as after
-     * invoking the `stop` method or before starting the task for the first time.
-     *
-     * The `task` is managed and controlled through lifecycle functions such as `start`, `stop`,
-     * `cancelTask`, and other related operations. Access to this property is restricted to internal
-     * management via its private setter.
+     * The internal task that's runs the [runnable] to call the [onTick] lifecycle function.
+     * This field will be `null` if this task is currently not running.
      */
     var task: T? = null
         private set
 
     /**
-     * Indicates whether the task is currently running.
-     *
-     * This property evaluates to `true` if both the `runnable` and `task` are non-null, meaning
-     * the task has been initialized and its execution has begun. It returns `false` if either
-     * the `runnable` or `task` is null, suggesting the task is not active or has been stopped.
+     * Checks if this task is currently running.
      */
     val running
         get() = runnable != null && task != null
 
     /**
-     * Starts this task if not already [running], by creating a [runnable] using [createRunnable] and a [task] by using [createTask].
-     * Also calls [onStart] to expose an entry-point for developers.
+     * Starts this task if It's not already running.
+     * This function will call [createRunnable] and [createTask] to set up this task before starting the internal tick timer.
+     * The [onStart] lifecycle function will be called after this task is ready for execution.
+     *
+     * On each tick, the [onTick] lifecycle function will be called.
+     *
+     * If this task is currently running, this function does nothing.
      */
     fun start() {
-        if (running) return
-        onStart()
+        if (running) {
+            return
+        }
+
         runnable = createRunnable()
         task = createTask()
+        onStart()
     }
 
     /**
-     * Stops the currently active [runnable] and [task] if [running].
-     * Also calls [onStop] to expose an entry-point for developers.
+     * Stops this task if It's currently running.
+     * This function stops and cleans up the internal [runnable] and [task] and then calls the [onStop] lifecycle function.
+     *
+     * If this task is currently not running, this function does nothing.
      */
     fun stop() {
-        if (!running) return
-        onStop()
+        if (!running) {
+            return
+        }
+
         cancelRunnable()
         cancelTask()
         runnable = null
         task = null
+        onStop()
     }
 
     /**
-     * Handles a task-tick by checking if this task currently allows ticks via [allowTick].
-     * Then calls the [onTick]-function to expose an entry-point for developers.
+     * Handles a single tick of this task and calls the [onTick] lifecycle function.
+     * If ticks are disabled by [allowTick], this function does nothing.
      */
     fun handleTick() {
-        if (!allowTick) return
+        if (!allowTick) {
+            return
+        }
+
         onTick()
     }
 
     /**
-     * Creates the [runnable]-instance for this repeatable task.
+     * Creates the internal [runnable] for this task.
      */
     abstract fun createRunnable(): R
 
     /**
-     * Creates the [task]-instance for this repeatable task.
+     * Creates the internal [runnable] for this task.
      */
     abstract fun createTask(): T
 
     /**
-     * Cancels the currently active [runnable].
+     * Cancels the internal [runnable] for this task.
      */
     abstract fun cancelRunnable()
 
     /**
-     * Cancels the currently active [task].
+     * Cancels the internal [task] for this task.
      */
     abstract fun cancelTask()
 
     /**
-     * Called when this task is started ia [start].
+     * Lifecycle function; called when this task is started.
      */
     open fun onStart() {}
 
     /**
-     * Called on every task-tick.
-     * Internally, this function is called, when [handleTick] is called.
+     * Lifecycle function; called when this task is ticked.
+     * This task will only tick if [allowTick] is `true`.
      */
     open fun onTick() {}
 
     /**
-     * Called when this task is stopped via [stop].
+     * Lifecycle function; called when this task is stopped.
      */
     open fun onStop() {}
-
-    companion object {
-        /**
-         * Retrieves the VitalRepeatableTask.Info annotation associated with this class.
-         *
-         * @receiver the class for which the annotation is to be retrieved.
-         * @return the VitalRepeatableTask.Info annotation of this class.
-         */
-        @JvmStatic
-        fun Class<out VitalRepeatableTask<*, *, *>>.getInfo(): Info = getRequiredAnnotation<Info>()
-
-        /**
-         * Retrieves the VitalRepeatableTask.Info annotation associated with this class.
-         *
-         * @receiver the class for which the annotation is to be retrieved.
-         * @return the VitalRepeatableTask.Info annotation of this class.
-         */
-        @JvmStatic
-        fun KClass<out VitalRepeatableTask<*, *, *>>.getInfo(): Info = java.getInfo()
-
-        /**
-         * Retrieves the VitalRepeatableTask.Info annotation associated with this instance.
-         *
-         * @receiver the instance for which the annotation is to be retrieved.
-         * @return the VitalRepeatableTask.Info annotation of this instance.
-         */
-        @JvmStatic
-        fun VitalRepeatableTask<*, *, *>.getInfo(): Info = javaClass.getInfo()
-    }
 
     /**
      * Defines the info for a [VitalRepeatableTask].
@@ -197,23 +153,6 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
         val interval: Long,
     )
 
-    /**
-     * Defines a Spigot repeatable task within the Vital-Framework.
-     *
-     * ```java
-     * @VitalRepeatableTask.Info()
-     * public class MyRepeatableTask extends VitalRepeatableTask.Spigot {
-     *   @Override
-     *   public void onStart() {}
-     *
-     *   @Override
-     *   public void onTick() {}
-     *
-     *   @Override
-     *   public void onStop() {}
-     * }
-     * ```
-     */
     open class Spigot(
         plugin: SpigotPlugin,
     ) : VitalRepeatableTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
@@ -222,7 +161,10 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
                 override fun run() = handleTick()
             }
 
-        override fun createTask() = runnable!!.runTaskTimer(plugin, 0L, ((interval.toFloat() / 1_000f) * 20f).toLong())
+        override fun createTask(): SpigotTask {
+            val info = getInfo(Info::class.java)
+            return runnable!!.runTaskTimer(plugin, 0L, ((info.interval.toFloat() / 1_000f) * 20f).toLong())
+        }
 
         override fun cancelRunnable() {
             runnable?.cancel()
@@ -233,26 +175,21 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
         }
     }
 
-    /**
-     * Represents a repeatable task implementation for the BungeeCord framework.
-     *
-     * This class extends the `VitalRepeatableTask` framework and provides functionality for
-     * executing repeatable tasks tailored to the `BungeePlugin`. The `Bungee` class specifies
-     * the creation of a runnable and a scheduled task, as well as their cancellation mechanisms.
-     */
     class Bungee(
         plugin: BungeePlugin,
     ) : VitalRepeatableTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
         override fun createRunnable() = BungeeRunnable { handleTick() }
 
-        override fun createTask() =
-            ProxyServer.getInstance().scheduler.schedule(
+        override fun createTask(): BungeeTask {
+            val info = getInfo(Info::class.java)
+            return ProxyServer.getInstance().scheduler.schedule(
                 plugin,
                 runnable,
                 0L,
-                interval,
+                info.interval,
                 TimeUnit.MILLISECONDS,
             )!!
+        }
 
         override fun cancelRunnable() {
             task?.cancel()

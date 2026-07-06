@@ -1,6 +1,6 @@
 package me.vitalframework.tasks
 
-import me.vitalframework.VitalCoreSubModule.Companion.logger
+import me.vitalframework.VitalCoreModule.Companion.logger
 import org.springframework.beans.factory.config.BeanPostProcessor
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.core.env.Environment
@@ -8,6 +8,10 @@ import java.lang.reflect.Method
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+/**
+ * Internal class; used to define a custom schedular to schedule tasks on the server's schedular instead of the one from Spring.
+ * This schedular can schedule functions annotated with [VitalScheduled].
+ */
 open class VitalScheduler(
     val environment: Environment,
 ) : BeanPostProcessor {

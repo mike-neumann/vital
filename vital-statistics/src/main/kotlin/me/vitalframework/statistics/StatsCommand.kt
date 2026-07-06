@@ -15,6 +15,9 @@ import org.springframework.core.SpringVersion
 import java.text.SimpleDateFormat
 import java.util.Date
 
+/**
+ * Internal class; handles health check logic and the /stats command.
+ */
 interface StatsCommand<CS> {
     companion object {
         const val PERMISSION = "me.vitalframework.command.vital-stats"
@@ -44,9 +47,9 @@ interface StatsCommand<CS> {
         sendMessage(sender, "Spring version: <yellow>${SpringVersion.getVersion()}")
         sendMessage(sender, "Server status: <yellow>${vitalStatisticsService.tps} TPS ($serverStatus)")
         sendMessage(sender, "RAM usage: <yellow>$ramUsageInGigaBytes GB")
-        sendMessage(sender, "Vital sub-modules: <yellow>${Vital.vitalSubModules.size}")
+        sendMessage(sender, "Vital sub-modules: <yellow>${Vital.vitalModules.size}")
 
-        for (name in Vital.vitalSubModules) {
+        for (name in Vital.vitalModules) {
             sendMessage(sender, "> <yellow>$name")
         }
 

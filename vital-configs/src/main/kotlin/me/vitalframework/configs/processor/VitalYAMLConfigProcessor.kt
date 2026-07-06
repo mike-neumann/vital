@@ -16,7 +16,14 @@ import java.io.InputStream
 import java.io.StringWriter
 
 /**
- * Defines a YAML-File processor for a [VitalConfig] instance.
+ * File processor for [VitalConfig] instances that want to store data in a `.yaml` file.
+ * Define this processor in [VitalConfig.Info] to use it.
+ *
+ * ```java
+ * @VitalConfig.Info(name = "myconfig.yaml", processor = VitalYAMLConfigProcessor.class)
+ * public class MyYamlConfig extends VitalConfig {
+ * }
+ * ```
  */
 class VitalYAMLConfigProcessor : Processor<MutableMap<String, Any>, Any> {
     private val yaml: Yaml

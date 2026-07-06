@@ -9,7 +9,14 @@ import java.io.StringWriter
 import java.util.Properties
 
 /**
- * Defines a Properties-File processor for a [VitalConfig] instance.
+ * File processor for [VitalConfig] instances that want to store data in a `.properties` file.
+ * Define this processor in [VitalConfig.Info] to use it.
+ *
+ * ```java
+ * @VitalConfig.Info(name = "myconfig.properties", processor = VitalPropertiesConfigProcessor.class)
+ * public class MyPropertiesConfig extends VitalConfig {
+ * }
+ * ```
  */
 class VitalPropertiesConfigProcessor : Processor<Properties, String> {
     override val data = Properties()
@@ -50,8 +57,8 @@ class VitalPropertiesConfigProcessor : Processor<Properties, String> {
         for ((key, value) in serializedContent.entries) {
             data.setProperty(key, value)
         }
-        val stringWriter = StringWriter()
 
+        val stringWriter = StringWriter()
         data.store(stringWriter, null)
 
         return stringWriter.toString()

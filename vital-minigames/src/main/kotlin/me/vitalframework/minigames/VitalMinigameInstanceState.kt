@@ -35,12 +35,12 @@ interface VitalMinigameInstanceState<T : VitalMinigameInstance> : SpigotListener
     val instance: T
 
     /**
-     * Called when this state is enabled on its registered instance.
+     * Lifecycle function; called when this state is enabled on its registered instance.
      */
     fun onEnable() {}
 
     /**
-     * Called when this state is disabled on its registered instance.
+     * Lifecycle function; called when this state is disabled on its registered instance.
      */
     fun onDisable() {}
 }

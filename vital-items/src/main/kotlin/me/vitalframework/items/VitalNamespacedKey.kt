@@ -2,6 +2,9 @@ package me.vitalframework.items
 
 import org.bukkit.NamespacedKey
 
+/**
+ * Internal class; stores internal [NamespacedKey] instances for [VitalItem] and localization via `vital-localization`.
+ */
 object VitalNamespacedKey {
     @JvmStatic
     val ITEM_UUID = NamespacedKey("vital", "item-uuid")

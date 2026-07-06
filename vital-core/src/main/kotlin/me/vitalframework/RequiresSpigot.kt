@@ -9,7 +9,7 @@ import org.springframework.util.ClassUtils
 
 /**
  * Convenience-condition to mark a class to only be loaded as a bean, when running as a Spigot plugin.
- * If not running as a Spigot plugin, the annotated bean will not be instantiated by spring.
+ * If not running as a Spigot plugin, the annotated bean will not be instantiated by Spring.
  *
  * Must be used in combination with [Conditional] and any [Component] stereotype.
  *

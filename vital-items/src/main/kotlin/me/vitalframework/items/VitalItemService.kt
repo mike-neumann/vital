@@ -4,6 +4,9 @@ import me.vitalframework.tasks.VitalScheduled
 import org.bukkit.Bukkit
 import org.bukkit.event.player.PlayerInteractEvent
 
+/**
+ * Internal service; manages the interaction and cooldowns for all [VitalItem] instances.
+ */
 open class VitalItemService(
     val vitalItems: List<VitalItem>,
 ) {

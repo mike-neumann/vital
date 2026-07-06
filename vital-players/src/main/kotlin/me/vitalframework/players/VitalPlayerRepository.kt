@@ -4,10 +4,11 @@ import me.vitalframework.VitalRepository
 import java.util.UUID
 
 /**
- * The global repository for in-memory data management for [VitalPlayer] instances.
- * When using "vital-players", a custom [VitalPlayer] instance defined by the "vital.players.vital-player-class-name" is created and stored here.
- * This repository can be used to retrieve all managed [VitalPlayer] instances.
+ * Global repository; stores all instances of [VitalPlayer].
+ * Use this class to retrieve your custom instances.
  *
- * Manual mutation of this repository is discouraged.
+ * It is ill-advised to modify the contents of this repository manually.
+ * Vital will automatically create new instances of your configured [VitalPlayer] class when a player joins
+ * and also automatically delete any instance when a player leaves.
  */
 class VitalPlayerRepository : VitalRepository<VitalPlayer<*>, UUID>()

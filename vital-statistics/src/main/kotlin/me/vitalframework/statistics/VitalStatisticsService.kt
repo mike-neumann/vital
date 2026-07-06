@@ -1,8 +1,11 @@
 package me.vitalframework.statistics
 
-import me.vitalframework.VitalCoreSubModule.Companion.logger
+import me.vitalframework.VitalCoreModule.Companion.logger
 import me.vitalframework.tasks.VitalScheduled
 
+/**
+ * Internal service; handles health statistics.
+ */
 open class VitalStatisticsService(
     val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
 ) {

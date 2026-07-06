@@ -1,7 +1,7 @@
 package me.vitalframework.commands.processor
 
 import me.vitalframework.Vital
-import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
 import me.vitalframework.commands.VitalCommand
 import me.vitalframework.processor.VitalPluginInfoAnnotationProcessingException
 import me.vitalframework.processor.VitalPluginInfoAnnotationProcessor

@@ -1,8 +1,6 @@
 package me.vitalframework.scoreboards
 
 import me.vitalframework.SpigotPlayer
-import net.kyori.adventure.text.minimessage.MiniMessage
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Bukkit
 import java.util.UUID
 
@@ -23,108 +21,74 @@ import java.util.UUID
  * ```
  */
 class VitalPerPlayerScoreboard(
-    val title: (SpigotPlayer) -> String,
-    vararg var lines: (SpigotPlayer) -> String,
-) : VitalScoreboard {
-    private val _scoreboardContent = mutableMapOf<UUID, VitalScoreboardContent>()
-
+    title: (SpigotPlayer) -> String,
+    vararg lines: (SpigotPlayer) -> String,
+) {
     /**
-     * Provides a mapping between player UUIDs and their corresponding scoreboard content.
-     *
-     * This property serves as a read-only view of the internal `_scoreboardContent` map,
-     * which stores instances of [VitalScoreboardContent] associated with individual players.
-     * It allows querying the scoreboard content for a specific player by their unique identifier.
-     *
-     * The mapping ensures that each player is assigned custom scoreboard content, enabling dynamic
-     * updates and personalized scoreboard interactions within the system.
-     *
-     * Accessing this property does not allow for modifications; updates to the scoreboard content
-     * must be performed through designated methods within the enclosing class.
+     * The [VitalScoreboard] instance for each player added to this scoreboard.
      */
-    val scoreboardContent: Map<UUID, VitalScoreboardContent>
-        get() = _scoreboardContent
+    private val _scoreboards = mutableMapOf<UUID, VitalScoreboard>()
+
+    val scoreboards: Map<UUID, VitalScoreboard>
+        get() = _scoreboards
 
     /**
-     * Updates the scoreboard content for all players by calling [update] for every player.
+     * The title function for this scoreboard.
+     * If modified, calls the [update] function to automatically update this scoreboard for all players.
+     */
+    var title = title
+        set(value) {
+            field = value
+            update()
+        }
+
+    /**
+     * The lines-functions for this scoreboard.
+     * If modified, calls the [update] function to automatically update this scoreboard for all players.
+     */
+    var lines = lines
+        set(value) {
+            field = value
+            update()
+        }
+
+    /**
+     * Adds the given [player] to this scoreboard.
+     * If the given [player] is already in this scoreboard, this function will override that scoreboard.
+     */
+    fun addPlayer(player: SpigotPlayer) {
+        _scoreboards[player.uniqueId] =
+            VitalScoreboard().apply {
+                this.addPlayer(player, title(player), lines.map { it(player) })
+            }
+    }
+
+    /**
+     * Removes the given [player] from this scoreboard.
+     * If the given [player] is not in this scoreboard, this function does nothing.
+     */
+    fun removePlayer(player: SpigotPlayer) {
+        val scoreboard = _scoreboards[player.uniqueId] ?: return
+        scoreboard.removePlayer(player, title(player), lines.map { it(player) })
+    }
+
+    /**
+     * Updates this scoreboard for all players.
+     * If this scoreboard has no players, this function does nothing.
      */
     fun update() {
-        for (playerUniqueId in _scoreboardContent.keys) {
+        for ((playerUniqueId, _) in scoreboards) {
             val player = Bukkit.getPlayer(playerUniqueId) ?: continue
             update(player)
         }
     }
 
     /**
-     * Updates the scoreboard content for the specified player.
-     * If the player is registered in the scoreboard content, their active scoreboard is reset.
-     * The method ensures that the player's scoreboard is updated with the latest content
-     * and then set back to their specific assigned scoreboard.
-     *
-     * @param player The player whose scoreboard content needs to be updated.
+     * Updates this scoreboard for the given [player].
+     * If the given [player] is not in this scoreboard, this function does nothing.
      */
     fun update(player: SpigotPlayer) {
-        if (player.uniqueId !in _scoreboardContent) return
-        player.scoreboard = Bukkit.getScoreboardManager().mainScoreboard
-        updateContent(player)
-        player.scoreboard = _scoreboardContent[player.uniqueId]!!.bukkitScoreboard
+        val scoreboard = _scoreboards[player.uniqueId] ?: return
+        scoreboard.update(title(player), lines.map { it(player) })
     }
-
-    /**
-     * Updates the content and visual representation of the scoreboard for the specified player.
-     * Handles the score updates, text formatting, and adjusting the display order of lines.
-     *
-     * @param player The player whose scoreboard content should be updated.
-     */
-    private fun updateContent(player: SpigotPlayer) {
-        if (player.uniqueId !in _scoreboardContent) return
-
-        val scoreboard = _scoreboardContent[player.uniqueId]!!
-        val objective = scoreboard.update()
-        val lines = applyLines(player)
-
-        for (lineIndex in lines.indices) {
-            val score =
-                objective.getScore(
-                    LegacyComponentSerializer
-                        .legacySection()
-                        .serialize(
-                            MiniMessage.miniMessage().deserialize(lines[lineIndex]),
-                        ) + "\u00A7".repeat(lineIndex),
-                )
-
-            score.score = lines.size - lineIndex
-        }
-    }
-
-    /**
-     * Adds a player to the scoreboard system associated with this instance.
-     * If the player is already present, the method exits without applying any changes.
-     *
-     * @param player The player to be added to the scoreboard system.
-     */
-    fun addPlayer(player: SpigotPlayer) {
-        if (player.uniqueId in _scoreboardContent) return
-        _scoreboardContent[player.uniqueId] = VitalScoreboardContent { title(player) }
-        update(player)
-    }
-
-    /**
-     * Removes the specified player from the scoreboard content and resets their scoreboard
-     * to the default main scoreboard of the server.
-     *
-     * @param player The player to be removed from the scoreboard.
-     */
-    fun removePlayer(player: SpigotPlayer) {
-        if (player.uniqueId !in _scoreboardContent) return
-        _scoreboardContent.remove(player.uniqueId)
-        player.scoreboard = Bukkit.getScoreboardManager().mainScoreboard
-    }
-
-    /**
-     * Applies each line of the scoreboard content to the specified player.
-     * This method transforms the existing lines for the specific player context.
-     *
-     * @param player The player for whom the scoreboard lines are being applied.
-     */
-    private fun applyLines(player: SpigotPlayer) = lines.map { it(player) }
 }

@@ -7,6 +7,9 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
+/**
+ * Internal listener; processes and delegates inventory related Events to the correct [VitalInventory].
+ */
 class VitalInventoryListener(
     val inventories: List<VitalInventory>,
 ) : VitalListener.Spigot() {

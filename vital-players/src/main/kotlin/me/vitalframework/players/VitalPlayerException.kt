@@ -2,31 +2,43 @@ package me.vitalframework.players
 
 import java.util.UUID
 
+/**
+ * Internal exception; thrown during [VitalPlayer] lifecycle.
+ */
 abstract class VitalPlayerException(
     message: String,
     cause: Throwable? = null,
 ) : RuntimeException(message, cause) {
+    /**
+     * Internal exception; thrown when the configured custom player class has an invalid signature.
+     */
     class InvalidClass(
         playerClass: Class<*>,
         cause: Throwable,
     ) : VitalPlayerException(
-            "invalid Vital player class '${playerClass.simpleName}' does not extend '${VitalPlayer::class.java.simpleName}'",
+            "Invalid Vital player class '${playerClass.simpleName}' does not extend '${VitalPlayer::class.java.simpleName}'",
             cause,
         )
 
+    /**
+     * Internal exception; thrown when an exception occurred during instantiation of the configured custom player class.
+     */
     class Create(
         playerClass: Class<*>,
         playerUniqueId: UUID,
         cause: Throwable,
     ) : VitalPlayerException(
-            "error while creating Vital player instance '${playerClass.simpleName}' for '$playerUniqueId'",
+            "Error while creating Vital player instance '${playerClass.simpleName}' for '$playerUniqueId'",
             cause,
         )
 
+    /**
+     * Internal exception; thrown when an instance of a custom player class was created even though one already exists.
+     */
     class AlreadyExists(
         playerClass: Class<*>,
         playerUniqueId: UUID,
     ) : VitalPlayerException(
-            "error while creating Vital player instance '${playerClass.simpleName}' for '$playerUniqueId', instance already exists",
+            "Error while creating Vital player instance '${playerClass.simpleName}' for '$playerUniqueId', instance already exists",
         )
 }

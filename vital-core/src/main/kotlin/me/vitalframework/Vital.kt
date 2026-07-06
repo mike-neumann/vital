@@ -1,6 +1,7 @@
 package me.vitalframework
 
-import me.vitalframework.VitalCoreSubModule.Companion.logger
+import me.vitalframework.VitalCoreModule.Companion.logger
+import org.springframework.beans.factory.getBeansOfType
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.ConfigurableApplicationContext
@@ -8,6 +9,12 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.util.ClassUtils
 import java.util.Properties
 
+/**
+ * This class defines internal functionality required to initialize and shutdown a Vital plugin and should rarely be used by developers manually.
+ * Plugin bootstrapping is automatically done via the `vital-gradle-plugin` and initialization is done by `vital-loader`.
+ *
+ * If you for some reason MUST initialize your Vital plugin manually, this would be the class you have to use.
+ */
 object Vital {
     private val logger = logger()
 
@@ -16,7 +23,7 @@ object Vital {
         private set
 
     @JvmStatic
-    val officialVitalSubModules =
+    val officialVitalModules =
         listOf(
             "vital-all",
             "vital-cloudnet4-bridge",
@@ -43,18 +50,40 @@ object Vital {
         )
 
     @JvmStatic
-    val vitalSubModules = mutableListOf<String>()
+    val vitalModules = mutableListOf<String>()
 
     @JvmStatic
     lateinit var metadata: Metadata
         private set
 
+    /**
+     * Returns if the given [vitalModuleName] is enabled.
+     * Note: Modules are enabled sequentially, during the initialization phase,
+     * this function might return false for a module that will be enabled later in the pipeline.
+     */
+    fun isVitalModuleEnabled(vitalModuleName: String): Boolean = vitalModules.contains(vitalModuleName)
+
+    /**
+     * Returns if the given [vitalModuleName] is an officially known Vital module.
+     * Every official Vital module starts with the prefix "vital-" and are collected in [officialVitalModules].
+     */
+    fun isOfficialVitalModule(vitalModuleName: String): Boolean = officialVitalModules.contains(vitalModuleName)
+
+    /**
+     * Initializes the Vital framework by starting a lightweight Spring Boot application.
+     * You should NEVER manually call this function.
+     * Vital initialization should be done via `vital-loader`.
+     * Calling this function manually in your plugin may cause classloader issues and unexpected errors during application initialization.
+     *
+     * IF you for some reason MUST use this function manually to initialize the framework, you should call this function on a separate Classloader, which is NOT the plugin classloader.
+     * For examples, take a look at the sources for `vital-loader`.
+     */
     @JvmStatic
     fun run(
         loader: Any,
         classLoader: ClassLoader,
     ) {
-        logger.debug("Running Vital via plugin loader '{}' and class loader '{}'...", loader, classLoader)
+        logger.debug("Running Vital via plugin loader '{}' and class loader '{}'.", loader, classLoader)
 
         Thread.currentThread().contextClassLoader = classLoader
         ClassUtils.overrideThreadContextClassLoader(classLoader)
@@ -64,12 +93,12 @@ object Vital {
         // load metadata from "vital-metadata.properties"
         loadMetadata(classLoader)
 
-        logger.debug("Loading main class '${metadata.mainClassName}'...")
+        logger.debug("Loading main class '${metadata.mainClassName}'.")
         val mainClass = Class.forName(metadata.mainClassName)
         logger.debug("Main class '${metadata.mainClassName}' successfully loaded")
 
         // start up spring boot using the previously generated "PluginConfiguration" class as the main class
-        logger.debug("Running spring boot...")
+        logger.debug("Running spring boot.")
         context =
             SpringApplicationBuilder(classLoader.loadClass("${mainClass.packageName}.PluginConfiguration"))
                 // here we register the plugin instance as a bean so we can inject it elsewhere
@@ -77,23 +106,48 @@ object Vital {
                 // this is needed so spring can locate classes and resources that are on the plugin classpath
                 .resourceLoader(VitalResourceLoader())
                 .run()
+
+        logger.info("Vital up and running, enabling all modules.")
+
+        // Once fully up and running we can enable all modules.
+        val vitalModules = context.beanFactory.getBeansOfType<VitalModule>()
+        for ((_, vitalModule) in vitalModules) {
+            vitalModule.enable()
+        }
     }
 
+    /**
+     * Shuts down the running Vital framework instance by killing the existing Spring context.
+     */
     @JvmStatic
     fun exit() {
-        logger.info("Shutting down Vital...")
+        logger.info("Shutting down Vital.")
 
         if (context.isClosed) {
             logger.info("Vital is already being shut down")
             return
         }
 
+        logger.info("Disabling all modules.")
+
+        // Disable all modules.
+        val vitalModules = context.beanFactory.getBeansOfType<VitalModule>()
+        for ((_, vitalModule) in vitalModules) {
+            vitalModule.disable()
+        }
+
         val exitCode = SpringApplication.exit(context)
         logger.info("Vital exited with code '$exitCode'")
     }
 
+    /**
+     * Loads the internal Vital metadata (vital.properties) from the classpath.
+     * This file is used for internal configurations regarding some Vital internals.
+     *
+     * Developers should rarely use this file to configure anything.
+     */
     private fun loadMetadata(classLoader: ClassLoader) {
-        logger.debug("Loading Vital metadata...")
+        logger.debug("Loading Vital metadata.")
 
         val metadataProperties = Properties().apply { load(classLoader.getResourceAsStream(Metadata.FILE_NAME)) }
         metadata = Metadata(metadataProperties[Metadata.Property.MAIN_CLASS].toString())
@@ -165,7 +219,7 @@ object Vital {
         /**
          * This instructs Vital to scan additional packages for Vital functionality.
          * If you have to include an external dependency in your plugin that uses Vital,
-         * like Commands, Configs, etc. this will be the place to define those packages
+         * like Commands, Configs, etc. this will be the place to define those packages.
          */
         val scanAdditionalPackages: Array<String> = [],
     ) {

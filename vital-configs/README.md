@@ -1,6 +1,6 @@
 # vital-configs
 
-This submodule can be used to include Vital's advanced config system into your plugin.  
+This module can be used to add Vital's advanced config system to your plugin.  
 It provides the means of defining advanced configs which can be stored on the filesystem.  
 
 Configs will be defined as a class, which can have `n` fields.  

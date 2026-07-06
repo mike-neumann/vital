@@ -2,9 +2,10 @@ package me.vitalframework.inventories
 
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.Vital
-import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalHasInfo
 import me.vitalframework.items.VitalItemStackBuilder.Companion.itemBuilder
-import me.vitalframework.localization.VitalLocalizationSubModule.Spigot.t
+import me.vitalframework.localization.VitalLocalizationModule.Spigot.t
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -15,7 +16,6 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.springframework.stereotype.Component
 import java.util.UUID
-import kotlin.reflect.KClass
 
 typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
 
@@ -48,60 +48,47 @@ typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
  * }
  * ```
  */
-open class VitalInventory {
-    private val _items = mutableMapOf<UUID, MutableMap<Int, ItemStack?>>()
-    private val _previousInventories = mutableMapOf<UUID, VitalInventory>()
-    private val _playerInventories = mutableMapOf<UUID, InventoryView>()
-    private val _actions = mutableMapOf<UUID, MutableMap<Int, InventoryItemClickAction>>()
+open class VitalInventory : VitalHasInfo {
+    override val info = mutableMapOf<Class<out Annotation>, Annotation>(Info::class.java to javaClass.getRequiredAnnotation<Info>())
+
+    val items = mutableMapOf<UUID, MutableMap<Int, ItemStack?>>()
+    val previousInventories = mutableMapOf<UUID, VitalInventory>()
+    val playerInventories = mutableMapOf<UUID, InventoryView>()
+    val actions = mutableMapOf<UUID, MutableMap<Int, InventoryItemClickAction>>()
+
+    val background =
+        itemBuilder {
+            val info = getInfo(Info::class.java)
+            type = info.background
+        }
 
     /**
-     * The type of inventory to be used defined by [Info.type].
+     * Gets all items for the given [playerUniqueId].
+     * This function will never return `null`, even if the given [playerUniqueId] doesn't have this inventory open.
      */
-    val type
-        get() = getInfo().type
+    fun getItems(playerUniqueId: UUID) = items[playerUniqueId] ?: mutableMapOf()
 
     /**
-     * The name of this inventory defined by [Info.name].
+     * Gets all mapped actions for the given [playerUniqueId].
+     * This function will never return `null`, even if the given [playerUniqueId] doesn't have this inventory open.
      */
-    val name
-        get() = getInfo().name
+    fun getActions(playerUniqueId: UUID) = actions[playerUniqueId] ?: mutableMapOf()
 
     /**
-     * The background this inventory should set when it's opened defined by [Info.background].
+     * Gets the actual [InventoryView] for the given [playerUniqueId].
+     * This function will return `null` if the given [playerUniqueId] doesn't have this inventory open.
      */
-    val background
-        get() = getInfo().background
+    fun getInventory(playerUniqueId: UUID) = playerInventories[playerUniqueId]
 
     /**
-     * All [SpigotPlayer]s as a [UUID] and their mapping to a specific [VitalInventory] instance as their previous inventory.
-     * When a player closes his current inventory and requests to view his previous one, this map is used to fetch it.
+     * Checks if the given [SpigotPlayer] currently has this inventory open.
      */
-    val previousInventories: Map<UUID, VitalInventory>
-        get() = _previousInventories
+    fun hasInventoryOpen(player: SpigotPlayer) = playerInventories.containsKey(player.uniqueId)
 
     /**
-     * All [SpigotPlayer]s as a [UUID] and their current [InventoryView] instance for this inventory.
-     * This map will only contain the players that have this inventory open at the time.
-     */
-    val playerInventories: Map<UUID, InventoryView>
-        get() = _playerInventories
-
-    /**
-     * All [SpigotPlayer]s as a [UUID] and their slot to [ItemStack] mapping for this inventory.
-     * If the [setItem] function was never called during inventory setup in [onUpdate], this map will be empty.
-     */
-    val items: Map<UUID, Map<Int, ItemStack?>>
-        get() = _items
-
-    /**
-     * All [SpigotPlayer]s and their mapping to an [InventoryItemClickAction] mapped to a specific slot in the inventory.
-     */
-    val actions: Map<UUID, Map<Int, InventoryItemClickAction>>
-        get() = _actions
-
-    /**
-     * Sets an [ItemStack] in the current inventory.
-     * May have an [InventoryItemClickAction] attached to it, to react to user-input.
+     * Sets the given [item] in the [slot] for the inventory of the given [player].
+     * Once the player opens this inventory, the actual [InventoryView] will be populated with all items set via this function.
+     * Additionally, an item may have an [action] attached to it.
      */
     @JvmOverloads
     fun setItem(
@@ -110,82 +97,76 @@ open class VitalInventory {
         item: ItemStack?,
         action: InventoryItemClickAction = {},
     ) {
-        if (_items.containsKey(player.uniqueId)) {
-            _items[player.uniqueId]!![slot] = item
-        } else {
-            _items[player.uniqueId] = mutableMapOf(slot to item)
-        }
+        val items = getItems(player.uniqueId).toMutableMap()
+        items[slot] = item
+        this.items[player.uniqueId] = items
 
-        if (_actions.containsKey(player.uniqueId)) {
-            _actions[player.uniqueId]!![slot] = action
-        } else {
-            _actions[player.uniqueId] = mutableMapOf(slot to action)
-        }
+        val actions = getActions(player.uniqueId)
+        actions[slot] = action
+        this.actions[player.uniqueId] = actions
     }
 
     /**
-     * Checks if the given [SpigotPlayer] currently has this inventory open.
-     */
-    fun hasInventoryOpen(player: SpigotPlayer) = _playerInventories.containsKey(player.uniqueId)
-
-    /**
-     * Updates all inventories for all [SpigotPlayer]s currently viewing this inventory ([_playerInventories]).
+     * Updates this inventory for all players currently viewing it.
+     * Calling this function will call the [onUpdate] lifecycle function.
+     *
+     * For each player currently viewing this inventory,
+     * the [onUpdate] player lifecycle function will be called.
      */
     fun update() {
         onUpdate()
 
-        for ((uniqueId, _) in _playerInventories) {
+        for ((uniqueId, _) in playerInventories) {
             val player = Bukkit.getPlayer(uniqueId) ?: continue
             update(player)
         }
     }
 
     /**
-     * Updates this inventory for the specified [SpigotPlayer].
+     * Updates this inventory for the given [player].
+     * All previously set items via [setItem] will be populated in the inventory for the given [player].
+     * If the player doesn't have this inventory open, this function does nothing.
      */
     open fun update(player: SpigotPlayer) {
-        if (player.uniqueId !in _playerInventories) return
-        val inventory = _playerInventories[player.uniqueId]!!
+        val inventory = getInventory(player.uniqueId) ?: return
 
         onUpdate(player)
 
         for (i in 0..<inventory.topInventory.size) {
-            inventory.setItem(
-                i,
-                itemBuilder {
-                    type = background
-                },
-            )
+            inventory.setItem(i, background)
         }
 
-        for ((i, item) in _items[player.uniqueId]!!) {
+        val items = getItems(player.uniqueId)
+        for ((i, item) in items) {
             inventory.setItem(i, item)
         }
     }
 
     /**
-     * Opens this inventory for the specified [SpigotPlayer].
-     * May have a previous inventory attached to it, to make reverse traversal possible.
+     * Opens this inventory for the given [player] and updates it via [update].
+     * If a [previousInventory] was given, clicking outside of this inventory view will open the previous inventory.
      */
     @Suppress("UnstableApiUsage")
     open fun open(
         player: SpigotPlayer,
         previousInventory: VitalInventory? = null,
     ) {
+        val info = getInfo(Info::class.java)
+
         previousInventory?.close(player)
         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW)
         val inventoryView =
-            type.menuType.create(
+            info.type.menuType.create(
                 player,
                 MiniMessage.miniMessage().deserialize(
-                    if ("vital-localization" in Vital.vitalSubModules) player.t(name) else name,
+                    if (Vital.isVitalModuleEnabled("vital-localization")) player.t(info.name) else info.name,
                 ),
             )
 
         if (previousInventory != null) {
-            _previousInventories[player.uniqueId] = previousInventory
+            previousInventories[player.uniqueId] = previousInventory
         }
-        _playerInventories[player.uniqueId] = inventoryView
+        playerInventories[player.uniqueId] = inventoryView
 
         onOpen(player)
         update(player)
@@ -193,76 +174,60 @@ open class VitalInventory {
     }
 
     /**
-     * Internal function to handle a click event for this inventory.
+     * Internal function to handle a [InventoryClickEvent] for this inventory.
+     * If the clicked item has an action attached to it via [setItem], the action will be triggered.
      */
     open fun click(e: InventoryClickEvent) {
-        _actions[e.whoClicked.uniqueId]?.get(e.slot)?.invoke(e)
+        actions[e.whoClicked.uniqueId]?.get(e.slot)?.invoke(e)
         onClick(e)
     }
 
     /**
-     * Closes this inventory for the specified [SpigotPlayer].
+     * Closes this inventory for the given [player].
+     * This function will clean up the state for this inventory
+     * and eventually call the [onClose] lifecycle function for the given [player].
      */
     open fun close(player: SpigotPlayer) {
         // the inventory MUST be closed first, to include previous inventory functionality
-        _playerInventories.remove(player.uniqueId)
+        playerInventories.remove(player.uniqueId)
         player.closeInventory()
 
         // then we can clean up this inventory for the closing player, so we don't leak memory'
-        _previousInventories.remove(player.uniqueId)
-        _actions.remove(player.uniqueId)
-        _items.remove(player.uniqueId)
+        previousInventories.remove(player.uniqueId)
+        actions.remove(player.uniqueId)
+        items.remove(player.uniqueId)
 
         // finally, call the onClose hook to allow for custom behavior during the close process
         onClose(player)
     }
 
     /**
-     * Called when this inventory is opened for a specific [SpigotPlayer].
+     * Lifecycle function; called when this inventory is opened for the given [player].
      */
     protected open fun onOpen(player: SpigotPlayer) {}
 
     /**
-     * Called when this inventory is to be updated.
-     * This function should only be used to set items, that should be global for all players.
+     * Lifecycle function; called when this inventory is updated for all players via [update].
+     * Override this function to set items that are always the same for each player (no language specifics, same item, etc. )
      */
     protected open fun onUpdate() {}
 
     /**
-     * Called when this inventory is to be updated for a specific player.
-     * This function should only be used to set items, that are tied to a specific player.
+     * Lifecycle function; called when this inventory is updated for the given [player].
+     * Override this function to set items that are unique for each player (language specific, different item, etc. ).
      */
     protected open fun onUpdate(player: SpigotPlayer) {}
 
     /**
-     * Called when an item or empty slot is clicked within the inventory.
+     * Lifecycle function; called when an item in this inventory is clicked and the [InventoryClickEvent] is handled via [click].
+     * This function will also get called when an empty slot is clicked.
      */
     protected open fun onClick(e: InventoryClickEvent) {}
 
     /**
-     * Called when this inventory is closed for a specific player.
+     * Lifecycle function; called when this inventory is closed for the given [player].
      */
     protected open fun onClose(player: SpigotPlayer) {}
-
-    companion object {
-        /**
-         * Retrieves the VitalInventory.Info annotation associated with this class.
-         */
-        @JvmStatic
-        fun Class<out VitalInventory>.getInfo(): Info = getRequiredAnnotation<Info>()
-
-        /**
-         * Retrieves the VitalInventory.Info annotation associated with this class.
-         */
-        @JvmStatic
-        fun KClass<out VitalInventory>.getInfo(): Info = java.getInfo()
-
-        /**
-         * Retrieves the VitalInventory.Info annotation associated with this instance.
-         */
-        @JvmStatic
-        fun VitalInventory.getInfo(): Info = javaClass.getInfo()
-    }
 
     /**
      * Defines the info for a [VitalInventory].

@@ -2,9 +2,10 @@ package me.vitalframework.items
 
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.Vital
-import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalHasInfo
 import me.vitalframework.items.VitalItemStackBuilder.Companion.itemBuilder
-import me.vitalframework.localization.VitalLocalizationSubModule.Spigot.t
+import me.vitalframework.localization.VitalLocalizationModule.Spigot.t
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.block.Action
@@ -14,7 +15,6 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.springframework.stereotype.Component
 import java.util.UUID
-import kotlin.reflect.KClass
 
 /**
  * Defines an interactable item within the Vital-Framework.
@@ -52,57 +52,41 @@ import kotlin.reflect.KClass
  * }
  * ```
  */
-open class VitalItem {
+open class VitalItem : VitalHasInfo {
+    override val info = mutableMapOf(Info::class.java to javaClass.getRequiredAnnotation<Info>())
+
+    /**
+     * This id is required to identify a single [VitalItem] during event processing and delegation.
+     */
     val uniqueId: UUID = UUID.randomUUID()
 
     /**
-     * Represents the initial cooldown period for an item in milliseconds.
-     *
-     * This value defines the time duration that must elapse after the item is used
-     * before it can be interacted with again. The cooldown mechanism helps regulate
-     * repetitive interactions and ensures balanced item usability during player interactions.
-     *
-     * The `initialCooldown` is applied when the item is first interacted with and
-     * works in conjunction with the player's cooldown state to prevent excessive usage.
-     */
-    val initialCooldown
-        get() = getInfo().cooldown
-
-    /**
-     * A mapping of players to their respective cooldown durations for item interactions in milliseconds.
-     *
-     * This map is used to track and manage the cooldown state of players when they interact with items
-     * associated with the `VitalItem` class. The keys represent the unique identifiers (UUIDs) of the
-     * players, and the values represent the remaining cooldown time in milliseconds for each player.
-     *
-     * The `playerCooldown` map ensures that players cannot repeatedly interact with items that are
-     * currently in cooldown, thus enforcing a delay between successive interactions.
-     *
-     * Cooldown timing is typically updated through a scheduled task, decrementing the values over time.
-     * Once the cooldown duration for a player reaches zero, the associated behavior for cooldown expiry
-     * is triggered.
+     * The cooldowns for each player of this item.
+     * Once the cooldown for a player expires, the player will be removed from this [Map].
      */
     val playerCooldown = mutableMapOf<UUID, Int>()
 
+    /**
+     * Gets the [ItemStack] for the given [player].
+     */
     fun getItemStack(player: SpigotPlayer) =
         itemBuilder(uniqueId) {
-            val info = this@VitalItem.getInfo()
-
             // first set default values, then try to localize them
+            val info = getInfo(Info::class.java)
             type = info.type
             name = info.name
             amount = info.amount
-            lore = info.lore.toMutableList()
-            itemFlags = info.itemFlags.toMutableList()
+            lore = info.lore
+            itemFlags = info.itemFlags
             unbreakable = info.unbreakable
 
             if (info.enchanted) {
                 enchantments[Enchantment.FORTUNE] = 1
             }
 
-            if ("vital-localization" in Vital.vitalSubModules) {
+            if (Vital.isVitalModuleEnabled("vital-localization")) {
                 name = player.t(info.name)
-                lore = info.lore.map { player.t(it) }.toMutableList()
+                lore = info.lore.flatMap { player.t(it).lines() }.toTypedArray()
                 afterInit = {
                     it.itemMeta =
                         it.itemMeta.apply {
@@ -126,24 +110,25 @@ open class VitalItem {
         }
 
     /**
-     * Handles a player's interaction event with an item and determines the appropriate response
-     * based on the type of action performed. This method also manages the player's cooldown state
-     * to prevent repetitive interactions within a specified cooldown period.
-     *
-     * @param e The [PlayerInteractEvent] representing the player's interaction event. It includes
-     *          information such as the action type (e.g., left- or right-click) and the interacting player.
+     * Internal function to handle the given [PlayerInteractEvent] for this item.
+     * This function handles all lifecycle functions of this item and the cooldown logic.
      */
     fun handleInteraction(e: PlayerInteractEvent) {
-        if (!playerCooldown.containsKey(e.player.uniqueId)) playerCooldown[e.player.uniqueId] = 0
-        if (playerCooldown[e.player.uniqueId]!! >= 1) return onCooldown(e)
-        val action = e.action
+        if (!playerCooldown.containsKey(e.player.uniqueId)) {
+            playerCooldown[e.player.uniqueId] = 0
+        }
 
-        when (action) {
+        if (playerCooldown[e.player.uniqueId]!! >= 1) {
+            return onCooldown(e)
+        }
+
+        when (e.action) {
             Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK -> onLeftClick(e)
             else -> onRightClick(e)
         }
 
-        playerCooldown[e.player.uniqueId] = initialCooldown
+        val info = getInfo(Info::class.java)
+        playerCooldown[e.player.uniqueId] = info.cooldown
     }
 
     // TODO
@@ -167,78 +152,33 @@ open class VitalItem {
     }
 
     /**
-     * Handles the logic executed when the player performs a left-click while interacting
-     * with an item. This method is called based on the player's interaction event.
-     *
-     * @param e The [PlayerInteractEvent] representing the player's interaction,
-     *          including the action performed and related context.
+     * Lifecycle function; called when this item is right-clicked by a player and the player's cooldown is not active.
      */
     open fun onLeftClick(e: PlayerInteractEvent) {}
 
     /**
-     * Handles the player's interaction when they right-click.
-     * This method is invoked in response to a right-click action performed by the player.
-     *
-     * @param e The [PlayerInteractEvent] triggered by the player's action.
+     * Lifecycle function; called when this item is left-clicked by a player and the player's cooldown is not active.
      */
     open fun onRightClick(e: PlayerInteractEvent) {}
 
     /**
-     * Handles logic when a player interacts with an item while it is on cooldown.
-     *
-     * This function is called when the player's interaction is blocked due to an active cooldown for the item.
-     * It serves as a placeholder for custom behavior that can be implemented by extending this method in subclasses.
-     *
-     * @param e The [PlayerInteractEvent] associated with the player's interaction attempt.
+     * Lifecycle function; called when this item is left- or right-clicked by a player and the player's cooldown is currently active.
      */
     open fun onCooldown(e: PlayerInteractEvent) {}
 
     /**
-     * Defines behavior to be executed when the cooldown for a specific player expires.
-     *
-     * @param player The player for whom the cooldown has expired.
+     * Lifecycle function; called when this item's cooldown expires for a player.
+     * This function is also called when a player doesn't have this item equipped.
      */
     open fun onCooldownExpire(player: SpigotPlayer) {}
 
     /**
-     * Invoked periodically during the cooldown period for a specified player. This method allows
-     * custom behavior to be executed with each tick of the cooldown. The frequency of invocation
-     * is determined by the scheduled cooldown handling logic.
-     *
-     * @param player The player currently undergoing the cooldown.
+     * Lifecycle function; called when the cooldown task ticks the cooldown for this item and a given player.
+     * This function is also called when a player doesn't have this item equipped.
      */
     open fun onCooldownTick(player: SpigotPlayer) {}
 
-    override fun toString(): String = "VitalItem(uniqueId=$uniqueId, initialCooldown=$initialCooldown, playerCooldown=$playerCooldown)"
-
-    companion object {
-        /**
-         * Retrieves the VitalItem.Info annotation associated with this class.
-         *
-         * @receiver the class for which the annotation is to be retrieved.
-         * @return the VitalItem.Info annotation of this class.
-         */
-        @JvmStatic
-        fun Class<out VitalItem>.getInfo(): Info = getRequiredAnnotation<Info>()
-
-        /**
-         * Retrieves the VitalItem.Info annotation associated with this class.
-         *
-         * @receiver the class for which the annotation is to be retrieved.
-         * @return the VitalItem.Info annotation of this class.
-         */
-        @JvmStatic
-        fun KClass<out VitalItem>.getInfo(): Info = java.getInfo()
-
-        /**
-         * Retrieves the VitalItem.Info annotation associated with this instance.
-         *
-         * @receiver the instance for which the annotation is to be retrieved.
-         * @return the VitalItem.Info annotation of this instance.
-         */
-        @JvmStatic
-        fun VitalItem.getInfo(): Info = javaClass.getInfo()
-    }
+    override fun toString(): String = "VitalItem(uniqueId=$uniqueId, info=$info, playerCooldown=$playerCooldown)"
 
     /**
      * Defines the info for a [VitalItem].

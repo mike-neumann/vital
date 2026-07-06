@@ -7,6 +7,10 @@ import org.springframework.core.io.UrlResource
 /**
  * Internal spring resource loader responsible for locating resources in the spring context.
  * Will strip any protocol from requested resources to enable correct resource loading.
+ *
+ * You should never have to use this, ever.
+ * If you do, make sure you actually know what you are doing.
+ * If you mess up the internal class loader, things might go very wrong.
  */
 class VitalResourceLoader : DefaultResourceLoader() {
     override fun getResource(location: String): Resource {

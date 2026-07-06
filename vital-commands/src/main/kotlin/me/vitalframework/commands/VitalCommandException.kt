@@ -3,10 +3,16 @@ package me.vitalframework.commands
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
 
+/**
+ * Internal exception used by [VitalCommand].
+ */
 abstract class VitalCommandException(
     message: String,
     cause: Throwable? = null,
 ) : RuntimeException(message, cause) {
+    /**
+     * Internal exception; thrown when an exception occurs while a [VitalCommand] tries to execute an arg exception handler function.
+     */
     class ExecuteArgExceptionHandlerMethod(
         method: Method,
         context: VitalCommand.ArgExceptionHandlerContext,
@@ -18,10 +24,17 @@ abstract class VitalCommandException(
             cause,
         )
 
+    /**
+     * Internal exception; thrown when no arg handler was found during [VitalCommand] execution.
+     */
     class UnmappedArgHandler(
         arg: String,
     ) : VitalCommandException("No arg handler method exists for arg '$arg'")
 
+    /**
+     * Internal exception; thrown when an arg handler function was defined with an invalid or not-supported return type signature.
+     * This exception is thrown directly when Vital starts up to reduce more runtime errors.
+     */
     class InvalidArgHandlerReturnSignature(
         method: Method,
         returnType: Class<*>,
@@ -31,6 +44,10 @@ abstract class VitalCommandException(
             })', found '${returnType.name}', must be '${VitalCommand.ReturnState::class.java.name}'",
         )
 
+    /**
+     * Internal exception; thrown when an arg handler function was defined with an invalid or not-supported parameter signature.
+     * This exception is thrown directly when Vital starts up to reduce more runtime errors.
+     */
     class InvalidArgHandlerParameterSignature(
         method: Method,
         parameter: Parameter,
@@ -40,6 +57,10 @@ abstract class VitalCommandException(
             })', failed at '${parameter.type.simpleName} ${parameter.name}'",
         )
 
+    /**
+     * Internal exception; thrown when an arg exception handler was mapped to a non-existing arg / arg handler name.
+     * This exception is thrown directly when Vital starts up to reduce more runtime errors.
+     */
     class UnmappedArgExceptionHandlerArg(
         method: Method,
         arg: String,
@@ -49,6 +70,10 @@ abstract class VitalCommandException(
             })' failed, arg '$arg' does not exist",
         )
 
+    /**
+     * Internal exception; thrown when an arg exception handler function was defined with an invalid or not-supported signature.
+     * This exception is thrown directly when Vital starts up to reduce more runtime errors.
+     */
     class InvalidArgExceptionHandlerMethodSignature(
         method: Method,
         parameter: Parameter,
@@ -58,6 +83,10 @@ abstract class VitalCommandException(
             })', failed at '${parameter.type.simpleName} ${parameter.name}'",
         )
 
+    /**
+     * Internal exception; thrown when a global exception handler function was defined with an invalid or not-supported signature.
+     * This exception is thrown directly when Vital starts up to reduce more runtime errors.
+     */
     class InvalidGlobalExceptionHandlerMethodSignature(
         method: Method,
         parameter: Parameter,
@@ -67,6 +96,9 @@ abstract class VitalCommandException(
             })' failed at '${parameter.type.simpleName} ${parameter.name}'",
         )
 
+    /**
+     * Internal exception; thrown when an exception occurs while a [VitalCommand] tries to execute a global exception handler function.
+     */
     class ExecuteGlobalExceptionHandlerMethod(
         method: Method,
         context: VitalCommand.GlobalExceptionHandlerContext,

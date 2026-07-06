@@ -6,105 +6,116 @@ import me.vitalframework.BungeeTask
 import me.vitalframework.SpigotPlugin
 import me.vitalframework.SpigotRunnable
 import me.vitalframework.SpigotTask
-import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalHasInfo
 import net.md_5.bungee.api.ProxyServer
-import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
-import kotlin.reflect.KClass
 
 /**
- * Defines a countdown task within the Vital-Framework.
- * A countdown is a [VitalRepeatableTask], with an internal [countdown], decrementing its value by 1 on every tick until it reaches 0.
- * Once the [countdown] reaches 0, its respective [onExpire] function will be called, so consumers can implement their own custom behavior.
+ * Defines a countdown task within the Vital framework.
+ * A countdown task may perform an action that can end after a set countdown.
  *
- * By default, the class will not be a bean.
- * If dependency injection is wanted or needed, apply the [Component] annotation.
+ * ```java
+ * public class MyCountdownState extends VitalCountdownState.Spigot() {
+ *     public MyCountdownState(JavaPlugin plugin) {
+ *         super(plugin);
+ *     }
+ *
+ *     @Override
+ *     public void onTick() {
+ *         // ...
+ *     }
+ *
+ *     @Override
+ *     public void onExpire() {
+ *         // ...
+ *     }
+ * }
+ * ```
  */
 abstract class VitalCountdownTask<P, R : Runnable, T>(
     val plugin: P,
-) {
-    /**
-     * The initial countdown of this countdown task.
-     * Will be set to [Info.countdown] upon instantiation.
-     */
-    val initialCountdown
-        get() = getInfo().countdown
+) : VitalHasInfo {
+    override val info = mutableMapOf(Info::class.java to javaClass.getRequiredAnnotation<Info>())
 
     /**
-     * The countdown of this countdown task.
-     * Will be set to [initialCountdown] upon instantiation.
+     * The current countdown of this task.
      */
-    var countdown = initialCountdown
+    var countdown = getInfo(Info::class.java).interval
 
     /**
-     * The interval between [onTick] calls of this countdown task.
-     */
-    var interval = getInfo().interval
-
-    /**
-     * If this countdown task currently allows ticks.
+     * Controls if this task can currently tick, decrease the [countdown] and call the [onTick] lifecycle function.
      */
     var allowTick = true
 
     /**
-     * The runnable of this countdown task.
+     * The internal task that runs to decrease the [countdown] and call the [onTick] lifecycle function.
+     * This field will be `null` if this task is currently not running.
      */
     var runnable: R? = null
         private set
 
     /**
-     * The task object of this countdown task.
+     * The internal task that's runs the [runnable] to decrease the [countdown] and call the [onTick] lifecycle function.
+     * This field will be `null` if this task is currently not running.
      */
     var task: T? = null
         private set
 
     /**
-     * If this countdown task is currently running.
+     * Checks if this task is currently running.
      */
     val running
         get() = runnable != null && task != null
 
     /**
-     * Starts this countdown task by setting its internal [runnable] using [createRunnable] and [task] using [createTask] and calling [onStart].
-     * If [running] is true, this function will pass.
+     * Starts this task if It's not already running.
+     * This function will call [createRunnable] and [createTask] to set up this task before starting the internal tick timer.
+     * The [onStart] lifecycle function will be called after this task is ready for execution.
+     *
+     * On each tick, the [countdown] will be decreased and the [onTick] lifecycle function will be called.
+     *
+     * If this task is currently running, this function does nothing.
      */
     fun start() {
         if (running) {
             return
         }
 
-        onStart()
         runnable = createRunnable()
         task = createTask()
+        onStart()
     }
 
     /**
-     * Stops this countdown task by setting its [runnable] and [task] back to null
-     * and calling the following functions in their respective order: [onStop], [cancelRunnable], [cancelTask].
-     * If [running] is false, this function will pass.
+     * Stops this task if It's currently running.
+     * This function stops and cleans up the internal [runnable] and [task] and then calls the [onStop] lifecycle function.
+     *
+     * If this task is currently not running, this function does nothing.
      */
     fun stop() {
         if (!running) {
             return
         }
 
-        onStop()
         cancelRunnable()
         cancelTask()
         runnable = null
         task = null
+        onStop()
     }
 
     /**
-     * Resets this countdown task by setting its internal countdown to [initialCountdown] and calling [onReset].
+     * Resets this task by setting the [countdown] to its initial value defined in [Info] and calls the [onReset] lifecycle function.
      */
     fun reset() {
-        countdown = initialCountdown
+        countdown = getInfo(Info::class.java).countdown
         onReset()
     }
 
     /**
-     * Restarts this countdown task by calling the following functions in their respective order: [stop], [reset], [start], [onRestart].
+     * Restarts this task by stopping it via [stop], resetting it's [countdown] via [reset],
+     * starting the task again via [start] and finally calling the [onRestart] lifecycle function.
      */
     fun restart() {
         stop()
@@ -114,10 +125,11 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     }
 
     /**
-     * Handles a countdown task tick.
-     * Will pass if [allowTick] is false.
-     * Calls [stop] and [onExpire] when this countdown task's countdown expires.
-     * On every tick, calls [onTick] while decrementing its internal countdown by 1.
+     * Handles a single tick of this task, decreases the [countdown] and calls the [onTick] lifecycle function.
+     *
+     * If the countdown reaches `0` this function will stop this task via [stop] and call the [onExpire] lifecycle function.
+     *
+     * If ticks are disabled by [allowTick], this function does nothing.
      */
     fun handleTick() {
         if (!allowTick) {
@@ -135,83 +147,55 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     }
 
     /**
-     * Creates the runnable for this countdown task's task.
+     * Creates the internal [runnable] for this task.
      */
     abstract fun createRunnable(): R
 
     /**
-     * Creates the task for this countdown task.
+     * Creates the internal [runnable] for this task.
      */
     abstract fun createTask(): T
 
     /**
-     * Cancels this countdown task's timer runnable.
+     * Cancels the internal [runnable] for this task.
      */
     abstract fun cancelRunnable()
 
     /**
-     * Cancels this countdown task's timer.
+     * Cancels the internal [task] for this task.
      */
     abstract fun cancelTask()
 
     /**
-     * Called when this countdown task is started via [start].
+     * Lifecycle function; called when this task is started.
      */
     open fun onStart() {}
 
     /**
-     * Called when this countdown task's timer is ticked with the set [interval].
+     * Lifecycle function; called when this task is ticked.
+     * This task will only tick if [allowTick] is `true`.
      */
     open fun onTick() {}
 
     /**
-     * Called when this countdown task is stopped via [stop].
+     * Lifecycle function; called when this task is stopped.
      */
     open fun onStop() {}
 
     /**
-     * Called when this countdown task's countdown expires.
+     * Lifecycle function; called when this task's [countdown] reaches `0`.
      */
     open fun onExpire() {}
 
     /**
-     * Called when this countdown task is reset via [reset].
+     * Lifecycle function; called when this task is reset via [reset].
      */
     open fun onReset() {}
 
     /**
-     * Called when this countdown task is restarted via [restart].
+     * Lifecycle function; called when this task is restarted via [restart].
      */
     open fun onRestart() {}
-
-    companion object {
-        /**
-         * Retrieves the VitalCountdownTask.Info annotation associated with this class.
-         *
-         * @receiver the class for which the annotation is to be retrieved.
-         * @return the VitalCountdownTask.Info annotation of this class.
-         */
-        @JvmStatic
-        fun Class<out VitalCountdownTask<*, *, *>>.getInfo(): Info = getRequiredAnnotation<Info>()
-
-        /**
-         * Retrieves the VitalCountdownTask.Info annotation associated with this class.
-         *
-         * @receiver the class for which the annotation is to be retrieved.
-         * @return the VitalCountdownTask.Info annotation of this class.
-         */
-        @JvmStatic
-        fun KClass<out VitalCountdownTask<*, *, *>>.getInfo(): Info = java.getInfo()
-
-        /**
-         * Retrieves the VitalCountdownTask.Info annotation associated with this instance.
-         *
-         * @receiver the instance for which the annotation is to be retrieved.
-         * @return the VitalCountdownTask.Info annotation of this instance.
-         */
-        @JvmStatic
-        fun VitalCountdownTask<*, *, *>.getInfo(): Info = javaClass.getInfo()
-    }
 
     /**
      * Defines the info for a [VitalCountdownTask].
@@ -223,16 +207,6 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
         val interval: Long = 1_000L,
     )
 
-    /**
-     * Represents a specialized countdown task for Spigot-based plugins.
-     *
-     * This class extends the behavior of a generalized countdown task to integrate
-     * with the Spigot framework. It facilitates the periodic execution of tasks
-     * using predefined intervals, handles task cancellation, and manages the lifecycle
-     * of Spigot-specific task and runnable instances.
-     *
-     * @param plugin The Spigot plugin instance to associate with this countdown task.
-     */
     open class Spigot(
         plugin: SpigotPlugin,
     ) : VitalCountdownTask<SpigotPlugin, SpigotRunnable, SpigotTask>(plugin) {
@@ -241,7 +215,10 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
                 override fun run() = handleTick()
             }
 
-        override fun createTask() = runnable!!.runTaskTimer(plugin, 0L, ((interval / 1000.0) * 20L).toLong())
+        override fun createTask(): SpigotTask {
+            val info = getInfo(Info::class.java)
+            return runnable!!.runTaskTimer(plugin, 0L, ((info.interval / 1000.0) * 20L).toLong())
+        }
 
         override fun cancelRunnable() {
             runnable?.cancel()
@@ -252,30 +229,15 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
         }
     }
 
-    /**
-     * Represents a specialized countdown task designed for use within a BungeeCord environment.
-     *
-     * This class extends the functionality of the `VitalCountdownTask` and provides
-     * implementations specific to the BungeeCord framework for creating and managing
-     * countdown tasks. It maintains compatibility with the framework's scheduling system
-     * while offering lifecycle management for tasks and runnables.
-     *
-     * Primary functions include:
-     * - Creating and managing a runnable responsible for handling countdown ticks.
-     * - Scheduling tasks within the BungeeCord scheduler using specific time intervals.
-     * - Canceling and cleaning up resources associated with the runnable and task.
-     *
-     * This class is open, allowing for further extension and customization as required.
-     *
-     * @constructor Initializes the Bungee countdown task with the provided plugin instance.
-     * @param plugin The plugin instance this countdown task is associated with.
-     */
     open class Bungee(
         plugin: BungeePlugin,
     ) : VitalCountdownTask<BungeePlugin, BungeeRunnable, BungeeTask>(plugin) {
         override fun createRunnable() = BungeeRunnable { handleTick() }
 
-        override fun createTask() = ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, interval, TimeUnit.MILLISECONDS)!!
+        override fun createTask(): BungeeTask {
+            val info = getInfo(Info::class.java)
+            return ProxyServer.getInstance().scheduler.schedule(plugin, runnable, 0L, info.interval, TimeUnit.MILLISECONDS)!!
+        }
 
         override fun cancelRunnable() {
             task?.cancel()

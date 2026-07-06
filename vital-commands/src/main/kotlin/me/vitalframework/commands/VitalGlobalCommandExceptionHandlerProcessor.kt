@@ -1,7 +1,7 @@
 package me.vitalframework.commands
 
+import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
 import me.vitalframework.commands.VitalCommand.Companion.getGlobalExceptionHandlerContext
-import me.vitalframework.commands.VitalCommand.Companion.getVitalCommandAdvice
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.getBeansWithAnnotation
 import org.springframework.context.ApplicationContext
@@ -18,11 +18,8 @@ open class VitalGlobalCommandExceptionHandlerProcessor(
             val adviceInstances =
                 advices
                     .filter {
-                        command.commandSenderClass.isAssignableFrom(
-                            it.javaClass
-                                .getVitalCommandAdvice()
-                                .commandSenderClass.java,
-                        )
+                        val info = it.javaClass.getRequiredAnnotation<VitalCommand.Advice>()
+                        command.commandSenderClass.isAssignableFrom(info.commandSenderClass.java)
                     }
 
             // get all advices for the command sender of the command.

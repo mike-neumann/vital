@@ -4,6 +4,9 @@ import me.vitalframework.SpigotEventHandler
 import me.vitalframework.VitalListener
 import org.bukkit.event.player.PlayerJoinEvent
 
+/**
+ * Internal listener; Hides all holograms from other players using [VitalHologramService.hideOtherPerPlayerHolograms].
+ */
 class VitalPerPlayerHologramListener(
     private val vitalHologramService: VitalHologramService,
 ) : VitalListener.Spigot() {

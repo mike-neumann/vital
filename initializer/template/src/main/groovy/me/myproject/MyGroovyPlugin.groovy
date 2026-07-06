@@ -1,7 +1,7 @@
 package me.myproject
 
 import me.vitalframework.Vital
-import me.vitalframework.VitalCoreSubModule
+import me.vitalframework.VitalCoreModule
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.event.EventListener
@@ -15,17 +15,17 @@ import org.springframework.context.event.EventListener
     environment = Vital.PluginEnvironment.${pluginEnvironment}
 )
 class MyGroovyPlugin {
-    private final def logger = VitalCoreSubModule.logger(this)
+    private final def logger = VitalCoreModule.logger(this)
 
     @EventListener(ApplicationReadyEvent)
     final def onApplicationReady() {
-        final def info = VitalCoreSubModule.getVitalInfo(MyGroovyPlugin)
+        final def info = VitalCoreModule.getRequiredAnnotation(MyGroovyPlugin, Vital.Info)
         logger.info("Groovy Vital plugin '${r"${info.name()}"}' version '${r"${info.version()}"}' successfully loaded!")
     }
 
     @EventListener(ContextClosedEvent)
     final def onContextClosed() {
-        final def info = VitalCoreSubModule.getVitalInfo(MyGroovyPlugin)
+        final def info = VitalCoreModule.getRequiredAnnotation(MyGroovyPlugin, Vital.Info)
         logger.info("Groovy Vital plugin '${r"${info.name()}"}' version '${r"${info.version()}"}' successfully unloaded!")
     }
 }

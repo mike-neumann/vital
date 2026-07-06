@@ -15,39 +15,15 @@ import org.bukkit.event.player.PlayerQuitEvent
 import java.util.UUID
 
 /**
- * Listener interface for managing player-related events and operations within the Vital framework.
- *
- * This interface provides methods to associate players with `VitalPlayer` instances,
- * manage their lifecycle events, and facilitate player interactions within specific
- * environments (e.g., Spigot or Bungee). It relies on a `VitalPlayerService` for backend operations.
+ * Internal listener; manages [VitalPlayer] lifecycles.
  */
 interface VitalPlayerListener {
-    /**
-     * The service instance responsible for managing player-related operations
-     * within the Vital framework. Provides access to player creation, destruction,
-     * and retrieval functionalities.
-     */
     val vitalPlayerService: VitalPlayerService
-
-    /**
-     * Provides configuration properties related to vital players within the system.
-     *
-     * These properties are loaded from the application's configuration file (e.g., application.yml or application.properties)
-     * and used for initializing and managing player-related configurations.
-     */
     val vitalPlayersConfigurationProperties: VitalPlayersConfigurationProperties
 
     /**
-     * Creates a new player instance and associates it with a given unique ID and player class.
-     *
-     * This function uses reflection to instantiate a `VitalPlayer` class linked to the specified player.
-     * If the `VitalPlayer` class is invalid or does not extend the required class, an exception is thrown.
-     *
-     * @param T The type of the player instance being created.
-     * @param player The player instance to be associated with the `VitalPlayer`.
-     * @param playerUniqueId The unique identifier of the player.
-     * @param playerClass The class type of the player instance.
-     * @throws VitalPlayerException.InvalidClass If the `VitalPlayer` class does not extend the required `VitalPlayer` type.
+     * Internal function; creates a new [VitalPlayer] instance for the given [player] and stores it in [VitalPlayerRepository].
+     * This function throws [VitalPlayerException.InvalidClass] if the configured custom player class has an invalid signature.
      */
     fun <T : Any> createPlayer(
         player: T,
@@ -65,12 +41,8 @@ interface VitalPlayerListener {
     }
 
     /**
-     * Destroys a player entity associated with the given unique identifier.
-     *
-     * This method delegates the removal operation to the `playerService`. If the player
-     * does not exist, no action is performed.
-     *
-     * @param playerUniqueId The unique identifier of the player to be destroyed.
+     * Destroys the [VitalPlayer] instance of the given [playerUniqueId].
+     * If no [VitalPlayer] instance exists for the given [playerUniqueId], this function does nothing.
      */
     fun destroyPlayer(playerUniqueId: UUID) = vitalPlayerService.deletePlayer(playerUniqueId)
 

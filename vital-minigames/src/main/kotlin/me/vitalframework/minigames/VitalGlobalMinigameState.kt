@@ -28,12 +28,12 @@ import me.vitalframework.SpigotListener
  */
 interface VitalGlobalMinigameState : SpigotListener {
     /**
-     * Called when this state is enabled via [VitalGlobalMinigameService.setState].
+     * Lifecycle function; called when this state is enabled via [VitalGlobalMinigameService.setState].
      */
     fun onEnable() {}
 
     /**
-     * Called when this state is disabled by switching to a new state using [VitalGlobalMinigameService.setState].
+     * Lifecycle function; called when this state is disabled by switching to a new state using [VitalGlobalMinigameService.setState].
      */
     fun onDisable() {}
 }

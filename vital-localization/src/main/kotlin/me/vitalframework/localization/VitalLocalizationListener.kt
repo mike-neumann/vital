@@ -11,9 +11,12 @@ import net.md_5.bungee.api.event.PlayerDisconnectEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.springframework.context.annotation.Conditional
 
+/**
+ * Internal listener; handles localization cleanup when a player leaves the server.
+ */
 interface VitalLocalizationListener {
     fun handle(player: Any) {
-        VitalLocalizationSubModule.playerLocales.remove(player)
+        VitalLocalizationModule.playerLocales.remove(player)
     }
 
     @Conditional(RequiresSpigot::class)

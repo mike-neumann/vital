@@ -4,8 +4,8 @@ import me.vitalframework.BungeeCommandSender
 import me.vitalframework.BungeePlayer
 import me.vitalframework.SpigotCommandSender
 import me.vitalframework.SpigotPlayer
-import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
-import me.vitalframework.commands.VitalCommandsSubModule.Companion.extractNonInvocationTargetException
+import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalHasInfo
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -13,12 +13,13 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.springframework.stereotype.Component
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
 
 /**
- * Defines a command within the Vital-Framework.
+ * Use this class to define your own custom command.
  * A command defines n-amount of entry points for user-input, that can perform actions and produce a result.
  *
  * Each command may have n-amount of arguments, each argument may also have n-amount of argument-exception-handlers,
@@ -60,54 +61,31 @@ import kotlin.reflect.KClass
  */
 abstract class VitalCommand<CS : Any> protected constructor(
     val commandSenderClass: Class<CS>,
-) {
-    /**
-     * The name of this command, defined by [VitalCommand.Info.name].
-     */
-    val name: String
-
-    /**
-     * The permission to execute this base command (no arguments), defined by [VitalCommand.Info.permission].
-     */
-    val permission: String
-
-    /**
-     * If this base command (no arguments) should only be executable by a player, defined by [VitalCommand.Info.playerOnly].
-     */
-    val playerOnly: Boolean
+) : VitalHasInfo {
+    override val info = mutableMapOf(Info::class.java to javaClass.getRequiredAnnotation<Info>())
 
     /**
      * The arguments of the command, mapped from [Pattern] to [VitalCommand.Arg].
      */
-    val args: Map<Pattern, Arg>
+    val args = getMappedArgHandlers()
 
     /**
      * The [VitalCommand.ArgHandlerContext] mapped by their [VitalCommand.Arg].
      */
-    val argHandlers: Map<Arg, ArgHandlerContext>
+    val argHandlers = getMappedArgHandlerContext()
 
     /**
      * The [Throwable] (type of exception) and their [VitalCommand.ArgExceptionHandlerContext] mapped by their [VitalCommand.Arg].
      */
-    val argExceptionHandlers: Map<Arg, Map<Class<out Throwable>, ArgExceptionHandlerContext>>
-
-    init {
-        val info = getInfo()
-        name = info.name
-        permission = info.permission
-        playerOnly = info.playerOnly
-        args = getMappedArgs()
-        argHandlers = getMappedArgHandlers()
-        argExceptionHandlers = getMappedArgExceptionHandlers()
-    }
+    val argExceptionHandlers = getMappedArgExceptionHandlers()
 
     /**
-     * Determines if the given command sender is a player.
+     * Internal function used to check if the given [commandSender] is a player.
      */
     abstract fun isPlayer(commandSender: CS): Boolean
 
     /**
-     * Checks whether the specified command sender has the required permission.
+     * Internal function used to check if the given [commandSender] has the given [permission].
      */
     abstract fun hasPermission(
         commandSender: CS,
@@ -115,12 +93,12 @@ abstract class VitalCommand<CS : Any> protected constructor(
     ): Boolean
 
     /**
-     * Retrieves a list of all player names.
+     * Internal function used to get the names of all currently connected players.
      */
     abstract fun getAllPlayerNames(): List<String>
 
     /**
-     * Retrieves a [VitalCommand.Arg] based on the executed argument string.
+     * Internal function used to get the [Arg] that matches with the given [executedArg].
      */
     internal fun getArg(executedArg: String) =
         args.entries
@@ -129,7 +107,8 @@ abstract class VitalCommand<CS : Any> protected constructor(
             .firstOrNull()
 
     /**
-     * Executes the global exception handler method for handling exceptions thrown during command execution.
+     * Internal function used to execute all registered global exception handlers for the given command execution.
+     * If the execution fails for any reason, [onCommandError] will be called as a fallback.
      */
     private fun executeGlobalExceptionHandlerMethod(
         sender: CS,
@@ -185,7 +164,8 @@ abstract class VitalCommand<CS : Any> protected constructor(
     }
 
     /**
-     * Executes an exception handler registered for a specific command argument.
+     * Internal function used to execute all arg exception handlers for the given command execution.
+     * If the execution fails for any reason, the exception will be delegated to global exceptions handlers by calling [executeGlobalExceptionHandlerMethod].
      */
     private fun executeArgExceptionHandlerMethod(
         sender: CS,
@@ -225,7 +205,8 @@ abstract class VitalCommand<CS : Any> protected constructor(
     }
 
     /**
-     * Executes the handler method associated with a specific command argument.
+     * Internal function used to execute the arg handler for the given command execution.
+     * If the execution fails for any reason, any known arg exception handlers will be called using [executeArgExceptionHandlerMethod].
      */
     private fun executeArgHandlerMethod(
         sender: CS,
@@ -233,15 +214,21 @@ abstract class VitalCommand<CS : Any> protected constructor(
         commandArg: Arg,
         values: Array<String>,
     ): ReturnState {
-        val context = argHandlers[commandArg] ?: throw VitalCommandException.UnmappedArgHandler(executedArg)
-        return context.handlerMethod(
-            this,
-            *context.getInjectableArgHandlerMethodParameters(sender, executedArg, commandArg, values),
-        ) as ReturnState
+        try {
+            val context = argHandlers[commandArg] ?: throw VitalCommandException.UnmappedArgHandler(executedArg)
+            return context.handlerMethod(
+                this,
+                *context.getInjectableArgHandlerMethodParameters(sender, executedArg, commandArg, values),
+            ) as ReturnState
+        } catch (e: Exception) {
+            executeArgExceptionHandlerMethod(sender, e, executedArg, commandArg)
+            return ReturnState.SUCCESS
+        }
     }
 
     /**
-     * Provides tab completion suggestions for commands based on the input arguments and context.
+     * Internal function used to provide automatic tab-completions for the given command execution.
+     * Additionally, implementers can add their own tab-completions by overriding the [onCommandTabComplete] lifecycle function.
      */
     fun tabComplete(
         sender: CS,
@@ -305,19 +292,23 @@ abstract class VitalCommand<CS : Any> protected constructor(
     }
 
     /**
-     * Executes a command with the given sender and arguments.
+     * Internal function used to execute this command as the given [sender] and [args].
+     * Any mapped arg handlers that matches the given command execution will be called using [executeArgExceptionHandlerMethod].
      */
     fun execute(
         sender: CS,
         args: Array<String>,
     ) {
+        val info = getInfo(Info::class.java)
         val joinedPlayerArgs = args.joinToString(" ")
-        if (playerOnly && !isPlayer(sender)) return onCommandRequiresPlayer(sender, joinedPlayerArgs, null)
+        if (info.playerOnly && !isPlayer(sender)) {
+            return onCommandRequiresPlayer(sender, joinedPlayerArgs, null)
+        }
 
         val matchedArg = getArg(joinedPlayerArgs)
         val returnState =
             when {
-                permission.isNotBlank() && !hasPermission(sender, permission) -> ReturnState.NO_PERMISSION
+                info.permission.isNotBlank() && !hasPermission(sender, info.permission) -> ReturnState.NO_PERMISSION
 
                 matchedArg != null -> {
                     if (matchedArg.permission.isNotBlank() && !hasPermission(sender, matchedArg.permission)) {
@@ -347,11 +338,7 @@ abstract class VitalCommand<CS : Any> protected constructor(
                                     )
                             }.forEach(values::add)
 
-                        try {
-                            executeArgHandlerMethod(sender, joinedPlayerArgs, matchedArg, values.toTypedArray())
-                        } catch (e: Exception) {
-                            executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, matchedArg)
-                        }
+                        executeArgHandlerMethod(sender, joinedPlayerArgs, matchedArg, values.toTypedArray())
                     }
                 }
 
@@ -371,7 +358,8 @@ abstract class VitalCommand<CS : Any> protected constructor(
     }
 
     /**
-     * Called as a fallback, when all other command exception handling mechanism fail (or are non-existent).
+     * Lifecycle function; called when an exception occurs during command execution.
+     * This function is called as a last resort if no arg exception handlers and no global exception handlers were defined to handle the [e].
      */
     protected open fun onCommandError(
         sender: CS,
@@ -380,8 +368,10 @@ abstract class VitalCommand<CS : Any> protected constructor(
     ): Unit = throw e
 
     /**
-     * Called when the tab completer is ready to add more tab completions to the already existing ones provided by Vital.
-     * You can use this function to add more tab completions.
+     * Lifecycle function; called when a player types the command into chat and triggers tab-completions.
+     * Use this function to add additional tab-completions if needed.
+     *
+     * The [args] are the same args used for your arg handlers, e.g. `add <player>`, `set <text>*`, etc.
      */
     protected open fun onCommandTabComplete(
         sender: CS,
@@ -389,7 +379,7 @@ abstract class VitalCommand<CS : Any> protected constructor(
     ) = listOf<String>()
 
     /**
-     * Called when an argument is called with invalid or missing arguments.
+     * Lifecycle function; called when this command or any arg is executed with invalid args.
      */
     protected open fun onCommandInvalidArgs(
         sender: CS,
@@ -398,7 +388,7 @@ abstract class VitalCommand<CS : Any> protected constructor(
     }
 
     /**
-     * Called when an argument is called without the required permissions.
+     * Lifecycle function; called when this command or any arg is executed with insufficient permissions.
      */
     protected open fun onCommandRequiresPermission(
         sender: CS,
@@ -408,7 +398,7 @@ abstract class VitalCommand<CS : Any> protected constructor(
     }
 
     /**
-     * Called when a player-only argument is called by a non-player.
+     * Lifecycle function; called when this command or any arg is executed as a non-player but the command or arg requires a player.
      */
     protected open fun onCommandRequiresPlayer(
         sender: CS,
@@ -428,7 +418,7 @@ abstract class VitalCommand<CS : Any> protected constructor(
     }
 
     /**
-     * Defines the info for a [VitalCommand].
+     * Defines the metadata info for a [VitalCommand].
      */
     @Component
     @Retention(AnnotationRetention.RUNTIME)
@@ -644,27 +634,32 @@ abstract class VitalCommand<CS : Any> protected constructor(
         const val ARG_REPLACEMENT = "\\\\S+"
 
         /**
-         * Retrieves a map of argument patterns to their corresponding argument definitions
-         * for a `VitalCommand`. It processes the methods of the `VitalCommand` instance
-         * to look for annotated argument handlers and maps argument patterns to their metadata.
-         *
-         * The method performs the following steps:
-         * - Filters methods annotated with `@ArgHandler`.
-         * - Extracts all `ArgHandler` annotations from these methods.
-         * - Processes the `name` property of each argument by replacing placeholders based on
-         *   specific regex patterns (`SPACE_REGEX`, `VARARG_REGEX`, `ARG_REGEX`) and their
-         *   defined replacements (`SPACE_REPLACEMENT`, `VARARG_REPLACEMENT`, `ARG_REPLACEMENT`).
-         * - Compiles the processed `name` as a regex pattern and associates it with the argument definition.
-         *
-         * @return A map where each key is a compiled regular expression pattern representing the argument name,
-         * and each value is the corresponding argument definition.
+         * Extracts the first non-[InvocationTargetException] from the given [Throwable].
+         * This function will be used during exception handling to extract the actual exception that occurred.
+         */
+        fun Throwable.extractNonInvocationTargetException(): Throwable {
+            var exception = this
+            if (exception is InvocationTargetException) {
+                var extractedException = targetException
+                while (extractedException is InvocationTargetException) {
+                    extractedException = extractedException.targetException
+                }
+
+                exception = extractedException
+            }
+
+            return exception
+        }
+
+        /**
+         * Internal function used to Get all functions annotated with [ArgHandler] and map them to their given [Arg.name] as a [Pattern].
+         * These mapped args are later used during command execution to find out which arg was actually executed by a command sender.
          */
         @JvmStatic
-        fun VitalCommand<*>.getMappedArgs() =
+        fun VitalCommand<*>.getMappedArgHandlers() =
             javaClass.methods
                 .filter { it.getAnnotationsByType(ArgHandler::class.java).size > 0 }
-                .map { it.getAnnotationsByType(ArgHandler::class.java).toList() }
-                .flatten()
+                .flatMap { it.getAnnotationsByType(ArgHandler::class.java).toList() }
                 .associate {
                     Pattern.compile(
                         it.arg.name
@@ -675,26 +670,15 @@ abstract class VitalCommand<CS : Any> protected constructor(
                 }
 
         /**
-         * Retrieves a mapping of argument handlers annotated within the `VitalCommand` class.
-         *
-         * This method scans the methods of the current `VitalCommand` instance for those that are annotated
-         * with `@ArgHandler`. Each identified method is paired with its corresponding annotation and processed
-         * to create a map where the key is the argument name declared in the `@ArgHandler` annotation, and
-         * the value is the handler context for that specific argument.
-         *
-         * The handler context includes preparation for allowed injectable parameters, ensuring compatibility
-         * with the framework's supported argument-handling structure.
-         *
-         * @return A map where each key represents the argument name defined in the `@ArgHandler` annotation,
-         * and each value represents the prepared handler context for the argument's processing.
+         * Internal function used to get the internal arg handler context for all functions annotated with [ArgHandler].
+         * This arg handler context will later be used during command execution to call the annotated arg handler function with the correct parameters.
          */
         @JvmStatic
-        fun VitalCommand<*>.getMappedArgHandlers() =
+        fun VitalCommand<*>.getMappedArgHandlerContext() =
             javaClass.methods
                 .asSequence()
                 .filter { it.getAnnotationsByType(ArgHandler::class.java).size > 0 }
-                .map { method -> method.getAnnotationsByType(ArgHandler::class.java).map { method to it } }
-                .flatten()
+                .flatMap { method -> method.getAnnotationsByType(ArgHandler::class.java).map { method to it } }
                 .associate { (method, argHandler) ->
                     // now we have a viable method ready for handling incoming arguments
                     // we just need to filter out the injectable parameters for our method
@@ -703,15 +687,8 @@ abstract class VitalCommand<CS : Any> protected constructor(
                 }
 
         /**
-         * Retrieves an array of parameters to be injected into a handler method
-         * based on the provided context and input parameters.
-         *
-         * @param context Provides contextual information such as indexes for the injectable parameters.
-         * @param sender The sender associated with the command execution.
-         * @param executedArg The argument string that was executed.
-         * @param commandArg The command argument object associated with the executed argument.
-         * @param values The array of values that were supplied for the command arguments.
-         * @return An array of parameters to be injected, ordered by their respective indexes.
+         * Internal function to correctly sort all injectable function parameters for an arg handler and return them as an [Array],
+         * so they can later be used to call their appropriate mapped arg handler function.
          */
         @JvmStatic
         fun ArgHandlerContext.getInjectableArgHandlerMethodParameters(
@@ -734,13 +711,8 @@ abstract class VitalCommand<CS : Any> protected constructor(
         }
 
         /**
-         * Retrieves a mutable map of mapped argument exception handlers for the current command.
-         * The method scans for methods annotated with `@VitalCommand.ArgExceptionHandler`
-         * and organizes them by their associated arguments and exception types.
-         *
-         * @return A mutable map where the keys are the command arguments (`VitalCommand.Arg`)
-         * and the values are nested mutable maps. The nested maps have exception
-         * types (`Class<out Throwable>`) as keys and exception handler context (`VitalCommand.ArgExceptionHandlerContext`) as values.
+         * Internal function used to get all arg exception handler functions annotated with [ArgExceptionHandler] and map them to their appropriate [Arg] and specified [Annotation].
+         * This function returns a [Map] of all mapped arg exception handlers and will later be used during command execution to correctly call arg exception handlers when an exception occurs during command execution.
          */
         @JvmStatic
         fun VitalCommand<*>.getMappedArgExceptionHandlers(): MutableMap<
@@ -752,8 +724,7 @@ abstract class VitalCommand<CS : Any> protected constructor(
 
             javaClass.methods
                 .filter { it.getAnnotationsByType(ArgExceptionHandler::class.java).size > 0 }
-                .map { method -> method.getAnnotationsByType(ArgExceptionHandler::class.java).map { method to it } }
-                .flatten()
+                .flatMap { method -> method.getAnnotationsByType(ArgExceptionHandler::class.java).map { method to it } }
                 .forEach { (method, argExceptionHandler) ->
                     val arg =
                         getArg(argExceptionHandler.arg)
@@ -774,17 +745,8 @@ abstract class VitalCommand<CS : Any> protected constructor(
         }
 
         /**
-         * Constructs an array of method parameters to inject into an exception handler method
-         * based on the provided context and arguments.
-         *
-         * @param context The context containing metadata about the exception handler method,
-         * including parameter indices for injectable arguments.
-         * @param sender The sender object, typically representing the entity or object that triggered the command.
-         * @param executedArg The argument string that was executed in the command causing the exception.
-         * @param commandArg The specific command argument associated with the executed argument.
-         * @param exception The exception that occurred during execution.
-         * @return An array of objects representing the parameters to be injected into the exception handler
-         * method, ordered by their parameter indices.
+         * Internal function to correctly sort all injectable function parameters for an arg exception handler and return them as an [Array],
+         * so they can later be used to call their appropriate mapped arg exception handler function.
          */
         @JvmStatic
         fun ArgExceptionHandlerContext.getInjectableArgExceptionHandlerMethodParameters(
@@ -807,14 +769,8 @@ abstract class VitalCommand<CS : Any> protected constructor(
         }
 
         /**
-         * Constructs an `ArgHandlerContext` for the given method of a command sender class.
-         *
-         * @receiver The method to analyze and build the `ArgHandlerContext`.
-         * @param commandSenderClass The class type of the command sender.
-         * @return An `ArgHandlerContext` object that contains parsed parameter indexes for
-         * handling command arguments.
-         * @throws VitalCommandException.InvalidArgHandlerReturnSignature If the method does not return `VitalCommand.ReturnState`.
-         * @throws VitalCommandException.InvalidArgHandlerParameterSignature If any method parameter has an invalid type.
+         * Internal function used to get the [ArgHandlerContext] of the given method and [commandSenderClass].
+         * The context will later be used during command execution to call the appropriate arg handler function.
          */
         @JvmStatic
         fun Method.getArgHandlerContext(commandSenderClass: Class<*>): ArgHandlerContext {
@@ -849,16 +805,8 @@ abstract class VitalCommand<CS : Any> protected constructor(
         }
 
         /**
-         * Constructs an `ArgExceptionHandlerContext` for a given method and command sender class. It identifies the indices
-         * of necessary parameters such as the command sender, executed argument, command argument, and exception within the
-         * provided method's parameter list.
-         *
-         * @receiver The method whose parameters are analyzed to retrieve the context.
-         * @param commandSenderClass The class of the command sender used to identify the corresponding parameter.
-         * @return An instance of `VitalCommand.ArgExceptionHandlerContext` containing the indices of relevant parameters
-         *         within the method's parameters.
-         * @throws VitalCommandException.InvalidArgExceptionHandlerMethodSignature If a parameter of an invalid type is
-         *         encountered in the method.
+         * Internal function used to get the [ArgExceptionHandlerContext] of the given method and [commandSenderClass].
+         * The context will later be used during command execution to call the appropriate arg exception handler function.
          */
         @JvmStatic
         fun Method.getArgExceptionHandlerContext(commandSenderClass: Class<*>): ArgExceptionHandlerContext {
@@ -896,13 +844,8 @@ abstract class VitalCommand<CS : Any> protected constructor(
         }
 
         /**
-         * Constructs and returns a `GlobalExceptionHandlerContext` instance for managing a global exception handler.
-         *
-         * @receiver The method to be analyzed for parameter indices and validated for its eligibility as a global exception handler.
-         * @param adviceInstance An instance of the advice that contains the exception handler method.
-         * @param commandSenderClass The class type representing the command sender in the context of the global exception handler.
-         * @return A `GlobalExceptionHandlerContext` containing metadata about the exception handler such as parameter indices.
-         * @throws VitalCommandException.InvalidGlobalExceptionHandlerMethodSignature If the method signature has unsupported parameter types.
+         * Internal function used to get the [GlobalExceptionHandlerContext] of the given method, [adviceInstance] (The global exception handler class) and [commandSenderClass].
+         * The context will later be used during command execution to call the appropriate global exception handler function.
          */
         @JvmStatic
         fun Method.getGlobalExceptionHandlerContext(
@@ -950,15 +893,8 @@ abstract class VitalCommand<CS : Any> protected constructor(
         }
 
         /**
-         * Constructs an array of parameters to be injected into a global exception handler method
-         * based on the specified indices in the provided context.
-         *
-         * @param context The context containing index mappings for injectable parameters.
-         * @param sender The command sender instance to be injected if applicable.
-         * @param executedArg The executed argument to be injected if applicable.
-         * @param commandArg The optional command argument to be injected if applicable.
-         * @param exception The exception thrown during command execution to be injected if applicable.
-         * @return An array of parameters to be injected into the global exception handler method.
+         * Internal function to correctly sort all injectable function parameters for a global exception handler and return them as an [Array],
+         * so they can later be used to call their appropriate mapped global exception handler function.
          */
         @JvmStatic
         fun GlobalExceptionHandlerContext.getInjectableGlobalExceptionHandlerMethodParameters(
@@ -979,50 +915,5 @@ abstract class VitalCommand<CS : Any> protected constructor(
                 .map { it.value }
                 .toTypedArray()
         }
-
-        /**
-         * Retrieves the VitalCommand.Info annotation associated with this class.
-         *
-         * @receiver the class of the VitalCommand instance for which the annotation is to be retrieved.
-         * @return the VitalCommand.Info annotation of this class
-         */
-        @JvmStatic
-        fun Class<out VitalCommand<*>>.getInfo(): Info = getRequiredAnnotation<Info>()
-
-        /**
-         * Retrieves the VitalCommand.Info annotation associated with this class.
-         *
-         * @receiver the class of the VitalCommand instance for which the annotation is to be retrieved.
-         * @return the VitalCommand.Info annotation of this class.
-         */
-        @JvmStatic
-        fun KClass<out VitalCommand<*>>.getInfo(): Info = java.getInfo()
-
-        /**
-         * Retrieves the VitalCommand.Info annotation associated with this instance.
-         *
-         * @receiver the VitalCommand instance for which the annotation is to be retrieved.
-         * @return the VitalCommand.Info annotation of this instance.
-         */
-        @JvmStatic
-        fun VitalCommand<*>.getInfo(): Info = javaClass.getInfo()
-
-        /**
-         * Retrieves the VitalCommand.Advice annotation associated with this class.
-         *
-         * @receiver the class for which the annotation is to be retrieved.
-         * @return the VitalCommand.Advice annotation of this class.
-         */
-        @JvmStatic
-        fun Class<*>.getVitalCommandAdvice(): Advice = getRequiredAnnotation<Advice>()
-
-        /**
-         * Retrieves the VitalCommand.Advice annotation associated with this class.
-         *
-         * @receiver the class for which the annotation is to be retrieved.
-         * @return the VitalCommand.Advice annotation of this class.
-         */
-        @JvmStatic
-        fun KClass<*>.getVitalCommandAdvice(): Advice = java.getVitalCommandAdvice()
     }
 }

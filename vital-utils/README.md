@@ -1,4 +1,4 @@
 # vital-utils
 
-This submodule can be used to include Vital's utilities.  
-It can also be used outside Vital plugins, and contains utilities, which are used to reduce code-duplication and improve readability.
+This module can be used to add Vital's utilities to your plugin.  
+It can also be used outside a Vital plugin, and contains utilities, which are used to reduce code-duplication and improve readability.

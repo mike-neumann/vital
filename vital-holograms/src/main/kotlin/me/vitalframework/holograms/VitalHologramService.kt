@@ -11,14 +11,16 @@ import org.bukkit.inventory.ItemStack
 import java.util.UUID
 
 /**
- * Service class to create and delete instances of [VitalHologram].
+ * Global service to create and delete holograms.
+ * Every created hologram will be stored globally in [VitalHologramRepository].
  */
 class VitalHologramService(
     private val plugin: SpigotPlugin,
-    private val vitalPerPlayerHologramProviders: List<VitalHologramProvider<VitalPerPlayerHologram>>,
+    private val vitalHologramRepository: VitalHologramRepository,
 ) {
     /**
      * Creates a hologram at the given [location] which displays all given [lines] that is visible to all players on the server.
+     * The created hologram is stored in [VitalHologramRepository].
      */
     fun createGlobalHologram(
         lines: List<VitalHologram.Line>,
@@ -31,11 +33,14 @@ class VitalHologramService(
                 it.isMarker = true
             }
         val lineArmorStandUniqueIds = lines.createArmorStands(location).map { it.uniqueId }
-        return VitalGlobalHologram(UUID.randomUUID(), lines, location, armorStand.uniqueId, lineArmorStandUniqueIds)
+        return vitalHologramRepository.save(
+            VitalGlobalHologram(UUID.randomUUID(), lines, location, armorStand.uniqueId, lineArmorStandUniqueIds),
+        )
     }
 
     /**
      * Creates a hologram at the given [location] which displays the given [lines] that is visible to only the passed [player].
+     * The created hologram is stored in [VitalHologramRepository].
      */
     fun createPerPlayerHologram(
         player: SpigotPlayer,
@@ -64,7 +69,7 @@ class VitalHologramService(
             hideHologram(player, hologram)
         }
 
-        return hologram
+        return vitalHologramRepository.save(hologram)
     }
 
     /**
@@ -123,6 +128,7 @@ class VitalHologramService(
 
     /**
      * Deletes a hologram by the given [armorStandUniqueId] and [lineArmorStandUniqueIds].
+     * The hologram will also be deleted from [VitalHologramRepository].
      */
     fun deleteHologram(
         armorStandUniqueId: UUID,
@@ -140,13 +146,14 @@ class VitalHologramService(
 
     /**
      * Deletes the given [hologram].
+     * The hologram will also be deleted from [VitalHologramRepository].
      */
     fun deleteHologram(hologram: VitalHologram) {
         deleteHologram(hologram.armorStandUniqueId, hologram.lineArmorStandUniqueIds)
     }
 
     /**
-     * Utility extension-function to convert a list on content-lines to armor stands.
+     * Internal function; used to convert a list on content-lines to armor stands.
      * This function will spawn the armor stands and return them as a list.
      *
      * Additionally, an [action] can be performed for each spawned armor stand.
@@ -187,19 +194,14 @@ class VitalHologramService(
         }
 
     /**
-     * Hides all other [VitalPerPlayerHologram]'s for the given [player].
-     * This function uses [VitalHologramProvider] to provide all [VitalPerPlayerHologram]'s.
-     *
-     * By default, no providers are known. The consuming project will need to implement its own [VitalHologramProvider],
-     * since Vital doesn't know how the consuming project stores its holograms.
-     * Some may use vital-configs for that, while others may use a database.
+     * Hides all other known holograms that are registered in [VitalHologramRepository] and are not owned by the given [player].
+     * Note that this function will only work correctly, if all holograms are loaded into [VitalHologramRepository].
+     * If not, this function will fail to hide other holograms since Vital is not aware of their existence.
      */
     fun hideOtherPerPlayerHolograms(player: SpigotPlayer) {
-        for (provider in vitalPerPlayerHologramProviders) {
-            val otherHolograms = provider.provide().filter { it.playerUniqueId != player.uniqueId }
-            for (hologram in otherHolograms) {
-                hideHologram(player, hologram)
-            }
+        val holograms = vitalHologramRepository.findAll<VitalPerPlayerHologram>().filter { it.playerUniqueId != player.uniqueId }
+        for (hologram in holograms) {
+            hideHologram(player, hologram)
         }
     }
 }

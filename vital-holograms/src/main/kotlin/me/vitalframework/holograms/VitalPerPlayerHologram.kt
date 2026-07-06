@@ -5,8 +5,13 @@ import org.bukkit.Location
 import java.util.UUID
 
 /**
- * Represents a per-player implementation of [VitalHologram].
- * This hologram will only be visible to a single player when created using [VitalHologramService.createPerPlayerHologram].
+ * Global hologram used to display player-specific data on a hologram for the given player.
+ * Only the specified player will be able to see the created hologram when you create it using [VitalHologramService.createPerPlayerHologram].
+ *
+ * This hologram should be used if you want to display a hologram with unique content for each player.
+ * Use this hologram if you also want to display language specific text.
+ *
+ * If you want to create a hologram that is always the same for each player (no language specifics), use [VitalGlobalHologram].
  */
 class VitalPerPlayerHologram() : VitalHologram() {
     @VitalConfig.Property(UUID::class)

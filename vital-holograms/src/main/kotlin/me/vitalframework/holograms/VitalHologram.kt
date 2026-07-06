@@ -6,8 +6,8 @@ import org.bukkit.Material
 import java.util.UUID
 
 /**
- * Represents the basic structure of a hologram within the Vital framework.
- * Holograms can be created using [VitalHologramService].
+ * Base class for all holograms.
+ * Please use the correct implementation for your use case: [VitalGlobalHologram], [VitalPerPlayerHologram].
  */
 abstract class VitalHologram internal constructor() : VitalEntity<UUID> {
     override lateinit var id: UUID
@@ -16,9 +16,6 @@ abstract class VitalHologram internal constructor() : VitalEntity<UUID> {
     open lateinit var armorStandUniqueId: UUID
     open lateinit var lineArmorStandUniqueIds: List<UUID>
 
-    /**
-     * Defines a single line on a [VitalHologram].
-     */
     data class Line(
         val text: String? = null,
         val material: Material? = null,

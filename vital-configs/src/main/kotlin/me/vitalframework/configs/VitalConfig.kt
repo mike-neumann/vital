@@ -1,11 +1,14 @@
 package me.vitalframework.configs
 
-import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
-import me.vitalframework.VitalCoreSubModule.Companion.logger
+import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreModule.Companion.logger
+import me.vitalframework.VitalHasInfo
+import me.vitalframework.configs.processor.VitalPropertiesConfigProcessor
 import org.springframework.stereotype.Component
 import java.io.IOException
 import java.io.InputStream
 import java.lang.reflect.Field
+import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
@@ -41,24 +44,26 @@ import kotlin.reflect.KClass
  * }
  * ```
  */
-abstract class VitalConfig {
+abstract class VitalConfig : VitalHasInfo {
+    override val info = mutableMapOf(Info::class.java to javaClass.getRequiredAnnotation<Info>())
+
     val logger = logger()
-    val fileName: String
+
+    val file: Path
     val processor: Processor<*, Any>
 
     init {
-        val info = getInfo()
-
-        fileName = info.name
+        val info = getInfo(Info::class.java)
+        file = Path(info.name)
         processor =
             try {
                 info.processor.java
                     .getDeclaredConstructor()
                     .newInstance()
             } catch (e: Exception) {
-                throw VitalConfigException.CreateFileProcessor(info.name, info.processor.java, e)
+                throw VitalConfigException.CreateFileProcessor(file.name, info.processor.java, e)
             }
-        val file = Path(fileName)
+
         val inputStream =
             when {
                 file.exists() -> file.inputStream()
@@ -74,46 +79,28 @@ abstract class VitalConfig {
     }
 
     /**
-     * Saves the configuration to a file if specified.
-     *
-     * @param writeToFile Indicates whether the configuration should be written to a file. Defaults to `true`.
-     * When this parameter is `true`, the method attempts to save the configuration data to a file specified
-     * by the `fileName` property. If the file does not exist, it is created along with any necessary
-     * parent directories. The operation may throw exceptions if issues occur during file creation
-     * or data writing.
+     * Saves this config by writing its field values to the defined file in path [Info.name].
      */
-    @JvmOverloads
-    fun save(writeToFile: Boolean = true) {
-        try {
-            if (writeToFile) {
-                val file = Path(fileName)
-                // create the file if it does not exist
-                if (!file.exists()) {
-                    if (file.parent != null) file.parent.createDirectories()
+    fun save() {
+        // create the file if it does not exist
+        if (!file.exists()) {
+            if (file.parent != null) file.parent.createDirectories()
 
-                    try {
-                        file.createFile()
-                        logger.debug("${file.name} config file created")
-                    } catch (e: IOException) {
-                        throw VitalConfigException.CreateFile(file.name, e)
-                    }
-                }
-
-                file.writeText(processor.save(processor.serialize(this)))
+            try {
+                file.createFile()
+                logger.debug("${file.name} config file created")
+            } catch (e: IOException) {
+                throw VitalConfigException.CreateFile(file.name, e)
             }
-        } catch (e: Exception) {
-            throw VitalConfigException.Save(fileName, e)
         }
+
+        file.writeText(processor.save(processor.serialize(this)))
     }
 
     /**
-     * Loads configuration data from the provided input stream and injects the content into the fields of the current object.
-     *
-     * The method processes the provided input stream, using the class of the current object as a reference for mapping
-     * configuration properties. Fields annotated with the appropriate property annotations are injected with their corresponding
-     * values from the configuration content.
-     *
-     * @param inputStream The input stream containing configuration data to be loaded. Must not be null.
+     * Loads this config from the given [inputStream].
+     * This function will load the serialized content
+     * via the defined [Info.processor] and initialize this class's fields.
      */
     fun load(inputStream: InputStream) {
         val serializedContent = processor.load(inputStream, javaClass)
@@ -125,39 +112,9 @@ abstract class VitalConfig {
 
     companion object {
         /**
-         * Retrieves the VitalConfig.Info annotation associated with this class.
-         *
-         * @receiver the class for which the annotation is to be retrieved.
-         * @return the VitalConfig.Info annotation of this class.
-         */
-        @JvmStatic
-        fun Class<out VitalConfig>.getInfo(): Info = getRequiredAnnotation<Info>()
-
-        /**
-         * Retrieves the VitalConfig.Info annotation associated with this class.
-         *
-         * @receiver the class for which the annotation is to be retrieved.
-         * @return the VitalConfig.Info annotation of this class.
-         */
-        @JvmStatic
-        fun KClass<out VitalConfig>.getInfo(): Info = java.getInfo()
-
-        /**
-         * Retrieves the VitalConfig.Info annotation associated with this instance.
-         *
-         * @receiver the instance for which the annotation is to be retrieved.
-         * @return the VitalConfig.Info annotation of this instance.
-         */
-        @JvmStatic
-        fun VitalConfig.getInfo(): Info = javaClass.getInfo()
-
-        /**
-         * Reads the value of the given field from the provided accessor object.
-         *
-         * @param accessor The instance of the object from which the field value is to be read.
-         * @param field The field to be accessed and read.
-         * @return The value of the field, or null if the field is not set or accessible.
-         * @throws VitalConfigException.ReadField If an exception occurs while attempting to read the field.
+         * Reads the given [field] using the given [accessor].
+         * This function bypasses any modifier to directly access the field's value.
+         * If this fails for any reason, [VitalConfigException.ReadField] is thrown.
          */
         @JvmStatic
         fun readField(
@@ -172,14 +129,9 @@ abstract class VitalConfig {
             }
 
         /**
-         * Injects a value into the specified field of the given object.
-         * The method forcibly sets the field accessible, even if it is private,
-         * to allow value injection. If an error occurs, a `VitalConfigException.InjectField` is thrown.
-         *
-         * @param accessor The object containing the field to inject into.
-         * @param field The field that will be injected with the given value.
-         * @param value The value to inject into the specified field.
-         * @throws VitalConfigException.InjectField if the injection fails.
+         * Injects the given [value] into the [field] for the given [accessor].
+         * This function bypasses any modifier to directly access and write to the given [field].
+         * If the injection fails for any reason, [VitalConfigException.InjectField] is thrown.
          */
         @JvmStatic
         fun injectField(
@@ -196,63 +148,37 @@ abstract class VitalConfig {
         }
 
         /**
-         * Retrieves all fields from the specified class that are annotated with the [Property] annotation.
-         *
-         * @receiver The class from which the annotated fields should be retrieved.
-         * @return A list of fields that are annotated with the [Property] annotation.
+         * Gets all property fields from the given class that are annotated via [Property].
          */
         @JvmStatic
         fun Class<*>.getPropertyFieldsFromType() = declaredFields.filter { it.isAnnotationPresent(Property::class.java) }
 
         /**
-         * Retrieves all fields from the specified class that are annotated with the [Property] annotation.
-         *
-         * @receiver The class from which the annotated fields should be retrieved.
-         * @return A list of fields that are annotated with the [Property] annotation.
+         * Gets all property fields from the given class that are annotated via [Property].
          */
         @JvmStatic
         fun KClass<*>.getPropertyFieldsFromType() = java.getPropertyFieldsFromType()
 
         /**
-         * Filters and retrieves the declared fields of a class that are not annotated with the `@Property` annotation.
-         *
-         * This function examines all fields declared in the specified class and excludes any fields
-         * annotated with the `@Property` annotation. It returns a list of fields that do not have this annotation.
-         *
-         * @receiver The `Class` object of the type from which the non-property fields are to be retrieved.
+         * Gets all non-property fields from the given class that are not annotated via [Property].
          */
         @JvmStatic
         fun Class<*>.getNonPropertyFieldsFromType() = declaredFields.filter { !it.isAnnotationPresent(Property::class.java) }
 
         /**
-         * Filters and retrieves the declared fields of a class that are not annotated with the `@Property` annotation.
-         *
-         * This function examines all fields declared in the specified class and excludes any fields
-         * annotated with the `@Property` annotation. It returns a list of fields that do not have this annotation.
-         *
-         * @receiver The `Class` object of the type from which the non-property fields are to be retrieved.
+         * Gets all non-property fields from the given class that are not annotated via [Property].
          */
         @JvmStatic
         fun KClass<*>.getNonPropertyFieldsFromType() = java.getNonPropertyFieldsFromType()
 
         /**
-         * Retrieves the first field from a class that matches the specified property name.
-         * Searches through the fields filtered by a custom criterion defined in `getPropertyFieldsFromType`.
-         *
-         * @receiver The target class from which fields are to be retrieved.
-         * @param property The name of the property to match against field names.
-         * @return The first matching field if found, or null otherwise.
+         * Gets the [Field] for the given [property] and class.
          */
         @JvmStatic
         fun Class<*>.getFieldByProperty(property: String) = getPropertyFieldsFromType().firstOrNull { it.name == property }
 
         /**
-         * Retrieves the first field from a class that matches the specified property name.
-         * Searches through the fields filtered by a custom criterion defined in `getPropertyFieldsFromType`.
-         *
-         * @receiver The target class from which fields are to be retrieved.
-         * @param property The name of the property to match against field names.
-         * @return The first matching field if found, or null otherwise.
+         * Gets the [Field] for the given [property] and class.
          */
         @JvmStatic
         fun KClass<*>.getFieldByProperty(property: String) = java.getFieldByProperty(property)
@@ -270,18 +196,8 @@ abstract class VitalConfig {
     )
 
     /**
-     * Annotation used to mark fields within a configuration class as properties.
-     *
-     * The `types` parameter allows specifying one or more `KClass` types that are
-     * supported for the annotated field. These types may be used to define
-     * compatible data formats, enforce type safety, or enable type-based processing
-     * of the annotated fields.
-     *
-     * This annotation is retained at runtime and is targetable at fields. It can
-     * be used in frameworks or libraries that need to introspect configuration
-     * data and perform field injections or validations dynamically.
-     *
-     * @property types The array of supported Kotlin class types for the annotated field.
+     * This annotation marks a [Field] as a property that can automatically be injected by a [VitalConfig].
+     * Use this annotation inside a [VitalConfig] implementer or any other class than is used as a value in a [VitalConfig] implementer.
      */
     @Target(AnnotationTarget.FIELD)
     @Retention(AnnotationRetention.RUNTIME)
@@ -290,32 +206,18 @@ abstract class VitalConfig {
     )
 
     /**
-     * Represents a generic processor interface for managing serialized and deserialized data.
-     * It provides methods for loading, reading, writing, saving, serializing, and deserializing objects and data.
-     *
-     * The interface is parameterized with a source type `S` and a target type `T`, enabling flexible implementations
-     * that can work with various data formats and types.
+     * Defines a processor that can serialize and deserialize content for a [VitalConfig].
+     * Implementation classes should be used in [Info.processor].
      */
     interface Processor<S, out T> {
         /**
-         * Represents the core data object used within the `Processor` class. This variable
-         * is used to store and process generic serialized or deserialized content.
-         *
-         * The type `S` is determined by the `Processor` implementation and can be customized
-         * as per the needs of specific use cases. The data stored might represent configuration
-         * settings, serialized objects, or intermediate processing state.
+         * The data object this serialize will use to serialize the content.
+         * E.g., [java.util.Properties] for a processor that can write and load `.properties` configs.
          */
         val data: S
 
         /**
-         * Loads and deserializes data from the provided input stream into a map representation,
-         * where the keys are property names and the values represent their corresponding serialized objects.
-         *
-         * @param inputStream The input stream from which the data will be loaded. Must not be null.
-         * @param clazz The class type to which the data should be mapped. This specifies the schema or structure
-         *              expected for the deserialized elements.
-         * @return A map containing key-value pairs, where keys are strings representing property or field names,
-         *         and values are the deserialized objects of the specified type.
+         * Loads the given [inputStream] into the [data] of this config and returns a [Map] of all properties to value mappings.
          */
         fun load(
             inputStream: InputStream,
@@ -323,21 +225,13 @@ abstract class VitalConfig {
         ): Map<String, T>
 
         /**
-         * Retrieves the value associated with the provided key from the processor's internal storage.
-         *
-         * @param key The unique identifier used to retrieve the associated value. Must not be null.
-         * @return The value of type `T` associated with the key, or null if the key is not found.
+         * Reads a single value for the given [key] from the [data] of this config.
          */
         fun read(key: String): T?
 
         /**
-         * Reads a value associated with a given key from the processor's internal storage.
-         * If the key does not exist, the specified default value will be returned.
-         *
-         * @param key The unique identifier for the value to be retrieved.
-         * @param def The default value to return if the key is not found in the storage.
-         * @return The value associated with the specified key, or the default value if the key is not found.
-         * Returns null if no value exists and no default is provided.
+         * Reads a single value for the given [key] from the [data] of this config.
+         * If no value was found, this function will return the given [def].
          */
         fun read(
             key: String,
@@ -345,26 +239,18 @@ abstract class VitalConfig {
         ): T?
 
         /**
-         * Writes the provided serialized content.
-         *
-         * @param serializedContent a map containing the serialized content to be written,
-         * where the keys are strings and the values are potentially variant of type T
+         * Writes the given [serializedContent] to the file of this config.
          */
         fun write(serializedContent: Map<String, @UnsafeVariance T>)
 
         /**
-         * Writes the provided instance into the processor's underlying configuration or serialized storage.
-         *
-         * @param instance The instance to be serialized and written. This object holds the data
-         *                 that should be saved or persisted by the processor.
+         * Writes the given [instance] to the file of this config.
+         * E.g., the [VitalPropertiesConfigProcessor] first serialized its content via [serialize] and then calls [write] with it.
          */
         fun write(instance: Any)
 
         /**
-         * Writes a value associated with a given key to the processor's internal storage mechanism.
-         *
-         * @param key The unique identifier used to associate the value in the storage.
-         * @param value The value to be written, where the type may vary depending on the processor implementation.
+         * Writes the given [value] to the property with the given [key] to the [data] of this config.
          */
         fun write(
             key: String,
@@ -372,32 +258,17 @@ abstract class VitalConfig {
         )
 
         /**
-         * Saves the provided serialized content and returns the file name where the data was saved.
-         *
-         * @param serializedContent The map containing serialized key-value pairs to be saved. Each key is a string,
-         * and each value is of type `T`, which may be subject to unsafe variance. Must not be null.
-         * @return The name of the file where the serialized content has been saved. This is typically derived
-         * from the configuration's predefined file name or path.
+         * Saves the given [serializedContent] to the [data] of this config.
          */
         fun save(serializedContent: Map<String, @UnsafeVariance T>): String
 
         /**
-         * Serializes the given instance into a map representation where the keys are property names
-         * and the values are their corresponding serialized values.
-         *
-         * @param instance The object instance to serialize. Must not be null.
-         * @return A map containing the serialized key-value pairs representing the object's properties.
+         * Serializes the content of the given [instance] to a [Map] where each entry is the name and value for each [Field] of the given [instance].
          */
         fun serialize(instance: Any): Map<String, T>
 
         /**
-         * Deserializes a given map of serialized data into an instance of the specified type.
-         *
-         * @param serializedContent The map containing serialized data where keys represent property names
-         *                          and values represent their respective serialized values.
-         * @param type The target class type to which the serialized content will be deserialized.
-         * @return An instance of the specified type populated with data from the serialized content,
-         *         or null if deserialization fails.
+         * Deserializes the given [serializedContent] to the given [type] returns an initialized instance of it.
          */
         fun deserialize(
             serializedContent: Map<String, @UnsafeVariance T>,

@@ -1,11 +1,9 @@
 package me.vitalframework.inventories
 
 import me.vitalframework.SpigotPlayer
-import me.vitalframework.VitalCoreSubModule.Companion.getRequiredAnnotation
-import org.jetbrains.annotations.Range
+import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
 import java.util.UUID
 import kotlin.math.ceil
-import kotlin.reflect.KClass
 
 /**
  * Defines a pageable inventory menu within the Vital-Framework.
@@ -28,45 +26,34 @@ import kotlin.reflect.KClass
  * ```
  */
 abstract class VitalPagedInventory : VitalInventory() {
-    private val _pages = mutableMapOf<UUID, Int>()
+    private val pages = mutableMapOf<UUID, Int>()
+    private val maxPages = mutableMapOf<UUID, Int>()
+
+    init {
+        info[Info::class.java] = javaClass.getRequiredAnnotation<Info>()
+    }
 
     /**
-     * All [SpigotPlayer]s as their [UUID] and their current page.
-     * If no [SpigotPlayer]s have this inventory open, the map will be empty.
+     * Gets the page content amount of this inventory defined by ([Info.fromSlot] + 1) - [Info.toSlot].
      */
-    val pages: Map<UUID, Int>
-        get() = _pages
-
-    private val _maxPages = mutableMapOf<UUID, Int>()
-
-    /**
-     * All [SpigotPlayer]s as their [UUID] and their max page.
-     * If no [SpigotPlayer]s have this inventory open, the map will be empty.
-     */
-    val maxPages: Map<UUID, Int>
-        get() = _maxPages
+    fun getPageContentAmount(): Int {
+        val info = getInfo(Info::class.java)
+        return (info.fromSlot + 1) - info.fromSlot
+    }
 
     /**
-     * The slot from which the "paged content", so content that will change depending on the page the inventors is on.
+     * Gets the current page of the given [playerUniqueId].
+     * This function will always at minimum return 1,
+     * even if the given player does not have this inventory open.
      */
-    val fromSlot
-        get() = getInfo().fromSlot
+    fun getPage(playerUniqueId: UUID) = pages[playerUniqueId] ?: 1
 
     /**
-     * The slot to which the "paged content" goes, so content
+     * Gets the current max page of the given [playerUniqueId].
+     * This function will always at minimum return 1,
+     * even if the given player does not have this inventory open.
      */
-    val toSlot
-        get() = getInfo().toSlot
-
-    /**
-     * Represents the amount of content present on the current page.
-     *
-     * The value is calculated as the difference between `toSlot` and `fromSlot`, inclusively.
-     * This ensures that the calculation accounts for the content range, where `toSlot` is the
-     * last slot that contains content, and `fromSlot` is the first slot that contains content.
-     */
-    val pageContentAmount
-        get() = (toSlot + 1) - fromSlot
+    fun getMaxPage(playerUniqueId: UUID) = maxPages[playerUniqueId] ?: 1
 
     /**
      * Updates the maximum number of pages based on the total amount of content.
@@ -77,23 +64,27 @@ abstract class VitalPagedInventory : VitalInventory() {
         playerUniqueId: UUID,
         totalContent: Int,
     ) {
-        _maxPages[playerUniqueId] = ceil((totalContent.toDouble() / pageContentAmount.toDouble())).toInt()
+        maxPages[playerUniqueId] = ceil((totalContent.toDouble() / getPageContentAmount().toDouble())).toInt().coerceAtLeast(1)
     }
 
     /**
-     * Sets the current page for the specified player, updating the maximum page count if total content is provided.
+     * Sets the given [page] for the given [player].
+     * Additionally [totalContent] can be defined to automatically calculate the [maxPages] for the given [player].
      *
-     * @param page The desired page number to set. If the number is out of range, it will be clamped between 1 and the maximum page.
-     * @param player The player for whom the page should be set.
-     * @param totalContent The total amount of content used to update the maximum page. If null, the maximum page remains unchanged.
+     * This function will clear all slots defined by [Info.fromSlot] until [Info.toSlot].
+     *
+     * The [page] will always be at minimum `1`, even when a value lower than that has been provided.
+     *
+     * Finally, the [onPageChange] lifecycle function is called for the given [player].
      */
     fun setPage(
         page: Int,
         player: SpigotPlayer,
         totalContent: Int? = null,
     ) {
+        val info = getInfo(Info::class.java)
         // Clear old slots.
-        for (slot in fromSlot..toSlot) {
+        for (slot in info.fromSlot..info.toSlot) {
             setItem(player, slot, null)
         }
 
@@ -101,51 +92,56 @@ abstract class VitalPagedInventory : VitalInventory() {
             updateMaxPage(player.uniqueId, totalContent)
         }
 
+        val maxPage = getMaxPage(player.uniqueId)
         val newPage =
             if (page <= 0) {
                 1
-            } else if (page >= (_maxPages[player.uniqueId] ?: 0)) {
-                _maxPages[player.uniqueId] ?: 0
+            } else if (page >= maxPage) {
+                maxPage
             } else {
                 page
             }
-        _pages[player.uniqueId] = newPage
+        pages[player.uniqueId] = newPage
         onPageChange(newPage, player)
         super.update(player)
     }
 
     /**
-     * Slices a given list to retrieve a subset of elements representing the current page
-     * for the specified player based on the player's page state.
+     * Slices the given [list] to match the [getPageContentAmount] for the current page of the given [player].
      *
-     * @param player the player whose page context is used to determine the slice of the list
-     * @param list the original list of elements to be paginated
-     * @return a sublist containing the elements for the player's current page, or an empty list if the
-     *         indices exceed the bounds of the original list
+     * E.g., if this inventory is configured to have pageable content from slot 0 to 10, [getPageContentAmount] will return `11`.
+     * When now passing a [list] of length `20`, this function will return the [list] containing elements from index `0` to `10`.
+     * If the given [player] is on page `2`, this function will return the [list] containing elements from index `11` to `19`.
      */
     protected fun <T> sliceForPage(
         player: SpigotPlayer,
         list: List<T>,
     ): List<Pair<Int, T>> {
-        val startIndex = (pageContentAmount * ((_pages[player.uniqueId] ?: 1) - 1))
-        val endIndex = startIndex + pageContentAmount
-        if (startIndex >= list.size || startIndex < 0) return mutableListOf()
-        if (endIndex >= list.size) return (fromSlot..toSlot).zip(list.subList(startIndex, list.size))
-        return (fromSlot..toSlot).zip(list.subList(startIndex, endIndex))
+        val startIndex = (getPageContentAmount() * (getPage(player.uniqueId) - 1))
+        val endIndex = startIndex + getPageContentAmount()
+        if (startIndex >= list.size || startIndex < 0) {
+            return mutableListOf()
+        }
+
+        val info = getInfo(Info::class.java)
+        if (endIndex >= list.size) {
+            return (info.fromSlot..info.toSlot).zip(list.subList(startIndex, list.size))
+        }
+
+        return (info.fromSlot..info.toSlot).zip(list.subList(startIndex, endIndex))
     }
 
     final override fun close(player: SpigotPlayer) {
         super.close(player)
-        _pages.remove(player.uniqueId)
+        pages.remove(player.uniqueId)
     }
 
     /**
-     * Opens the inventory for the specified player and optionally retains a reference
-     * to the previous inventory state. This implementation also sets the initial page
-     * to page 1 for the player.
+     * Opens this inventory for the given [player].
+     * Optionally, a [previousInventory] can be passed to make back-traversal possible.
      *
-     * @param player The player for whom the inventory is being opened.
-     * @param previousInventory The player's previous inventory, or null if there is no prior inventory.
+     * When the given [player] clicks outside the current inventory view, he is navigated back to the given [previousInventory].
+     * Additionally, this function will set the page for the given [player] to page `1` via [setPage].
      */
     final override fun open(
         player: SpigotPlayer,
@@ -156,13 +152,13 @@ abstract class VitalPagedInventory : VitalInventory() {
     }
 
     /**
-     * Opens the inventory for the specified player with support for pagination and an optional reference to the previous inventory.
-     * This implementation allows specifying an initial page and the total content to calculate the maximum number of pages.
+     * Opens this inventory for the given [player].
+     * Optionally, a [previousInventory] can be passed to make back-traversal possible.
      *
-     * @param player The player for whom the inventory is being opened.
-     * @param previousInventory The player's previous inventory, or null if there is no prior inventory.
-     * @param page The initial page to be opened. Defaults to 1 if not specified.
-     * @param totalContent The total number of content items, used to determine the maximum page. If null, the maximum page remains unchanged.
+     * When the given [player] clicks outside the current inventory view, he is navigated back to the given [previousInventory].
+     * Additionally, this function will set the page for the given [player] to page `1` via [setPage].
+     *
+     * This function can also accept [totalContent] to automatically calculate the [maxPages] for the given [player].
      */
     fun open(
         player: SpigotPlayer,
@@ -175,46 +171,21 @@ abstract class VitalPagedInventory : VitalInventory() {
     }
 
     /**
-     * Updates the inventory for a specific player, ensuring their current page is set.
-     * Overrides the base implementation to handle page-specific logic.
-     *
-     * @param player The player for whom the inventory update is performed.
+     * Updates this inventory for the given [player] and additionally calls the [onPageChange] lifecycle.
      */
     final override fun update(player: SpigotPlayer) {
         super.update(player)
-        setPage(_pages[player.uniqueId] ?: 1, player)
+        setPage(getPage(player.uniqueId), player)
     }
 
     /**
-     * Invoked whenever a page change occurs for a specific player in the inventory system.
-     *
-     * @param page The new page number that the player has navigated to.
-     * @param player The player for whom the page change has occurred.
+     * Lifecycle function; called when the given [page] is updated for the given [player].
+     * Override this function to set items that are supposed to change between multiple pages.
      */
     protected open fun onPageChange(
         page: Int,
         player: SpigotPlayer,
     ) {
-    }
-
-    companion object {
-        /**
-         * Retrieves the VitalPagedInventory.Info annotation associated with this class.
-         */
-        @JvmStatic
-        fun Class<out VitalPagedInventory>.getInfo(): Info = getRequiredAnnotation<Info>()
-
-        /**
-         * Retrieves the VitalPagedInventory.Info annotation associated with this class.
-         */
-        @JvmStatic
-        fun KClass<out VitalPagedInventory>.getInfo(): Info = java.getInfo()
-
-        /**
-         * Retrieves the VitalPagedInventory.Info annotation associated with this instance.
-         */
-        @JvmStatic
-        fun VitalPagedInventory.getInfo(): Info = javaClass.getInfo()
     }
 
     /**
@@ -224,11 +195,7 @@ abstract class VitalPagedInventory : VitalInventory() {
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(
-        val fromSlot:
-            @Range(from = 0, to = 9)
-            Int = 0,
-        val toSlot:
-            @Range(from = 0, to = 9)
-            Int = 0,
+        val fromSlot: Int = 0,
+        val toSlot: Int = 0,
     )
 }

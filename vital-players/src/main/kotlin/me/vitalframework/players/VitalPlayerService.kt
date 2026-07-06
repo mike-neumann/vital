@@ -3,9 +3,8 @@ package me.vitalframework.players
 import java.util.UUID
 
 /**
- * The global custom player instance manager which can be used to create instances of custom [VitalPlayer] implementations.
- * This service should only rarely be of use to implementing plugins.
- * It is only used internally in Vital.
+ * Internal class; used to create and destroy custom instances of [VitalPlayer]
+ * that are configured via `vital.players.player-class-name`.
  */
 class VitalPlayerService(
     private val vitalPlayerRepository: VitalPlayerRepository,
