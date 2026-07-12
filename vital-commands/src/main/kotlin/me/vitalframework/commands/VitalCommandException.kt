@@ -4,7 +4,7 @@ import java.lang.reflect.Method
 import java.lang.reflect.Parameter
 
 /**
- * Internal exception used by [VitalCommand].
+ * Internal exception; thrown during [VitalCommand] lifecycles.
  */
 abstract class VitalCommandException(
     message: String,

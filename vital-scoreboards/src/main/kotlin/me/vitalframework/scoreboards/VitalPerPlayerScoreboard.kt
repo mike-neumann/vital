@@ -56,10 +56,18 @@ class VitalPerPlayerScoreboard(
      * Adds the given [player] to this scoreboard.
      * If the given [player] is already in this scoreboard, this function will override that scoreboard.
      */
-    fun addPlayer(player: SpigotPlayer) {
+    @JvmOverloads
+    fun addPlayer(
+        player: SpigotPlayer,
+        update: Boolean = true,
+    ) {
         _scoreboards[player.uniqueId] =
             VitalScoreboard().apply {
-                this.addPlayer(player, title(player), lines.map { it(player) })
+                this.addPlayer(
+                    player,
+                    if (update) ({ title(player) }) else null,
+                    if (update) ({ lines.map { it(player) } }) else null,
+                )
             }
     }
 
@@ -67,9 +75,17 @@ class VitalPerPlayerScoreboard(
      * Removes the given [player] from this scoreboard.
      * If the given [player] is not in this scoreboard, this function does nothing.
      */
-    fun removePlayer(player: SpigotPlayer) {
+    @JvmOverloads
+    fun removePlayer(
+        player: SpigotPlayer,
+        update: Boolean = true,
+    ) {
         val scoreboard = _scoreboards[player.uniqueId] ?: return
-        scoreboard.removePlayer(player, title(player), lines.map { it(player) })
+        scoreboard.removePlayer(
+            player,
+            if (update) ({ title(player) }) else null,
+            if (update) ({ lines.map { it(player) } }) else null,
+        )
     }
 
     /**
@@ -89,6 +105,6 @@ class VitalPerPlayerScoreboard(
      */
     fun update(player: SpigotPlayer) {
         val scoreboard = _scoreboards[player.uniqueId] ?: return
-        scoreboard.update(title(player), lines.map { it(player) })
+        scoreboard.update({ title(player) }) { lines.map { it(player) } }
     }
 }

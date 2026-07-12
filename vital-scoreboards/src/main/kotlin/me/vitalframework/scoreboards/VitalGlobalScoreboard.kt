@@ -23,12 +23,12 @@ class VitalGlobalScoreboard(
     var title = title
         set(value) {
             field = value
-            update(value(), lines.map { it() })
+            update(value) { lines.map { it() } }
         }
 
     var lines = lines
         set(value) {
             field = value
-            update(title(), value.map { it() })
+            update(title) { value.map { it() } }
         }
 }

@@ -1,6 +1,7 @@
 package me.vitalframework.minigames
 
 import me.vitalframework.SpigotPlugin
+import me.vitalframework.VitalCoreModule.Companion.logger
 import net.kyori.adventure.util.TriState
 import org.bukkit.Bukkit
 import org.bukkit.World
@@ -20,6 +21,8 @@ open class VitalMinigameInstanceService(
     private val vitalMinigameInstanceRepository: VitalMinigameInstanceRepository,
     private val plugin: SpigotPlugin,
 ) {
+    private val logger = logger()
+
     /**
      * Loads a new instance world by the given [templateWorldName].
      * This function will copy all world files from the [templateWorldName] to a new world that can be used for a new [VitalMinigameInstance], e.g. "[VitalMinigameInstance.id]_[templateWorldName]",
@@ -31,6 +34,10 @@ open class VitalMinigameInstanceService(
         templateWorldName: String,
         action: (World?) -> Unit = {},
     ) {
+        if (!plugin.isEnabled) {
+            throw VitalMinigameInstanceException.LoadTemplateWorldPluginDisabled(templateWorldName, plugin.name)
+        }
+
         Bukkit.getScheduler().runTaskAsynchronously(
             plugin,
             Runnable {
@@ -42,12 +49,9 @@ open class VitalMinigameInstanceService(
 
                 val instanceId = UUID.randomUUID()
                 val instanceWorldFile = templateWorldFile.copyTo(Bukkit.getWorldContainer().resolve("${templateWorldName}_$instanceId"))
-
                 val templateWorld = Bukkit.getWorld(templateWorldName)!!
-                // Finally actually load the world.
-                Bukkit.getScheduler().runTask(
-                    plugin,
-                    Runnable {
+                val task = {
+                    try {
                         action(
                             Bukkit.createWorld(
                                 WorldCreator(instanceWorldFile.name)
@@ -56,8 +60,26 @@ open class VitalMinigameInstanceService(
                                     .generateStructures(false),
                             ),
                         )
-                    },
-                )
+                    } catch (e: Exception) {
+                        throw VitalMinigameInstanceException.ExecuteLoadTemplateWorldAction(templateWorldName, plugin.name, e)
+                    }
+                }
+                if (plugin.isEnabled) {
+                    // Finally actually load the world.
+                    Bukkit.getScheduler().runTask(plugin, task)
+                } else {
+                    logger.warn(
+                        "Plugin is disabled, cannot schedule task for loading template world '{}' for instance with id '{}', attempting to run task directly.",
+                        templateWorldName,
+                        instanceId,
+                    )
+                    task()
+                    logger.info(
+                        "Direct invocation of task for loading template world '{}' for instance with id '{}' successful.",
+                        templateWorldName,
+                        instanceId,
+                    )
+                }
             },
         )
     }
@@ -75,21 +97,40 @@ open class VitalMinigameInstanceService(
     /**
      * Registers a new game instance on this service.
      * An instance may perform custom logic during registration via [VitalMinigameInstance.onRegister].
-     * Additionally, an [action] function can be provided to perform an action right after instance registration, but before [VitalMinigameInstance.onRegister] is called.
+     * Additionally, an [afterRegisterAction] function can be provided to perform an action right after instance registration, but before [VitalMinigameInstance.onRegister] is called.
      *
      * Fails if an instance with the same id as [instance] already exists.
      */
     @JvmOverloads
     fun <T : VitalMinigameInstance> registerInstance(
         instance: T,
-        action: (T) -> Unit = {},
+        afterRegisterAction: (T) -> Unit = {},
     ) {
         if (vitalMinigameInstanceRepository.existsById(instance.id)) {
             throw IllegalStateException()
         }
 
+        // Write to a marker-file so Vital can identify leftover instance worlds on restart.
+        val markerFile = Bukkit.getWorldContainer().resolve(instance.world.name).resolve(VitalMinigameInstance.MARKER)
+        if (!markerFile.exists()) {
+            try {
+                val isFileCreated = markerFile.createNewFile()
+                if (!isFileCreated) {
+                    throw VitalMinigameInstanceException.CreateMarker(instance.world.name, instance.id)
+                }
+            } catch (e: Exception) {
+                throw VitalMinigameInstanceException.CreateMarker(instance.world.name, instance.id, e)
+            }
+        }
+
         vitalMinigameInstanceRepository.save(instance)
-        action(instance)
+
+        try {
+            afterRegisterAction(instance)
+        } catch (e: Exception) {
+            throw VitalMinigameInstanceException.ExecuteAfterRegisterAction(instance.world.name, instance.id, e)
+        }
+
         instance.register()
     }
 
@@ -126,8 +167,7 @@ open class VitalMinigameInstanceService(
         }
 
         val instance = vitalMinigameInstanceRepository.findById(type, id)!!
-        beforeDeleteAction(instance)
-        unregisterInstance(instance)
+        unregisterInstance(instance, beforeDeleteAction, afterDeleteAction)
     }
 
     /**
@@ -143,17 +183,30 @@ open class VitalMinigameInstanceService(
         afterDeleteAction: (T) -> Unit = {},
     ) {
         vitalMinigameInstanceRepository.delete(instance)
-        beforeDeleteAction(instance)
+
+        try {
+            beforeDeleteAction(instance)
+        } catch (e: Exception) {
+            throw VitalMinigameInstanceException.ExecuteBeforeDeleteAction(instance.world.name, instance.id, e)
+        }
+
         instance.unregister()
 
-        Bukkit.unloadWorld(instance.world, false)
-        Bukkit.getScheduler().runTaskAsynchronously(
-            plugin,
-            Runnable {
-                Bukkit.getWorldContainer().resolve(instance.world.name).deleteRecursively()
-                afterDeleteAction(instance)
-            },
-        )
+        val isWorldUnloaded = Bukkit.unloadWorld(instance.world, false)
+        if (!isWorldUnloaded) {
+            throw VitalMinigameInstanceException.UnloadWorld(instance.world.name, instance.id)
+        }
+
+        val isDeleted = Bukkit.getWorldContainer().resolve(instance.world.name).deleteRecursively()
+        if (!isDeleted) {
+            throw VitalMinigameInstanceException.Delete(instance.world.name, instance.id)
+        }
+
+        try {
+            afterDeleteAction(instance)
+        } catch (e: Exception) {
+            throw VitalMinigameInstanceException.ExecuteAfterDeleteAction(instance.world.name, instance.id, e)
+        }
     }
 
     /**

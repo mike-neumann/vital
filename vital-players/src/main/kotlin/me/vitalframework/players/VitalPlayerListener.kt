@@ -29,16 +29,17 @@ interface VitalPlayerListener {
         player: T,
         playerUniqueId: UUID,
         playerClass: Class<T>,
-    ) = try {
-        vitalPlayerService.createPlayer(
-            player,
-            playerUniqueId,
-            playerClass,
-            vitalPlayersConfigurationProperties.playerClass,
-        )
-    } catch (e: ClassCastException) {
-        throw VitalPlayerException.InvalidClass(vitalPlayersConfigurationProperties.playerClass, e)
-    }
+    ): VitalPlayer<*> =
+        try {
+            vitalPlayerService.createPlayer(
+                player,
+                playerUniqueId,
+                playerClass,
+                vitalPlayersConfigurationProperties.playerClass,
+            )
+        } catch (e: ClassCastException) {
+            throw VitalPlayerException.InvalidClass(vitalPlayersConfigurationProperties.playerClass, e)
+        }
 
     /**
      * Destroys the [VitalPlayer] instance of the given [playerUniqueId].

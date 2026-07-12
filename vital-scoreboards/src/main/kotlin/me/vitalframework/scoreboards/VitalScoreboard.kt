@@ -23,59 +23,68 @@ open class VitalScoreboard : VitalEntity<UUID> {
      * Updates this scoreboard with the given [title] and [lines].
      */
     fun update(
-        title: String,
-        lines: List<String>,
+        _title: () -> String,
+        _lines: () -> List<String>,
     ): Objective {
-        for (objective in bukkitScoreboard.objectives) {
-            objective.unregister()
-        }
+        try {
+            val title = _title()
+            val lines = _lines()
 
-        val objective =
-            bukkitScoreboard.getObjective(
-                PlainTextComponentSerializer
-                    .plainText()
-                    .serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
-            ) ?: bukkitScoreboard.registerNewObjective(
-                PlainTextComponentSerializer
-                    .plainText()
-                    .serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
-                Criteria.DUMMY,
-                MiniMessage.miniMessage().deserialize(title),
-            )
+            for (objective in bukkitScoreboard.objectives) {
+                objective.unregister()
+            }
 
-        objective.displaySlot = DisplaySlot.SIDEBAR
-        objective.displayName(MiniMessage.miniMessage().deserialize(title))
-
-        // Reset scores for existing entries
-        for (entry in bukkitScoreboard.entries) {
-            bukkitScoreboard.resetScores(entry)
-        }
-
-        // Update each line.
-        for (lineIndex in lines.indices) {
-            val score =
-                objective.getScore(
-                    LegacyComponentSerializer
-                        .legacySection()
-                        .serialize(
-                            MiniMessage.miniMessage().deserialize(lines[lineIndex]),
-                        ) + "\u00A7".repeat(lineIndex),
+            val objective =
+                bukkitScoreboard.getObjective(
+                    PlainTextComponentSerializer
+                        .plainText()
+                        .serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
+                ) ?: bukkitScoreboard.registerNewObjective(
+                    PlainTextComponentSerializer
+                        .plainText()
+                        .serialize(LegacyComponentSerializer.legacySection().deserialize(title)),
+                    Criteria.DUMMY,
+                    MiniMessage.miniMessage().deserialize(title),
                 )
 
-            score.score = lines.size - lineIndex
-        }
+            objective.displaySlot = DisplaySlot.SIDEBAR
+            objective.displayName(MiniMessage.miniMessage().deserialize(title))
 
-        return objective
+            // Reset scores for existing entries
+            for (entry in bukkitScoreboard.entries) {
+                bukkitScoreboard.resetScores(entry)
+            }
+
+            // Update each line.
+            for (lineIndex in lines.indices) {
+                val score =
+                    objective.getScore(
+                        LegacyComponentSerializer
+                            .legacySection()
+                            .serialize(
+                                MiniMessage.miniMessage().deserialize(lines[lineIndex]),
+                            ) + "\u00A7".repeat(lineIndex),
+                    )
+
+                score.score = lines.size - lineIndex
+            }
+
+            return objective
+        } catch (e: Exception) {
+            throw VitalScoreboardException.Update(e)
+        }
     }
 
     /**
-     * Internal function; adds a new team with the given [name] to this scoreboard  and updates it via [update].
+     * Internal function; adds a new team with the given [name] to this scoreboard.
+     * This function will only update this scoreboard if both [title] and [lines] are set.
      * If the given team is already in this scoreboard, this function does nothing.
      */
+    @JvmOverloads
     fun addTeam(
         name: String,
-        title: String,
-        lines: List<String>,
+        title: (() -> String)? = null,
+        lines: (() -> List<String>)? = null,
         init: Team.() -> Unit,
     ) {
         if (bukkitScoreboard.getTeam(name) != null) {
@@ -84,54 +93,70 @@ open class VitalScoreboard : VitalEntity<UUID> {
 
         val team = bukkitScoreboard.registerNewTeam(name)
         init(team)
-        update(title, lines)
+
+        if (title != null && lines != null) {
+            update(title, lines)
+        }
     }
 
     /**
-     * Internal function; removes the team with the given [name] from this scoreboard and updates it via [update].
+     * Internal function; removes the team with the given [name] from this scoreboard.
+     * This function will only update this scoreboard if both [title] and [lines] are set.
      * If the given team is not in this scoreboard, this function does nothing.
      */
+    @JvmOverloads
     fun removeTeam(
         name: String,
-        title: String,
-        lines: List<String>,
+        title: (() -> String)? = null,
+        lines: (() -> List<String>)? = null,
     ) {
         val team = bukkitScoreboard.getTeam(name) ?: return
         team.unregister()
-        update(title, lines)
+
+        if (title != null && lines != null) {
+            update(title, lines)
+        }
     }
 
     /**
      * Internal function; adds the given [player] to this scoreboard and updates it via [update].
+     * This function will only update this scoreboard if both [title] and [lines] are set.
      * If the given [player] is already in this scoreboard, this function does nothing.
      */
+    @JvmOverloads
     fun addPlayer(
         player: SpigotPlayer,
-        title: String,
-        lines: List<String>,
+        title: (() -> String)? = null,
+        lines: (() -> List<String>)? = null,
     ) {
         if (player.scoreboard == bukkitScoreboard) {
             return
         }
 
         player.scoreboard = bukkitScoreboard
-        update(title, lines)
+        if (title != null && lines != null) {
+            update(title, lines)
+        }
     }
 
     /**
      * Internal function; removes the given [player] from this scoreboard and updates it via [update].
+     * This function will only update this scoreboard if both [title] and [lines] are set.
      * If the given [player] is not in this scoreboard, this function does nothing.
      */
+    @JvmOverloads
     fun removePlayer(
         player: SpigotPlayer,
-        title: String,
-        lines: List<String>,
+        title: (() -> String)? = null,
+        lines: (() -> List<String>)? = null,
     ) {
         if (player.scoreboard != bukkitScoreboard) {
             return
         }
 
         player.scoreboard = Bukkit.getScoreboardManager().mainScoreboard
-        update(title, lines)
+        if (title != null && lines != null) {
+            update(title, lines)
+        }
     }
 }

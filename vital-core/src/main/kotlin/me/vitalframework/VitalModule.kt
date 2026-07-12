@@ -65,17 +65,17 @@ abstract class VitalModule : VitalHasInfo {
     fun disable() {
         val info = getInfo(Info::class.java)
         try {
-            if (Vital.isVitalModuleEnabled(info.value)) {
+            if (!Vital.isVitalModuleEnabled(info.value)) {
                 logger.error("Cannot disable Vital module '${info.value}', it is already disabled.")
                 return
             }
 
-            logger.info("Disabling Vital module '${info.value}'...'")
+            logger.info("Disabling Vital module '${info.value}'.")
             onDisable()
             Vital.vitalModules.remove(info.value)
             logger.info("Vital module '${info.value}' successfully disabled.")
         } catch (e: Exception) {
-            logger.error("Error while disabling Vital module '${info.value}'", e)
+            logger.error("Error while disabling Vital module '${info.value}'.", e)
         }
     }
 

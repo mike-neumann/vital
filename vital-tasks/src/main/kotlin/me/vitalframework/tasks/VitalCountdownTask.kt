@@ -41,7 +41,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     /**
      * The current countdown of this task.
      */
-    var countdown = getInfo(Info::class.java).interval
+    var countdown = getInfo(Info::class.java).countdown
 
     /**
      * Controls if this task can currently tick, decrease the [countdown] and call the [onTick] lifecycle function.

@@ -82,19 +82,23 @@ abstract class VitalConfig : VitalHasInfo {
      * Saves this config by writing its field values to the defined file in path [Info.name].
      */
     fun save() {
-        // create the file if it does not exist
-        if (!file.exists()) {
-            if (file.parent != null) file.parent.createDirectories()
+        try {
+            // create the file if it does not exist
+            if (!file.exists()) {
+                if (file.parent != null) file.parent.createDirectories()
 
-            try {
-                file.createFile()
-                logger.debug("${file.name} config file created")
-            } catch (e: IOException) {
-                throw VitalConfigException.CreateFile(file.name, e)
+                try {
+                    file.createFile()
+                    logger.debug("${file.name} config file created")
+                } catch (e: IOException) {
+                    throw VitalConfigException.CreateFile(file.name, e)
+                }
             }
-        }
 
-        file.writeText(processor.save(processor.serialize(this)))
+            file.writeText(processor.save(processor.serialize(this)))
+        } catch (e: Exception) {
+            throw VitalConfigException.Save(file.name, e)
+        }
     }
 
     /**
