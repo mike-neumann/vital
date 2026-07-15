@@ -65,7 +65,13 @@ class VitalLocalizationModule : VitalModule() {
             set(value) {
                 playerLocales[this] = value
 
+                val loggingContext = "Context: player '$this', new locale '$value'."
+
+                logger.debug("Player vital localization was changed. Will update inventory items viable for localization. $loggingContext")
                 if ("vital-items" in Vital.vitalModules) {
+                    logger.debug(
+                        "The 'vital-items' module was not found, cannot update item locales for player and new locale. $loggingContext",
+                    )
                     // update any now non-localized items
                     for (item in inventory.filterNotNull()) {
                         val itemLocalized =
@@ -75,10 +81,14 @@ class VitalLocalizationModule : VitalModule() {
                                     "item-localized",
                                 ), PersistentDataType.BOOLEAN,
                             ]
-                                ?: continue
+                        if (itemLocalized == null || !itemLocalized) {
+                            logger.debug(
+                                "Cannot update locale of item '$item' for player. Items must have a namespaced key 'vital:item-localized' to be viable for localization. $loggingContext",
+                            )
+                            continue
+                        }
 
-                        if (!itemLocalized) continue
-
+                        logger.debug("Item '$item' is viable for localization, extracting required values. $loggingContext")
                         val localizationKey =
                             item.itemMeta.persistentDataContainer[
                                 NamespacedKey(
@@ -87,6 +97,7 @@ class VitalLocalizationModule : VitalModule() {
                                 ),
                                 PersistentDataType.STRING,
                             ]
+                        logger.debug("Name localization key '$localizationKey'. $loggingContext")
                         if (localizationKey == null) {
                             logger.warn("Item '$item' has been marked for localization but no localization key is present")
                             continue
@@ -100,10 +111,17 @@ class VitalLocalizationModule : VitalModule() {
                                 ),
                                 PersistentDataType.LIST.strings(),
                             ]
+                        logger.debug("Lore localization keys '$loreLocalizationKeys'. $loggingContext")
                         if (loreLocalizationKeys == null) {
                             logger.warn("Item '$item' has been marked for localization but no lore localization keys are present")
                             continue
                         }
+
+                        val translatedName = t(localizationKey)
+                        val translatedLore = loreLocalizationKeys.map { t(it) }
+                        logger.debug(
+                            "Applying item localization for item '$item' with name localization key '$localizationKey' to '$translatedName' and lore localization keys '$loreLocalizationKeys' to '$translatedLore'. $loggingContext",
+                        )
 
                         // we have an item that is set to be localized
                         // update only its name and lore now.
@@ -115,7 +133,7 @@ class VitalLocalizationModule : VitalModule() {
                                     displayName(
                                         MiniMessage
                                             .miniMessage()
-                                            .deserialize(t(localizationKey))
+                                            .deserialize(translatedName)
                                             .decoration(TextDecoration.ITALIC, false),
                                     )
                                 }
@@ -123,10 +141,10 @@ class VitalLocalizationModule : VitalModule() {
                                 val lore = lore()
                                 if (lore != null) {
                                     lore(
-                                        loreLocalizationKeys.map {
+                                        translatedLore.map {
                                             MiniMessage
                                                 .miniMessage()
-                                                .deserialize(t(it))
+                                                .deserialize(it)
                                                 .decoration(TextDecoration.ITALIC, false)
                                         },
                                     )

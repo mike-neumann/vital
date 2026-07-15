@@ -82,17 +82,26 @@ abstract class VitalConfig : VitalHasInfo {
      * Saves this config by writing its field values to the defined file in path [Info.name].
      */
     fun save() {
+        val info = getInfo(Info::class.java)
+        val loggingContext = "Context: Config '${info.name}', processor '${info.processor.simpleName}', class '${javaClass.simpleName}'"
         try {
+            logger.debug("Saving config. $loggingContext")
             // create the file if it does not exist
             if (!file.exists()) {
-                if (file.parent != null) file.parent.createDirectories()
+                logger.debug("Config file doesnt exist yet, creating it. $loggingContext")
+                if (file.parent != null) {
+                    logger.debug("Config file parent directory doesnt exist yet, creating it. $loggingContext")
+                    file.parent.createDirectories()
+                }
 
                 try {
                     file.createFile()
-                    logger.debug("${file.name} config file created")
+                    logger.debug("Config file created. $loggingContext")
                 } catch (e: IOException) {
                     throw VitalConfigException.CreateFile(file.name, e)
                 }
+            } else {
+                logger.debug("Config file already exists, writing directly to it. $loggingContext")
             }
 
             file.writeText(processor.save(processor.serialize(this)))
@@ -107,10 +116,20 @@ abstract class VitalConfig : VitalHasInfo {
      * via the defined [Info.processor] and initialize this class's fields.
      */
     fun load(inputStream: InputStream) {
+        val info = getInfo(Info::class.java)
+        val loggingContext = "Context: Config '${info.name}', processor '${info.processor.simpleName}', class '${javaClass.simpleName}'"
+        logger.debug("Loading config from input stream. $loggingContext")
         val serializedContent = processor.load(inputStream, javaClass)
+        logger.debug("Injecting serialized content '$serializedContent'. $loggingContext")
 
         for ((key, value) in serializedContent) {
-            javaClass.getFieldByProperty(key)?.let { injectField(this, it, value) }
+            val field = javaClass.getFieldByProperty(key)
+            if (field != null) {
+                logger.debug("Key '$key' matches field '$field', attempting to inject it. $loggingContext")
+                injectField(this, field, value)
+            } else {
+                logger.debug("Key '$key' does not match any field, cannot inject it. $loggingContext")
+            }
         }
     }
 

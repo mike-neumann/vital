@@ -57,7 +57,7 @@ class VitalCoreModule {
                     Bukkit.getPluginManager().registerEvents(vitalListener, plugin)
                     logger.info("Spigot listener '${vitalListener::class.java.name}' successfully registered")
                 } catch (e: Exception) {
-                    logger.error("Error while registering spigot listener '${vitalListener::class.java.name}'", e)
+                    throw VitalListenerException.Register(vitalListener::class.java, e)
                 }
             }
         }
@@ -77,7 +77,7 @@ class VitalCoreModule {
                     plugin.proxy.pluginManager.registerListener(plugin, vitalListener)
                     logger.info("Bungee listener '${vitalListener::class.java.name}' successfully registered")
                 } catch (e: Exception) {
-                    logger.error("Error while registering bungee listener '${vitalListener::class.java.name}'", e)
+                    throw VitalListenerException.Register(vitalListener::class.java, e)
                 }
             }
         }

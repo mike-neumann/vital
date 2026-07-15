@@ -3,6 +3,7 @@ package me.vitalframework.items
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.Vital
 import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreModule.Companion.logger
 import me.vitalframework.VitalHasInfo
 import me.vitalframework.items.VitalItemStackBuilder.Companion.itemBuilder
 import me.vitalframework.localization.VitalLocalizationModule.Spigot.t
@@ -54,6 +55,8 @@ import java.util.UUID
  */
 open class VitalItem : VitalHasInfo {
     override val info = mutableMapOf(Info::class.java to javaClass.getRequiredAnnotation<Info>())
+
+    private val logger = logger()
 
     /**
      * This id is required to identify a single [VitalItem] during event processing and delegation.
@@ -114,21 +117,36 @@ open class VitalItem : VitalHasInfo {
      * This function handles all lifecycle functions of this item and the cooldown logic.
      */
     fun handleInteraction(e: PlayerInteractEvent) {
+        val loggingContext = "Context: Vital item '$this', e '$e', player '${e.player}'."
+        logger.debug("Handling interaction for Vital item. $loggingContext")
+
         if (!playerCooldown.containsKey(e.player.uniqueId)) {
+            logger.debug("Player does not yet have a cooldown for this Vital item, setting to '0'. $loggingContext")
             playerCooldown[e.player.uniqueId] = 0
         }
 
-        if (playerCooldown[e.player.uniqueId]!! >= 1) {
+        val playerCooldown = playerCooldown[e.player.uniqueId]!!
+        if (playerCooldown >= 1) {
+            logger.debug(
+                "Current cooldown of '$playerCooldown' exceeds '0', calling 'onCooldown(PlayerInteractEvent)' lifecycle. $loggingContext",
+            )
             return onCooldown(e)
         }
 
         when (e.action) {
-            Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK -> onLeftClick(e)
-            else -> onRightClick(e)
+            Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK -> {
+                logger.debug("Item was left-clicked, calling 'onLeftClick(PlayerInteractEvent)' lifecycle. $loggingContext")
+                onLeftClick(e)
+            }
+            else -> {
+                logger.debug("Item was right-clicked, calling 'onRightClick(PlayerInteractEvent)' lifecycle. $loggingContext")
+                onRightClick(e)
+            }
         }
 
         val info = getInfo(Info::class.java)
-        playerCooldown[e.player.uniqueId] = info.cooldown
+        logger.debug("Setting cooldown back to '${info.cooldown}'. $loggingContext")
+        this.playerCooldown[e.player.uniqueId] = info.cooldown
     }
 
     // TODO

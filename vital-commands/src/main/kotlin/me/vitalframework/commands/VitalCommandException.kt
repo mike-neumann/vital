@@ -109,4 +109,12 @@ abstract class VitalCommandException(
             })' using context '$context'",
             cause,
         )
+
+    /**
+     * Internal exception; thrown when an exception occurs while registering a command.
+     */
+    class Register(
+        commandClass: Class<out VitalCommand<*>>,
+        cause: Throwable,
+    ) : VitalCommandException("Error while registering command '${commandClass.simpleName}'.", cause)
 }

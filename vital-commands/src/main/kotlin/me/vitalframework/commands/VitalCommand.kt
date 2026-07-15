@@ -5,6 +5,7 @@ import me.vitalframework.BungeePlayer
 import me.vitalframework.SpigotCommandSender
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreModule.Companion.logger
 import me.vitalframework.VitalHasInfo
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
@@ -64,6 +65,8 @@ abstract class VitalCommand<CS : Any> protected constructor(
 ) : VitalHasInfo {
     override val info = mutableMapOf(Info::class.java to javaClass.getRequiredAnnotation<Info>())
 
+    private val logger = logger()
+
     /**
      * The arguments of the command, mapped from [Pattern] to [VitalCommand.Arg].
      */
@@ -116,19 +119,36 @@ abstract class VitalCommand<CS : Any> protected constructor(
         commandArg: Arg?,
         originalException: Throwable,
     ) {
+        val loggingContext =
+            "Context: Command '${javaClass.simpleName}', sender '$sender', " +
+                "executed command '$executedArg', found command arg '$commandArg', exception '$originalException'."
+        logger.debug("Attempting to find and execute global exception handler. $loggingContext")
+
         val exception = originalException.extractNonInvocationTargetException()
+        logger.debug("Extracted exception '$exception' for global exception handler execution. $loggingContext")
 
         val globalContext =
             VitalGlobalCommandExceptionHandlerProcessor.getGlobalExceptionHandler(exception.javaClass)
                 ?: try {
+                    logger.debug("Could not find global exception handler, will execute onCommandError. $loggingContext")
                     return onCommandError(sender, commandArg, exception)
                 } catch (e: Exception) {
+                    logger.debug(
+                        "Exception while calling onCommandError, will try to find a global exception handler for exception '$e'. $loggingContext",
+                    )
                     // try to find a global exception handler mapped for the exception that was thrown while handling a command error
                     val secondGlobalContext =
                         VitalGlobalCommandExceptionHandlerProcessor.getGlobalExceptionHandler(e.javaClass)
-                            ?: // if we couldn't find a global exception handler for this exception, we are out of options...
-                            // simple rethrow this exception so it is redirected to default exception handling...
-                            throw e
+                    if (secondGlobalContext == null) {
+                        logger.debug("No global exception handler found for exception '$e' while executing onCommandError. $loggingContext")
+                        // if we couldn't find a global exception handler for this exception, we are out of options...
+                        // simply rethrow this exception so it is redirected to default exception handling...
+                        throw e
+                    } else {
+                        logger.debug(
+                            "Global exception handler '${secondGlobalContext.handlerMethod.name}' found for exception '$e' while executing onCommandError. $loggingContext",
+                        )
+                    }
 
                     // if we DO have a second global exception handler for this exception, we can call it here...
                     secondGlobalContext.handlerMethod(
@@ -144,6 +164,7 @@ abstract class VitalCommand<CS : Any> protected constructor(
                 }
 
         try {
+            logger.debug("Global exception handler '${globalContext.handlerMethod.name}' found. $loggingContext")
             globalContext.handlerMethod(
                 globalContext.adviceInstance,
                 *globalContext.getInjectableGlobalExceptionHandlerMethodParameters(
@@ -173,28 +194,46 @@ abstract class VitalCommand<CS : Any> protected constructor(
         executedArg: String,
         commandArg: Arg?,
     ) {
+        val loggingContext =
+            "Context: Command: ${javaClass.simpleName}, sender '$sender', " +
+                "executed command '$executedArg', found command arg '$commandArg'."
+        logger.debug("Attempting to find and execute arg exception handler. $loggingContext")
+
         // when passing an invocation target exception, we first have to extract the actual exception that occurred.
         val exception = originalException.extractNonInvocationTargetException()
+        logger.debug("Extracted exception '$exception' for arg exception handler execution. $loggingContext")
+
         val exceptionHandlers = argExceptionHandlers[commandArg] ?: emptyMap()
+        logger.debug("Viable arg exception handlers are '$exceptionHandlers'. $loggingContext")
+
         // we may or may not have an exception handler mapped for this execution context
         val context =
             exceptionHandlers.entries
                 .filter { it.key.isAssignableFrom(exception.javaClass) }
                 .map { it.value }
                 .firstOrNull()
+        logger.debug("Viable arg exception handler for this context '$context'. $loggingContext")
+
         if (context == null || commandArg == null) {
             // we do not have any exception handler mapped for this argument, or the passed argument is null
             // try to find a global exception handler
+            logger.debug(
+                "No viable arg exception handler found for this context. Will try to find and execute a global exception handler. $loggingContext",
+            )
             return executeGlobalExceptionHandlerMethod(sender, executedArg, commandArg, exception)
         }
 
         try {
+            logger.debug("Arg exception handler found '${context.handlerMethod.name}', trying to call it. $loggingContext")
             context.handlerMethod(
                 this,
                 *context.getInjectableArgExceptionHandlerMethodParameters(sender, executedArg, commandArg, exception),
             )
         } catch (e: Exception) {
             try {
+                logger.debug(
+                    "Error while trying to call arg exception handler '${context.handlerMethod.name}'. Will try to find a global exception handler for the new exception '$e'. $loggingContext",
+                )
                 // an exception occurred while invoking the arg exception handler, try to find a global one instead
                 executeGlobalExceptionHandlerMethod(sender, executedArg, commandArg, e)
             } catch (e: Exception) {
@@ -214,13 +253,21 @@ abstract class VitalCommand<CS : Any> protected constructor(
         commandArg: Arg,
         values: Array<String>,
     ): ReturnState {
+        val loggingContext =
+            "Context: Command '${javaClass.simpleName}', sender '$sender', " +
+                "executedArg '$executedArg', command arg '$commandArg', values '${values.contentToString()}'."
         try {
+            logger.debug("Attempting to find and execute arg handler method. $loggingContext")
             val context = argHandlers[commandArg] ?: throw VitalCommandException.UnmappedArgHandler(executedArg)
+            logger.debug("Arg handler method found '${context.handlerMethod.name}'. $loggingContext")
             return context.handlerMethod(
                 this,
                 *context.getInjectableArgHandlerMethodParameters(sender, executedArg, commandArg, values),
             ) as ReturnState
         } catch (e: Exception) {
+            logger.debug(
+                "Error while trying to call arg handler method. Will try to find an arg exception handler for exception '$e'. $loggingContext",
+            )
             executeArgExceptionHandlerMethod(sender, e, executedArg, commandArg)
             return ReturnState.SUCCESS
         }
@@ -234,8 +281,11 @@ abstract class VitalCommand<CS : Any> protected constructor(
         sender: CS,
         args: Array<String>,
     ): List<String> {
+        val logginContext = "Context: Command '${javaClass.simpleName}', sender '$sender', args '${args.contentToString()}'."
+        logger.debug("Requested tab complete. $logginContext")
         val tabCompleted = mutableListOf<String>()
         for ((_, commandArg) in this.args) {
+            logger.debug("Stepping args for tab completion. Current arg '${commandArg.name}'. $logginContext")
             val splitCommandArg = commandArg.name.split(" ")
             // the player has entered more arguments than the command arg supports, we can never have a hit here
             if (args.size > splitCommandArg.size) continue
@@ -275,6 +325,9 @@ abstract class VitalCommand<CS : Any> protected constructor(
             }
 
             if (commandArgMatches) {
+                logger.debug(
+                    "Arg '${commandArg.name}' matches for tab completion. Also adding all tab completions from onCommandTabComplete. $logginContext",
+                )
                 tabCompleted.add(splitCommandArg.subList(args.size - 1, splitCommandArg.size).joinToString(" "))
                 // only the last element should be converted to argument type check to avoid confusing tab completions
                 val argType = Arg.Type.getTypeByPlaceholder(splitCommandArg[args.size - 1])
@@ -288,6 +341,7 @@ abstract class VitalCommand<CS : Any> protected constructor(
             }
         }
 
+        logger.debug("Will display the following '${tabCompleted.size}' tab completions: '$tabCompleted'.")
         return tabCompleted
     }
 
@@ -299,23 +353,37 @@ abstract class VitalCommand<CS : Any> protected constructor(
         sender: CS,
         args: Array<String>,
     ) {
+        val logginContext = "Context: Command '${javaClass.simpleName}', sender '$sender', args '${args.contentToString()}'."
+        logger.debug("Attempting to execute command. $logginContext")
         val info = getInfo(Info::class.java)
         val joinedPlayerArgs = args.joinToString(" ")
         if (info.playerOnly && !isPlayer(sender)) {
+            logger.debug(
+                "Sender is not a player, but this command can only be executed by a player. Will call onCommandRequiresPlayer. $logginContext",
+            )
             return onCommandRequiresPlayer(sender, joinedPlayerArgs, null)
         }
 
         val matchedArg = getArg(joinedPlayerArgs)
+        logger.debug("Command arg found '$matchedArg'. $logginContext")
         val returnState =
             when {
-                info.permission.isNotBlank() && !hasPermission(sender, info.permission) -> ReturnState.NO_PERMISSION
+                info.permission.isNotBlank() && !hasPermission(sender, info.permission) -> {
+                    logger.debug("Sender does not have the required permissions '${info.permission}' for this command. $logginContext")
+                    ReturnState.NO_PERMISSION
+                }
 
                 matchedArg != null -> {
                     if (matchedArg.permission.isNotBlank() && !hasPermission(sender, matchedArg.permission)) {
+                        logger.debug(
+                            "Sender does not have the required permissions '${matchedArg.permission}' for this arg '$matchedArg'. $logginContext",
+                        )
                         ReturnState.NO_PERMISSION
                     } else if (matchedArg.playerOnly && !isPlayer(sender)) {
+                        logger.debug("Sender is not a player but this arg '$matchedArg' requires a player. $logginContext")
                         ReturnState.ONLY_PLAYER
                     } else {
+                        logger.debug("Sender is permitted to execute this command and arg '$matchedArg'. $logginContext")
                         val values = mutableListOf<String>()
                         val commandArgs =
                             matchedArg.name
@@ -338,21 +406,43 @@ abstract class VitalCommand<CS : Any> protected constructor(
                                     )
                             }.forEach(values::add)
 
+                        logger.debug(
+                            "Values extracted from sender input '${args.contentToString()}' for arg '$matchedArg'. Will try to execute a mapped arg handler. $logginContext",
+                        )
                         executeArgHandlerMethod(sender, joinedPlayerArgs, matchedArg, values.toTypedArray())
                     }
                 }
 
-                else -> ReturnState.INVALID_ARGS
+                else -> {
+                    logger.debug("Sender input is not valid for this command and arg '$matchedArg'. $logginContext")
+                    ReturnState.INVALID_ARGS
+                }
             }
 
         try {
             when (returnState) {
-                ReturnState.SUCCESS -> {}
-                ReturnState.INVALID_ARGS -> onCommandInvalidArgs(sender, joinedPlayerArgs)
-                ReturnState.NO_PERMISSION -> onCommandRequiresPermission(sender, joinedPlayerArgs, matchedArg)
-                ReturnState.ONLY_PLAYER -> onCommandRequiresPlayer(sender, joinedPlayerArgs, matchedArg)
+                ReturnState.SUCCESS -> {
+                    logger.debug("Command execution successful. $logginContext")
+                }
+                ReturnState.INVALID_ARGS -> {
+                    logger.debug("Sender has provided invalid args. Will call onCommandInvalidArg. $logginContext")
+                    onCommandInvalidArgs(sender, joinedPlayerArgs)
+                }
+                ReturnState.NO_PERMISSION -> {
+                    logger.debug("Sender does not have the required permission. Will call onCommandRequiresPermission. $logginContext")
+                    onCommandRequiresPermission(sender, joinedPlayerArgs, matchedArg)
+                }
+                ReturnState.ONLY_PLAYER -> {
+                    logger.debug(
+                        "Command or arg requires a player while the sender is not a player. Will call onCommandRequiresPlayer. $logginContext",
+                    )
+                    onCommandRequiresPlayer(sender, joinedPlayerArgs, matchedArg)
+                }
             }
         } catch (e: Exception) {
+            logger.debug(
+                "Error while processing command execution. Will try to find and execute an arg exception handler for exception '$e'. $logginContext",
+            )
             executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, matchedArg)
         }
     }
@@ -365,7 +455,12 @@ abstract class VitalCommand<CS : Any> protected constructor(
         sender: CS,
         commandArg: Arg?,
         e: Throwable,
-    ): Unit = throw e
+    ) {
+        logger.debug(
+            "Lifecycle function 'onCommandError' was not overridden for command '${javaClass.simpleName}', will rethrow exception '$e' for sender '$sender' and arg '$commandArg' and possibly execute any global exception handlers for this exception.",
+        )
+        throw e
+    }
 
     /**
      * Lifecycle function; called when a player types the command into chat and triggers tab-completions.
@@ -376,7 +471,12 @@ abstract class VitalCommand<CS : Any> protected constructor(
     protected open fun onCommandTabComplete(
         sender: CS,
         args: String,
-    ) = listOf<String>()
+    ): List<String> {
+        logger.debug(
+            "Lifecycle function 'onCommandTabComplete' was not overridden for command '${javaClass.simpleName}', this command will not provide any additional tab completions for sender '$sender' and args '$args'.",
+        )
+        return listOf()
+    }
 
     /**
      * Lifecycle function; called when this command or any arg is executed with invalid args.
@@ -385,6 +485,9 @@ abstract class VitalCommand<CS : Any> protected constructor(
         sender: CS,
         args: String,
     ) {
+        logger.debug(
+            "Lifecycle function 'onCommandInvalidArgs' was not overridden for command '${javaClass.simpleName}'. Sender '$sender', args '$args'.",
+        )
     }
 
     /**
@@ -395,6 +498,9 @@ abstract class VitalCommand<CS : Any> protected constructor(
         args: String,
         commandArg: Arg?,
     ) {
+        logger.debug(
+            "Lifecycle function 'onCommandRequiresPermission' was not overridden for command '${javaClass.simpleName}'. Sender '$sender', args '$args', command arg '$commandArg'.",
+        )
     }
 
     /**
@@ -405,6 +511,9 @@ abstract class VitalCommand<CS : Any> protected constructor(
         args: String,
         commandArg: Arg?,
     ) {
+        logger.debug(
+            "Lifecycle function 'onCommandRequiresPlayer' was not overridden for command '${javaClass.simpleName}'. Sender '$sender', args '$args', command arg '$commandArg'.",
+        )
     }
 
     /**

@@ -54,7 +54,7 @@ abstract class VitalModule : VitalHasInfo {
             Vital.vitalModules.add(info.value)
             logger.info("Vital module '${info.value}' successfully enabled.")
         } catch (e: Exception) {
-            logger.error("Error while enabling Vital module '${info.value}'", e)
+            throw VitalModuleException.Enable(info.value, e)
         }
     }
 
@@ -75,7 +75,7 @@ abstract class VitalModule : VitalHasInfo {
             Vital.vitalModules.remove(info.value)
             logger.info("Vital module '${info.value}' successfully disabled.")
         } catch (e: Exception) {
-            logger.error("Error while disabling Vital module '${info.value}'.", e)
+            throw VitalModuleException.Disable(info.value, e)
         }
     }
 

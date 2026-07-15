@@ -2,6 +2,7 @@ package me.vitalframework.inventories
 
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreModule.Companion.logger
 import java.util.UUID
 import kotlin.math.ceil
 
@@ -26,6 +27,7 @@ import kotlin.math.ceil
  * ```
  */
 abstract class VitalPagedInventory : VitalInventory() {
+    private val logger = logger()
     private val pages = mutableMapOf<UUID, Int>()
     private val maxPages = mutableMapOf<UUID, Int>()
 
@@ -64,6 +66,9 @@ abstract class VitalPagedInventory : VitalInventory() {
         playerUniqueId: UUID,
         totalContent: Int,
     ) {
+        logger.debug(
+            "Updating max page for Vital inventory '$this' and player uuid '$playerUniqueId' from the requested total content amount '$totalContent'.",
+        )
         maxPages[playerUniqueId] = ceil((totalContent.toDouble() / getPageContentAmount().toDouble())).toInt().coerceAtLeast(1)
     }
 
@@ -82,13 +87,22 @@ abstract class VitalPagedInventory : VitalInventory() {
         player: SpigotPlayer,
         totalContent: Int? = null,
     ) {
+        val loggingContext =
+            "Context: player '${player.name}', Vital inventory '$this', " +
+                "new page '$page', new total content '$totalContent'."
+        logger.debug("Setting page for current Vital inventory and player. $loggingContext")
         val info = getInfo(Info::class.java)
+
         // Clear old slots.
+        logger.debug("Clearing all slots. $loggingContext")
         for (slot in info.fromSlot..info.toSlot) {
             setItem(player, slot, null)
         }
 
         if (totalContent != null) {
+            logger.debug(
+                "Total content is set, will use 'updateMaxPage(Integer)' to update the max page for the current player. $loggingContext",
+            )
             updateMaxPage(player.uniqueId, totalContent)
         }
 
@@ -101,7 +115,11 @@ abstract class VitalPagedInventory : VitalInventory() {
             } else {
                 page
             }
+
+        logger.debug("Final page was determined '$newPage'. $loggingContext")
         pages[player.uniqueId] = newPage
+
+        logger.debug("Calling 'onPageChange(Integer, Player)'. $loggingContext")
         onPageChange(newPage, player)
         super.update(player)
     }

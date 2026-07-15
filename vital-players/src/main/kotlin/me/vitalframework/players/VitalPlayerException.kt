@@ -41,4 +41,15 @@ abstract class VitalPlayerException(
     ) : VitalPlayerException(
             "Error while creating Vital player instance '${playerClass.simpleName}' for '$playerUniqueId', instance already exists",
         )
+
+    /**
+     * Internal exception; thrown when an exception occurs while checking the configured custom Vital player class.
+     */
+    class CheckPlayerClass(
+        playerClassName: String,
+        cause: Throwable,
+    ) : VitalPlayerException(
+            "Error while checking custom Vital player class '$playerClassName'. Does this class exist? Is it reachable by your plugin's classloader / Vital? Does the class extend VitalPlayer?",
+            cause,
+        )
 }

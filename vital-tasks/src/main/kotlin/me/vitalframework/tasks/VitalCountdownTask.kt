@@ -7,6 +7,7 @@ import me.vitalframework.SpigotPlugin
 import me.vitalframework.SpigotRunnable
 import me.vitalframework.SpigotTask
 import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreModule.Companion.logger
 import me.vitalframework.VitalHasInfo
 import net.md_5.bungee.api.ProxyServer
 import java.util.concurrent.TimeUnit
@@ -37,6 +38,8 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     val plugin: P,
 ) : VitalHasInfo {
     override val info = mutableMapOf(Info::class.java to javaClass.getRequiredAnnotation<Info>())
+
+    private val logger = logger()
 
     /**
      * The current countdown of this task.
@@ -78,12 +81,20 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      * If this task is currently running, this function does nothing.
      */
     fun start() {
+        val loggingContext = "Context: Vital countdown task '$this'."
+        logger.debug("Countdown start was requested. $loggingContext")
         if (running) {
+            logger.debug("Countdown is already running. $loggingContext")
             return
         }
 
+        logger.debug("Creating runnable for countdown. $loggingContext")
         runnable = createRunnable()
+
+        logger.debug("Creating task for countdown. $loggingContext")
         task = createTask()
+
+        logger.debug("Calling 'onStart' lifecycle. $loggingContext")
         onStart()
     }
 
@@ -94,14 +105,22 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      * If this task is currently not running, this function does nothing.
      */
     fun stop() {
+        val loggingContext = "Context: Vital countdown task '$this'."
+        logger.debug("Countdown stop was requested. $loggingContext")
         if (!running) {
+            logger.debug("Countdown is already stopped. $loggingContext")
             return
         }
 
+        logger.debug("Cancelling runnable for countdown. $loggingContext")
         cancelRunnable()
+
+        logger.debug("Cancelling task for countdown. $loggingContext")
         cancelTask()
         runnable = null
         task = null
+
+        logger.debug("Calling 'onStop' lifecycle. $loggingContext")
         onStop()
     }
 
@@ -109,6 +128,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      * Resets this task by setting the [countdown] to its initial value defined in [Info] and calls the [onReset] lifecycle function.
      */
     fun reset() {
+        logger.debug("Resetting countdown for countdown task '$this' and calling 'onReset' lifecycle.")
         countdown = getInfo(Info::class.java).countdown
         onReset()
     }
@@ -118,9 +138,13 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      * starting the task again via [start] and finally calling the [onRestart] lifecycle function.
      */
     fun restart() {
+        val loggingContext = "Context: Vital countdown task '$this'."
+        logger.debug("Countdown restart was requested. $loggingContext")
         stop()
         reset()
         start()
+
+        logger.debug("Calling 'onRestart' lifecycle. $loggingContext")
         onRestart()
     }
 
@@ -132,16 +156,25 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      * If ticks are disabled by [allowTick], this function does nothing.
      */
     fun handleTick() {
+        val loggingContext = "Context: Vital countdown task '$this'."
+        logger.debug("Handling countdown tick. $loggingContext")
         if (!allowTick) {
+            logger.debug("Task doesnt allow ticks. $loggingContext")
             return
         }
 
+        logger.debug("Task allows ticks, checking against current countdown. $loggingContext")
+
         if (countdown <= 0) {
+            logger.debug("Countdown is expired, stopping task. $loggingContext")
             stop()
+
+            logger.debug("Countdown task was stopped, calling 'onExpire' lifecycle. $loggingContext")
             onExpire()
             return
         }
 
+        logger.debug("Countdown has not yet expired, calling 'onTick' lifecycle. $loggingContext")
         onTick()
         countdown -= 1
     }

@@ -112,7 +112,13 @@ object Vital {
         // Once fully up and running we can enable all modules.
         val vitalModules = context.beanFactory.getBeansOfType<VitalModule>()
         for ((_, vitalModule) in vitalModules) {
-            vitalModule.enable()
+            try {
+                vitalModule.enable()
+            } catch (e: Exception) {
+                logger.error("Error while enabling Vital module '${vitalModule.info[VitalModule.Info::class.java]?.value}'", e)
+                exit()
+                break
+            }
         }
     }
 
@@ -124,7 +130,7 @@ object Vital {
         logger.info("Shutting down Vital.")
 
         if (context.isClosed) {
-            logger.info("Vital is already being shut down")
+            logger.info("Vital is already being shut down.")
             return
         }
 
@@ -132,12 +138,24 @@ object Vital {
 
         // Disable all modules.
         val vitalModules = context.beanFactory.getBeansOfType<VitalModule>()
+        logger.debug("Will disable '${vitalModules.size}' modules.")
         for ((_, vitalModule) in vitalModules) {
-            vitalModule.disable()
+            val name = vitalModule.info[VitalModule.Info::class.java]?.value
+            try {
+                logger.debug("Disabling module '$name'.")
+                vitalModule.disable()
+            } catch (e: Exception) {
+                SpringApplication.exit(context)
+                logger.error(
+                    "Vital was shut down, but an error occurred while disabling module '$name'.",
+                    e,
+                )
+                return
+            }
         }
 
         val exitCode = SpringApplication.exit(context)
-        logger.info("Vital exited with code '$exitCode'")
+        logger.info("Vital exited with code '$exitCode'.")
     }
 
     /**

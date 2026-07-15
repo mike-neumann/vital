@@ -21,10 +21,7 @@ class VitalPlayersModule(
         try {
             logger.info("Will use class '${vitalPlayersConfigurationProperties.playerClass.name}' for new Vital managed player instances.")
         } catch (e: Exception) {
-            logger.error(
-                "Error while installing 'vital-players', please make sure the class for custom Vital managed player instances '${vitalPlayersConfigurationProperties.playerClassName}' exists and can be reached by Vital's classloader '${javaClass.classLoader.javaClass.name}'.",
-                e,
-            )
+            throw VitalPlayerException.CheckPlayerClass(vitalPlayersConfigurationProperties.playerClassName, e)
         }
     }
 

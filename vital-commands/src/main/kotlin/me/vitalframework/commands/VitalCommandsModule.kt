@@ -47,7 +47,7 @@ class VitalCommandsModule {
                     plugin.getCommand(info.name)!!.setExecutor(vitalCommand)
                     logger.info("Spigot command '${vitalCommand::class.java.name}' successfully registered")
                 } catch (e: Exception) {
-                    logger.error("Error while registering spigot command '${vitalCommand::class.java.name}'", e)
+                    throw VitalCommandException.Register(vitalCommand::class.java, e)
                 }
             }
         }
@@ -94,7 +94,7 @@ class VitalCommandsModule {
 
                     logger.info("Bungee command '${vitalCommand::class.java.name}' successfully registered")
                 } catch (e: Exception) {
-                    logger.error("Error while registering bungee command '${vitalCommand::class.java.name}'", e)
+                    throw VitalCommandException.Register(vitalCommand::class.java, e)
                 }
             }
         }

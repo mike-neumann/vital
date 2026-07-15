@@ -1,8 +1,10 @@
 package me.vitalframework.inventories
 
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.Vital
 import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreModule.Companion.logger
 import me.vitalframework.VitalHasInfo
 import me.vitalframework.items.VitalItemStackBuilder.Companion.itemBuilder
 import me.vitalframework.localization.VitalLocalizationModule.Spigot.t
@@ -50,6 +52,8 @@ typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
  */
 open class VitalInventory : VitalHasInfo {
     override val info = mutableMapOf<Class<out Annotation>, Annotation>(Info::class.java to javaClass.getRequiredAnnotation<Info>())
+
+    private val logger = logger()
 
     val items = mutableMapOf<UUID, MutableMap<Int, ItemStack?>>()
     val previousInventories = mutableMapOf<UUID, VitalInventory>()
@@ -114,10 +118,21 @@ open class VitalInventory : VitalHasInfo {
      * the [onUpdate] player lifecycle function will be called.
      */
     fun update() {
+        val loggingContext = "Context: Vital inventory '$this'."
+        logger.debug("Calling 'onUpdate' lifecycle. $loggingContext")
         onUpdate()
 
+        logger.debug("Updating Vital inventory for all '${playerInventories.size}' players that currently have it open. $loggingContext")
         for ((uniqueId, _) in playerInventories) {
-            val player = Bukkit.getPlayer(uniqueId) ?: continue
+            logger.debug("Updating Vital inventory for player with uuid '$uniqueId'. $loggingContext")
+            val player = Bukkit.getPlayer(uniqueId)
+            if (player == null) {
+                logger.debug(
+                    "Player with uuid '$uniqueId' not found (he might not be online anymore), will skip update for him. $loggingContext",
+                )
+                continue
+            }
+
             update(player)
         }
     }
@@ -128,14 +143,24 @@ open class VitalInventory : VitalHasInfo {
      * If the player doesn't have this inventory open, this function does nothing.
      */
     open fun update(player: SpigotPlayer) {
-        val inventory = getInventory(player.uniqueId) ?: return
+        val loggingContext = "Context: player '$player', Vital inventory '$this'."
+        val inventory = getInventory(player.uniqueId)
+        if (inventory == null) {
+            logger.debug(
+                "Cannot update Vital inventory of player, this player currently doesnt have this Vital inventory open. $loggingContext",
+            )
+            return
+        }
 
+        logger.debug("Calling 'onUpdate(Player)' lifecycle for the current player. $loggingContext")
         onUpdate(player)
 
+        logger.debug("Setting background item for the current player. $loggingContext")
         for (i in 0..<inventory.topInventory.size) {
             inventory.setItem(i, background)
         }
 
+        logger.debug("Setting items for the current player. $loggingContext")
         val items = getItems(player.uniqueId)
         for ((i, item) in items) {
             inventory.setItem(i, item)
@@ -151,8 +176,10 @@ open class VitalInventory : VitalHasInfo {
         player: SpigotPlayer,
         previousInventory: VitalInventory? = null,
     ) {
+        val loggingContext = "Context: player '$player', Vital inventory '$this', previous Vital inventory '$previousInventory'."
         val info = getInfo(Info::class.java)
 
+        logger.debug("Opening Vital inventory for the current player, closing any previous inventory (if set). $loggingContext")
         previousInventory?.close(player)
         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW)
         val inventoryView =
@@ -168,8 +195,13 @@ open class VitalInventory : VitalHasInfo {
         }
         playerInventories[player.uniqueId] = inventoryView
 
+        logger.debug("Calling 'onOpen(Player)' lifecycle for the current player. $loggingContext")
         onOpen(player)
+
+        logger.debug("Calling 'update(Player)' for the current player. $loggingContext")
         update(player)
+
+        logger.debug("Opening the actual inventory for the current player. $loggingContext")
         player.openInventory(inventoryView)
     }
 
@@ -178,7 +210,11 @@ open class VitalInventory : VitalHasInfo {
      * If the clicked item has an action attached to it via [setItem], the action will be triggered.
      */
     open fun click(e: InventoryClickEvent) {
+        val loggingContext = "Context: event '$e', Vital inventory '$this'."
+        logger.debug("Handling internal click event, invoking any registered item (if any). $loggingContext")
         actions[e.whoClicked.uniqueId]?.get(e.slot)?.invoke(e)
+
+        logger.debug("Calling 'onClick(InventoryClickEvent)' lifecycle. $loggingContext")
         onClick(e)
     }
 
@@ -188,6 +224,8 @@ open class VitalInventory : VitalHasInfo {
      * and eventually call the [onClose] lifecycle function for the given [player].
      */
     open fun close(player: SpigotPlayer) {
+        val loggingContext = "Context: player '$player', Vital inventory '$this'."
+        logger.debug("Closing Vital inventory for the current player. $loggingContext")
         // the inventory MUST be closed first, to include previous inventory functionality
         playerInventories.remove(player.uniqueId)
         player.closeInventory()
@@ -198,6 +236,7 @@ open class VitalInventory : VitalHasInfo {
         items.remove(player.uniqueId)
 
         // finally, call the onClose hook to allow for custom behavior during the close process
+        logger.debug("Calling 'onClose(Player)' lifecycle for the current player. $loggingContext")
         onClose(player)
     }
 

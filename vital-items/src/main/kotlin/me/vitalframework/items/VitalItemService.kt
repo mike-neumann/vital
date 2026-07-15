@@ -1,5 +1,6 @@
 package me.vitalframework.items
 
+import me.vitalframework.VitalCoreModule.Companion.logger
 import me.vitalframework.tasks.VitalScheduled
 import org.bukkit.Bukkit
 import org.bukkit.event.player.PlayerInteractEvent
@@ -10,6 +11,8 @@ import org.bukkit.event.player.PlayerInteractEvent
 open class VitalItemService(
     val vitalItems: List<VitalItem>,
 ) {
+    private val logger = logger()
+
     fun handleInteraction(e: PlayerInteractEvent) {
         vitalItems.firstOrNull { it == e.item }?.handleInteraction(e)
     }
@@ -21,9 +24,11 @@ open class VitalItemService(
                 val player = Bukkit.getPlayer(uniqueId) ?: continue
 
                 item.playerCooldown[uniqueId] = item.playerCooldown[uniqueId]!! - 50
+                // So the log doesn't get spammed with messages, we are not logging the tick lifecycle execution.
                 item.onCooldownTick(player)
 
                 if (item.playerCooldown[uniqueId]!! <= 0) {
+                    logger.debug("Calling 'onCooldownExpire(Player)' for player '$player' and Vital item '$item'.")
                     item.onCooldownExpire(player)
                 }
             }

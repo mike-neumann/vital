@@ -7,6 +7,7 @@ import me.vitalframework.SpigotPlugin
 import me.vitalframework.SpigotRunnable
 import me.vitalframework.SpigotTask
 import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import me.vitalframework.VitalCoreModule.Companion.logger
 import me.vitalframework.VitalHasInfo
 import net.md_5.bungee.api.ProxyServer
 import java.util.concurrent.TimeUnit
@@ -33,6 +34,8 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     val plugin: P,
 ) : VitalHasInfo {
     override val info = mutableMapOf(Info::class.java to javaClass.getRequiredAnnotation<Info>())
+
+    private val logger = logger()
 
     /**
      * Controls if this task can currently tick and call the [onTick] lifecycle function.
@@ -69,12 +72,19 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
      * If this task is currently running, this function does nothing.
      */
     fun start() {
+        val loggingContext = "Context: Vital repeatable task '$this'."
+        logger.debug("Task start was requested. $loggingContext")
         if (running) {
+            logger.debug("Task is already running. $loggingContext")
             return
         }
 
+        logger.debug("Creating runnable for task start. $loggingContext")
         runnable = createRunnable()
+        logger.debug("Creating task for task start. $loggingContext")
         task = createTask()
+
+        logger.debug("Calling 'onStart' lifecycle. $loggingContext")
         onStart()
     }
 
@@ -85,14 +95,22 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
      * If this task is currently not running, this function does nothing.
      */
     fun stop() {
+        val loggingContext = "Context: Vital repeatable task '$this'."
+        logger.debug("Task stop was requested. $loggingContext")
         if (!running) {
+            logger.debug("Task is already stopped. $loggingContext")
             return
         }
 
+        logger.debug("Cancelling runnable for task stop. $loggingContext")
         cancelRunnable()
+
+        logger.debug("Cancelling task for task stop. $loggingContext")
         cancelTask()
         runnable = null
         task = null
+
+        logger.debug("Task is stopped, calling 'onStop' lifecycle. $loggingContext")
         onStop()
     }
 
@@ -101,10 +119,14 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
      * If ticks are disabled by [allowTick], this function does nothing.
      */
     fun handleTick() {
+        val loggingContext = "Context: Vital repeatable task '$this'."
+        logger.debug("Handling tick. $loggingContext")
         if (!allowTick) {
+            logger.debug("Task doesnt allow ticks. $loggingContext")
             return
         }
 
+        logger.debug("Calling 'onTick' lifecycle. $loggingContext")
         onTick()
     }
 

@@ -2,6 +2,7 @@ package me.vitalframework.holograms
 
 import me.vitalframework.SpigotPlayer
 import me.vitalframework.SpigotPlugin
+import me.vitalframework.VitalCoreModule.Companion.logger
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Bukkit
@@ -18,6 +19,8 @@ class VitalHologramService(
     private val plugin: SpigotPlugin,
     private val vitalHologramRepository: VitalHologramRepository,
 ) {
+    private val logger = logger()
+
     /**
      * Creates a hologram at the given [location] which displays all given [lines] that is visible to all players on the server.
      * The created hologram is stored in [VitalHologramRepository].
@@ -26,6 +29,9 @@ class VitalHologramService(
         lines: List<VitalHologram.Line>,
         location: Location,
     ): VitalGlobalHologram {
+        val loggingContext = "Context: lines '$lines', location: '$location'."
+        logger.debug("Creating global hologram. $loggingContext")
+
         val armorStand =
             location.world!!.spawn(location, ArmorStand::class.java) {
                 it.isVisible = false
@@ -33,9 +39,14 @@ class VitalHologramService(
                 it.isMarker = true
             }
         val lineArmorStandUniqueIds = lines.createArmorStands(location).map { it.uniqueId }
-        return vitalHologramRepository.save(
-            VitalGlobalHologram(UUID.randomUUID(), lines, location, armorStand.uniqueId, lineArmorStandUniqueIds),
-        )
+        val hologram =
+            vitalHologramRepository.save(
+                VitalGlobalHologram(UUID.randomUUID(), lines, location, armorStand.uniqueId, lineArmorStandUniqueIds),
+            )
+
+        logger.debug("Global hologram created. $loggingContext")
+
+        return hologram
     }
 
     /**
@@ -47,6 +58,9 @@ class VitalHologramService(
         lines: List<VitalHologram.Line>,
         location: Location,
     ): VitalPerPlayerHologram {
+        val loggingContext = "Context: player '$player', lines '$lines', location: '$location'."
+
+        logger.debug("Creating per player hologram. $loggingContext")
         val armorStand =
             location.world!!.spawn(location, ArmorStand::class.java) {
                 it.isVisible = false
@@ -69,7 +83,9 @@ class VitalHologramService(
             hideHologram(player, hologram)
         }
 
-        return vitalHologramRepository.save(hologram)
+        vitalHologramRepository.save(hologram)
+        logger.debug("Per player hologram created. $loggingContext")
+        return hologram
     }
 
     /**
@@ -80,9 +96,15 @@ class VitalHologramService(
         armorStandUniqueId: UUID,
         lineArmorStandUniqueIds: List<UUID>,
     ) {
+        val loggingContext =
+            "Context: player '$player', armor stand uuid '$armorStandUniqueId', " +
+                "line armor stand uuids '$lineArmorStandUniqueIds'."
+
+        logger.debug("Hiding hologram. $loggingContext")
         player.hideEntity(plugin, Bukkit.getEntity(armorStandUniqueId)!!)
 
         for (lineArmorStandUniqueId in lineArmorStandUniqueIds) {
+            logger.debug("Hiding hologram for player '$player'. $loggingContext")
             player.hideEntity(plugin, Bukkit.getEntity(lineArmorStandUniqueId)!!)
         }
     }
@@ -107,9 +129,14 @@ class VitalHologramService(
         armorStandUniqueId: UUID,
         lineArmorStandUniqueIds: List<UUID>,
     ) {
+        val loggingContext =
+            "Context: player '$player', armor stand uuid '$armorStandUniqueId', " +
+                "line armor stand uuids '$lineArmorStandUniqueIds'."
+        logger.debug("Showing hologram. $loggingContext")
         player.showEntity(plugin, Bukkit.getEntity(armorStandUniqueId)!!)
 
         for (lineArmorStandUniqueId in lineArmorStandUniqueIds) {
+            logger.debug("Showing hologram for player '$player'. $loggingContext")
             player.showEntity(plugin, Bukkit.getEntity(lineArmorStandUniqueId)!!)
         }
     }
@@ -134,9 +161,15 @@ class VitalHologramService(
         armorStandUniqueId: UUID,
         lineArmorStandUniqueIds: List<UUID>,
     ) {
-        val armorStand = Bukkit.getEntity(armorStandUniqueId)!!
-        val lineArmorStands = lineArmorStandUniqueIds.map { Bukkit.getEntity(it)!! }
+        val loggingContext = "Context: armor stand uuid '$armorStandUniqueId', line armor stand uuids '$lineArmorStandUniqueIds'."
+        val armorStand = Bukkit.getEntity(armorStandUniqueId)
+        if (armorStand != null) {
+            logger.debug("Deleting hologram. $loggingContext")
+        } else {
+            throw NullPointerException()
+        }
 
+        val lineArmorStands = lineArmorStandUniqueIds.map { Bukkit.getEntity(it)!! }
         armorStand.remove()
 
         for (lineArmorStand in lineArmorStands) {
@@ -161,8 +194,11 @@ class VitalHologramService(
     private fun List<VitalHologram.Line>.createArmorStands(
         location: Location,
         action: (ArmorStand) -> Unit = {},
-    ): List<ArmorStand> =
-        reversed().mapIndexed { i, line ->
+    ): List<ArmorStand> {
+        val loggingContext = "Context: location '$location', lines '$this'."
+        logger.debug("Creating armor stands for each hologram line. $loggingContext")
+        return reversed().mapIndexed { i, line ->
+            logger.debug("Creating armor stand for hologram line '${line.text}'. $loggingContext")
             // convert the minimessage formatted line into a legacy section formatted line.
             val formattedLine =
                 LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(line.text ?: ""))
@@ -192,6 +228,7 @@ class VitalHologramService(
             action(armorStand)
             armorStand
         }
+    }
 
     /**
      * Hides all other known holograms that are registered in [VitalHologramRepository] and are not owned by the given [player].
@@ -199,8 +236,11 @@ class VitalHologramService(
      * If not, this function will fail to hide other holograms since Vital is not aware of their existence.
      */
     fun hideOtherPerPlayerHolograms(player: SpigotPlayer) {
+        val loggingContext = "Context: player '$player'."
+        logger.debug("Hiding all other holograms for player '$player'. $loggingContext")
         val holograms = vitalHologramRepository.findAll<VitalPerPlayerHologram>().filter { it.playerUniqueId != player.uniqueId }
         for (hologram in holograms) {
+            logger.debug("Hiding hologram '${hologram.id}' for player '$player'. $loggingContext")
             hideHologram(player, hologram)
         }
     }
