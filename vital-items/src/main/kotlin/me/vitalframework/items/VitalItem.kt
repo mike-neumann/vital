@@ -172,29 +172,39 @@ open class VitalItem : VitalHasInfo {
     /**
      * Lifecycle function; called when this item is right-clicked by a player and the player's cooldown is not active.
      */
-    open fun onLeftClick(e: PlayerInteractEvent) {}
+    open fun onLeftClick(e: PlayerInteractEvent) {
+        logger.debug("Lifecycle function 'onLeftClick(PlayerInteractEvent)' was not overridden for Vital item '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this item is left-clicked by a player and the player's cooldown is not active.
      */
-    open fun onRightClick(e: PlayerInteractEvent) {}
+    open fun onRightClick(e: PlayerInteractEvent) {
+        logger.debug("Lifecycle function 'onRightClick(PlayerInteractEvent)' was not overridden for Vital item '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this item is left- or right-clicked by a player and the player's cooldown is currently active.
      */
-    open fun onCooldown(e: PlayerInteractEvent) {}
+    open fun onCooldown(e: PlayerInteractEvent) {
+        logger.debug("Lifecycle function 'onCooldown(PlayerInteractEvent)' was not overridden for Vital item '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this item's cooldown expires for a player.
      * This function is also called when a player doesn't have this item equipped.
      */
-    open fun onCooldownExpire(player: SpigotPlayer) {}
+    open fun onCooldownExpire(player: SpigotPlayer) {
+        logger.debug("Lifecycle function 'onCooldownExpire(Player)' was not overridden for Vital item '$this'.")
+    }
 
     /**
      * Lifecycle function; called when the cooldown task ticks the cooldown for this item and a given player.
      * This function is also called when a player doesn't have this item equipped.
      */
-    open fun onCooldownTick(player: SpigotPlayer) {}
+    open fun onCooldownTick(player: SpigotPlayer) {
+        logger.debug("Lifecycle function 'onCooldownTick(Player)' was not overridden for Vital item '$this'.")
+    }
 
     override fun toString(): String = "VitalItem(uniqueId=$uniqueId, info=$info, playerCooldown=$playerCooldown)"
 

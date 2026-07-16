@@ -243,30 +243,40 @@ open class VitalInventory : VitalHasInfo {
     /**
      * Lifecycle function; called when this inventory is opened for the given [player].
      */
-    protected open fun onOpen(player: SpigotPlayer) {}
+    protected open fun onOpen(player: SpigotPlayer) {
+        logger.debug("Lifecycle function 'onOpen(Player)' was not overridden for Vital inventory '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this inventory is updated for all players via [update].
      * Override this function to set items that are always the same for each player (no language specifics, same item, etc. )
      */
-    protected open fun onUpdate() {}
+    protected open fun onUpdate() {
+        logger.debug("Lifecycle function 'onUpdate()' was not overridden for Vital inventory '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this inventory is updated for the given [player].
      * Override this function to set items that are unique for each player (language specific, different item, etc. ).
      */
-    protected open fun onUpdate(player: SpigotPlayer) {}
+    protected open fun onUpdate(player: SpigotPlayer) {
+        logger.debug("Lifecycle function 'onUpdate(Player)' was not overridden for Vital inventory '$this'.")
+    }
 
     /**
      * Lifecycle function; called when an item in this inventory is clicked and the [InventoryClickEvent] is handled via [click].
      * This function will also get called when an empty slot is clicked.
      */
-    protected open fun onClick(e: InventoryClickEvent) {}
+    protected open fun onClick(e: InventoryClickEvent) {
+        logger.debug("Lifecycle function 'onClick(InventoryClickEvent)' was not overridden for Vital inventory '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this inventory is closed for the given [player].
      */
-    protected open fun onClose(player: SpigotPlayer) {}
+    protected open fun onClose(player: SpigotPlayer) {
+        logger.debug("Lifecycle function 'onClose(Player)' was not overridden for Vital inventory '$this'.")
+    }
 
     /**
      * Defines the info for a [VitalInventory].

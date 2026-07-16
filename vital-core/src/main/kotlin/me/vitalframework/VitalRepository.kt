@@ -1,5 +1,7 @@
 package me.vitalframework
 
+import me.vitalframework.VitalCoreModule.Companion.logger
+
 /**
  * A volatile in-memory repository to store temporary data in a Spring-like repository implementation.
  * It can store implementations of [VitalEntity] and the means to get, save and delete them.
@@ -17,6 +19,8 @@ package me.vitalframework
  * THIS WILL BREAK INSTANCE INTERNALS.
  */
 abstract class VitalRepository<T : VitalEntity<ID>, ID> {
+    private val logger = logger()
+
     private val _entities = mutableMapOf<ID, T>()
     val entities: List<T>
         get() = _entities.values.toList()
@@ -99,10 +103,14 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     /**
      * Lifecycle function; called when the given [entity] is saved to this repository.
      */
-    protected fun onSave(entity: T) {}
+    protected fun onSave(entity: T) {
+        logger.debug("Lifecycle function 'onSave(T)' was not overridden for Vital repository '$this'.")
+    }
 
     /**
      * Lifecycle function; called when the given [entity] is deleted from this repository.
      */
-    protected fun onDelete(entity: T) {}
+    protected fun onDelete(entity: T) {
+        logger.debug("Lifecycle function 'onDelete(T)' was not overridden for Vital repository '$this'.")
+    }
 }

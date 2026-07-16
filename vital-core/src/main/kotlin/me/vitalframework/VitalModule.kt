@@ -84,6 +84,7 @@ abstract class VitalModule : VitalHasInfo {
      * Override this function to for example perform initialization logic for your module.
      */
     open fun onEnable() {
+        logger.debug("Lifecycle function 'onEnable' was not overridden by module '${getInfo(Info::class.java).value}'.")
     }
 
     /**
@@ -91,6 +92,7 @@ abstract class VitalModule : VitalHasInfo {
      * Override this function to for example perform teardown logic for your module.
      */
     open fun onDisable() {
+        logger.debug("Lifecycle function 'onDisable' was not overridden by module '${getInfo(Info::class.java).value}'.")
     }
 
     /**

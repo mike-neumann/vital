@@ -202,33 +202,45 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     /**
      * Lifecycle function; called when this task is started.
      */
-    open fun onStart() {}
+    open fun onStart() {
+        logger.debug("Lifecycle function 'onStart' was not overridden by Vital countdown task '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this task is ticked.
      * This task will only tick if [allowTick] is `true`.
      */
-    open fun onTick() {}
+    open fun onTick() {
+        logger.debug("Lifecycle function 'onTick' was not overridden by Vital countdown task '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this task is stopped.
      */
-    open fun onStop() {}
+    open fun onStop() {
+        logger.debug("Lifecycle function 'onStop' was not overridden by Vital countdown task '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this task's [countdown] reaches `0`.
      */
-    open fun onExpire() {}
+    open fun onExpire() {
+        logger.debug("Lifecycle function 'onExpire' was not overridden by Vital countdown task '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this task is reset via [reset].
      */
-    open fun onReset() {}
+    open fun onReset() {
+        logger.debug("Lifecycle function 'onReset' was not overridden by Vital countdown task '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this task is restarted via [restart].
      */
-    open fun onRestart() {}
+    open fun onRestart() {
+        logger.debug("Lifecycle function 'onRestart' was not overridden by Vital countdown task '$this'.")
+    }
 
     /**
      * Defines the info for a [VitalCountdownTask].

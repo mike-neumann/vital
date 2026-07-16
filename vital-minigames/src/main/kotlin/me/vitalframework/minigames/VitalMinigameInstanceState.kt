@@ -1,6 +1,7 @@
 package me.vitalframework.minigames
 
 import me.vitalframework.SpigotListener
+import me.vitalframework.VitalCoreModule.Companion.logger
 
 /**
  * Defines a single state within an active minigame instance.
@@ -28,6 +29,8 @@ import me.vitalframework.SpigotListener
  * ```
  */
 interface VitalMinigameInstanceState<T : VitalMinigameInstance> : SpigotListener {
+    val logger get() = logger()
+
     /**
      * The instance this state belongs to.
      * Each instance may have its own data. e.g. its designated state instances you may switch to.
@@ -37,10 +40,14 @@ interface VitalMinigameInstanceState<T : VitalMinigameInstance> : SpigotListener
     /**
      * Lifecycle function; called when this state is enabled on its registered instance.
      */
-    fun onEnable() {}
+    fun onEnable() {
+        logger.debug("Lifecycle function 'onEnable' was not overridden by Vital minigame instance state '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this state is disabled on its registered instance.
      */
-    fun onDisable() {}
+    fun onDisable() {
+        logger.debug("Lifecycle function 'onDisable' was not overridden by Vital minigame instance state '$this'.")
+    }
 }

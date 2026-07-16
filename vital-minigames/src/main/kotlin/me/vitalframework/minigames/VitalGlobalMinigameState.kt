@@ -1,6 +1,7 @@
 package me.vitalframework.minigames
 
 import me.vitalframework.SpigotListener
+import me.vitalframework.VitalCoreModule.Companion.logger
 
 /**
  * Defines a minigame state within the Vital-Framework.
@@ -27,13 +28,19 @@ import me.vitalframework.SpigotListener
  * ```
  */
 interface VitalGlobalMinigameState : SpigotListener {
+    val logger get() = logger()
+
     /**
      * Lifecycle function; called when this state is enabled via [VitalGlobalMinigameService.setState].
      */
-    fun onEnable() {}
+    fun onEnable() {
+        logger.debug("Lifecycle function 'onEnable' was not overridden for Vital global minigame state '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this state is disabled by switching to a new state using [VitalGlobalMinigameService.setState].
      */
-    fun onDisable() {}
+    fun onDisable() {
+        logger.debug("Lifecycle function 'onDisable' was not overridden for Vital global minigame state '$this'.")
+    }
 }

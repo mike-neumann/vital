@@ -204,6 +204,7 @@ abstract class VitalPagedInventory : VitalInventory() {
         page: Int,
         player: SpigotPlayer,
     ) {
+        logger.debug("Lifecycle function 'onPageChange(Integer, Player)' was not overridden for Vital paged inventory '$this'.")
     }
 
     /**

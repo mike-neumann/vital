@@ -85,13 +85,17 @@ open class VitalMinigameInstance(
      * Lifecycle function; called when this instance is registered on the global [VitalMinigameInstanceService] bean.
      * Can be used to perform custom logic during instance registration.
      */
-    open fun onRegister() {}
+    open fun onRegister() {
+        logger.debug("Lifecycle function 'onRegister' was not overridden for Vital minigame instance '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this instance is unregistered on the global [VitalMinigameInstanceService] bean.
      * Can be used to perform custom logic during instance unregistration.
      */
-    open fun onUnregister() {}
+    open fun onUnregister() {
+        logger.debug("Lifecycle function 'onUnregister' was not overridden for Vital minigame instance '$this'.")
+    }
 
     /**
      * Internal function; gets the world in which the specified event occurred, or null if it cannot be determined.

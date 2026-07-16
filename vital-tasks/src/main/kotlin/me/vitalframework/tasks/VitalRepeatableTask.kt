@@ -153,18 +153,24 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     /**
      * Lifecycle function; called when this task is started.
      */
-    open fun onStart() {}
+    open fun onStart() {
+        logger.debug("Lifecycle function 'onStart' was not overridden by Vital repeatable task '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this task is ticked.
      * This task will only tick if [allowTick] is `true`.
      */
-    open fun onTick() {}
+    open fun onTick() {
+        logger.debug("Lifecycle function 'onTick' was not overridden by Vital repeatable task '$this'.")
+    }
 
     /**
      * Lifecycle function; called when this task is stopped.
      */
-    open fun onStop() {}
+    open fun onStop() {
+        logger.debug("Lifecycle function 'onStop' was not overridden by Vital repeatable task '$this'.")
+    }
 
     /**
      * Defines the info for a [VitalRepeatableTask].
