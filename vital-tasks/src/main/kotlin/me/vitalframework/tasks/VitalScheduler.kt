@@ -72,4 +72,8 @@ open class VitalScheduler(
             }
         }, initialDelay, fixedDelay, timeUnit)
     }
+
+    fun shutdown() {
+        scheduler.shutdownNow()
+    }
 }

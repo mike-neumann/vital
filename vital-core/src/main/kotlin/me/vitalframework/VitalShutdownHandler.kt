@@ -6,8 +6,6 @@ import org.bukkit.event.server.RemoteServerCommandEvent
 import org.bukkit.event.server.ServerCommandEvent
 import org.slf4j.Logger
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.context.annotation.Conditional
-import org.springframework.stereotype.Component
 import sun.misc.Signal
 
 /**
@@ -33,8 +31,6 @@ interface VitalShutdownHandler : InitializingBean {
         )
     }
 
-    @Conditional(RequiresSpigot::class)
-    @Component
     class Spigot :
         VitalListener.Spigot(),
         VitalShutdownHandler {
@@ -61,8 +57,6 @@ interface VitalShutdownHandler : InitializingBean {
         }
     }
 
-    @Conditional(RequiresBungee::class)
-    @Component
     class Bungee :
         VitalListener.Bungee(),
         VitalShutdownHandler {

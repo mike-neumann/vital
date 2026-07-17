@@ -35,7 +35,7 @@ class VitalPlayersModule(
 
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @Conditional(RequiresSpigot::class)
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     class Spigot {
         @Order(Ordered.HIGHEST_PRECEDENCE)
         @ConditionalOnMissingBean
@@ -48,7 +48,7 @@ class VitalPlayersModule(
 
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @Conditional(RequiresBungee::class)
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     class Bungee {
         @Order(Ordered.HIGHEST_PRECEDENCE)
         @ConditionalOnMissingBean

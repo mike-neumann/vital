@@ -91,16 +91,22 @@ object Vital {
         logger.debug("Vital class loader successfully overridden to '{}'", classLoader)
 
         // load metadata from "vital-metadata.properties"
+        logger.debug("Loading Vital metadata.")
         loadMetadata(classLoader)
+        logger.debug("Vital metadata successfully loaded.")
 
         logger.debug("Loading main class '${metadata.mainClassName}'.")
         val mainClass = Class.forName(metadata.mainClassName)
         logger.debug("Main class '${metadata.mainClassName}' successfully loaded")
 
+        logger.debug("Loading internal Vital-generated plugin configuration class.")
+        val pluginConfigurationClass = classLoader.loadClass("${mainClass.packageName}.PluginConfiguration")
+        logger.debug("Internal Vital-generated plugin configuration class successfully loaded.")
+
         // start up spring boot using the previously generated "PluginConfiguration" class as the main class
         logger.debug("Running spring boot.")
         context =
-            SpringApplicationBuilder(classLoader.loadClass("${mainClass.packageName}.PluginConfiguration"))
+            SpringApplicationBuilder(pluginConfigurationClass)
                 // here we register the plugin instance as a bean so we can inject it elsewhere
                 .initializers({ it.beanFactory.registerSingleton("plugin", loader) })
                 // this is needed so spring can locate classes and resources that are on the plugin classpath

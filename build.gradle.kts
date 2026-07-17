@@ -81,11 +81,11 @@ subprojects {
             // TODO: this solution is temporary, so i can pull Vital for my own projects
             // TODO: release Vital to maven central once i have a stable version
             if (version.toString().endsWith("-SNAPSHOT")) {
-                maven("http://10.8.0.1:8082/repository/maven-snapshots/") {
+                maven("http://repo.rainymc.de/nexus/content/repositories/snapshots/") {
                     isAllowInsecureProtocol = true
                 }
             } else {
-                maven("http://10.8.0.1:8082/repository/maven-releases/") {
+                maven("http://repo.rainymc.de/nexus/content/repositories/releases/") {
                     isAllowInsecureProtocol = true
                 }
             }

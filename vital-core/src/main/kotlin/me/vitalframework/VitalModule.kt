@@ -105,7 +105,7 @@ abstract class VitalModule : VitalHasInfo {
      * }
      * ```
      */
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(

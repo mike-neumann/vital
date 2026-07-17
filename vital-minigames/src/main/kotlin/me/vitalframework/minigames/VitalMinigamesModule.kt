@@ -68,7 +68,7 @@ class VitalMinigamesModule(
     }
 
     @Conditional(RequiresSpigot::class)
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     class Spigot {
         private val logger = logger()
 

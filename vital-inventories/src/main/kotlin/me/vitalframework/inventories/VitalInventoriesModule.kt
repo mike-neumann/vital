@@ -30,7 +30,7 @@ class VitalInventoriesModule(
     }
 
     @Conditional(RequiresSpigot::class)
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     class Spigot {
         @ConditionalOnMissingBean
         @Bean

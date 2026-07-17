@@ -1,7 +1,9 @@
 package me.vitalframework.tasks
 
+import me.vitalframework.Vital
 import me.vitalframework.VitalCoreModule.Companion.logger
 import me.vitalframework.VitalModule
+import org.springframework.beans.factory.getBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
 import org.springframework.core.env.Environment
@@ -23,6 +25,13 @@ class VitalTasksModule(
         for (vitalCountdownTask in vitalCountdownTasks) {
             logger.info("Countdown task '${vitalCountdownTask::class.java.name}' successfully registered")
         }
+    }
+
+    override fun onDisable() {
+        logger.debug("Shutting down Vital scheduler.")
+        val vitalScheduler = Vital.context.getBean<VitalScheduler>()
+        vitalScheduler.shutdown()
+        logger.debug("Vital schedular shut down.")
     }
 
     @ConditionalOnMissingBean

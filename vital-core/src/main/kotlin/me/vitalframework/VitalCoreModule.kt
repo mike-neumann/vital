@@ -2,7 +2,9 @@ package me.vitalframework
 
 import org.bukkit.Bukkit
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.event.EventListener
 import org.springframework.core.Ordered
@@ -61,6 +63,17 @@ class VitalCoreModule {
                 }
             }
         }
+
+        @ConditionalOnMissingBean
+        @Bean
+        fun vitalBStatsInitialization(
+            plugin: SpigotPlugin,
+            vitalCoreConfigurationProperties: VitalCoreConfigurationProperties,
+        ): VitalBStatsInitialization.Spigot = VitalBStatsInitialization.Spigot(plugin, vitalCoreConfigurationProperties)
+
+        @ConditionalOnMissingBean
+        @Bean
+        fun vitalShutdownHandler(): VitalShutdownHandler.Spigot = VitalShutdownHandler.Spigot()
     }
 
     @Conditional(RequiresBungee::class)
@@ -81,6 +94,17 @@ class VitalCoreModule {
                 }
             }
         }
+
+        @ConditionalOnMissingBean
+        @Bean
+        fun vitalBStatsInitialization(
+            plugin: BungeePlugin,
+            vitalCoreConfigurationProperties: VitalCoreConfigurationProperties,
+        ): VitalBStatsInitialization.Bungee = VitalBStatsInitialization.Bungee(plugin, vitalCoreConfigurationProperties)
+
+        @ConditionalOnMissingBean
+        @Bean
+        fun vitalShutdownHandler(): VitalShutdownHandler.Bungee = VitalShutdownHandler.Bungee()
     }
 
     companion object {
