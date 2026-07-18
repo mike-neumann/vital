@@ -1,8 +1,10 @@
 .idea
 .gradle
+.nuxt
 
 target
 build
 initializer/generated
+node_modules
 
 *.iml

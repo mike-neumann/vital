@@ -1,0 +1,68 @@
+{
+  "layout": {
+    "title": "Vital - Das ultimative Minecraft-Plugin-Framework",
+    "description": "Beschleunige die Minecraft-Plugin-Entwicklung mit modernen, bewährten Java-Tools, entwicklerfreundlichen APIs und einer Struktur, die tatsächlich lesbar ist.",
+    "item": {
+      "home": "Startseite",
+      "docs": "Dokumentation"
+    },
+    "error": {
+      "home": "Zur Startseite"
+    },
+    "language": {
+      "de": "Deutsch",
+      "en": "Englisch"
+    }
+  },
+  "view": {
+    "index": {
+      "hero": {
+        "title": "Vital-Framework",
+        "get-started": "Loslegen",
+        "code": {
+          "title": "Minimales funktionierendes Vital-Plugin und plugin.yml"
+        }
+      },
+      "features": {
+        "title": "Alles, was du brauchst, um die besten Minecraft-Plugins zu erstellen",
+        "description": "Vital stellt dir alle Funktionen zur Verfügung, die du brauchst, um mit der Erstellung des Plugins zu beginnen, das du schon immer machen wolltest. Erstelle kleine bis hin zu riesigen Plugins, deiner Fantasie sind keine Grenzen gesetzt.",
+        "features": {
+          "autoconfigured": {
+            "title": "Automatisch konfiguriert",
+            "description": "Vital verwaltet deine Plugin-Konfiguration automatisch, sodass du dir keine Sorgen machen musst, sie selbst zu aktualisieren."
+          },
+          "powerful": {
+            "title": "Leistungsstark",
+            "description": "Vital wurde mit Spring Boot als Kern entwickelt. Erstelle umfangreiche Plugins, indem du bewährte Java-Tools aus dem Spring-Ökosystem nutzt. Keine Sorge, deine Plugins bleiben genauso leichtgewichtig wie vorher."
+          },
+          "readable": {
+            "title": "Readability",
+            "description": "Erstelle endlich lesbare Minecraft-Plugins, an denen Entwicklerteams gemeinsam arbeiten können. Kein Spaghetti-Code mehr oder Dinge, die kaum funktionieren."
+          },
+          "multiplatform-ready": {
+            "title": "Multiplatform",
+            "description": "Nutze Vital, um Plugins für all deine lieblings-Plattformen zu erstellen, wie: Spigot, Paper und BungeeCord. Keine zusätzlichen Konfigurationen nötig, von der Plugin-Konfiguration (plugin.yml) bis zur Command-Interaktion wird alles von Vital erledigt."
+          },
+          "modular": {
+            "title": "Modular",
+            "description": "Nutze Vital's Modulsystem, um dein Erlebnis noch weiter zu verbessern. Jedes Modul bringt eigene Funktionen mit sich, wie: fortschrittliches Command-System, Minispiel-System, dynamische Scoreboards, Lokalisierung, Inventar-Menüs, interaktive Items, Configs usw."
+          },
+          "lightweight": {
+            "title": "Leichtgewichtig",
+            "description": "Dank Vital's Modulsystem musst du nur die Funktionen auswählen, die du für dein Projekt tatsächlich brauchst. Du musst nicht das gesamte Framework einbinden, wenn du nur das Command-System brauchst, oder? Dadurch bleibt dein Projekt leichtgewichtig und einfacher zu warten."
+          }
+        }
+      },
+      "cta": {
+        "title": "Und noch viel mehr...",
+        "description": "Vital ist nicht nur eine kleine Bibliothek, sondern ein Ökosystem, das speziell entwickelt wurde, um die Entwicklung von Minecraft-Plugins einfacher und strukturierter als je zuvor zu machen. Es ist das Framework, von dem du nie wusstest, dass du es brauchst, aber sobald du es benutzt, möchtest du nie wieder zurück!",
+        "cards": {
+          "documentation": {
+            "title": "Dokumentation",
+            "description": "Sieh dir die Dokumentation an, um schnell mit Vital zu starten oder Hilfe zu jeder Komponente zu erhalten. Keine Sorge, die Dokumentation ist NICHT überdimensioniert und sehr leicht verständlich."
+          }
+        }
+      }
+    }
+  }
+}

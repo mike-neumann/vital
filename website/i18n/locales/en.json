@@ -1,0 +1,68 @@
+{
+  "layout": {
+    "title": "Vital - The ultimate Minecraft plugin framework",
+    "description": "Supercharge Minecraft plugin development with modern, proven Java tools, developer-friendly APIs and structure that is actually readable.",
+    "item": {
+      "home": "Home",
+      "docs": "Docs"
+    },
+    "error": {
+      "home": "Go home"
+    },
+    "language": {
+      "de": "German",
+      "en": "English"
+    }
+  },
+  "view": {
+    "index": {
+      "hero": {
+        "title": "Vital framework",
+        "get-started": "Get started",
+        "code": {
+          "title": "Minimal working Vital plugin and plugin.yml"
+        }
+      },
+      "features": {
+        "title": "Everything you need to create the best Minecraft plugins",
+        "description": "Vital provides you with all of the features you need to start making that plugin you always wanted to. Build small to even massive plugins, the skies the limit.",
+        "features": {
+          "autoconfigured": {
+            "title": "Autoconfigured",
+            "description": "Vital automatically manages your plugin configuration so you don't have to worry about forgetting to update it yourself."
+          },
+          "powerful": {
+            "title": "Powerful",
+            "description": "Vital was built with Spring Boot at its core. Create extensive plugins by utilizing proven Java tools from the Spring ecosystem. Don't worry, your plugins will stay as lightweight as they were before."
+          },
+          "readable": {
+            "title": "Readable",
+            "description": "Finally create readable Minecraft plugins that you can work on by teams of developers. No more spaghetti code or stuff that barely works."
+          },
+          "multiplatform-ready": {
+            "title": "Multiplatform ready",
+            "description": "Use Vital to create plugins for all of your favorite platforms, like: Spigot, Paper and BungeeCord. No extra configurations needed, everything from plugin configuration (plugin.yml) to command interaction is done by Vital."
+          },
+          "modular": {
+            "title": "Modular",
+            "description": "Utilize Vital's module system to enhance your experience even more. Every module brings its own unique features like: advanced command system, minigame system, dynamic scoreboards, localization, inventory menus, interactable items, configs, etc."
+          },
+          "lightweight": {
+            "title": "Lightweight",
+            "description": "Thanks to Vital's module system you can choose only the functionality you actually need for your project. No need to include the whole monolith if you only need the command system right? This keeps your project lightweight and easier to maintain."
+          }
+        }
+      },
+      "cta": {
+        "title": "And even more...",
+        "description": "Vital is not just a small library, it is an entire ecosystem, specifically built to make Minecraft plugin development easier and more structured than ever before. It's the framework you never knew you needed but once you start using it, you never want to go back again!",
+        "cards": {
+          "documentation": {
+            "title": "Documentation",
+            "description": "Check out the documentation to quickly get started with Vital or to get help with any component. Don't worry, the docs are NOT oversized and are easy to understand."
+          }
+        }
+      }
+    }
+  }
+}
