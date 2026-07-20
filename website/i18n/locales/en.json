@@ -19,6 +19,8 @@
       "hero": {
         "title": "Vital framework",
         "get-started": "Get started",
+        "features": "Features",
+        "planned-features": "Planned features",
         "code": {
           "title": "Minimal working Vital plugin and plugin.yml"
         }
@@ -60,6 +62,28 @@
           "documentation": {
             "title": "Documentation",
             "description": "Check out the documentation to quickly get started with Vital or to get help with any component. Don't worry, the docs are NOT oversized and are easy to understand."
+          }
+        }
+      },
+      "planned-features": {
+        "title": "Planned features",
+        "description": "These features are CURRENTLY NOT AVAILABLE but are planned for the future. If you have any ideas for other features please open up an issue on GitHub.",
+        "features": {
+          "lite-mode": {
+            "title": "Lite Mode",
+            "description": "You can also run Vital without Spring Boot while still benefiting from all of its features and functionality."
+          },
+          "more-platforms": {
+            "title": "More Platforms",
+            "description": "In addition to Spigot, Paper, and BungeeCord, Vital also supports other platforms such as Velocity and more."
+          },
+          "web-initializer": {
+            "title": "Web Initializer",
+            "description": "The initializer can also be used on the web to create your project, so it no longer needs to be run locally."
+          },
+          "npcs": {
+            "title": "NPCs",
+            "description": "With Vital, you can also create NPCs that perform their own actions, such as patrolling routes, reacting to player interactions, and more."
           }
         }
       }

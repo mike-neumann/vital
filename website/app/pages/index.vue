@@ -2,11 +2,24 @@
 import Code from "~/components/Code.vue";
 
 const heroLinks = computed(() => [{
+  icon: "i-lucide-book-open",
   label: $t("view.index.hero.get-started"),
+  trailingIcon: "i-lucide-external-link",
   to: "/docs",
   target: "_blank",
-  trailingIcon: "i-lucide-book-open",
   size: "xl"
+}, {
+  icon: "i-lucide-star",
+  label: $t("view.index.hero.features"),
+  to: "#features",
+  size: "xl",
+  variant: "subtle"
+}, {
+  icon: "i-lucide-hammer",
+  label: $t("view.index.hero.planned-features"),
+  to: "#planned-features",
+  size: "xl",
+  variant: "subtle"
 }])
 
 const heroCode = `
@@ -47,6 +60,29 @@ const features = computed(() => [
     description: $t("view.index.features.features.lightweight.description")
   }
 ])
+
+const plannedFeatures = computed(() => [
+  {
+    icon: "i-lucide-shrink",
+    title: $t("view.index.planned-features.features.lite-mode.title"),
+    description: $t("view.index.planned-features.features.lite-mode.description")
+  },
+  {
+    icon: "i-lucide-layers-plus",
+    title: $t("view.index.planned-features.features.more-platforms.title"),
+    description: $t("view.index.planned-features.features.more-platforms.description")
+  },
+  {
+    icon: "i-lucide-compass",
+    title: $t("view.index.planned-features.features.web-initializer.title"),
+    description: $t("view.index.planned-features.features.web-initializer.description")
+  },
+  {
+    icon: "i-lucide-users-round",
+    title: $t("view.index.planned-features.features.npcs.title"),
+    description: $t("view.index.planned-features.features.npcs.description")
+  }
+])
 </script>
 
 <template>
@@ -85,5 +121,14 @@ const features = computed(() => [
         </UPageGrid>
       </UPageCTA>
     </UPageSection>
+
+    <USeparator />
+
+    <UPageSection
+      id="planned-features"
+      :title="$t('view.index.planned-features.title')"
+      :description="$t('view.index.planned-features.description')"
+      :features="plannedFeatures"
+    />
   </div>
 </template>
