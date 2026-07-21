@@ -4,6 +4,7 @@
     "description": "Beschleunige die Minecraft-Plugin-Entwicklung mit modernen, bewährten Java-Tools, entwicklerfreundlichen APIs und einer Struktur, die tatsächlich lesbar ist.",
     "item": {
       "home": "Startseite",
+      "all-features": "Alle Features",
       "docs": "Dokumentation"
     },
     "error": {
@@ -12,6 +13,10 @@
     "language": {
       "de": "Deutsch",
       "en": "Englisch"
+    },
+    "view": {
+      "index": "Home",
+      "docs-slug": "Doku"
     }
   },
   "view": {
@@ -20,7 +25,7 @@
         "title": "Vital-Framework",
         "get-started": "Loslegen",
         "features": "Features",
-        "planned-features": "Geplante Features",
+        "all-features": "Alle Features",
         "code": {
           "title": "Minimales funktionierendes Vital-Plugin und plugin.yml"
         }
@@ -84,6 +89,62 @@
           "npcs": {
             "title": "NPCs",
             "description": "Du kannst mit Vital auch NPCs erstellen die ihre eigenen Aktionen durchführen können wie z. B. eine Route patrouillieren, auf Spieleraktionen reagieren, etc."
+          }
+        }
+      }
+    },
+    "all-features": {
+      "cta": {
+        "title": "Alle Features",
+        "description": "Eine umfassende Liste aller Features die das Vital-Framework derzeit zu bieten hat.",
+        "card": {
+          "vital-commands": {
+            "title": "vital-commands",
+            "description": "Erstelle eigene Comamnds mit Annotations. Jeder Command ist eine Klasse, jeder Unterbefehl '/mycommand arg' ist eine Methode, die automatisch aufgerufen wird, wenn dein Command ausgeführt wird. Das Command-System enthält automatische Tab-Completion und ein umfassendes System zur Behandlung von Exceptions. Dieses System wird deine Sichtweise auf die Erstellung von Commands komplett verändern!"
+          },
+          "vital-configs": {
+            "title": "vital-configs",
+            "description": "Jede Config-Datei wird nun eine Klasse sein, in der jede gespeicherte Property eine Klassenvariable mit vollständiger Typsicherheit ist. Schreibe direkt in deine Klasse, anstatt mit rohen Daten zu hantieren. Das Config-System unterstützt außerdem das Speichern eigener Klassen-Typen."
+          },
+          "vital-holograms": {
+            "title": "vital-holograms",
+            "description": "Erstelle einfach globale Hologramme und sogar Hologramme, die nur von bestimmten Spielern gesehen werden können. Zeige Spieler-Stats und noch mehr an."
+          },
+          "vital-inventories": {
+            "title": "vital-inventories",
+            "description": "Erstelle Inventar-Menüs, mit denen deine Spieler interagieren und zwischen denen sie navigieren können. Inventare sind immer dynamisch und können außerdem übersetzte Titel und Gegenstände über 'vital-localization' anzeigen!"
+          },
+          "vital-items": {
+            "title": "vital-items",
+            "description": "Erstelle einfach Gegenstände, mit denen deine Spieler interagieren können. Alle Gegenstände unterstützen direkt Cooldowns und Übersetzungen über 'vital-localization'."
+          },
+          "vital-localization": {
+            "title": "vital-localization",
+            "description": "Füge deinem Plugin eine vollständige Lokalisierungs- (Übersetzungs-) Lösung hinzu. Verwende Resource Bundles, um sprachspezifische Texte anzuzeigen. Kombiniere es mit Modulen wie 'vital-items' und 'vital-inventories' für eine vollständigere Lösung."
+          },
+          "vital-minigames": {
+            "title": "vital-minigames",
+            "description": "Das ultimative Framework zur Erstellung von Games mit echten Spieleentwicklungs-Patterns wie State-Machines usw. Erstelle Games, die entweder ihren State mit dem gesamten Server teilen oder sogar mehrere Games (Instanzen) auf demselben Server. Vital leitet Events automatisch nur an Games und States weiter, die aktuell aktiv sind. Dies wird deine Games auf die nächste Stufe bringen!"
+          },
+          "vital-players": {
+            "title": "vital-players",
+            "description": "Eine custom Player-Management-Lösung, mit der du einfach Daten in deinen eigenen Player-Objekten speichern kannst."
+          },
+          "vital-scoreboards": {
+            "title": "vital-scoreboards",
+            "description": "Erstelle einfach dynamische Scoreboards, die automatisch für alle Spieler aktualisiert werden, wenn du sie änderst. Erstelle globale Scoreboards, um dieselben Daten für alle Spieler anzuzeigen, oder erstelle Spieler-Scoreboards, um spielerspezifische Daten für alle deine Spieler darzustellen."
+          },
+          "vital-statistics": {
+            "title": "vital-statistics",
+            "description": "Integrierter Server-TPS-Healthcheck, der dich warnt, wenn die TPS deines Servers sinken."
+          },
+          "vital-tasks": {
+            "title": "vital-tasks",
+            "description": "Erstelle Server scheduler Tasks, ohne dir Gedanken darüber machen zu müssen, wo du sie in deiner Codebase abgelegt hast. Jede Task ist eine eigene Klasse mit klar definierten Lifecycles und einer festen Struktur, sodass du immer weißt, was deine Task tatsächlich macht."
+          },
+          "vital-utils": {
+            "title": "vital-utils",
+            "description": "Stellt nützliche Utilities bereit, die sogar verwendet werden können, wenn du Vital nicht nutzt. Broadcast-Aktionen, Potion-Effekte, Teleportieren von Spielern mit Effekten, Zensieren von Wörtern, Konvertieren von Texte in Adventure-Komponenten und vieles mehr."
           }
         }
       }

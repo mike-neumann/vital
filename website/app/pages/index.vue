@@ -15,9 +15,10 @@ const heroLinks = computed(() => [{
   size: "xl",
   variant: "subtle"
 }, {
-  icon: "i-lucide-hammer",
-  label: $t("view.index.hero.planned-features"),
-  to: "#planned-features",
+  icon: "i-lucide-list",
+  label: $t("view.index.hero.all-features"),
+  trailingIcon: "i-lucide-external-link",
+  to: "/all-features",
   size: "xl",
   variant: "subtle"
 }])
@@ -30,7 +31,8 @@ const heroCode = `
   apiVersion = "1.21",
   environment = "Vital.PluginEnvironment.PAPER"
 )
-public class MyPlugin {}
+public class MyPlugin {
+}
 `
 
 const features = computed(() => [

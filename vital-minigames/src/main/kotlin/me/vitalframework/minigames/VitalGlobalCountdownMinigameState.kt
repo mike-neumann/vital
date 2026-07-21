@@ -14,7 +14,7 @@ import me.vitalframework.tasks.VitalCountdownTask
  * The current minigame state can be managed by [VitalGlobalMinigameService].
  *
  * ```java
- * @MinigameState
+ * @GlobalMinigameState
  * public class MyCountdownMinigameState extends VitalGlobalCountdownMinigameState {
  *   public MyGlobalCountdownMinigameState(JavaPlugin plugin) {
  *     super(plugin);

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import Default from "~/layouts/default.vue";
-
 const search = useSearchCollection("docs")
 
 const navigation = ref()
@@ -15,7 +13,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <default>
+  <div>
     <UPage class="mt-5">
       <template #left>
         <UPageAside>
@@ -32,5 +30,5 @@ watchEffect(() => {
 
       <slot />
     </UPage>
-  </default>
+  </div>
 </template>

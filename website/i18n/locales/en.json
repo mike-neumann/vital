@@ -4,6 +4,7 @@
     "description": "Supercharge Minecraft plugin development with modern, proven Java tools, developer-friendly APIs and structure that is actually readable.",
     "item": {
       "home": "Home",
+      "all-features": "All features",
       "docs": "Docs"
     },
     "error": {
@@ -12,6 +13,10 @@
     "language": {
       "de": "German",
       "en": "English"
+    },
+    "view": {
+      "index": "Home",
+      "docs-slug": "Docs"
     }
   },
   "view": {
@@ -20,7 +25,7 @@
         "title": "Vital framework",
         "get-started": "Get started",
         "features": "Features",
-        "planned-features": "Planned features",
+        "all-features": "All features",
         "code": {
           "title": "Minimal working Vital plugin and plugin.yml"
         }
@@ -84,6 +89,62 @@
           "npcs": {
             "title": "NPCs",
             "description": "With Vital, you can also create NPCs that perform their own actions, such as patrolling routes, reacting to player interactions, and more."
+          }
+        }
+      }
+    },
+    "all-features": {
+      "cta": {
+        "title": "All features",
+        "description": "This is a comprehensive list of all features the Vital framework currently has to offer.",
+        "card": {
+          "vital-commands": {
+            "title": "vital-commands",
+            "description": "Create custom server commands using an annotation-driven design. Every command is a class, every subcommand '/mycommand arg' is a method that will automatically be called when your command is executed. The command system contains automatic tab-completions and a comprehensive and advanced system for handling exceptions. This system will change how you look at command creation!"
+          },
+          "vital-configs": {
+            "title": "vital-configs",
+            "description": "Every config file will now be a class where every saved property is a class field with proper type-safety. Write to your class instead of juggling around with raw data. The config system also supports saving your own custom types."
+          },
+          "vital-holograms": {
+            "title": "vital-holograms",
+            "description": "Easily create global holograms and even holograms that can only be seen by specific players. Display player statistics and more."
+          },
+          "vital-inventories": {
+            "title": "vital-inventories",
+            "description": "Create inventory menus that your players can interact with and navigate between. Inventories are always dynamic and can also show translated titles and items via 'vital-localization'!"
+          },
+          "vital-items": {
+            "title": "vital-items",
+            "description": "Easily create items that your players can interact with. All items directly support cooldown and translations via 'vital-localization'."
+          },
+          "vital-localization": {
+            "title": "vital-localization",
+            "description": "Add a full localization (translations) solution to your plugin. Use resource bundles to show player-language specific texts. Combine it with modules like 'vital-items' and 'vital-inventories' for a more complete solution."
+          },
+          "vital-minigames": {
+            "title": "vital-minigames",
+            "description": "The ultimate framework for making games using real game development patterns, like state machines, etc. Create games that either share their state with the entire server, or even host multiple games (instances) on the same server. Vital automatically routes events only to games and states that are currently active. This will bring your games to the next level!"
+          },
+          "vital-players": {
+            "title": "vital-players",
+            "description": "A custom player management solution so you can easily store data on your custom player objects."
+          },
+          "vital-scoreboards": {
+            "title": "vital-scoreboards",
+            "description": "Easily create dynamic scoreboards that automatically update for all players when you change them, etc. Create global scoreboards to show the same data for all players, or create player scoreboards to show player specific data for all of your players."
+          },
+          "vital-statistics": {
+            "title": "vital-statistics",
+            "description": "Integrated server TPS health checker to warn you when your server's TPS drops."
+          },
+          "vital-tasks": {
+            "title": "vital-tasks",
+            "description": "Create server-scheduled tasks without having to worry about losing where you put it in your code base. Every task will be its own class that has strict lifecycles and structure so you always know what your task actually does."
+          },
+          "vital-utils": {
+            "title": "vital-utils",
+            "description": "Provides useful utilities, that can even be used when you are not using Vital. Broadcast actions, potion effects, teleport players with effects, censor words, converts raw text to adventure components, and more."
           }
         }
       }

@@ -8,7 +8,7 @@ import me.vitalframework.tasks.VitalCountdownTask
  * A state may perform mutation on its own instance that's passed to its constructor to modify game data.
  *
  * ```java
- * @MinigameState
+ * @GlobalMinigameState
  * public class MyCountdownMinigameInstanceState extends VitalCountdownMinigameState<MyMinigameInstance> {
  *   public MyCountdownMinigameInstanceState(MyMinigameInstance instance) {
  *     super(instance);

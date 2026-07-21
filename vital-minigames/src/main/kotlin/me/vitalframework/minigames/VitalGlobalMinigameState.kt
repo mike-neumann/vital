@@ -13,7 +13,7 @@ import me.vitalframework.VitalCoreModule.Companion.logger
  * The current minigame state can be managed by [VitalGlobalMinigameService].
  *
  * ```java
- * @MinigameState
+ * @GlobalMinigameState
  * public class MyGlobalMinigameState implements VitalGlobalMinigameState {
  *   @Override
  *   public void onEnable() {
