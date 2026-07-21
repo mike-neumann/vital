@@ -1,7 +1,7 @@
 package me.myproject;
 
-import me.vitalframework.Vital;
-import me.vitalframework.VitalCoreModule;
+import dev.vitalframework.Vital;
+import dev.vitalframework.VitalCoreModule;
 import org.slf4j.Logger;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.ContextClosedEvent;

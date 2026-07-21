@@ -1,11 +1,11 @@
-package me.vitalframework.initializer.test
+package dev.vitalframework.initializer.test
 
-import me.vitalframework.initializer.DataModel
-import me.vitalframework.initializer.GradleDslProgrammingLanguage
-import me.vitalframework.initializer.PluginEnvironment
-import me.vitalframework.initializer.ProgrammingLanguage
-import me.vitalframework.initializer.createFreemarkerConfiguration
-import me.vitalframework.initializer.generatePlugin
+import dev.vitalframework.initializer.DataModel
+import dev.vitalframework.initializer.GradleDslProgrammingLanguage
+import dev.vitalframework.initializer.PluginEnvironment
+import dev.vitalframework.initializer.ProgrammingLanguage
+import dev.vitalframework.initializer.createFreemarkerConfiguration
+import dev.vitalframework.initializer.generatePlugin
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest

@@ -1,0 +1,133 @@
+package dev.vitalframework.statistics
+
+import dev.vitalframework.BungeeCommandSender
+import dev.vitalframework.RequiresBungee
+import dev.vitalframework.RequiresSpigot
+import dev.vitalframework.SpigotCommandSender
+import dev.vitalframework.Vital
+import dev.vitalframework.commands.VitalCommand
+import dev.vitalframework.utils.VitalUtils.Bungee.sendFormattedMessage
+import dev.vitalframework.utils.VitalUtils.Spigot.sendFormattedMessage
+import net.md_5.bungee.api.ProxyServer
+import org.bukkit.Bukkit
+import org.springframework.context.annotation.Conditional
+import org.springframework.core.SpringVersion
+import java.text.SimpleDateFormat
+import java.util.Date
+
+/**
+ * Internal class; handles health check logic and the /stats command.
+ */
+interface StatsCommand<CS> {
+    companion object {
+        const val PERMISSION = "dev.vitalframework.command.vital-stats"
+    }
+
+    val vitalStatisticsService: VitalStatisticsService
+    val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties
+
+    fun sendMessage(
+        sender: CS,
+        message: String,
+    )
+
+    fun handleOnCommand(sender: CS) {
+        val serverStatus =
+            if (vitalStatisticsService.tps >=
+                vitalStatisticsConfigurationProperties.minTps
+            ) {
+                "<green>HEALTHY</green>"
+            } else {
+                "<red>UNHEALTHY</yellow>"
+            }
+        val ramUsageInGigaBytes =
+            (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024 / 1024
+
+        sendMessage(sender, "-----> Server-Statistics")
+        sendMessage(sender, "Spring version: <yellow>${SpringVersion.getVersion()}")
+        sendMessage(sender, "Server status: <yellow>${vitalStatisticsService.tps} TPS ($serverStatus)")
+        sendMessage(sender, "RAM usage: <yellow>$ramUsageInGigaBytes GB")
+        sendMessage(sender, "Vital sub-modules: <yellow>${Vital.vitalModules.size}")
+
+        for (name in Vital.vitalModules) {
+            sendMessage(sender, "> <yellow>$name")
+        }
+
+        sendMessage(sender, "-----")
+    }
+
+    fun handleOnHealthTps(sender: CS): VitalCommand.ReturnState {
+        sendMessage(sender, "-----> TPS")
+        sendMessage(sender, "TPS: <yellow>${vitalStatisticsService.tps}")
+        sendMessage(
+            sender,
+            "TPS reports: <yellow>${vitalStatisticsService.lastTps.size} of ${vitalStatisticsConfigurationProperties.maxTpsTaskCache}",
+        )
+
+        for ((time, tps) in vitalStatisticsService.lastTps) {
+            sendMessage(sender, "> <yellow>${SimpleDateFormat("HH:mm:ss").format(Date(time))}, $tps TPS")
+        }
+
+        sendMessage(
+            sender,
+            "Bad TPS reports: <yellow>${vitalStatisticsService.lastUnhealthyTps.size} of ${vitalStatisticsConfigurationProperties.maxTpsTaskCache}",
+        )
+
+        for ((time, tps) in vitalStatisticsService.lastUnhealthyTps) {
+            sendMessage(sender, "> <yellow>${SimpleDateFormat("HH:mm:ss").format(Date(time))}, $tps TPS")
+        }
+
+        sendMessage(sender, "-----")
+
+        return VitalCommand.ReturnState.SUCCESS
+    }
+
+    @Conditional(RequiresSpigot::class)
+    @VitalCommand.Info("vital-stats", permission = PERMISSION)
+    class Spigot(
+        override val vitalStatisticsService: VitalStatisticsService,
+        override val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
+    ) : VitalCommand.Spigot(),
+        StatsCommand<SpigotCommandSender> {
+        override fun sendMessage(
+            sender: SpigotCommandSender,
+            message: String,
+        ) = sender.sendFormattedMessage(message)
+
+        @ArgHandler
+        fun onNoArg(sender: SpigotCommandSender): ReturnState {
+            sender.sendFormattedMessage("MC Version: <yellow>${Bukkit.getVersion()}")
+            sender.sendFormattedMessage("Bukkit Version: <yellow>${Bukkit.getBukkitVersion()}")
+            handleOnCommand(sender)
+
+            return ReturnState.SUCCESS
+        }
+
+        @ArgHandler(Arg("tps"))
+        fun onTps(sender: SpigotCommandSender) = handleOnHealthTps(sender)
+    }
+
+    @Conditional(RequiresBungee::class)
+    @VitalCommand.Info("vital-stats", permission = PERMISSION)
+    class Bungee(
+        override val vitalStatisticsService: VitalStatisticsService,
+        override val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
+    ) : VitalCommand.Bungee(),
+        StatsCommand<BungeeCommandSender> {
+        override fun sendMessage(
+            sender: BungeeCommandSender,
+            message: String,
+        ) = sender.sendFormattedMessage(message)
+
+        @ArgHandler
+        fun onNoArg(sender: BungeeCommandSender): ReturnState {
+            sender.sendFormattedMessage("Bungee version: <yellow>${ProxyServer.getInstance().version}")
+            handleOnCommand(sender)
+
+            return ReturnState.SUCCESS
+        }
+
+        @ArgHandler(Arg("tps"))
+        fun onTps(sender: BungeeCommandSender) = handleOnHealthTps(sender)
+    }
+}

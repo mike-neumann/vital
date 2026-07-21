@@ -1,9 +1,9 @@
 package me.myproject
 
-import me.vitalframework.Vital
-import me.vitalframework.VitalCoreModule.Companion.getVitalInfo
-import me.vitalframework.VitalCoreModule.Companion.logger
-import me.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import dev.vitalframework.Vital
+import dev.vitalframework.VitalCoreModule.Companion.getVitalInfo
+import dev.vitalframework.VitalCoreModule.Companion.logger
+import dev.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.event.EventListener

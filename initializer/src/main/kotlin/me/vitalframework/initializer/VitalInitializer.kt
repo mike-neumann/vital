@@ -1,4 +1,4 @@
-package me.vitalframework.initializer
+package dev.vitalframework.initializer
 
 import freemarker.template.Configuration
 import freemarker.template.TemplateExceptionHandler

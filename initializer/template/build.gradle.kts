@@ -9,7 +9,7 @@ groovy
 kotlin("jvm") version "2.2.0"
 kotlin("kapt") version "2.2.0"
     </#if>
-    id("me.vitalframework.vital-gradle-plugin") version "dev-SNAPSHOT"
+    id("dev.vitalframework.vital-gradle-plugin") version "dev-SNAPSHOT"
 }
 
 group = "me.myproject"

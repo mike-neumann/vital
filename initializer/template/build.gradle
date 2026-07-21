@@ -9,7 +9,7 @@ id 'groovy'
 id 'org.jetbrains.kotlin.jvm' version '2.2.0'
 id 'org.jetbrains.kotlin.kapt' version '2.2.0'
     </#if>
-    id 'me.vitalframework.vital-gradle-plugin' version 'dev-SNAPSHOT'
+    id 'dev.vitalframework.vital-gradle-plugin' version 'dev-SNAPSHOT'
 }
 
 group 'me.myproject'

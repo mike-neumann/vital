@@ -33,7 +33,7 @@ repositories {
 }
 
 subprojects {
-    group = "me.vitalframework"
+    group = "dev.vitalframework"
     version = getGitTag()
 
     apply(plugin = "org.jetbrains.kotlin.jvm")

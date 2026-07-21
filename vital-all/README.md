@@ -7,6 +7,6 @@ To exclude specific modules from your plugin, you can add this to your plugin's 
 
 ```kotlin
 configurations.all {
-    exclude(group = "me.vitalframework", module = "vital-.")
+    exclude(group = "dev.vitalframework", module = "vital-.")
 }
 ```

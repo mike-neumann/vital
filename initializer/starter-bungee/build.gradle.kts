@@ -1,6 +1,6 @@
 plugins {
     java
-    id("me.vitalframework.vital-gradle-plugin") version "dev-SNAPSHOT"
+    id("dev.vitalframework.vital-gradle-plugin") version "dev-SNAPSHOT"
 }
 
 group = "me.myproject"
