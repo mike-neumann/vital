@@ -27,7 +27,7 @@
         "features": "Features",
         "all-features": "All features",
         "code": {
-          "title": "Minimal working Vital plugin and plugin.yml"
+          "title": "Minimal Vital plugin (plugin.yml is automatically created)"
         }
       },
       "features": {
@@ -96,7 +96,8 @@
     "all-features": {
       "cta": {
         "title": "All features",
-        "description": "This is a comprehensive list of all features the Vital framework currently has to offer.",
+        "description": "This is a comprehensive list of all features the Vital framework currently has to offer. Note that these features are all separate modules that you need to add to your plugin in order to get the functionalities you need. The Vital module system makes your plugin smaller and so that it only contains the components your actually need for your plugin!",
+
         "card": {
           "vital-commands": {
             "title": "vital-commands",
