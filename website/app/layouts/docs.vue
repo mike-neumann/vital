@@ -41,14 +41,14 @@ watchEffect(() => {
       <template #left>
         <UPageAside>
           <div class="pl-5">
-            <DocsNavigation :search="search" :navigation="navigation" />
+            <DocsNavigation :search="search" :navigation="navigation" show-content-search />
           </div>
         </UPageAside>
       </template>
 
       <div class="pl-5 pr-5">
         <div class="lg:hidden">
-          <DocsNavigation :search="search" :navigation="navigation" />
+          <DocsNavigation :search="search" :navigation="navigation" :show-content-search="false" />
 
           <div class="pt-5 pb-5">
             <USeparator />
