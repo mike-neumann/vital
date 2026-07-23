@@ -1,8 +1,8 @@
+rootProject.name = "starter-bungee"
+
 pluginManagement {
     repositories {
         mavenLocal()
         gradlePluginPortal()
     }
 }
-
-rootProject.name = "starter-bungee"

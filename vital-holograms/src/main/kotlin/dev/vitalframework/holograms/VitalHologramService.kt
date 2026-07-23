@@ -4,12 +4,15 @@ import dev.vitalframework.SpigotPlayer
 import dev.vitalframework.SpigotPlugin
 import dev.vitalframework.VitalCoreModule.Companion.logger
 import net.kyori.adventure.text.minimessage.MiniMessage
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.ArmorStand
+import org.bukkit.entity.Entity
+import org.bukkit.entity.Item
 import org.bukkit.inventory.ItemStack
 import java.util.UUID
+import kotlin.collections.reversed
 
 /**
  * Global service to create and delete holograms.
@@ -22,13 +25,129 @@ class VitalHologramService(
     private val logger = logger()
 
     /**
+     * Internal function; creates the [ArmorStand] entities for the given [lines].
+     */
+    private fun createHologramLineArmorStands(
+        baseArmorStand: Entity,
+        lines: List<VitalHologram.Line>,
+    ): List<ArmorStand> =
+        lines.reversed().mapIndexed { i, line ->
+            val loggingContext = "Line: line '${line.text}', material '${line.material}'"
+            logger.debug("Creating new line. $loggingContext")
+
+            val newLineArmorStand =
+                baseArmorStand.world
+                    .spawn(baseArmorStand.location.clone().add(0.0, .25 * i, 0.0), ArmorStand::class.java) {
+                        it.isVisible = false
+                        it.isInvisible = true
+                        it.isMarker = true
+
+                        val lineText = line.text?.let { MiniMessage.miniMessage().deserialize(it) }
+                        if (lineText != null) {
+                            it.isCustomNameVisible = true
+                            it.customName(lineText)
+                        }
+
+                        if (line.material != null) {
+                            val lineItem =
+                                it.world.dropItem(it.location, ItemStack(line.material)) {
+                                    it.isUnlimitedLifetime = true
+                                    it.setCanPlayerPickup(false)
+                                    it.setCanMobPickup(false)
+                                }
+                            it.addPassenger(lineItem)
+                        }
+                    }
+
+            baseArmorStand.addPassenger(newLineArmorStand)
+            logger.debug("New line created. $loggingContext")
+            newLineArmorStand
+        }
+
+    /**
+     * Updates all lines of the given [hologram].
+     * If the hologram doesn't exist, this function will throw [IllegalStateException].
+     */
+    fun updateHologram(hologram: VitalHologram) {
+        val lines = hologram.lines.map { it() }
+        val loggingContext = "Context: location '${hologram.location}', lines '$lines'."
+        val baseArmorStand =
+            Bukkit.getEntity(hologram.armorStandUniqueId)
+                ?: let {
+                    logger.debug(
+                        "Cannot update hologram, entity with uuid '${hologram.armorStandUniqueId}' does not exist, attempting to load chunk and retrying.",
+                    )
+                    hologram.location.chunk.load()
+
+                    Bukkit.getEntity(hologram.armorStandUniqueId)
+                        ?: throw IllegalStateException(
+                            "Cannot update hologram, entity with uuid '${hologram.armorStandUniqueId}' does not exist.",
+                        )
+                }
+
+        val lineArmorStands = baseArmorStand.passengers.filterIsInstance<ArmorStand>().toMutableList()
+        if (lineArmorStands.size != lines.size) {
+            logger.debug("Line size has changed, will recreate all line holograms. $loggingContext")
+
+            for (lineArmorStand in lineArmorStands) {
+                baseArmorStand.removePassenger(lineArmorStand)
+                lineArmorStand.remove()
+            }
+
+            lineArmorStands.clear()
+            lineArmorStands.addAll(createHologramLineArmorStands(baseArmorStand, lines))
+        }
+
+        logger.debug("Updating all '${lineArmorStands.size}' lines. $loggingContext")
+        for ((lineArmorStand, line) in lineArmorStands.zip(lines)) {
+            val loggingContext = "$loggingContext - Line: text '${line.text}', material '${line.material}'."
+            logger.debug("Updating line. $loggingContext")
+
+            lineArmorStand.isVisible = false
+            lineArmorStand.isInvisible = true
+            lineArmorStand.isMarker = true
+            lineArmorStand.isCustomNameVisible = true
+
+            val oldLineText = lineArmorStand.customName()?.let { PlainTextComponentSerializer.plainText().serialize(it) }
+            if (oldLineText != line.text) {
+                logger.debug("Line has changed, will update. $loggingContext")
+                val newLine = line.text?.let { MiniMessage.miniMessage().deserialize(it) }
+                lineArmorStand.customName(newLine)
+            }
+
+            val oldLineItem = lineArmorStand.passengers.filterIsInstance<Item>().firstOrNull()
+            if (oldLineItem?.itemStack?.type != line.material) {
+                logger.debug("Material has changed, will update, new material is '${line.material}'. $loggingContext")
+                lineArmorStand.removePassenger(oldLineItem!!)
+                oldLineItem.remove()
+
+                if (line.material != null) {
+                    val newLineItem =
+                        lineArmorStand.world.dropItem(lineArmorStand.location, ItemStack(line.material)) {
+                            it.isUnlimitedLifetime = true
+                            it.setCanPlayerPickup(false)
+                            it.setCanMobPickup(false)
+                        }
+
+                    lineArmorStand.addPassenger(newLineItem)
+                }
+            }
+
+            logger.debug("Line update complete. $loggingContext")
+        }
+
+        logger.debug("All '${lineArmorStands.size}' lines have been updated. $loggingContext")
+    }
+
+    /**
      * Creates a hologram at the given [location] which displays all given [lines] that is visible to all players on the server.
      * The created hologram is stored in [VitalHologramRepository].
      */
     fun createGlobalHologram(
-        lines: List<VitalHologram.Line>,
         location: Location,
-    ): VitalGlobalHologram {
+        vararg linesFunctions: () -> VitalHologram.Line,
+    ): VitalHologram {
+        val lines = linesFunctions.map { it() }
         val loggingContext = "Context: lines '$lines', location: '$location'."
         logger.debug("Creating global hologram. $loggingContext")
 
@@ -38,14 +157,13 @@ class VitalHologramService(
                 it.isInvisible = true
                 it.isMarker = true
             }
-        val lineArmorStandUniqueIds = lines.createArmorStands(location).map { it.uniqueId }
+        val lineArmorStandUniqueIds = createHologramLineArmorStands(armorStand, lines).map { it.uniqueId }
         val hologram =
             vitalHologramRepository.save(
-                VitalGlobalHologram(UUID.randomUUID(), lines, location, armorStand.uniqueId, lineArmorStandUniqueIds),
+                VitalHologram(UUID.randomUUID(), linesFunctions.toList(), location, armorStand.uniqueId, lineArmorStandUniqueIds),
             )
 
         logger.debug("Global hologram created. $loggingContext")
-
         return hologram
     }
 
@@ -53,11 +171,12 @@ class VitalHologramService(
      * Creates a hologram at the given [location] which displays the given [lines] that is visible to only the passed [player].
      * The created hologram is stored in [VitalHologramRepository].
      */
-    fun createPerPlayerHologram(
+    fun createPlayerHologram(
         player: SpigotPlayer,
-        lines: List<VitalHologram.Line>,
         location: Location,
-    ): VitalPerPlayerHologram {
+        vararg linesFunctions: (SpigotPlayer) -> VitalHologram.Line,
+    ): VitalPlayerHologram {
+        val lines = linesFunctions.map { it(player) }
         val loggingContext = "Context: player '$player', lines '$lines', location: '$location'."
 
         logger.debug("Creating per player hologram. $loggingContext")
@@ -68,13 +187,14 @@ class VitalHologramService(
                 it.isMarker = true
             }
 
+        val linesArmorStandUniqueIds = createHologramLineArmorStands(armorStand, lines).map { it.uniqueId }
         val hologram =
-            VitalPerPlayerHologram(
+            VitalPlayerHologram(
                 UUID.randomUUID(),
-                lines,
+                linesFunctions.toList(),
                 location,
                 armorStand.uniqueId,
-                lines.createArmorStands(location).map { it.uniqueId },
+                linesArmorStandUniqueIds,
                 player.uniqueId,
             )
 
@@ -186,59 +306,14 @@ class VitalHologramService(
     }
 
     /**
-     * Internal function; used to convert a list on content-lines to armor stands.
-     * This function will spawn the armor stands and return them as a list.
-     *
-     * Additionally, an [action] can be performed for each spawned armor stand.
-     */
-    private fun List<VitalHologram.Line>.createArmorStands(
-        location: Location,
-        action: (ArmorStand) -> Unit = {},
-    ): List<ArmorStand> {
-        val loggingContext = "Context: location '$location', lines '$this'."
-        logger.debug("Creating armor stands for each hologram line. $loggingContext")
-        return reversed().mapIndexed { i, line ->
-            logger.debug("Creating armor stand for hologram line '${line.text}'. $loggingContext")
-            // convert the minimessage formatted line into a legacy section formatted line.
-            val formattedLine =
-                LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(line.text ?: ""))
-
-            val armorStand =
-                location.world!!
-                    .spawn(location.clone().add(0.0, .25 * i, 0.0), ArmorStand::class.java) {
-                        it.isVisible = false
-                        it.isInvisible = true
-                        it.isMarker = true
-
-                        if (formattedLine.isNotEmpty()) {
-                            it.isCustomNameVisible = true
-                            it.customName(MiniMessage.miniMessage().deserialize(formattedLine))
-                        }
-
-                        if (line.material != null) {
-                            it.addPassenger(
-                                it.world.dropItem(it.location, ItemStack(line.material)) {
-                                    it.isUnlimitedLifetime = true
-                                    it.setCanPlayerPickup(false)
-                                    it.setCanMobPickup(false)
-                                },
-                            )
-                        }
-                    }
-            action(armorStand)
-            armorStand
-        }
-    }
-
-    /**
      * Hides all other known holograms that are registered in [VitalHologramRepository] and are not owned by the given [player].
      * Note that this function will only work correctly, if all holograms are loaded into [VitalHologramRepository].
      * If not, this function will fail to hide other holograms since Vital is not aware of their existence.
      */
-    fun hideOtherPerPlayerHolograms(player: SpigotPlayer) {
+    fun hideOtherPlayerHolograms(player: SpigotPlayer) {
         val loggingContext = "Context: player '$player'."
         logger.debug("Hiding all other holograms for player '$player'. $loggingContext")
-        val holograms = vitalHologramRepository.findAll<VitalPerPlayerHologram>().filter { it.playerUniqueId != player.uniqueId }
+        val holograms = vitalHologramRepository.findAll<VitalPlayerHologram>().filter { it.playerUniqueId != player.uniqueId }
         for (hologram in holograms) {
             logger.debug("Hiding hologram '${hologram.id}' for player '$player'. $loggingContext")
             hideHologram(player, hologram)

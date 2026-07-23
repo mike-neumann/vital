@@ -32,6 +32,10 @@ repositories {
     mavenCentral()
 }
 
+allprojects {
+    tasks.findByName("bootJar")?.enabled = false
+}
+
 subprojects {
     group = "dev.vitalframework"
     version = getGitTag()
@@ -116,4 +120,6 @@ subprojects {
     tasks.test {
         useJUnitPlatform()
     }
+
+    tasks.findByName("bootJar")?.enabled = false
 }

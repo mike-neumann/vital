@@ -16,7 +16,8 @@
     },
     "view": {
       "index": "Home",
-      "docs-slug": "Docs"
+      "docs-slug": "Docs",
+      "all-features": "All features"
     }
   },
   "view": {

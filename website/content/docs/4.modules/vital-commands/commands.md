@@ -12,7 +12,7 @@ A command can have n-number of arg handlers, each arg handler is essentially a m
 
 Since Vital can determine the structure of your command by simply just looking at your class it will automatically build tab-completions without you having to do anything!  
 
-```java
+```java [MyCommand.java]
 @VitalCommand.Info(name = "mycommand")
 public class MyCommand extends VitalCommand.Spigot {
 }
@@ -23,7 +23,7 @@ public class MyCommand extends VitalCommand.Spigot {
 The following example shows a command that has an arg handler for `/mycommand myarg0 myarg1`.  
 When this command is executed, Vital automatically calls the method annotated with `@ArgHandler`.
 
-```java
+```java [MyCommand.java]
 @VitalCommand.Info(name = "mycommand")
 public class MyCommand extends VitalCommand.Spigot {
   @ArgHandler(arg = @Arg(name = "myarg0 myarg1"))
@@ -44,7 +44,7 @@ But sometimes you might need to return `ReturnState.NO_PERMISSION` or something 
 > Important: Obviously, you cant set your parameter to a `Player` if you can also receive non-players as a sender, be careful of that when you build your commands!
 
 We can also restrict specific arg handlers to players, or restrict their permissions.
-```java
+```java [MyCommand.java]
 @ArgHandler(arg = @Arg(name = "myarg0 myarg1", permission = "myserver.mycommand.permission", playerOnly = true))
 ```
 
@@ -53,7 +53,7 @@ We can also restrict specific arg handlers to players, or restrict their permiss
 Sometimes we need to get some input from a player.  
 To do this, we can use the `<...>` syntax.
 
-```java
+```java [MyCommand.java]
 @VitalCommand.Info(name = "mycommand")
 public class MyCommand extends VitalCommand.Spigot {
   @ArgHandler(arg = @Arg(name = "myarg0 <myarg1>"))
@@ -77,7 +77,7 @@ For space delimited values, use varargs.
 
 To also receive values delimited by spaces, you can use the vararg syntax `<...>*` in your arg handlers.
 
-```java
+```java [MyCommand.java]
   @ArgHandler(arg = @Arg(name = "myarg0 <myarg1>*"))
   public ReturnState onMyArg0MyArg1SomethingBlaBla(Player player, String[] values) {
     // ...

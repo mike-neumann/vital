@@ -24,12 +24,12 @@
 
 .page-enter-from {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(-20px);
 }
 
 .page-leave-to {
   opacity: 0;
-  transform: translateY(-20px);
+  transform: translateY(20px);
   filter: blur(0.5rem);
 }
 

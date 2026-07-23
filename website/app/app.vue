@@ -71,6 +71,10 @@ const languageDropdownMenuItems = computed<NavigationMenuItem[]>(() => available
 
         <UNavigationMenu :items="navItems"/>
 
+        <template #body>
+          <UNavigationMenu :items="navItems" orientation="vertical"/>
+        </template>
+
         <template #right>
           <UDropdownMenu :items="languageDropdownMenuItems">
             <UButton icon="i-lucide-globe" variant="ghost" color="neutral" trailing-icon="i-lucide-chevron-down">

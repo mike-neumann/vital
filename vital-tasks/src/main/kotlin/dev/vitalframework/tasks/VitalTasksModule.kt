@@ -1,11 +1,17 @@
 package dev.vitalframework.tasks
 
+import dev.vitalframework.BungeePlugin
+import dev.vitalframework.RequiresBungee
+import dev.vitalframework.RequiresSpigot
+import dev.vitalframework.SpigotPlugin
 import dev.vitalframework.Vital
 import dev.vitalframework.VitalCoreModule.Companion.logger
 import dev.vitalframework.VitalModule
 import org.springframework.beans.factory.getBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Conditional
+import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
 import org.springframework.scheduling.annotation.EnableScheduling
 
@@ -34,7 +40,25 @@ class VitalTasksModule(
         logger.debug("Vital schedular shut down.")
     }
 
-    @ConditionalOnMissingBean
-    @Bean
-    fun vitalScheduler(environment: Environment): VitalScheduler = VitalScheduler(environment)
+    @Conditional(RequiresSpigot::class)
+    @Configuration
+    class Spigot {
+        @ConditionalOnMissingBean
+        @Bean
+        fun vitalSchedulerSpigot(
+            environment: Environment,
+            plugin: SpigotPlugin,
+        ) = VitalScheduler.Spigot(environment, plugin)
+    }
+
+    @Conditional(RequiresBungee::class)
+    @Configuration
+    class Bungee {
+        @ConditionalOnMissingBean
+        @Bean
+        fun vitalSchedulerBungee(
+            environment: Environment,
+            plugin: BungeePlugin,
+        ): VitalScheduler = VitalScheduler.Bungee(environment, plugin)
+    }
 }

@@ -1,8 +1,8 @@
+rootProject.name = "starter-paper"
+
 pluginManagement {
     repositories {
         mavenLocal()
         gradlePluginPortal()
     }
 }
-
-rootProject.name = "starter-paper"

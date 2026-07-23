@@ -14,7 +14,7 @@ When an exception occurs during that arg handler execution, Vital will search fo
 
 E.g., You have the following command.  
 
-```java
+```java [MyCommand.java]
 @VitalCommand.Info(name = "mycommand")
 public class MyCommand extends VitalCommand.Spigot {
   @ArgHandler(arg = @Arg(name = "myarg0 myarg1"))
@@ -35,7 +35,7 @@ The solution? Arg exception handlers.
 When this `Exception` is now thrown while you execute `/mycommand myarg0 myarg1`, Vital will automatically look for an arg exception handler in your command class that is configured to handle an `Exception` for `myarg0 myarg1`.  
 
 An arg exception handler may look like this.  
-```java
+```java [MyCommand.java]
 @VitalCommand.Info(name = "mycommand")
 public class MyCommand extends VitalCommand.Spigot {
   @ArgHandler(arg = @Arg(name = "myarg0 myarg1"))
@@ -81,7 +81,7 @@ Also, global exception handlers are **not bound to a specific argument**, they o
 
 Global command exceptions handlers are defined in their own class that must be annotated with `@VitalCommand.Advice(CommandSender)`.  
 
-```java
+```java [MyGlobalCommandExceptionHandler.java]
 @VitalCommand.Advice(CommandSender.class)
 public class MyGlobalCommandExceptionHandler {
   @VitalCommand.GlobalExceptionHandler(type = Exception.class)

@@ -1,0 +1,31 @@
+---
+title: Recipe for interactive items.
+description: Recipe for interactive items.
+navigation:
+  title: Items
+---
+
+# Items
+
+Below is an example for an item that your players can interact with.  
+The item will have a cooldown of 1 second and thus can only be used every 1 second.
+
+```java [MyItem.java]
+@VitalItem.Info(type = Material.STICK, name = "My item", cooldown = 1_000)
+public class MyItem extends VitalItem {
+	@Override
+	public void onRightClick(PlayerInteractEvent e) {
+		e.getPlayer().sendMessage("You have right-clicked the item!");
+	}
+
+	@Override
+	public void onLeftClick(PlayerInteractEvent e) {
+		e.getPlayer().sendMessage("You have left-clicked the item!");
+	}
+
+	@Override
+	public void onCooldown(PlayerInteractEvent e) {
+		e.getPlayer().sendMessage("The item is still on cooldown!");
+	}
+}
+```

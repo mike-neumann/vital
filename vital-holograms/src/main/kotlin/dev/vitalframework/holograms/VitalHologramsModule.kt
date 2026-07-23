@@ -44,7 +44,6 @@ class VitalHologramsModule : VitalModule() {
 
         @ConditionalOnMissingBean
         @Bean
-        fun vitalPerPlayerHologramListener(vitalHologramService: VitalHologramService) =
-            VitalPerPlayerHologramListener(vitalHologramService)
+        fun vitalPlayerHologramListener(vitalHologramService: VitalHologramService) = VitalPlayerHologramListener(vitalHologramService)
     }
 }
