@@ -7,5 +7,6 @@ target
 build
 initializer/generated
 node_modules
+website/public/dokka
 
 *.iml

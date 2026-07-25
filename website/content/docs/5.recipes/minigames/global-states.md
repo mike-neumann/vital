@@ -1,6 +1,6 @@
 ---
 title: Recipe for global minigame states.
-description: Recipe for global minigame states.
+description: This page defines a recipe (pre-written code snippet) for a global game state, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Global minigame states
 ---

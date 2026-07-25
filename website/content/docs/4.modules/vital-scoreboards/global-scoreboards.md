@@ -1,6 +1,6 @@
 ---
 title: About global scoreboards.
-description: About global scoreboards.
+description: This page explains how you can create scoreboards that are visible for all players and will show the same content for all players.
 navigation:
   title: Global scoreboards
 ---

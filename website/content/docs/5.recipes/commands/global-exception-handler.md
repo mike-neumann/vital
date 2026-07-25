@@ -1,6 +1,6 @@
 ---
 title: Recipe for a global command exception handler.
-description: Recipe for a global command exception handler.
+description: This page defines a recipe (pre-written code snippet) for a global command exception handler, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Global command exception handler
 ---
@@ -13,7 +13,7 @@ Use this to display more generic error messages, specific error messages for you
 Global exception handlers are also used to handle exceptions that might have been thrown inside of your arg exception handlers.  
 If you want to test this, simply throw any kind of exception in any arg exception handler.
 
-```java [MyGlobalCommandExceptionHandler.md]
+```java [MyGlobalCommandExceptionHandler.java]
 @VitalCommand.Advice(commandSender = CommandSender.class)
 public class MyGlobalCommandExceptionHandler {
 	@VitalCommand.GlobalExceptionHandler(type = Exception.class)

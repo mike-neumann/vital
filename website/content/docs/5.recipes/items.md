@@ -1,6 +1,6 @@
 ---
 title: Recipe for interactive items.
-description: Recipe for interactive items.
+description: This page defines a recipe (pre-written code snippet) for an item, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Items
 ---

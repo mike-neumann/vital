@@ -1,11 +1,16 @@
 {
   "layout": {
-    "title": "Vital - The ultimate Minecraft plugin framework",
-    "description": "Supercharge Minecraft plugin development with modern, proven Java tools, developer-friendly APIs and structure that is actually readable.",
+    "default": {
+      "title": "Vital - The ultimate plugin framework"
+    },
+    "docs": {
+      "title": "Vital-Framework docs"
+    },
     "item": {
       "home": "Home",
       "all-features": "All features",
-      "docs": "Docs"
+      "docs": "Docs",
+      "dokka": "Code docs"
     },
     "error": {
       "home": "Go home"
@@ -15,9 +20,18 @@
       "en": "English"
     },
     "view": {
-      "index": "Home",
-      "docs-slug": "Docs",
-      "all-features": "All features"
+      "index": {
+        "title": "Home",
+        "description": "Supercharge Minecraft plugin development with modern, proven Java tools, developer-friendly APIs and structure that is actually readable."
+      },
+      "docs-slug": {
+        "title": "Docs",
+        "description": "The docs for Vital, the ultimate Minecraft plugin framework to supercharge Minecraft plugin development with modern, proven Java tools, developer-friendly APIs and structure that is actually readable."
+      },
+      "all-features": {
+        "title": "All features",
+        "description": "This page lists all features that the Vital framework currently has to offer."
+      }
     }
   },
   "view": {

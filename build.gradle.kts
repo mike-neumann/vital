@@ -25,11 +25,43 @@ plugins {
     alias(libs.plugins.javaLibrary)
     alias(libs.plugins.mavenPublish)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.dokka.javadoc)
 }
 
 repositories {
     mavenLocal()
     mavenCentral()
+}
+
+dokka {
+    pluginsConfiguration.html {
+        separateInheritedMembers.set(false)
+        mergeImplicitExpectActualDeclarations.set(true)
+    }
+}
+
+dependencies {
+    dokka(project(":vital-cloudnet4-bridge"))
+    dokka(project(":vital-cloudnet4-driver"))
+    dokka(project(":vital-commands"))
+    dokka(project(":vital-commands-processor"))
+    dokka(project(":vital-configs"))
+    dokka(project(":vital-core"))
+    dokka(project(":vital-gradle-plugin"))
+    dokka(project(":vital-core-processor"))
+    dokka(project(":vital-holograms"))
+    dokka(project(":vital-inventories"))
+    dokka(project(":vital-items"))
+    dokka(project(":vital-loader"))
+    dokka(project(":vital-localization"))
+    dokka(project(":vital-minigames"))
+    dokka(project(":vital-players"))
+    dokka(project(":vital-scoreboards"))
+    dokka(project(":vital-statistics"))
+    dokka(project(":vital-tasks"))
+    dokka(project(":vital-tests"))
+    dokka(project(":vital-utils"))
 }
 
 allprojects {
@@ -42,6 +74,8 @@ subprojects {
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.kapt")
+    apply(plugin = "org.jetbrains.dokka")
+    apply(plugin = "org.jetbrains.dokka-javadoc")
     apply(plugin = "org.jetbrains.kotlin.plugin.spring")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "java-library")

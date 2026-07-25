@@ -1,5 +1,9 @@
 import io.spring.gradle.dependencymanagement.org.codehaus.plexus.interpolation.os.Os
 
+plugins {
+  application
+}
+
 val pnpmInstallTask =
   tasks.register("pnpmInstall", Exec::class) {
     description = "This task will run 'pnpm install' to install all needed dependencies for the website."
@@ -27,6 +31,14 @@ val npmBuildTask =
     }
   }
 
+val moveDokkaSourcesTask =
+  tasks.register("moveDokkaSources", Copy::class) {
+    dependsOn(rootProject.tasks.named("dokkaGenerate"))
+
+    from(rootProject.layout.buildDirectory.dir("dokka/html"))
+    into(project.layout.projectDirectory.dir("public/dokka"))
+  }
+
 tasks.build {
-  dependsOn(npmBuildTask)
+  dependsOn(rootProject.tasks.named("dokkaGenerate"), moveDokkaSourcesTask, npmBuildTask)
 }

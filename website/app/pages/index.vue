@@ -17,7 +17,6 @@ const heroLinks = computed(() => [{
 }, {
   icon: "i-lucide-list",
   label: $t("view.index.hero.all-features"),
-  trailingIcon: "i-lucide-external-link",
   to: "/all-features",
   size: "xl",
   variant: "subtle"
@@ -65,11 +64,6 @@ const features = computed(() => [
 
 const plannedFeatures = computed(() => [
   {
-    icon: "i-lucide-shrink",
-    title: $t("view.index.planned-features.features.lite-mode.title"),
-    description: $t("view.index.planned-features.features.lite-mode.description")
-  },
-  {
     icon: "i-lucide-layers-plus",
     title: $t("view.index.planned-features.features.more-platforms.title"),
     description: $t("view.index.planned-features.features.more-platforms.description")
@@ -91,7 +85,7 @@ const plannedFeatures = computed(() => [
   <div>
     <UPageHero
       :title="$t('view.index.hero.title')"
-      :description="$t('layout.description')"
+      :description="$t('layout.view.index.description')"
       orientation="horizontal"
       :links="heroLinks"
     >

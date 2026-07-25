@@ -1,8 +1,8 @@
 ---
-title: Recipe for a global scoreboard.
-description: Recipe for a global scoreboard.
+title: Recipe for a player scoreboard.
+description: This page defines a recipe (pre-written code snippet) for a player scoreboard, that can be copied by a developer instead of manually writing it.
 navigation:
-  title: Global scoreboard
+  title: Player scoreboard
 ---
 
 # Player scoreboard

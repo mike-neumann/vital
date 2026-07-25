@@ -32,7 +32,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 24
-      - run: ./gradlew clean publishToMavenLocal --info --stacktrace --refresh-dependencies
+      - run: ./gradlew clean build --info --stacktrace --refresh-dependencies
       - uses: actions/upload-artifact@v4
         with:
           name: website

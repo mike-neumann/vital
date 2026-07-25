@@ -1,6 +1,6 @@
 ---
 title: Recipe for a command with an arg exception handler.
-description: Recipe for a command with an arg exception handler.
+description: This page defines a recipe (pre-written code snippet) for a command and arg exception handler, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Command with arg exception handler
 ---
@@ -16,7 +16,7 @@ For each of these subcommands, an arg exception handler has been defined that wi
 
 If you want to test the exceptions, simply uncomment `throw new Exception("Test exception")` (Remove the `//`).
 
-```java [MyCommand.md]
+```java [MyCommand.java]
 @VitalCommand.Info(name = "mycommand")
 public class MyCommand extends VitalCommand.Spigot {
 	@ArgHandler(arg = @Arg(name = "arg0"))

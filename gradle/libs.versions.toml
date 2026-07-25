@@ -21,6 +21,8 @@ spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 javaLibrary = { id = "org.gradle.java-library" }
 mavenPublish = { id = "org.gradle.maven-publish" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "kotlin" }
+dokka-javadoc = { id = "org.jetbrains.dokka-javadoc", version.ref = "kotlin" }
 
 [libraries]
 paperApi = { group = "io.papermc.paper", name = "paper-api", version.ref = "paperApi" }

@@ -1,6 +1,6 @@
 ---
-title: About commands.
-description: About commands.
+title: Commands.
+description: This page explains how you can create commands using the `vital-commands` module.
 navigation:
   title: Commands
 ---

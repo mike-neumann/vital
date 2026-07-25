@@ -1,6 +1,6 @@
 ---
 title: About player scoreboards.
-description: About player scoreboards.
+description: This page explains how you can create scoreboards that only visible by specific players and will show player-specific content for each player.
 navigation:
   title: Player scoreboards
 ---

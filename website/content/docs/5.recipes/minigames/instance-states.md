@@ -1,6 +1,6 @@
 ---
 title: Recipe for minigame instance states.
-description: Recipe for minigame instance states.
+description: This page defines a recipe (pre-written code snippet) for an instance game state, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Instance states
 ---

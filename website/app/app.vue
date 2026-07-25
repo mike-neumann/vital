@@ -3,35 +3,28 @@ import type {NavigationMenuItem} from "@nuxt/ui";
 
 const {availableLocales, setLocale, locale} = useI18n()
 
-const route = useRoute()
+useSeoMeta({
+  ogImage: "ogImage.png",
+  twitterCard: "summary_large_image"
+})
 
 useHead({
   titleTemplate: (title) => {
-    const siteName = $t('layout.title')
+    const siteName = $t('layout.default.title')
 
     return title
       ? `${title} · ${siteName}`
       : siteName
   },
-  title: $t(`layout.view.${String(route.name)}`),
   meta: [
     {name: 'viewport', content: 'width=device-width, initial-scale=1'}
   ],
   link: [
-    {rel: 'icon', href: '/favicon.png'}
+    {rel: 'icon', href: '/favicon.ico'}
   ],
   htmlAttrs: {
     lang: locale
   }
-})
-
-useSeoMeta({
-  title: $t("layout.title"),
-  description: $t("layout.description"),
-  ogTitle: $t("layout.title"),
-  ogDescription: $t("layout.description"),
-  ogImage: 'https://ui.nuxt.com/assets/templates/nuxt/starter-light.png',
-  twitterCard: 'summary_large_image'
 })
 
 
@@ -50,6 +43,13 @@ const navItems = computed<NavigationMenuItem[]>(() => ([
     icon: "i-lucide-book-open",
     label: $t("layout.item.docs"),
     to: "/docs"
+  },
+  {
+    icon: "i-lucide-code",
+    label: $t("layout.item.dokka"),
+    href: "/dokka",
+    target: "_blank",
+    external: true
   }
 ]))
 
