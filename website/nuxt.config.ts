@@ -11,7 +11,7 @@ export default defineNuxtConfig({
   ],
 
   site: {
-    url: "http://localhost:3000"
+    url: "https://vitalframework.dev"
   },
 
   sitemap: {
