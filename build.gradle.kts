@@ -156,4 +156,14 @@ subprojects {
     }
 
     tasks.findByName("bootJar")?.enabled = false
+
+    tasks.register("lintCheck") {
+        description = "Pattern-matching task to check for any linting violations."
+        dependsOn(tasks.ktlintCheck)
+    }
+
+    tasks.register("lintFormat") {
+        description = "Pattern-matching task to format any linting violations."
+        dependsOn(tasks.ktlintFormat)
+    }
 }

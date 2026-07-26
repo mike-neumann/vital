@@ -8,9 +8,21 @@ defineProps<{
 
 <template>
   <ClientOnly>
-    <UContentSearchButton class="mb-5 w-full" :collapsed="false" />
-    <UContentSearch v-if="showContentSearch" :navigation="navigation" :search="search.search" :search-status="search.status.value" />
+    <UContentSearchButton
+      class="mb-5 w-full"
+      :collapsed="false"
+    />
+    <UContentSearch
+      v-if="showContentSearch"
+      :navigation="navigation"
+      :search="search.search"
+      :search-status="search.status.value"
+    />
   </ClientOnly>
 
-  <UContentNavigation :navigation="navigation" type="single" highlight />
+  <UContentNavigation
+    :navigation="navigation"
+    type="single"
+    highlight
+  />
 </template>

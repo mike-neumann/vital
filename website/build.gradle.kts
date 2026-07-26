@@ -31,8 +31,44 @@ val npmBuildTask =
     }
   }
 
+val lintCheckTask =
+  tasks.register("websiteLintCheck", Exec::class) {
+    description = "This task will run 'pnpm run lint:check' to check all linting for the website."
+    dependsOn(pnpmInstallTask)
+    workingDir = projectDir
+
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+      commandLine("cmd", "/c", "pnpm", "run", "lint:check")
+    } else {
+      commandLine("pnpm", "run", "lint:check")
+    }
+  }
+
+val lintFormatTask =
+  tasks.register("websiteLintFormat", Exec::class) {
+    description = "This task will run 'pnpm run lint:format' to fix all linting problems for the website where possible."
+    dependsOn(pnpmInstallTask)
+    workingDir = projectDir
+
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+      commandLine("cmd", "/c", "pnpm", "run", "lint:format")
+    } else {
+      commandLine("pnpm", "run", "lint:format")
+    }
+  }
+
+tasks.named("lintCheck") {
+  dependsOn(lintCheckTask)
+}
+
+tasks.named("lintFormat") {
+  dependsOn(lintFormatTask)
+}
+
 val moveDokkaSourcesTask =
   tasks.register("moveDokkaSources", Copy::class) {
+    description =
+      "This task moves all generated Dokka sources from the root project into the 'public/' directory of the website, so they can be statically hosted."
     dependsOn(rootProject.tasks.named("dokkaGenerate"))
 
     from(rootProject.layout.buildDirectory.dir("dokka/html"))
@@ -40,5 +76,5 @@ val moveDokkaSourcesTask =
   }
 
 tasks.build {
-  dependsOn(rootProject.tasks.named("dokkaGenerate"), moveDokkaSourcesTask, npmBuildTask)
+  dependsOn(lintCheckTask, rootProject.tasks.named("dokkaGenerate"), moveDokkaSourcesTask, npmBuildTask)
 }

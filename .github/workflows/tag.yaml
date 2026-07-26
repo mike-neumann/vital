@@ -12,7 +12,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 24
-      - run: ./gradlew ktlintCheck --info --stacktrace --refresh-dependencies
+      - run: ./gradlew lintCheck --info --stacktrace --refresh-dependencies
   test:
     needs: lint
     runs-on: ubuntu-latest

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  layout: "docs"
+  layout: 'docs'
 })
 
 const route = useRoute()
@@ -10,7 +10,7 @@ const title = computed(() => page.value?.title)
 const description = computed(() => page.value?.description)
 
 watchEffect(() => {
-  queryCollection("docs").path(route.path).first().then(it => page.value = it)
+  queryCollection('docs').path(route.path).first().then(it => page.value = it)
 })
 
 useHead({
@@ -20,7 +20,7 @@ useHead({
     return title
       ? `${title} · ${siteName}`
       : siteName
-  },
+  }
 })
 
 useSeoMeta({
@@ -33,6 +33,9 @@ useSeoMeta({
 
 <template>
   <div>
-    <ContentRenderer v-if="page" :value="page" />
+    <ContentRenderer
+      v-if="page"
+      :value="page"
+    />
   </div>
 </template>

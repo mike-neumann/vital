@@ -1,23 +1,17 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
-    "@nuxt/eslint",
-    "@nuxt/ui",
-    "@nuxtjs/i18n",
-    "@nuxtjs/seo",
-    "@nuxt/content",
-    "@nuxtjs/robots",
-    "@nuxtjs/sitemap"
+    '@nuxt/eslint',
+    '@nuxt/ui',
+    '@nuxtjs/i18n',
+    '@nuxtjs/seo',
+    '@nuxt/content',
+    '@nuxtjs/robots',
+    '@nuxtjs/sitemap'
   ],
 
-  site: {
-    url: "https://vitalframework.dev"
-  },
-
-  sitemap: {
-    sources: [
-      "/api/__sitemap__/urls"
-    ]
+  devtools: {
+    enabled: true
   },
 
   app: {
@@ -35,56 +29,62 @@ export default defineNuxtConfig({
       ]
     },
     pageTransition: {
-      name: "page",
-      mode: "out-in"
+      name: 'page',
+      mode: 'out-in'
     },
     layoutTransition: {
-      name: "page",
-      mode: "out-in"
+      name: 'page',
+      mode: 'out-in'
     }
+  },
+
+  css: ['~/assets/css/main.css'],
+
+  site: {
+    url: 'https://vitalframework.dev'
   },
 
   content: {
     build: {
       markdown: {
         highlight: {
-          langs: ["java", "kotlin", "groovy", "yaml", "properties"],
+          langs: ['java', 'kotlin', 'groovy', 'yaml', 'properties'],
           theme: {
-            default: "github-light",
-            dark: "github-dark"
+            default: 'github-light',
+            dark: 'github-dark'
           }
         }
       }
     }
   },
 
-  i18n: {
-    defaultLocale: "en",
-    strategy: "no_prefix",
-    locales: [
-      { code: "en", language: "en-US", file: "en.json" },
-      { code: "de", language: "de-DE", file: "de.json" }
-    ]
-  },
-
-  devtools: {
-    enabled: true
-  },
-
-  css: ["~/assets/css/main.css"],
-
   routeRules: {
-    "/": { prerender: true }
+    '/': { prerender: true }
   },
 
-  compatibilityDate: "2026-06-30",
+  compatibilityDate: '2026-06-30',
 
   eslint: {
     config: {
       stylistic: {
-        commaDangle: "never",
-        braceStyle: "1tbs"
+        commaDangle: 'never',
+        braceStyle: '1tbs'
       }
     }
+  },
+
+  i18n: {
+    defaultLocale: 'en',
+    strategy: 'no_prefix',
+    locales: [
+      { code: 'en', language: 'en-US', file: 'en.json' },
+      { code: 'de', language: 'de-DE', file: 'de.json' }
+    ]
+  },
+
+  sitemap: {
+    sources: [
+      '/api/__sitemap__/urls'
+    ]
   }
 })

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type {BreadcrumbItem} from "#ui/components/Breadcrumb.vue";
-import type {ContentNavigationItem} from "@nuxt/content";
+import type { BreadcrumbItem } from '#ui/components/Breadcrumb.vue'
+import type { ContentNavigationItem } from '@nuxt/content'
 
-const search = useSearchCollection("docs")
+const search = useSearchCollection('docs')
 const route = useRoute()
 
 const navigation = ref<ContentNavigationItem[]>([])
@@ -27,7 +27,7 @@ function findBreadcrumb(items: ContentNavigationItem[], path: string, parents: C
 }
 
 watchEffect(() => {
-  queryCollectionNavigation("docs").then(it => {
+  queryCollectionNavigation('docs').then((it) => {
     // Navigation will ALWAYS have at least one element, which is the ROOT node.
     // Because we don't want to have the root node, we will discard it and only use its direct children.
     navigation.value = it[0]?.children ?? []
@@ -41,14 +41,22 @@ watchEffect(() => {
       <template #left>
         <UPageAside>
           <div class="pl-5">
-            <DocsNavigation :search="search" :navigation="navigation" show-content-search />
+            <DocsNavigation
+              :search="search"
+              :navigation="navigation"
+              show-content-search
+            />
           </div>
         </UPageAside>
       </template>
 
       <div class="pl-5 pr-5">
         <div class="lg:hidden">
-          <DocsNavigation :search="search" :navigation="navigation" :show-content-search="false" />
+          <DocsNavigation
+            :search="search"
+            :navigation="navigation"
+            :show-content-search="false"
+          />
 
           <div class="pt-5 pb-5">
             <USeparator />

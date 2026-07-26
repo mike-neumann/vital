@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {codeToHtml} from "shiki";
+import { codeToHtml } from 'shiki'
 
 const props = defineProps<{
   title: string
@@ -10,18 +10,18 @@ const props = defineProps<{
 const colorMode = useColorMode()
 
 const isLoading = ref(true)
-const html = ref("")
+const html = ref('')
 
 watchEffect(async () => {
   isLoading.value = true
   html.value = await codeToHtml(props.code.trim(), {
-    lang: "java",
-    theme: colorMode.value === "dark"
-      ? "github-dark"
-      : "github-light",
+    lang: 'java',
+    theme: colorMode.value === 'dark'
+      ? 'github-dark'
+      : 'github-light',
     transformers: [{
       pre: (node) => {
-        (node.properties.style = "")
+        (node.properties.style = '')
       }
     }]
   })
@@ -42,8 +42,16 @@ watchEffect(async () => {
     </div>
 
     <div v-if="isLoading">
-      <USkeleton v-for="line of code.split('\n')" :key="code" class="h-4 mb-1" :style="{ width: `${line.length}ch` }" />
+      <USkeleton
+        v-for="line of code.split('\n')"
+        :key="line"
+        class="h-4 mb-1"
+        :style="{ width: `${line.length}ch` }"
+      />
     </div>
-    <pre class="overflow-x-auto rounded text-sm text-white" v-html="html" />
+    <pre
+      class="overflow-x-auto rounded text-sm text-white"
+      v-html="html"
+    />
   </UCard>
 </template>
