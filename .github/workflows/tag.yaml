@@ -12,6 +12,9 @@ jobs:
         with:
           distribution: temurin
           java-version: 24
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
       - run: ./gradlew lintCheck --info --stacktrace --refresh-dependencies
   test:
     needs: lint
@@ -22,6 +25,9 @@ jobs:
         with:
           distribution: temurin
           java-version: 24
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
       - run: ./gradlew clean test --info --stacktrace --refresh-dependencies
   build:
     needs: test
@@ -32,6 +38,9 @@ jobs:
         with:
           distribution: temurin
           java-version: 24
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
       - run: ./gradlew clean build --info --stacktrace --refresh-dependencies
       - uses: actions/upload-artifact@v4
         with:
