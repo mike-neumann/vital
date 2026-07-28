@@ -90,3 +90,13 @@ If someone executes `/mycommand myarg0 hello 123`, the `String[] values` array w
 > Note that varargs behave the same as they do in Java.  
 > Varargs **MUST** be the last variable in your arg handler and can only exist once.  
 > You CANNOT have multiple varargs in a single arg handler, you can also NOT define another variable AFTER a vararg.
+
+## Lifecycles
+
+| Lifecycle                                       | Usage                                                                                                                                                                                                                                                                  |
+|:------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `onCommandError(CS, Arg?, Throwable)`           | Perform an action when an exception was thrown during command execution. This lifecycle is called as the last resort if any other exception handler (arg exception handler, global exception handler) cannot handle the exception that was thrown during your command. |
+| `onCommandTabComplete(CS, String)`              | Add your own tab-completions to the ones Vital automatically generates for you. The `String` passed to this lifecycle will be your command arg string name.                                                                                                            |
+| `onCommandInvalidArgs(CS, String)`              | Perform an action when a command was executed with invalid or incomplete args.                                                                                                                                                                                         |
+| `onCommandRequiresPermission(CS, String, Arg?)` | Perform an action when a command was executed with insufficient permissions.                                                                                                                                                                                           |
+| `onCommandRequiresPlayer(CS, String, Arg?)`     | Perform an action when a command was executed as a non-player but the command requires a player.                                                                                                                                                                       |

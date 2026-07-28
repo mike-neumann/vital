@@ -1,12 +1,9 @@
 package dev.vitalframework.statistics
 
-import dev.vitalframework.RequiresSpigot
 import dev.vitalframework.VitalCoreModule.Companion.logger
 import dev.vitalframework.VitalModule
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Conditional
-import org.springframework.context.annotation.Configuration
 
 @VitalModule.Info(value = "vital-statistics")
 class VitalStatisticsModule : VitalModule() {
@@ -18,12 +15,8 @@ class VitalStatisticsModule : VitalModule() {
         )
     }
 
-    @Conditional(RequiresSpigot::class)
-    @Configuration(proxyBeanMethods = false)
-    class Spigot {
-        @ConditionalOnMissingBean
-        @Bean
-        fun vitalStatisticsService(vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties): VitalStatisticsService =
-            VitalStatisticsService(vitalStatisticsConfigurationProperties)
-    }
+    @ConditionalOnMissingBean
+    @Bean
+    fun vitalStatisticsService(vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties): VitalStatisticsService =
+        VitalStatisticsService(vitalStatisticsConfigurationProperties)
 }

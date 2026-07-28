@@ -4,7 +4,8 @@
       "title": "Vital - Das ultimative Plugin-Framework"
     },
     "docs": {
-      "title": "Vital Framework Doku"
+      "title": "Vital Framework Doku",
+      "language-warning": "Die Doku gibt es momentan nur auf Englisch!"
     },
     "item": {
       "home": "Startseite",

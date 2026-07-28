@@ -2,8 +2,9 @@
 import type { BreadcrumbItem } from '#ui/components/Breadcrumb.vue'
 import type { ContentNavigationItem } from '@nuxt/content'
 
-const search = useSearchCollection('docs')
 const route = useRoute()
+const { locale, defaultLocale } = useI18n()
+const search = useSearchCollection('docs')
 
 const navigation = ref<ContentNavigationItem[]>([])
 
@@ -37,6 +38,16 @@ watchEffect(() => {
 
 <template>
   <div>
+    <div
+      v-if="locale !== defaultLocale"
+      class="sticky"
+    >
+      <UBanner
+        :title="$t('layout.docs.language-warning')"
+        color="warning"
+      />
+    </div>
+
     <UPage class="mt-5">
       <template #left>
         <UPageAside>

@@ -11,7 +11,6 @@ export default defineSitemapEventHandler(async (event) => {
 
   // Dokka pages
   const dokkaRoot = path.resolve('./public/dokka')
-  console.log(`dokkaRoot: `, dokkaRoot)
 
   async function scan(dir: string) {
     const entries = await fs.readdir(dir, { withFileTypes: true })

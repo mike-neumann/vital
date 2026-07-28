@@ -4,7 +4,8 @@
       "title": "Vital - The ultimate plugin framework"
     },
     "docs": {
-      "title": "Vital-Framework docs"
+      "title": "Vital-Framework docs",
+      "language-warning": "The docs are currently only available in English!"
     },
     "item": {
       "home": "Home",
