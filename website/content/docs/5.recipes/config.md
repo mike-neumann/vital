@@ -42,9 +42,9 @@ public class MyYamlConfig extends VitalConfig {
 }
 ```
 
-```java [MyConfig.java]
+```java [MyPropertiesConfig.java]
 @VitalConfig.Info(name = "myconfig.properties", processor = VitalPropertiesConfigProcessor.class)
-public class MyConfig extends VitalConfig {
+public class MyPropertiesConfig extends VitalConfig {
 	@Property(String.class)
 	private String myString;
 
