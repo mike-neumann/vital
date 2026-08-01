@@ -1,5 +1,5 @@
 ---
-title: Exception handling.
+title: Exception handling
 description: This page explains how you can handle exceptions during your command executions.
 navigation:
   title: Exception handling

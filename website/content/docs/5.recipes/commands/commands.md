@@ -1,5 +1,5 @@
 ---
-title: Recipe for a command with an arg exception handler.
+title: Recipe for a command with an arg exception handler
 description: This page defines a recipe (pre-written code snippet) for a command and arg exception handler, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Command with arg exception handler

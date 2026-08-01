@@ -1,5 +1,5 @@
 ---
-title: Recipe for a paged inventory.
+title: Recipe for a paged inventory
 description: This page defines a recipe (pre-written code snippet) for a paged inventory, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Paged inventory

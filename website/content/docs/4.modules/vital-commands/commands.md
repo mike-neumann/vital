@@ -1,5 +1,5 @@
 ---
-title: Commands.
+title: Commands
 description: This page explains how you can create commands using the `vital-commands` module.
 navigation:
   title: Commands

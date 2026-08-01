@@ -1,5 +1,5 @@
 ---
-title: Recipe for repeatable tasks.
+title: Recipe for repeatable tasks
 description: This page defines a recipe (pre-written code snippet) for a repeatable task, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Repeatable tasks

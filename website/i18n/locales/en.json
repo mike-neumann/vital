@@ -52,7 +52,7 @@
         "features": {
           "autoconfigured": {
             "title": "Autoconfigured",
-            "description": "Vital automatically manages your plugin configuration so you don't have to worry about forgetting to update it yourself."
+            "description": "Vital automatically manages your plugin configuration (plugin.yml) so you don't have to worry about forgetting to update it yourself."
           },
           "powerful": {
             "title": "Powerful",

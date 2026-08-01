@@ -1,5 +1,5 @@
 ---
-title: Recipe for localization.
+title: Recipe for localization
 description: This page defines a recipe (pre-written code snippet) for localization, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Localization

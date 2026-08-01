@@ -1,5 +1,5 @@
 ---
-title: Recipe for minigame instance countdown states.
+title: Recipe for minigame instance countdown states
 description: This page defines a recipe (pre-written code snippet) for an instance countdown game state, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Instance countdown states

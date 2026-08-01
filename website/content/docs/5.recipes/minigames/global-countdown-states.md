@@ -1,5 +1,5 @@
 ---
-title: Recipe for global minigame countdown states.
+title: Recipe for global minigame countdown states
 description: This page defines a recipe (pre-written code snippet) for a global countdown game state, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Global minigame countdown states

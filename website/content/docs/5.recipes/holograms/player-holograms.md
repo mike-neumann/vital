@@ -1,5 +1,5 @@
 ---
-title: Recipe for player holograms.
+title: Recipe for player holograms
 description: This page defines a recipe (pre-written code snippet) for a player hologram, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Player holograms

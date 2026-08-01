@@ -52,7 +52,7 @@
         "features": {
           "autoconfigured": {
             "title": "Automatisch konfiguriert",
-            "description": "Vital verwaltet deine Plugin-Konfiguration automatisch, sodass du dir keine Sorgen machen musst, sie selbst zu aktualisieren."
+            "description": "Vital verwaltet deine Plugin-Konfiguration (plugin.yml) automatisch, sodass du dir keine Sorgen machen musst, sie selbst zu aktualisieren."
           },
           "powerful": {
             "title": "Leistungsstark",

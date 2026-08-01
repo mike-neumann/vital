@@ -1,5 +1,5 @@
 ---
-title: Recipe for a global command exception handler.
+title: Recipe for a global command exception handler
 description: This page defines a recipe (pre-written code snippet) for a global command exception handler, that can be copied by a developer instead of manually writing it.
 navigation:
   title: Global command exception handler
