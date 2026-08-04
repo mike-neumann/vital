@@ -5,7 +5,7 @@ const heroLinks = computed(() => [{
   icon: 'i-lucide-book-open',
   label: $t('view.index.hero.get-started'),
   trailingIcon: 'i-lucide-external-link',
-  to: '/docs',
+  to: '/docs/about',
   target: '_blank',
   size: 'xl'
 }, {
@@ -116,7 +116,7 @@ const plannedFeatures = computed(() => [
             :description="$t('view.index.cta.cards.documentation.description')"
             icon="i-lucide-book-open"
             class="col-span-full"
-            to="/docs"
+            to="/docs/about"
           />
         </UPageGrid>
       </UPageCTA>

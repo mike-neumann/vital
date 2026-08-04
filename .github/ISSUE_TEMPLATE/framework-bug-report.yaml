@@ -1,0 +1,141 @@
+name: Framework bug report
+description: File a bug report for the Vital framework
+title: "[Framework] "
+labels: [bug, framework]
+
+body:
+  - type: dropdown
+    id: vital-version
+    attributes:
+      label: Vital version
+      description: Which version of Vital are you using?
+      options:
+        - Dev build
+    validations:
+      required: true
+
+  - type: input
+    id: minecraft-version
+    attributes:
+      label: Minecraft version
+      description: Which Minecraft version is your server running?
+      placeholder: "1.21.1"
+    validations:
+      required: true
+
+  - type: input
+    id: java-version
+    attributes:
+      label: Java version
+      description: Which Java version is your server using?
+      placeholder: "Java 21"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Server platform
+      description: On which platform does this issue occur?
+      multiple: true
+      options:
+        - Paper
+        - Spigot
+        - BungeeCord
+    validations:
+      required: true
+
+  - type: dropdown
+    id: modules
+    attributes:
+      label: Affected modules
+      description: Select the modules affected by this bug.
+      multiple: true
+      options:
+        - Unknown
+        - vital-cloudnet4-bridge
+        - vital-cloudnet4-driver
+        - vital-commands
+        - vital-configs
+        - vital-core
+        - vital-holograms
+        - vital-inventories
+        - vital-items
+        - vital-localization
+        - vital-minigames
+        - vital-players
+        - vital-scoreboards
+        - vital-statistics
+        - vital-tasks
+        - vital-utils
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How much does this issue affect your plugin or server?
+      options:
+        - Critical (Plugin cannot start, server crashes / slows down, etc.)
+        - High (Major functionality is broken)
+        - Medium (Feature partially broken)
+        - Low (Minor issue or annoyance)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Bug category
+      description: What kind of issue is this?
+      options:
+        - Framework functionality
+        - API
+        - Configuration
+        - Performance
+        - Compatibility
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the problem
+      description: What exactly is wrong with Vital?
+      placeholder: |
+        Explain what happened and what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: How can this issue be reproduced?
+      placeholder: |
+        1. Add module X
+        2. Call method Y
+        3. Observe the issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and errors
+      description: Paste relevant console errors or stack traces here.
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Drag and drop screenshots or recordings here.
+
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping us improve Vital!
+        Please provide as much information as possible so we can reproduce and fix the issue.

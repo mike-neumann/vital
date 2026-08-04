@@ -5,7 +5,18 @@
     },
     "docs": {
       "title": "Vital-Framework docs",
-      "language-warning": "The docs are currently only available in English!"
+      "language-warning": "The docs are currently only available in English!",
+      "estimated-read-time": "{estimatedReadTime} minute estimated read time | {estimatedReadTime} minutes estimated read time",
+      "create-issue": {
+        "title": "Found an issue?",
+        "description": "Help us improve the documentation by reporting typos, missing information, or anything confusing.",
+        "sub-description": "Don't worry, we will auto-fill most of the annoying fields.",
+        "button": "Create GitHub issue"
+      },
+      "not-found": {
+        "title": "Docs page not found",
+        "description": "This docs page doesn't exist. You have been redirected to the about page."
+      }
     },
     "item": {
       "home": "Home",

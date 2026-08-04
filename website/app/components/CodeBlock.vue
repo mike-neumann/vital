@@ -9,24 +9,17 @@ const props = defineProps<{
 
 const colorMode = useColorMode()
 
-const isLoading = ref(true)
-const html = ref('')
-
-watchEffect(async () => {
-  isLoading.value = true
-  html.value = await codeToHtml(props.code.trim(), {
-    lang: 'java',
-    theme: colorMode.value === 'dark'
-      ? 'github-dark'
-      : 'github-light',
-    transformers: [{
-      pre: (node) => {
-        (node.properties.style = '')
-      }
-    }]
-  })
-  isLoading.value = false
-})
+const { data: html, status } = useAsyncData('code-block', () => codeToHtml(props.code.trim(), {
+  lang: 'java',
+  theme: colorMode.value === 'dark'
+    ? 'github-dark'
+    : 'github-light',
+  transformers: [{
+    pre: (node) => {
+      (node.properties.style = '')
+    }
+  }]
+}))
 </script>
 
 <template>
@@ -41,7 +34,7 @@ watchEffect(async () => {
       />
     </div>
 
-    <div v-if="isLoading">
+    <div v-if="status === 'pending'">
       <USkeleton
         v-for="line of code.split('\n')"
         :key="line"

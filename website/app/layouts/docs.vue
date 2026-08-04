@@ -4,11 +4,28 @@ import type { ContentNavigationItem } from '@nuxt/content'
 
 const route = useRoute()
 const { locale, defaultLocale } = useI18n()
+const siteConfig = useSiteConfig()
+const config = useRuntimeConfig()
 const search = useSearchCollection('docs')
 
-const navigation = ref<ContentNavigationItem[]>([])
+const open = ref(true)
 
-const breadcrumb = computed<BreadcrumbItem>(() => findBreadcrumb(navigation.value, route.path).map(it => ({ label: it.title, to: it.path })))
+const { data: navigation } = await useAsyncData('docs-navigation', async () => (await queryCollectionNavigation('docs'))?.[0]?.children ?? [])
+const { data: estimatedReadTime } = await useAsyncData(() => `docs-page-estimated-read-time:${route.fullPath}`, async () => {
+  const page = await queryCollection('docs').path(route.path).first()
+  if (!page?.body) {
+    return undefined
+  }
+
+  const words = page.rawbody.trim().split(/\s+/).length
+  return Math.max(1, Math.ceil(words / config.public.estimatedWordsPerMinute))
+})
+
+const breadcrumb = computed<BreadcrumbItem>(() => findBreadcrumb(navigation.value ?? [], route.path).map(it => ({ label: it.title, to: it.path })))
+const createIssueUrl = computed(() => {
+  const pageUrl = encodeURIComponent(`${siteConfig.url}${route.path}`)
+  return `${config.public.githubCreateWebdocIssueUrl}&page=${pageUrl}`
+})
 
 function findBreadcrumb(items: ContentNavigationItem[], path: string, parents: ContentNavigationItem[] = []): BreadcrumbItem[] {
   for (const item of items) {
@@ -26,14 +43,6 @@ function findBreadcrumb(items: ContentNavigationItem[], path: string, parents: C
 
   return []
 }
-
-watchEffect(() => {
-  queryCollectionNavigation('docs').then((it) => {
-    // Navigation will ALWAYS have at least one element, which is the ROOT node.
-    // Because we don't want to have the root node, we will discard it and only use its direct children.
-    navigation.value = it[0]?.children ?? []
-  })
-})
 </script>
 
 <template>
@@ -75,13 +84,64 @@ watchEffect(() => {
         </div>
 
         <div class="pl-2">
-          <UBreadcrumb :items="breadcrumb" />
+          <div>
+            <UBreadcrumb :items="breadcrumb" />
+            <UBadge
+              class="mt-2"
+              icon="i-lucide-glasses"
+              :label="$t('layout.docs.estimated-read-time', { estimatedReadTime }, estimatedReadTime)"
+              variant="outline"
+              color="info"
+            />
+          </div>
 
-          <div class="pt-3">
+          <div class="pt-3 mt-2">
             <slot />
           </div>
         </div>
       </div>
     </UPage>
+
+    <UCard class="fixed bottom-6 right-6 z-50 w-80">
+      <div class="flex items-center justify-between">
+        <p class="font-medium">
+          {{ $t('layout.docs.create-issue.title') }}
+        </p>
+
+        <UButton
+          variant="ghost"
+          color="neutral"
+          square
+          :icon="open ? 'i-lucide-chevron-down' : 'i-lucide-chevron-up'"
+          @click="open = !open"
+        />
+      </div>
+
+      <UCollapsible :open="open">
+        <template #content>
+          <div class="mt-3 space-y-3">
+            <p class="text-sm text-muted">
+              {{ $t('layout.docs.create-issue.description') }}
+            </p>
+
+            <USeparator />
+
+            <p class="text-sm text-muted font-extrabold">
+              {{ $t('layout.docs.create-issue.sub-description') }}
+            </p>
+
+            <UButton
+              :to="createIssueUrl"
+              target="_blank"
+              icon="i-simple-icons-github"
+              trailing-icon="i-lucide-external-link"
+              block
+            >
+              {{ $t('layout.docs.create-issue.button') }}
+            </UButton>
+          </div>
+        </template>
+      </UCollapsible>
+    </UCard>
   </div>
 </template>

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
 
+const toaster = { position: 'top-right' }
+
 const { availableLocales, setLocale, locale } = useI18n()
+const config = useRuntimeConfig()
 
 useSeoMeta({
   ogImage: 'ogImage.png',
@@ -41,7 +44,7 @@ const navItems = computed<NavigationMenuItem[]>(() => ([
   {
     icon: 'i-lucide-book-open',
     label: $t('layout.item.docs'),
-    to: '/docs'
+    to: '/docs/about'
   },
   {
     icon: 'i-lucide-code',
@@ -60,7 +63,7 @@ const languageDropdownMenuItems = computed<NavigationMenuItem[]>(() => available
 
 <template>
   <div>
-    <UApp>
+    <UApp :toaster="toaster">
       <UHeader>
         <template #left>
           <NuxtLink to="/">
@@ -92,7 +95,7 @@ const languageDropdownMenuItems = computed<NavigationMenuItem[]>(() => available
           <UColorModeButton />
 
           <UButton
-            to="https://github.com/mike-neumann/vital"
+            :to="config.public.githubUrl"
             target="_blank"
             icon="i-simple-icons-github"
             aria-label="GitHub"

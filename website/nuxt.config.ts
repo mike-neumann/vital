@@ -58,6 +58,15 @@ export default defineNuxtConfig({
     }
   },
 
+  runtimeConfig: {
+    public: {
+      githubUrl: 'https://github.com/mike-neumann/vital',
+      githubCreateWebdocIssueUrl: 'https://github.com/mike-neumann/vital/issues/new?template=webdoc-bug-report.yaml',
+      githubCreateFrameworkIssueUrl: 'https://github.com/mike-neumann/vital/issues/new?template=framework-bug-report.yaml',
+      estimatedWordsPerMinute: 150
+    }
+  },
+
   routeRules: {
     '/': { prerender: true }
   },

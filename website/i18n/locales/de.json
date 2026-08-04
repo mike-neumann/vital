@@ -5,7 +5,18 @@
     },
     "docs": {
       "title": "Vital Framework Doku",
-      "language-warning": "Die Doku gibt es momentan nur auf Englisch!"
+      "language-warning": "Die Doku gibt es momentan nur auf Englisch!",
+      "estimated-read-time": "{estimatedReadTime} Minute geschätze Lesezeit | {estimatedReadTime} Minuten geschätze Lesezeit",
+      "create-issue": {
+        "title": "Fehler gefunden?",
+        "description": "Helf uns dabei die Dokumentation zu verbessern, indem du Fehler oder sonstige unschönheiten meldest.",
+        "sub-description": "Keine Sorge, wir füllen die meisten nervigen Felder automatisch aus.",
+        "button": "Issue auf GitHub erstellen"
+      },
+      "not-found": {
+        "title": "Doku-Seite nicht gefunden",
+        "description": "Diese Doku-Seite gibt es nicht, du wurdest zur About-Seite weitergeleitet."
+      }
     },
     "item": {
       "home": "Startseite",

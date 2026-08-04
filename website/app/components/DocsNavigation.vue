@@ -4,6 +4,8 @@ defineProps<{
   search: typeof useSearchCollection
   navigation: typeof queryCollectionNavigation
 }>()
+
+const route = useRoute()
 </script>
 
 <template>
@@ -21,8 +23,10 @@ defineProps<{
   </ClientOnly>
 
   <UContentNavigation
+    :key="route.fullPath"
     :navigation="navigation"
     type="single"
     highlight
+    default-open
   />
 </template>

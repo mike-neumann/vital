@@ -1,0 +1,67 @@
+name: Webdoc bug report
+description: File a bug for the web documentation
+title: "[Webdoc] "
+labels: [bug, website, docs]
+
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Documentation page
+      description: Which page contains the problem?
+      placeholder: https://vitalframework.dev/docs/...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Problem type
+      options:
+        - Incorrect information
+        - Missing information
+        - Typo or grammar
+        - Broken example
+        - Broken link
+        - Layout or UI issue
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: Browsers affected
+      description: Select the browsers where you see the issue.
+      multiple: true
+      options:
+        - Firefox
+        - Chrome
+        - Safari
+        - Microsoft Edge
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the problem
+      description: What exactly is wrong with the web documentation?
+      placeholder: Spelling mistake? Incorrect docs? Too complex? Broken layout? Example not working?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement
+      description: How could this be improved?
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Drag and drop screenshots or recordings here.
+
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping us improve the web documentation!
