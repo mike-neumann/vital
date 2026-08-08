@@ -34,62 +34,125 @@
     "view": {
       "index": {
         "title": "Home",
-        "description": "Supercharge Minecraft plugin development with modern, proven Java tools, developer-friendly APIs and structure that is actually readable."
+        "description": "A modular framework for building modern Minecraft plugins with clean architecture, less boilerplate, and powerful developer tools."
       },
       "docs-slug": {
         "title": "Docs",
-        "description": "The docs for Vital, the ultimate Minecraft plugin framework to supercharge Minecraft plugin development with modern, proven Java tools, developer-friendly APIs and structure that is actually readable."
+        "description": "The docs for Vital, the ultimate Minecraft plugin framework to supercharge Minecraft plugin development with modern, proven Java tools, developer-friendly APIs and a project structure that's actually readable."
       },
       "all-features": {
         "title": "All features",
         "description": "This page lists all features that the Vital framework currently has to offer."
       }
-    }
+    },
+    "footer": "This site and the Vital framework was built with ❤️ by Mike Neumann"
   },
   "view": {
     "index": {
       "hero": {
         "title": "Vital framework",
         "get-started": "Get started",
-        "features": "Features",
+        "why": "Why should I use Vital?",
+        "highlights": "Highlighted features",
         "all-features": "All features",
         "code": {
           "title": "Minimal Vital plugin (plugin.yml is automatically created)"
         }
       },
-      "features": {
-        "title": "Everything you need to create the best Minecraft plugins",
-        "description": "Vital provides you with all of the features you need to start making that plugin you always wanted to. Build small to even massive plugins, the skies the limit.",
+      "why": {
+        "title": "Why should I use Vital?",
         "features": {
-          "autoconfigured": {
-            "title": "Autoconfigured",
-            "description": "Vital automatically manages your plugin configuration (plugin.yml) so you don't have to worry about forgetting to update it yourself."
+          "plugin-yml": {
+            "title": "plugin.yml",
+            "description": "Remember when you added that one command and tried to test it but it somehow didn't even exist? Ah yes, i forgot to update my plugin.yml... Vital will look at your project and automatically generate a plugin.yml for you."
           },
-          "powerful": {
-            "title": "Powerful",
-            "description": "Vital was built with Spring Boot at its core. Create extensive plugins by utilizing proven Java tools from the Spring ecosystem. Don't worry, your plugins will stay as lightweight as they were before."
+          "command-executors": {
+            "title": "Command creation hell",
+            "description": "Writing commands is simple they said. Let's add a new subcommand here and some permission checks there, and all of a sudden your command is 100 lines long without even doing anything yet... Vital gives you a proper command system."
+          },
+          "config-loading": {
+            "title": "Configs are just strings...",
+            "description": "Who doesn't like loosely typed configs, right? No one likes them... Vital gives you a system where every config file is a class that can directly store whatever you want."
+          },
+          "inventory-boilerplate": {
+            "title": "Inventory boilerplate",
+            "description": "Every inventory eventually ends up sharing one giant click listener that filters unwanted clicks. Vital gives every inventory its own class and automatically handles all event routing."
+          },
+          "hologram-boilerplate": {
+            "title": "Simple holograms aren't actually simple",
+            "description": "Displaying a few floating lines shouldn't require managing entities and viewers yourself. Vital allows you to easily create holograms."
+          },
+          "scoreboard-management": {
+            "title": "Scoreboard madness",
+            "description": "Now this is a special case of boilerplate. 50 Lines for a static scoreboard that doesn't even change... Vital automatically handles scoreboards for you, oh and you can also create scoreboards with a single line of code."
+          },
+          "item-interactions": {
+            "title": "Item interaction boilerplate",
+            "description": "Every custom item ends up inside one massive PlayerInteractEvent listener. Vital let's every item handle its own interactions by automatically routing the events for you."
+          },
+          "player-objects": {
+            "title": "Player data without a million HashMaps",
+            "description": "Coins in one map. Levels in another. Settings in a third. A dedicated player object is much easier to work with."
+          },
+          "task-organization": {
+            "title": "Scheduled tasks everywhere",
+            "description": "A few months later you're searching for runTaskLater() because you can't remember where the task was scheduled in your codebase. Vital gives every scheduled task its own class with a clear lifecycle."
+          },
+          "localization": {
+            "title": "Adding translations",
+            "description": "Everything starts in English. Then someone asks for German... and suddenly every message is hardcoded somewhere. Vital handles localization across your plugin."
+          },
+          "minigame-events": {
+            "title": "Checking game state in every listener",
+            "description": "Most events begin by checking whether the game is running, which instance the player belongs to and what state it's in. Vital will automatically route events to correct games and states, no more boilerplate."
+          },
+          "utility-code": {
+            "title": "The inevitable Utils.java",
+            "description": "Every project grows another utility class with teleports, broadcasts, Adventure helpers and random methods. Vital already has various utilities built right in. You can even use them outside of a Vital plugin."
+          },
+          "etc": {
+            "title": "The list goes on...",
+            "description": "..."
+          }
+        }
+      },
+      "highlights": {
+        "title": "Highlighted features",
+        "description": "Vital provides you with all of the features you need to start making that plugin you always wanted to. Build anything from small utilities to massive plugins - the sky's the limit.",
+        "features": {
+          "multiplatform-ready": {
+            "title": "One framework, multiple platforms",
+            "description": "Use Vital to create plugins for all of your favorite platforms, like: Spigot, Paper and BungeeCord. No extra configurations needed, everything from plugin.yml to command interaction is done by Vital."
           },
           "readable": {
-            "title": "Readable",
-            "description": "Finally create readable Minecraft plugins that you can work on by teams of developers. No more spaghetti code or stuff that barely works."
+            "title": "Structured code",
+            "description": "Build Minecraft plugins with a clean, structured architecture that's easy for entire teams to work on. No more spaghetti code or stuff that barely works."
           },
-          "multiplatform-ready": {
-            "title": "Multiplatform ready",
-            "description": "Use Vital to create plugins for all of your favorite platforms, like: Spigot, Paper and BungeeCord. No extra configurations needed, everything from plugin configuration (plugin.yml) to command interaction is done by Vital."
+          "autoconfigured": {
+            "title": "Zero plugin.yml",
+            "description": "Vital automatically manages your plugin.yml so you don't have to worry about forgetting to update it yourself."
+          },
+          "minigames": {
+            "title": "Minigames",
+            "description": "Vital offers a complete minigame framework to create games using proven game development patterns, like state machines and scoping. State management, automatic event routing and even hosting multiple truly isolated game instances on the same server becomes easy and maintainable."
+          },
+          "powerful": {
+            "title": "Spring-powered",
+            "description": "Vital was built with Spring Boot at its core. Create extensive plugins by utilizing proven Java tools from the Spring ecosystem. Don't worry - your plugins remain lightweight."
           },
           "modular": {
-            "title": "Modular",
+            "title": "Pick your modules",
             "description": "Utilize Vital's module system to enhance your experience even more. Every module brings its own unique features like: advanced command system, minigame system, dynamic scoreboards, localization, inventory menus, interactable items, configs, etc."
           },
           "lightweight": {
-            "title": "Lightweight",
-            "description": "Thanks to Vital's module system you can choose only the functionality you actually need for your project. No need to include the whole monolith if you only need the command system right? This keeps your project lightweight and easier to maintain."
+            "title": "Only include what you use",
+            "description": "Thanks to Vital's module system you can choose only the functionality you actually need for your project. No need to include the entire framework if all you need is the command system, right? This keeps your project lightweight and easier to maintain."
           }
         }
       },
       "cta": {
         "title": "And even more...",
-        "description": "Vital is not just a small library, it is an entire ecosystem, specifically built to make Minecraft plugin development easier and more structured than ever before. It's the framework you never knew you needed but once you start using it, you never want to go back again!",
+        "description": "Vital is not just a small library, it is an entire ecosystem, specifically built to make Minecraft plugin development easier and more structured than ever before. It's the framework you never knew you needed - and once you've used it, you won't want to go back.",
         "cards": {
           "documentation": {
             "title": "Documentation",
@@ -99,7 +162,7 @@
       },
       "planned-features": {
         "title": "Planned features",
-        "description": "These features are CURRENTLY NOT AVAILABLE but are planned for the future. If you have any ideas for other features please open up an issue on GitHub.",
+        "description": "These features are planned for the future. If you have any ideas for other features please open up an issue on GitHub.",
         "features": {
           "lite-mode": {
             "title": "Lite Mode",
@@ -107,7 +170,7 @@
           },
           "more-platforms": {
             "title": "More Platforms",
-            "description": "In addition to Spigot, Paper, and BungeeCord, Vital also supports other platforms such as Velocity and more."
+            "description": "In addition to Spigot, Paper, and BungeeCord, Vital will support other platforms such as Velocity and more."
           },
           "web-initializer": {
             "title": "Web Initializer",
@@ -123,16 +186,15 @@
     "all-features": {
       "cta": {
         "title": "All features",
-        "description": "This is a comprehensive list of all features the Vital framework currently has to offer. Note that these features are all separate modules that you need to add to your plugin in order to get the functionalities you need. The Vital module system makes your plugin smaller and so that it only contains the components your actually need for your plugin!",
-
+        "description": "This is a comprehensive list of all features the Vital framework currently has to offer. Note that these features are all separate modules that you need to add to your plugin in order to get the functionalities you need. The Vital module system makes your plugin smaller and so that it only contains the components you actually need for your plugin!",
         "card": {
           "vital-commands": {
             "title": "vital-commands",
-            "description": "Create custom server commands using an annotation-driven design. Every command is a class, every subcommand '/mycommand arg' is a method that will automatically be called when your command is executed. The command system contains automatic tab-completions and a comprehensive and advanced system for handling exceptions. This system will change how you look at command creation!"
+            "description": "Create custom server commands using an annotation-driven design. Every command is a class, every subcommand '/mycommand arg' is a method that will automatically be called when your command is executed. The command system contains automatic tab completions and a comprehensive and advanced system for handling exceptions. This system will change how you look at command creation!"
           },
           "vital-configs": {
             "title": "vital-configs",
-            "description": "Every config file will now be a class where every saved property is a class field with proper type-safety. Write to your class instead of juggling around with raw data. The config system also supports saving your own custom types."
+            "description": "Every config file will now be a class where every saved property is a class field with proper type safety. Write to your class instead of juggling around with raw data. The config system also supports saving your own custom types."
           },
           "vital-holograms": {
             "title": "vital-holograms",
@@ -152,7 +214,7 @@
           },
           "vital-minigames": {
             "title": "vital-minigames",
-            "description": "The ultimate framework for making games using real game development patterns, like state machines, etc. Create games that either share their state with the entire server, or even host multiple games (instances) on the same server. Vital automatically routes events only to games and states that are currently active. This will bring your games to the next level!"
+            "description": "The ultimate framework for making games using real game development patterns, like state machines, etc. Create games that either share their state with the entire server, or even host multiple games (instances) on the same server. Vital automatically routes events only to active game instances and states. This will bring your games to the next level!"
           },
           "vital-players": {
             "title": "vital-players",
@@ -168,7 +230,7 @@
           },
           "vital-tasks": {
             "title": "vital-tasks",
-            "description": "Create server-scheduled tasks without having to worry about losing where you put it in your code base. Every task will be its own class that has strict lifecycles and structure so you always know what your task actually does."
+            "description": "Create server-scheduled tasks without having to worry about losing where you put it in your codebase. Every task will be its own class that has strict lifecycles and structure so you always know what your task actually does."
           },
           "vital-utils": {
             "title": "vital-utils",

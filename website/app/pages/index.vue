@@ -9,8 +9,13 @@ const heroLinks = computed(() => [{
   target: '_blank',
   size: 'xl'
 }, {
+  icon: 'i-lucide-circle-question-mark',
+  label: $t('view.index.hero.why'),
+  to: '#why',
+  size: 'xl',
+}, {
   icon: 'i-lucide-star',
-  label: $t('view.index.hero.features'),
+  label: $t('view.index.hero.highlights'),
   to: '#features',
   size: 'xl',
   variant: 'subtle'
@@ -34,31 +39,94 @@ public class MyPlugin {
 }
 `
 
+const whyFeatures = computed(() => [
+  {
+    title: $t('view.index.why.features.plugin-yml.title'),
+    description: $t('view.index.why.features.plugin-yml.description'),
+  },
+  {
+    title: $t('view.index.why.features.command-executors.title'),
+    description: $t('view.index.why.features.command-executors.description'),
+  },
+  {
+    title: $t('view.index.why.features.config-loading.title'),
+    description: $t('view.index.why.features.config-loading.description'),
+  },
+  {
+    title: $t('view.index.why.features.inventory-boilerplate.title'),
+    description: $t('view.index.why.features.inventory-boilerplate.description'),
+  },
+  {
+    title: $t('view.index.why.features.hologram-boilerplate.title'),
+    description: $t('view.index.why.features.hologram-boilerplate.description'),
+  },
+  {
+    title: $t('view.index.why.features.scoreboard-management.title'),
+    description: $t('view.index.why.features.scoreboard-management.description'),
+  },
+  {
+    title: $t('view.index.why.features.item-interactions.title'),
+    description: $t('view.index.why.features.item-interactions.description'),
+  },
+  {
+    title: $t('view.index.why.features.player-objects.title'),
+    description: $t('view.index.why.features.player-objects.description'),
+  },
+  {
+    title: $t('view.index.why.features.task-organization.title'),
+    description: $t('view.index.why.features.task-organization.description'),
+  },
+  {
+    title: $t('view.index.why.features.localization.title'),
+    description: $t('view.index.why.features.localization.description'),
+  },
+  {
+    title: $t('view.index.why.features.minigame-events.title'),
+    description: $t('view.index.why.features.minigame-events.description'),
+  },
+  {
+    title: $t('view.index.why.features.utility-code.title'),
+    description: $t('view.index.why.features.utility-code.description'),
+  },
+  {
+    title: $t('view.index.why.features.etc.title'),
+    description: $t('view.index.why.features.etc.description')
+  }
+])
+
 const features = computed(() => [
   {
-    icon: 'i-lucide-cog',
-    title: $t('view.index.features.features.autoconfigured.title'),
-    description: $t('view.index.features.features.autoconfigured.description')
-  }, {
-    icon: 'i-lucide-zap',
-    title: $t('view.index.features.features.powerful.title'),
-    description: $t('view.index.features.features.powerful.description')
-  }, {
+    icon: 'i-lucide-boxes',
+    title: $t('view.index.highlights.features.multiplatform-ready.title'),
+    description: $t('view.index.highlights.features.multiplatform-ready.description')
+  },
+  {
     icon: 'i-lucide-eye',
-    title: $t('view.index.features.features.readable.title'),
-    description: $t('view.index.features.features.readable.description')
+    title: $t('view.index.highlights.features.readable.title'),
+    description: $t('view.index.highlights.features.readable.description')
+  },
+  {
+    icon: 'i-lucide-cog',
+    title: $t('view.index.highlights.features.autoconfigured.title'),
+    description: $t('view.index.highlights.features.autoconfigured.description')
+  },
+  {
+    icon: 'i-lucide-joystick',
+    title: $t('view.index.highlights.features.minigames.title'),
+    description: $t('view.index.highlights.features.minigames.description')
+  },
+  {
+    icon: 'i-lucide-zap',
+    title: $t('view.index.highlights.features.powerful.title'),
+    description: $t('view.index.highlights.features.powerful.description')
   }, {
     icon: 'i-lucide-blocks',
-    title: $t('view.index.features.features.modular.title'),
-    description: $t('view.index.features.features.modular.description')
-  }, {
-    icon: 'i-lucide-boxes',
-    title: $t('view.index.features.features.multiplatform-ready.title'),
-    description: $t('view.index.features.features.multiplatform-ready.description')
+    title: $t('view.index.highlights.features.modular.title'),
+    description: $t('view.index.highlights.features.modular.description')
   }, {
     icon: 'i-lucide-feather',
-    title: $t('view.index.features.features.lightweight.title'),
-    description: $t('view.index.features.features.lightweight.description')
+    title: $t('view.index.highlights.features.lightweight.title'),
+    description: $t('view.index.highlights.features.lightweight.description')
   }
 ])
 
@@ -97,9 +165,20 @@ const plannedFeatures = computed(() => [
     </UPageHero>
 
     <UPageSection
+      id="why"
+      :title="$t('view.index.why.title')"
+    >
+      <UPageGrid>
+        <UPageCard v-for="(feature, i) of whyFeatures" :key="i" :title="feature.title" :description="feature.description" />
+      </UPageGrid>
+    </UPageSection>
+
+    <USeparator />
+
+    <UPageSection
       id="features"
-      :title="$t('view.index.features.title')"
-      :description="$t('view.index.features.description')"
+      :title="$t('view.index.highlights.title')"
+      :description="$t('view.index.highlights.description')"
       :features="features"
     />
 

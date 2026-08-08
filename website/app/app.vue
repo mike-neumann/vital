@@ -116,13 +116,13 @@ const languageDropdownMenuItems = computed<NavigationMenuItem[]>(() => available
       <UFooter>
         <template #left>
           <p class="text-sm text-muted">
-            This site was built with Nuxt UI • © {{ new Date().getFullYear() }}
+            {{ $t('layout.footer') }}
           </p>
         </template>
 
         <template #right>
           <UButton
-            to="https://github.com/nuxt-ui-templates/starter"
+            :to="config.public.githubUrl"
             target="_blank"
             icon="i-simple-icons-github"
             aria-label="GitHub"
