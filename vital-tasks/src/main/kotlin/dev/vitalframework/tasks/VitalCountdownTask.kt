@@ -16,8 +16,15 @@ import java.util.concurrent.TimeUnit
  * Defines a countdown task within the Vital framework.
  * A countdown task may perform an action that can end after a set countdown.
  *
+ * By default, a countdown task will not be a Spring bean. That means that Vital will not automatically create an instance of it.
+ * This is because countdown tasks are also meant to be used by vital-minigames, where each instanced-game may have multiple running countdowns that are not scoped to the entire server.
+ *
+ * A countdown task can be marked as "autoStart" to automatically start it when a new instance is created.
+ * This functionality is disabled by default.
+ *
  * ```java
- * public class MyCountdownState extends VitalCountdownState.Spigot() {
+ * @VitalCountdownTask.Info(interval = 1_000, countdown = 10, autoStart = false)
+ * public class MyCountdownTask extends VitalCountdownTask.Spigot {
  *     public MyCountdownState(JavaPlugin plugin) {
  *         super(plugin);
  *     }
@@ -70,6 +77,13 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
      */
     val running
         get() = runnable != null && task != null
+
+    init {
+        val info = getInfo(Info::class.java)
+        if (info.autoStart) {
+            start()
+        }
+    }
 
     /**
      * Starts this task if It's not already running.
@@ -250,6 +264,7 @@ abstract class VitalCountdownTask<P, R : Runnable, T>(
     annotation class Info(
         val countdown: Long,
         val interval: Long = 1_000L,
+        val autoStart: Boolean = false,
     )
 
     open class Spigot(

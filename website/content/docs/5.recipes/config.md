@@ -15,23 +15,23 @@ Property configs can only store simple data like strings, booleans, numbers, etc
 ```java [MyYamlConfig.java]
 @VitalConfig.Info(name = "myconfig.yaml", processor = VitalYAMLConfigProcessor.class)
 public class MyYamlConfig extends VitalConfig {
-	@Property(String.class)
+	@Property(types = {String.class})
 	private String myString;
 
 	// You always have to explicitly define the generic parameters here	
-	@Property(String.class)
+	@Property(types = {String.class})
 	private List<String> myStringList;
 
-	@Property(MyClass.class)
+	@Property(types = {MyClass.class})
 	private MyClass myClass;
 
-	@Property(String.class, MyClass.class)
+	@Property(types = {String.class, MyClass.class})
 	private Map<String, MyClass> myClassMap;
 
 	// Getters and setters
 
 	public class MyClass {
-		@Property(String.class)
+		@Property(types = {String.class})
 		private String myClassString;
 
 		// Custom config objects must have a default constructor
@@ -45,13 +45,13 @@ public class MyYamlConfig extends VitalConfig {
 ```java [MyPropertiesConfig.java]
 @VitalConfig.Info(name = "myconfig.properties", processor = VitalPropertiesConfigProcessor.class)
 public class MyPropertiesConfig extends VitalConfig {
-	@Property(String.class)
+	@Property(types = {String.class})
 	private String myString;
 
-	@Property(Boolean.class)
+	@Property(types = {Boolean.class})
 	private boolean myBoolean;
 
-	@Property(Integer.class)
+	@Property(types = {Integer.class})
 	private int myInt;
 
 	// Getters and setters

@@ -8,9 +8,9 @@ navigation:
 # Custom players
 
 Below is an example for a custom player using `vital-players`.  
-First you need to add this to your application configuration (`application.yaml`, `application.properties`, etc.).
+First you need to add this to your application configuration (`application.yaml`, `application.properties`, etc.) in your project's `src/main/resources` location.
 
-```yaml [application.yaml]
+```yaml [src/main/resources/application.yaml]
 vital:
 	players:
 		player-class-name: fully.qualified.class.name.MyPlayer
@@ -37,7 +37,7 @@ Vital automatically creates an instance of your custom player when a player join
 Now use the `VitalPlayerRepository` bean to get your player.
 
 ```java
-final var myPlayer = vitalPlayerRepository.getById(MyPlayer.class, myPlayerUniqueId);
+final var myPlayer = vitalPlayerRepository.findById(MyPlayer.class, myPlayerUniqueId);
 myPlayer.getMyString();
 myPlayer.getMyBoolean();
 // …

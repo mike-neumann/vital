@@ -33,13 +33,13 @@ import kotlin.reflect.KClass
  *   processor = VitalYAMLConfigProcessor.class
  * )
  * public class MyVitalConfig extends VitalConfig {
- *   @Property(String.class)
+ *   @Property(types = {String.class})
  *   private String myString;
  *
- *   @Property(String.class)
+ *   @Property(types = {String.class})
  *   private List<String> myStringList;
  *
- *   @Property(String.class, Long.class)
+ *   @Property(types = {String.class, Long.class})
  *   private Map<String, Long> myStringLongMap;
  * }
  * ```

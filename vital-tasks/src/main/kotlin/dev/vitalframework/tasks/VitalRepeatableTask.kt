@@ -16,8 +16,14 @@ import java.util.concurrent.TimeUnit
  * Defines a repeatable task within the Vital framework.
  * A task may perform repeated actions with a set interval.
  *
+ * By default, a repeatable task will not be a Spring bean. That means that Vital will not automatically create an instance of it.
+ * This is because repeatable tasks are also meant to be used by vital-minigames, where each instanced-game may have multiple running tasks that are not scoped to the entire server.
+ *
+ * A repeatable task can be marked as "autoStart" to automatically start it when a new instance is created.
+ * This functionality is disabled by default.
+ *
  * ```java
- * @VitalRepeatableTask.Info(interval = 1_000)
+ * @VitalRepeatableTask.Info(interval = 1_000, autoStart = false)
  * public class MyRepeatableTask extends VitalRepeatableTask.Spigot {
  *     public MyRepeatableTask(JavaPlugin plugin) {
  *         super(plugin);
@@ -61,6 +67,13 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
      */
     val running
         get() = runnable != null && task != null
+
+    init {
+        val info = getInfo(Info::class.java)
+        if (info.autoStart) {
+            start()
+        }
+    }
 
     /**
      * Starts this task if It's not already running.
@@ -179,6 +192,7 @@ abstract class VitalRepeatableTask<P, R : Runnable, T>(
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Info(
         val interval: Long,
+        val autoStart: Boolean = false,
     )
 
     open class Spigot(

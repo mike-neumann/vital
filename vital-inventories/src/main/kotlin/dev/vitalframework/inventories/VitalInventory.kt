@@ -170,6 +170,7 @@ open class VitalInventory : VitalHasInfo {
      * Opens this inventory for the given [player] and updates it via [update].
      * If a [previousInventory] was given, clicking outside of this inventory view will open the previous inventory.
      */
+    @JvmOverloads
     @Suppress("UnstableApiUsage")
     open fun open(
         player: SpigotPlayer,

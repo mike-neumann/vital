@@ -41,6 +41,7 @@ class VitalHologramService(
                         it.isVisible = false
                         it.isInvisible = true
                         it.isMarker = true
+                        it.setGravity(false)
 
                         val lineText = line.text?.let { MiniMessage.miniMessage().deserialize(it) }
                         if (lineText != null) {
@@ -59,7 +60,6 @@ class VitalHologramService(
                         }
                     }
 
-            baseArmorStand.addPassenger(newLineArmorStand)
             logger.debug("New line created. $loggingContext")
             newLineArmorStand
         }
@@ -107,6 +107,7 @@ class VitalHologramService(
             lineArmorStand.isInvisible = true
             lineArmorStand.isMarker = true
             lineArmorStand.isCustomNameVisible = true
+            lineArmorStand.setGravity(false)
 
             val oldLineText = lineArmorStand.customName()?.let { PlainTextComponentSerializer.plainText().serialize(it) }
             if (oldLineText != line.text) {
@@ -156,6 +157,7 @@ class VitalHologramService(
                 it.isVisible = false
                 it.isInvisible = true
                 it.isMarker = true
+                it.setGravity(false)
             }
         val lineArmorStandUniqueIds = createHologramLineArmorStands(armorStand, lines).map { it.uniqueId }
         val hologram =
@@ -185,6 +187,7 @@ class VitalHologramService(
                 it.isVisible = false
                 it.isInvisible = true
                 it.isMarker = true
+                it.setGravity(false)
             }
 
         val linesArmorStandUniqueIds = createHologramLineArmorStands(armorStand, lines).map { it.uniqueId }
