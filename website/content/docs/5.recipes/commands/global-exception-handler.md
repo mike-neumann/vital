@@ -7,10 +7,10 @@ navigation:
 
 # Global command exception handler
 
-Below is an example for a global command exception handler that can automatically handle exceptions for all of your commands so you don’t have to define arg exception handlers for each command.  
+Below is an example of a global command exception handler that can automatically handle exceptions for all of your commands so you don’t have to define arg exception handlers for each command.  
 Use this to display more generic error messages, specific error messages for your commands should still be arg exception handlers.
 
-Global exception handlers are also used to handle exceptions that might have been thrown inside of your arg exception handlers.  
+Global exception handlers are also used to handle exceptions that might have been thrown inside your arg exception handlers.  
 If you want to test this, simply throw any kind of exception in any arg exception handler.
 
 ```java [MyGlobalCommandExceptionHandler.java]

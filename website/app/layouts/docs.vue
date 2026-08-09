@@ -104,9 +104,13 @@ function findBreadcrumb(items: ContentNavigationItem[], path: string, parents: C
 
     <UCard class="fixed bottom-6 right-6 z-50 w-80">
       <div class="flex items-center justify-between">
-        <p class="font-medium">
-          {{ $t('layout.docs.create-issue.title') }}
-        </p>
+        <div>
+          <p class="font-medium flex items-center justify-between gap-3">
+            <UIcon name="i-lucide-info" />
+
+            {{ $t('layout.docs.create-issue.title') }}
+          </p>
+        </div>
 
         <UButton
           variant="ghost"

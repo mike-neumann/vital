@@ -1,6 +1,6 @@
 package dev.vitalframework.processor
 
-import dev.vitalframework.Vital
+import dev.vitalframework.VitalPlugin
 import java.io.IOException
 import java.io.InputStreamReader
 import javax.annotation.processing.AbstractProcessor
@@ -16,7 +16,8 @@ import javax.tools.StandardLocation
 @SupportedAnnotationTypes("*")
 class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
     private var ran = false
-    lateinit var info: Vital.Info
+    lateinit var info: VitalPlugin.Info
+    lateinit var pluginEnvironment: VitalPlugin.PluginEnvironment
 
     override fun process(
         annotations: MutableSet<out TypeElement>,
@@ -27,51 +28,80 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
             return true
         }
 
-        val mainClassNamesAndInfo = getMainClassNamesAndInfo(roundEnv)
+        val mainClassNamesAndInfo = getMainClassAndInfo(roundEnv)
         if (mainClassNamesAndInfo.size > 1) {
-            throw VitalPluginInfoAnnotationProcessingException.MultipleMainClasses(*mainClassNamesAndInfo.map { it.first }.toTypedArray())
+            throw VitalPluginInfoAnnotationProcessingException.MultipleMainClasses(
+                *mainClassNamesAndInfo
+                    .map {
+                        it.first.qualifiedName.toString()
+                    }.toTypedArray(),
+            )
         }
 
         val (className, info) = mainClassNamesAndInfo.firstOrNull() ?: throw VitalPluginInfoAnnotationProcessingException.NoMainClass()
-        writeMetadataFile(className)
+        val classNameType = className.asType()
+        val isVitalPluginSpigotSubtype =
+            processingEnv.typeUtils.isSubtype(
+                classNameType,
+                processingEnv.elementUtils.getTypeElement("dev.vitalframework.VitalPlugin.Spigot").asType(),
+            )
+        val isVitalPluginPaperSubtype =
+            processingEnv.typeUtils.isSubtype(
+                classNameType,
+                processingEnv.elementUtils.getTypeElement("dev.vitalframework.VitalPlugin.Paper").asType(),
+            )
+        val isVitalPluginBungeeSubtype =
+            processingEnv.typeUtils.isSubtype(
+                classNameType,
+                processingEnv.elementUtils.getTypeElement("dev.vitalframework.VitalPlugin.Bungee").asType(),
+            )
+
+        pluginEnvironment =
+            if (isVitalPluginSpigotSubtype) {
+                VitalPlugin.PluginEnvironment.SPIGOT
+            } else if (isVitalPluginPaperSubtype) {
+                VitalPlugin.PluginEnvironment.PAPER
+            } else if (isVitalPluginBungeeSubtype) {
+                VitalPlugin.PluginEnvironment.BUNGEE
+            } else {
+                throw VitalPluginInfoAnnotationProcessingException.InvalidMainPluginClassType(className.qualifiedName.toString())
+            }
+
+        writeMetadataFile(className.qualifiedName.toString())
 
         this.info = info
         setupPluginYml(
-            info.environment,
+            pluginEnvironment,
             info.name,
             info.description,
             info.version,
             info.apiVersion,
             info.author,
         )
-        generatePluginYml(info.environment)
+        generatePluginYml(pluginEnvironment)
 
-        val packageName = className.substringBeforeLast(".")
+        val packageName = className.qualifiedName.toString().substringBeforeLast(".")
         generatePluginConfigurationClass(packageName)
 
         ran = true
         return true
     }
 
-    private fun getMainClassNamesAndInfo(roundEnv: RoundEnvironment): List<Pair<String, Vital.Info>> =
+    private fun getMainClassAndInfo(roundEnv: RoundEnvironment): List<Pair<TypeElement, VitalPlugin.Info>> =
         roundEnv
-            .getElementsAnnotatedWith(Vital.Info::class.java)
+            .getElementsAnnotatedWith(VitalPlugin.Info::class.java)
             .filter { it.kind == ElementKind.CLASS }
-            .map {
-                val typeElement = it as TypeElement
-                val className = typeElement.qualifiedName.toString()
-                className to it.getAnnotation(Vital.Info::class.java)!!
-            }
+            .map { it as TypeElement to it.getAnnotation(VitalPlugin.Info::class.java)!! }
 
     private fun writeMetadataFile(mainClass: String) {
         processingEnv.filer
-            .createResource(StandardLocation.CLASS_OUTPUT, "", Vital.Metadata.FILE_NAME)
+            .createResource(StandardLocation.CLASS_OUTPUT, "", VitalPlugin.Metadata.FILE_NAME)
             .openWriter()
-            .use { it.write(Vital.Metadata(mainClass).serialize()) }
+            .use { it.write(VitalPlugin.Metadata(mainClass).serialize()) }
     }
 
     private fun setupPluginYml(
-        pluginEnvironment: Vital.PluginEnvironment,
+        pluginEnvironment: VitalPlugin.PluginEnvironment,
         name: String,
         description: String,
         version: String,
@@ -79,16 +109,16 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         author: Array<String>,
     ) {
         when (pluginEnvironment) {
-            Vital.PluginEnvironment.BUNGEE -> {
+            VitalPlugin.PluginEnvironment.BUNGEE -> {
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("name: $name")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine($$"main: dev.vitalframework.loader.VitalPluginLoader$Bungee")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("version: $version")
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine("author: \"${author.joinToString(", ")}\"")
             }
 
-            Vital.PluginEnvironment.SPIGOT, Vital.PluginEnvironment.PAPER -> {
+            VitalPlugin.PluginEnvironment.SPIGOT, VitalPlugin.PluginEnvironment.PAPER -> {
                 val vitalPluginLoaderImplementationName =
-                    if (pluginEnvironment == Vital.PluginEnvironment.PAPER) "Paper" else "Spigot"
+                    if (pluginEnvironment == VitalPlugin.PluginEnvironment.PAPER) "Paper" else "Spigot"
                 VitalPluginInfoHolder.PLUGIN_INFO.appendLine(
                     "main: dev.vitalframework.loader.VitalPluginLoader$$vitalPluginLoaderImplementationName",
                 )
@@ -101,7 +131,7 @@ class VitalPluginInfoAnnotationProcessor : AbstractProcessor() {
         }
     }
 
-    private fun generatePluginYml(pluginEnvironment: Vital.PluginEnvironment) =
+    private fun generatePluginYml(pluginEnvironment: VitalPlugin.PluginEnvironment) =
         try {
             // scan for the vital-commands-processor dependency.
             Class.forName("dev.vitalframework.commands.processor.VitalCommandInfoAnnotationProcessor")

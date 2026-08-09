@@ -12,7 +12,7 @@ With player scoreboards, you can create scoreboards that show translated text an
 
 If you do not need to show unique data / texts for each player, you should use [global scoreboards](/docs/modules/vital-scoreboards/global-scoreboards).
 
-Unlike other components, scoreboards are not classes, since they don't require any special data or event management.  
+Unlike other components, scoreboards are not classes since they don't require any special data or event management.  
 Simply create your scoreboard wherever you need it and store it globally.
 
 > It is recommended to expose your scoreboards as a Spring bean.  

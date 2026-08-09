@@ -7,10 +7,10 @@ navigation:
 
 # Repeatable tasks
 
-Below is an example for a repeatable task that will run on your server’s scheduler (main server thread).  
+Below is an example of a repeatable task that will run on your server’s scheduler (main server thread).  
 Use repeatable tasks for a more structured way of creating server-synchronous tasks.
 
-The example shown below will repeat every 1 second.
+The example shown below will be repeated every 1 second.
 
 ```java [MyRepeatableTask.java]
 @VitalRepeatableTask.Info(interval = 1_000)

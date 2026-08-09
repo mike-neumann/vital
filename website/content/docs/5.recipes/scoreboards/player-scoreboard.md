@@ -7,8 +7,8 @@ navigation:
 
 # Player scoreboard
 
-Below is an example for a player scoreboard whose content can be unique for each player on the server.  
-Use this scoreboard, if you need to for example display player specific stats, etc.
+Below is an example of a player scoreboard whose content can be unique for each player on the server.  
+Use this scoreboard if you need to, for example, display player-specific stats, etc.
 
 ```java
 final var myPlayerScoreboard = new VitalPlayerScoreboard(

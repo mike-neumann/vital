@@ -4,10 +4,8 @@ import dev.vitalframework.BungeePlugin
 import dev.vitalframework.RequiresBungee
 import dev.vitalframework.RequiresSpigot
 import dev.vitalframework.SpigotPlugin
-import dev.vitalframework.Vital
 import dev.vitalframework.VitalCoreModule.Companion.logger
 import dev.vitalframework.VitalModule
-import org.springframework.beans.factory.getBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
@@ -18,8 +16,9 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @EnableScheduling
 @VitalModule.Info(value = "vital-tasks")
 class VitalTasksModule(
-    val vitalRepeatableTasks: List<VitalRepeatableTask<*, *, *>>,
-    val vitalCountdownTasks: List<VitalCountdownTask<*, *, *>>,
+    private val vitalRepeatableTasks: List<VitalRepeatableTask<*, *, *>>,
+    private val vitalCountdownTasks: List<VitalCountdownTask<*, *, *>>,
+    private val vitalScheduler: VitalScheduler,
 ) : VitalModule() {
     val logger = logger()
 
@@ -35,7 +34,6 @@ class VitalTasksModule(
 
     override fun onDisable() {
         logger.debug("Shutting down Vital scheduler.")
-        val vitalScheduler = Vital.context.getBean<VitalScheduler>()
         vitalScheduler.shutdown()
         logger.debug("Vital schedular shut down.")
     }

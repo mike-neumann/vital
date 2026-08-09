@@ -7,7 +7,7 @@ navigation:
 
 # Global holograms
 
-Below is an example on how to create a global hologram.  
+Below is an example of how to create a global hologram.  
 Global holograms should be used when you want to display data / text that will be the same for all of your players on your server.
 
 Use the `VitalHologramService` bean to create and delete your holograms.

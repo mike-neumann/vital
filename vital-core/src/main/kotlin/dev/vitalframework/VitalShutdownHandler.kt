@@ -13,26 +13,28 @@ import sun.misc.Signal
  */
 interface VitalShutdownHandler : InitializingBean {
     val logger: Logger
+    val vitalPlugin: VitalPlugin
 
     override fun afterPropertiesSet() {
         Signal.handle(Signal("TERM")) {
             logger.info("Shutting down Vital via 'SIGTERM'")
-            Vital.exit()
+            vitalPlugin.exit()
         }
         Signal.handle(Signal("INT")) {
             logger.info("Shutting down Vital via 'SIGINT'.")
-            Vital.exit()
+            vitalPlugin.exit()
         }
         Runtime.getRuntime().addShutdownHook(
             Thread {
                 logger.info("Shutting down Vital via JVM shutdown hook.")
-                Vital.exit()
+                vitalPlugin.exit()
             },
         )
     }
 
-    class Spigot :
-        VitalListener.Spigot(),
+    class Spigot(
+        override val vitalPlugin: VitalPlugin,
+    ) : VitalListener.Spigot(),
         VitalShutdownHandler {
         override val logger = logger()
 
@@ -43,7 +45,7 @@ interface VitalShutdownHandler : InitializingBean {
             }
 
             logger.info("Shutting down Vital via '/stop'.")
-            Vital.exit()
+            vitalPlugin.exit()
         }
 
         @SpigotEventHandler
@@ -53,12 +55,13 @@ interface VitalShutdownHandler : InitializingBean {
             }
 
             logger.info("Shutting down Vital via RCON 'stop'.")
-            Vital.exit()
+            vitalPlugin.exit()
         }
     }
 
-    class Bungee :
-        VitalListener.Bungee(),
+    class Bungee(
+        override val vitalPlugin: VitalPlugin,
+    ) : VitalListener.Bungee(),
         VitalShutdownHandler {
         override val logger = logger()
 
@@ -69,7 +72,7 @@ interface VitalShutdownHandler : InitializingBean {
             }
 
             logger.info("Shutting down Vital via '/end'.")
-            Vital.exit()
+            vitalPlugin.exit()
         }
     }
 }

@@ -7,7 +7,7 @@ navigation:
 
 # Items
 
-Below is an example for an item that your players can interact with.  
+Below is an example of an item that your players can interact with.  
 The item will have a cooldown of 1 second and thus can only be used every 1 second.
 
 ```java [MyItem.java]

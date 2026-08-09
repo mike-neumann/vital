@@ -10,7 +10,7 @@ navigation:
 Below is an example for a YAML and a Properties config.  
 YAML configs can be used to store more complex data, like your custom classes for other constructs.
 
-Properties configs can only store simple data like strings, booleans, numbers, etc.
+Property configs can only store simple data like strings, booleans, numbers, etc.
 
 ```java [MyYamlConfig.java]
 @VitalConfig.Info(name = "myconfig.yaml", processor = VitalYAMLConfigProcessor.class)

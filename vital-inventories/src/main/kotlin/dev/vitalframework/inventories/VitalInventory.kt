@@ -1,13 +1,12 @@
 package dev.vitalframework.inventories
 
 import dev.vitalframework.SpigotPlayer
-import dev.vitalframework.Vital
 import dev.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
 import dev.vitalframework.VitalCoreModule.Companion.logger
 import dev.vitalframework.VitalHasInfo
+import dev.vitalframework.VitalPlugin
 import dev.vitalframework.items.VitalItemStackBuilder.Companion.itemBuilder
 import dev.vitalframework.localization.VitalLocalizationModule.Spigot.t
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -186,7 +185,7 @@ open class VitalInventory : VitalHasInfo {
             info.type.menuType.create(
                 player,
                 MiniMessage.miniMessage().deserialize(
-                    if (Vital.isVitalModuleEnabled("vital-localization")) player.t(info.name) else info.name,
+                    if (VitalPlugin.instance.isVitalModuleEnabled("vital-localization")) player.t(info.name) else info.name,
                 ),
             )
 

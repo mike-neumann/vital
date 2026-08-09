@@ -7,10 +7,10 @@ navigation:
 
 # Scheduled tasks
 
-Below is an example for a scheduled task that will run on your server’s scheduler (main server thread).  
-Use scheduled tasks for a more slimmer version of a repeatable task and a more structured way of creating server-synchronous tasks.  
+Below is an example of a scheduled task that will run on your server’s scheduler (main server thread).  
+Use scheduled tasks for a slimmer version of a repeatable task and a more structured way of creating server-synchronous tasks.  
 
-The example shown below will initially wait 1 second when it starts, and then repeat every 5 seconds.
+The example shown below will initially wait 1 second when it starts and then repeat every 5 seconds.
 
 ```java [MyComponent.java]
 @Component

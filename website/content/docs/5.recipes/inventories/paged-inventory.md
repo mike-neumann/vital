@@ -7,7 +7,7 @@ navigation:
 
 # Paged inventory
 
-Below is an example for a paged inventory (9x3 slots).
+Below is an example of a paged inventory (9x3 slots).
 
 ```java [MyPagedInventory.java]
 @VitalPagedInventory.Info(fromSlot = 10, toSlot = 16)

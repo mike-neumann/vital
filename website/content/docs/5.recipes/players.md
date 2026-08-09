@@ -32,7 +32,7 @@ public class MyPlayer extends VitalPlayer.Spigot {
 }
 ```
 
-Vital automatically creates an instance of your custom player when a player joins your server and automatically deletes it, when your player leaves.
+Vital automatically creates an instance of your custom player when a player joins your server and automatically deletes it when your player leaves.
 
 Now use the `VitalPlayerRepository` bean to get your player.
 

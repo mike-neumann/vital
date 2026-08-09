@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
@@ -49,6 +50,7 @@ class VitalCoreModule {
     @VitalModule.Info(value = "vital-core")
     class Spigot(
         val plugin: SpigotPlugin,
+        @param:Lazy
         val vitalListeners: List<VitalListener.Spigot>,
     ) : VitalModule() {
         val logger = logger()
@@ -71,15 +73,17 @@ class VitalCoreModule {
             vitalCoreConfigurationProperties: VitalCoreConfigurationProperties,
         ): VitalBStatsInitialization.Spigot = VitalBStatsInitialization.Spigot(plugin, vitalCoreConfigurationProperties)
 
+        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         @ConditionalOnMissingBean
         @Bean
-        fun vitalShutdownHandler(): VitalShutdownHandler.Spigot = VitalShutdownHandler.Spigot()
+        fun vitalShutdownHandler(vitalPlugin: VitalPlugin): VitalShutdownHandler.Spigot = VitalShutdownHandler.Spigot(vitalPlugin)
     }
 
     @Conditional(RequiresBungee::class)
     @VitalModule.Info(value = "vital-core")
     class Bungee(
         val plugin: BungeePlugin,
+        @param:Lazy
         val vitalListeners: List<VitalListener.Bungee>,
     ) : VitalModule() {
         val logger = logger()
@@ -102,9 +106,10 @@ class VitalCoreModule {
             vitalCoreConfigurationProperties: VitalCoreConfigurationProperties,
         ): VitalBStatsInitialization.Bungee = VitalBStatsInitialization.Bungee(plugin, vitalCoreConfigurationProperties)
 
+        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         @ConditionalOnMissingBean
         @Bean
-        fun vitalShutdownHandler(): VitalShutdownHandler.Bungee = VitalShutdownHandler.Bungee()
+        fun vitalShutdownHandler(vitalPlugin: VitalPlugin): VitalShutdownHandler.Bungee = VitalShutdownHandler.Bungee(vitalPlugin)
     }
 
     companion object {

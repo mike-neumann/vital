@@ -7,7 +7,7 @@ navigation:
 
 # Command with an arg exception handler
 
-Below is an example for a Spigot command that handles the following subcommands:
+Below is an example of a Spigot command that handles the following subcommands:
 - `/mycommand arg0`
 - `/mycommand arg0 <arg1>`
 - `/mycommand arg0 arg1 <arg2>*`

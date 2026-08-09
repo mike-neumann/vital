@@ -4,9 +4,9 @@ package dev.vitalframework.localization
 
 import dev.vitalframework.BungeePlayer
 import dev.vitalframework.SpigotPlayer
-import dev.vitalframework.Vital
 import dev.vitalframework.VitalCoreModule.Companion.logger
 import dev.vitalframework.VitalModule
+import dev.vitalframework.VitalPlugin
 import dev.vitalframework.localization.VitalLocalizationModule.Spigot.vitalLocale
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -51,7 +51,11 @@ class VitalLocalizationModule : VitalModule() {
                 key
             } else {
                 try {
-                    Vital.context.getBean<MessageSource>().getMessage(key, arrayOf(*args), locale)
+                    VitalPlugin
+                        .instance
+                        .context
+                        .getBean<MessageSource>()
+                        .getMessage(key, arrayOf(*args), locale)
                 } catch (_: Exception) {
                     key
                 }
@@ -68,7 +72,7 @@ class VitalLocalizationModule : VitalModule() {
                 val loggingContext = "Context: player '$this', new locale '$value'."
 
                 logger.debug("Player vital localization was changed. Will update inventory items viable for localization. $loggingContext")
-                if ("vital-items" in Vital.vitalModules) {
+                if ("vital-items" in VitalPlugin.instance.vitalModules) {
                     logger.debug(
                         "The 'vital-items' module was not found, cannot update item locales for player and new locale. $loggingContext",
                     )
@@ -164,7 +168,7 @@ class VitalLocalizationModule : VitalModule() {
          * ```java
          * // "myserver.item.name=My item {0}"
          *
-         * VitalLocalizationModule.Spigot.INSTANCE.t(myPlayer, "myserver.item.name", "VALUE") -> My item VALUE
+         * VitalLocalizationModule.Spigot.t(myPlayer, "myserver.item.name", "VALUE") -> My item VALUE
          * ```
          */
         @JvmStatic
@@ -192,7 +196,7 @@ class VitalLocalizationModule : VitalModule() {
          * ```java
          * // "myserver.item.name=My item {0}"
          *
-         * VitalLocalizationModule.Bungee.INSTANCE.t(myPlayer, "myserver.item.name", "VALUE"); -> My item VALUE
+         * VitalLocalizationModule.Bungee.t(myPlayer, "myserver.item.name", "VALUE"); -> My item VALUE
          * ```
          */
         @JvmStatic

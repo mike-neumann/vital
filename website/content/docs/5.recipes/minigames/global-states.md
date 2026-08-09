@@ -5,10 +5,10 @@ navigation:
   title: Global minigame states
 ---
 
-# Global mini game states
+# Global mini-game states
 
 Below is an example for a global game state for the `vital-minigames` module.  
-In a game, only 1 state can currently be active at a given time.
+In a game, only one state can currently be active at a given time.
 
 Only the currently active state will receive events.
 

@@ -7,7 +7,7 @@ navigation:
 
 # Countdown tasks
 
-Below is an example for a countdown task that will run on your server’s scheduler (main server thread).  
+Below is an example of a countdown task that will run on your server’s scheduler (main server thread).  
 Use countdown tasks for a more structured way of creating server-synchronous countdowns.
 
 The example shown below will define a countdown of 10 seconds, every 1 second the countdown will decrease.

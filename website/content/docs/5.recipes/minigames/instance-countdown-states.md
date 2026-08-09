@@ -7,8 +7,8 @@ navigation:
 
 # Minigame instance countdown states
 
-Below is an example for a mini game instance countdown state for `vital-minigames`.  
-In a game, only 1 state can currently be active at a given time.
+Below is an example for a mini-game instance countdown state for `vital-minigames`.  
+In a game, only one state can currently be active at a given time.
 
 Only the currently active state will receive events and decrease the countdown.  
 The example shown below will define a countdown of 10 seconds that will decrease every 1 second.

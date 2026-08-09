@@ -9,7 +9,7 @@ navigation:
 
 Below is an example on how to create a player hologram.  
 Player holograms should be used when you want to display data / text that can be unique for each player.  
-Use player holograms to display player specific stats, or translated text.
+Use player holograms to display player-specific stats or translated text.
 
 Use the `VItalHologramService` bean to create and delete your holograms.
 

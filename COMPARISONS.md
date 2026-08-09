@@ -44,25 +44,21 @@ main: me.myplugin.MyPlugin
 <td>
 
 ```java
-@Vital.Info(
+@VitalPlugin.Info(
         name = "MyPlugin",
         version = "1.0.0",
         description = "MyPlugin description",
         apiVersion = "1.21",
-        author = {"MyName"},
-        // For Spigot
-        environment = Vital.Info.PluginEnvironment.SPIGOT,
-        // Or for Paper
-        environment = Vital.Info.PluginEnvironment.PAPER
+        author = {"MyName"}
 )
-public class MyPlugin {
-    @EventListener(ApplicationReadyEvent.class)
-    public void onApplicationReady(ApplicationReadyEvent e) {
+public class MyPlugin extends VitalPlugin.Spigot {
+    @Override
+    public void onEnable() {
         // Do something here...
     }
 
-    @EventListener(ContextClosedEvent.class)
-    public void onContextClosed(ContextClosedEvent e) {
+    @Override
+    public void onDisable() {
         // Do something here...
     }
 }

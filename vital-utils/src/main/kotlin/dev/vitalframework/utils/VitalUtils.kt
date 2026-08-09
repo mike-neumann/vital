@@ -214,7 +214,7 @@ interface VitalUtils<CS, P : CS> {
 
         init {
             try {
-                Class.forName("dev.vitalframework.Vital")
+                Class.forName("dev.vitalframework.VitalPlugin")
             } catch (_: Exception) {
                 logger.info("Running 'vital-utils' outside of a Vital project.")
                 logger.info(

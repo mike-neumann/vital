@@ -7,10 +7,10 @@ navigation:
 
 # Global scoreboards
 
-Global scoreboards, like the name implies will show global data and text that is **THE SAME FOR ALL PLAYERS ON THE SERVER**. You can't show translated text / data with this scoreboard.  
+Global scoreboards, like the name implies, will show global data and text that is **THE SAME FOR ALL PLAYERS ON THE SERVER**. You can't show translated text / data with this scoreboard.  
 If you do need to show data / text that may be different for each player, please use [player scoreboards](/docs/modules/vital-scoreboards/player-scoreboards).
 
-Unlike other components, scoreboards are not classes, since they don't require any special data or event management.  
+Unlike other components, scoreboards are not classes since they don't require any special data or event management.  
 Simply create your scoreboard wherever you need it and store it globally.  
 
 > It is recommended to expose your scoreboards as a Spring bean.  
@@ -28,7 +28,7 @@ public VitalGlobalScoreboard vitalGlobalScoreboard() {
 }
 ```
 
-Note that the title and lines are both lambda function.  
+Note that the title and lines are both lambda functions.  
 Every time you change the title or the lines, the title and lines functions will be invoked to produce a freshly updated scoreboard.
 
 ---

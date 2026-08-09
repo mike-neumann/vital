@@ -1,7 +1,7 @@
 package dev.vitalframework.commands.processor
 
-import dev.vitalframework.Vital
 import dev.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
+import dev.vitalframework.VitalPlugin
 import dev.vitalframework.commands.VitalCommand
 import dev.vitalframework.processor.VitalPluginInfoAnnotationProcessingException
 import dev.vitalframework.processor.VitalPluginInfoAnnotationProcessor
@@ -47,7 +47,7 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
 
         val additionalPackages =
             pluginInfoAnnotationProcessor.info.scanAdditionalPackages.toMutableList().apply {
-                addAll(Vital.Info.DEFAULT_PACKAGES)
+                addAll(VitalPlugin.Info.DEFAULT_PACKAGES)
             }
         for (additionalPackage in additionalPackages) {
             for (clazz in Reflections(additionalPackage).getTypesAnnotatedWith(VitalCommand.Info::class.java, true)) {
@@ -59,7 +59,7 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
             }
         }
 
-        generatePluginYmlCommands(commandInfoList, pluginInfoAnnotationProcessor.info.environment)
+        generatePluginYmlCommands(commandInfoList, pluginInfoAnnotationProcessor.pluginEnvironment)
 
         ran = true
         return true
@@ -67,7 +67,7 @@ class VitalCommandInfoAnnotationProcessor : AbstractProcessor() {
 
     private fun generatePluginYmlCommands(
         commandInfos: MutableList<VitalCommand.Info>,
-        pluginEnvironment: Vital.PluginEnvironment,
+        pluginEnvironment: VitalPlugin.PluginEnvironment,
     ) {
         try {
             // Create the new `plugin.yml` file resource as the basic processor left it uncreated.

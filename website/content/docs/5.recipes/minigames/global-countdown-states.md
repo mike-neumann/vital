@@ -5,12 +5,12 @@ navigation:
   title: Global minigame countdown states
 ---
 
-# Global mini game countdown states
+# Global mini-game countdown states
 
-Below is an example for a global mini game countdown state for the `vital-minigames` module.  
-In a game, only 1 state can currently be active at a given time.
+Below is an example for a global mini-game countdown state for the `vital-minigames` module.  
+In a game, only one state can currently be active at a given time.
 
-Only the currently active state will receive events and the countdown will decrease.
+Only the currently active state will receive events, and the countdown will decrease.
 
 ```java [MyCountdownMinigameState.java]
 @GlobalMinigameState

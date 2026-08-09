@@ -68,7 +68,7 @@ The following parameters are supported and can freely be added to your method in
 
 But even with all of this exception handling, there are still some loopholes...  
 What happens if we want to display a default message for all kinds of exceptions across our entire commands of your plugin?  
-We'd have to create arg exception handlers for each command and that isn't really what we want to do...  
+We'd have to create arg exception handlers for each command, and that isn't really what we want to do...  
 
 On top of everything that Vital already does, Vital also gives you an option to create a so-called **global command exception handler**.  
 As the name implies, this exception handler will be called across **all of your commands in your plugin**.  
@@ -99,7 +99,7 @@ This global exception handler **will only be called if no arg exception handler 
 
 But still, this isn't the final handling point for exceptions.  
 If all of these handlers fail (for whatever reason), the `onCommandException` lifecycle of your command class will be the ultimate fallback for any kind of exception that was thrown during your arg exception handler and global exception handlers.  
-Normally, this would never happen, but to make sure that you always have control over what happens in your command lifecyle, this is the absolute fallback.
+Normally, this would never happen, but to make sure that you always have control over what happens in your command lifecycle, this is the absolute fallback.
 
 Just like arg exception handlers, global exception handlers also use the same method parameter binding technique.  
 So you can freely choose whatever parameters you want to use for your method.  

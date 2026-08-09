@@ -4,7 +4,7 @@ import dev.vitalframework.BungeeCommandSender
 import dev.vitalframework.RequiresBungee
 import dev.vitalframework.RequiresSpigot
 import dev.vitalframework.SpigotCommandSender
-import dev.vitalframework.Vital
+import dev.vitalframework.VitalPlugin
 import dev.vitalframework.commands.VitalCommand
 import dev.vitalframework.utils.VitalUtils.Bungee.sendFormattedMessage
 import dev.vitalframework.utils.VitalUtils.Spigot.sendFormattedMessage
@@ -25,6 +25,7 @@ interface StatsCommand<CS> {
 
     val vitalStatisticsService: VitalStatisticsService
     val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties
+    val vitalPlugin: VitalPlugin
 
     fun sendMessage(
         sender: CS,
@@ -47,9 +48,9 @@ interface StatsCommand<CS> {
         sendMessage(sender, "Spring version: <yellow>${SpringVersion.getVersion()}")
         sendMessage(sender, "Server status: <yellow>${vitalStatisticsService.tps} TPS ($serverStatus)")
         sendMessage(sender, "RAM usage: <yellow>$ramUsageInGigaBytes GB")
-        sendMessage(sender, "Vital sub-modules: <yellow>${Vital.vitalModules.size}")
+        sendMessage(sender, "Vital sub-modules: <yellow>${vitalPlugin.vitalModules.size}")
 
-        for (name in Vital.vitalModules) {
+        for (name in vitalPlugin.vitalModules) {
             sendMessage(sender, "> <yellow>$name")
         }
 
@@ -87,6 +88,7 @@ interface StatsCommand<CS> {
     class Spigot(
         override val vitalStatisticsService: VitalStatisticsService,
         override val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
+        override val vitalPlugin: VitalPlugin,
     ) : VitalCommand.Spigot(),
         StatsCommand<SpigotCommandSender> {
         override fun sendMessage(
@@ -112,6 +114,7 @@ interface StatsCommand<CS> {
     class Bungee(
         override val vitalStatisticsService: VitalStatisticsService,
         override val vitalStatisticsConfigurationProperties: VitalStatisticsConfigurationProperties,
+        override val vitalPlugin: VitalPlugin,
     ) : VitalCommand.Bungee(),
         StatsCommand<BungeeCommandSender> {
         override fun sendMessage(

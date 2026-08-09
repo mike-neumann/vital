@@ -10,7 +10,7 @@ interface VitalPluginLoader {
         try {
             // we need to manually load in the "Vital" class to avoid any conflicts with our current class loader...
             // that's also why Vital isn't on the classpath here
-            val vital = vitalClassLoader.loadClass("dev.vitalframework.Vital")
+            val vital = vitalClassLoader.loadClass("dev.vitalframework.VitalPlugin")
             val run = vital.getMethod("run", Any::class.java, ClassLoader::class.java)
             run(null, this, vitalClassLoader)
         } catch (e: Exception) {
@@ -25,9 +25,11 @@ interface VitalPluginLoader {
         try {
             // we need to manually load in the "Vital" class to avoid any conflicts with our current class loader...
             // that's also why Vital isn't on the classpath here
-            val vital = vitalClassLoader.loadClass("dev.vitalframework.Vital")
-            val exit = vital.getMethod("exit")
-            exit(null)
+            val vital = vitalClassLoader.loadClass("dev.vitalframework.VitalPlugin")
+            val getInstance = vital.getMethod("getInstance")
+            val vitalPlugin = getInstance(null)
+            val exit = vitalPlugin.javaClass.getMethod("exit")
+            exit(vitalPlugin)
         } catch (e: Exception) {
             println("!!! an error occurred while disabling Vital powered plugin!!!")
             println("please consult the following stack trace for any info")

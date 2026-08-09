@@ -45,7 +45,7 @@
         "description": "Die Seite listet alle Feature auf, die Vital derzeit zu bieten hat."
       }
     },
-    "footer": "Diese Seite und das Vital-Framework wurden mit ❤️ von Mike Neumann"
+    "footer": "Diese Seite und das Vital-Framework wurden mit ❤️ entwickelt von Mike Neumann"
   },
   "view": {
     "index": {

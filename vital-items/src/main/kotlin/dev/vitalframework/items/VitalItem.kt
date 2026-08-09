@@ -1,10 +1,10 @@
 package dev.vitalframework.items
 
 import dev.vitalframework.SpigotPlayer
-import dev.vitalframework.Vital
 import dev.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
 import dev.vitalframework.VitalCoreModule.Companion.logger
 import dev.vitalframework.VitalHasInfo
+import dev.vitalframework.VitalPlugin
 import dev.vitalframework.items.VitalItemStackBuilder.Companion.itemBuilder
 import dev.vitalframework.localization.VitalLocalizationModule.Spigot.t
 import org.bukkit.Material
@@ -87,7 +87,7 @@ open class VitalItem : VitalHasInfo {
                 enchantments[Enchantment.FORTUNE] = 1
             }
 
-            if (Vital.isVitalModuleEnabled("vital-localization")) {
+            if (VitalPlugin.instance.isVitalModuleEnabled("vital-localization")) {
                 name = player.t(info.name)
                 lore = info.lore.flatMap { player.t(it).lines() }.toTypedArray()
                 afterInit = {

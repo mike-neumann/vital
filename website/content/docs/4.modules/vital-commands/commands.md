@@ -8,9 +8,9 @@ navigation:
 # Commands
 
 Every command will be a class that extends `VitalCommand.Spigot` and is annotated with `VitalCommand.Info`.  
-A command can have n-number of arg handlers, each arg handler is essentially a method that is executed, when the command is executed with the configured argument.  
+A command can have n-number of arg handlers; each arg handler is essentially a method executed when the command is executed with the configured argument.  
 
-Since Vital can determine the structure of your command by simply just looking at your class it will automatically build tab-completions without you having to do anything!  
+Since Vital can determine the structure of your command by simply just looking at your class, it will automatically build tab-completions without you having to do anything!  
 
 ```java [MyCommand.java]
 @VitalCommand.Info(name = "mycommand")
@@ -40,10 +40,10 @@ By default, this will most likely be `ReturnState.SUCCESS` for almost any of you
 But sometimes you might need to return `ReturnState.NO_PERMISSION` or something else for special use cases.
 
 > Note that we have direct access to the player (or command sender) that executed the command.  
-> Using the `@VitalCommand.Info` annotation, you can also mark your command to only be executable by players, by default, this is turned off and your commands can also be executed by non-players, like your server console.  
+> Using the `@VitalCommand.Info` annotation, you can also mark your command to only be executable by players, by default, this is turned off, and your commands can also be executed by non-players, like your server console.  
 > Important: Obviously, you cant set your parameter to a `Player` if you can also receive non-players as a sender, be careful of that when you build your commands!
 
-We can also restrict specific arg handlers to players, or restrict their permissions.
+We can also restrict specific arg handlers to players or restrict their permissions.
 ```java [MyCommand.java]
 @ArgHandler(arg = @Arg(name = "myarg0 myarg1", permission = "myserver.mycommand.permission", playerOnly = true))
 ```
@@ -71,7 +71,7 @@ E.g., when someone executes `/mycommand myarg0 hello`, the `String[] values` arr
 
 Note that you cannot receive values that are delimited by spaces.  
 So this `/mycommand myarg0 hello 123` will not work.  
-For space delimited values, use varargs.
+For space-delimited values, use varargs.
 
 ## Varargs
 

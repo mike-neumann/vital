@@ -7,8 +7,8 @@ navigation:
 
 # Minigame instance states
 
-Below is an example for a mini game instance state for `vital-minigames`.  
-In a game, only 1 state can currently be active at a given time.
+Below is an example for a mini-game instance state for `vital-minigames`.  
+In a game, only one state can currently be active at a given time.
 
 Only the currently active state will receive events.
 

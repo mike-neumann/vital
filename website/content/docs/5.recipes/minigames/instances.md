@@ -7,7 +7,7 @@ navigation:
 
 # Minigame instances
 
-Below is an example for a single `vital-minigames` mini game instance.  
+Below is an example for a single `vital-minigames` mini-game instance.  
 A game instance defines the "type" of your game and stores all the information for your game, like player stats, players alive, etc.
 
 Every instance will be isolated into its own world.  

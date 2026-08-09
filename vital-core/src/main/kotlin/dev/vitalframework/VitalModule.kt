@@ -29,20 +29,21 @@ abstract class VitalModule : VitalHasInfo {
     override val info = mutableMapOf(Info::class.java to javaClass.getRequiredAnnotation<Info>())
 
     private val logger = logger()
+    lateinit var vitalPlugin: VitalPlugin
 
     /**
      * Enables this module by calling the [onEnable] lifecycle function.
      * The module is only enabled if it is not already enabled.
      */
-    fun enable() {
+    fun enable(vitalPlugin: VitalPlugin) {
         val info = getInfo(Info::class.java)
         try {
-            if (Vital.isVitalModuleEnabled(info.value)) {
+            if (vitalPlugin.isVitalModuleEnabled(info.value)) {
                 logger.error("Cannot enable Vital module '${info.value}', it is already enabled.")
                 return
             }
 
-            if (info.value.startsWith("vital-") && !Vital.isOfficialVitalModule(info.value)) {
+            if (info.value.startsWith("vital-") && !VitalPlugin.isOfficialVitalModule(info.value)) {
                 logger.error("!!! '${info.value}' is not an official Vital module but is trying to disguise itself as one !!!")
                 logger.error("!!! This does not mean it is trying to cause harm. !!!")
                 logger.error("!!! If you are the developer of '${info.value}', please consider renaming your module. !!!")
@@ -51,7 +52,8 @@ abstract class VitalModule : VitalHasInfo {
 
             logger.info("Enabling Vital module '${info.value}'.")
             onEnable()
-            Vital.vitalModules.add(info.value)
+            vitalPlugin.vitalModules.add(info.value)
+            this.vitalPlugin = vitalPlugin
             logger.info("Vital module '${info.value}' successfully enabled.")
         } catch (e: Exception) {
             throw VitalModuleException.Enable(info.value, e)
@@ -62,17 +64,17 @@ abstract class VitalModule : VitalHasInfo {
      * Disables this module by calling the [onDisable] lifecycle function.
      * The module is only disabled if it is currently enabled.
      */
-    fun disable() {
+    fun disable(vitalPlugin: VitalPlugin) {
         val info = getInfo(Info::class.java)
         try {
-            if (!Vital.isVitalModuleEnabled(info.value)) {
+            if (!vitalPlugin.isVitalModuleEnabled(info.value)) {
                 logger.error("Cannot disable Vital module '${info.value}', it is already disabled.")
                 return
             }
 
             logger.info("Disabling Vital module '${info.value}'.")
             onDisable()
-            Vital.vitalModules.remove(info.value)
+            vitalPlugin.vitalModules.remove(info.value)
             logger.info("Vital module '${info.value}' successfully disabled.")
         } catch (e: Exception) {
             throw VitalModuleException.Disable(info.value, e)

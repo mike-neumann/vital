@@ -12,7 +12,7 @@ const heroLinks = computed(() => [{
   icon: 'i-lucide-circle-question-mark',
   label: $t('view.index.hero.why'),
   to: '#why',
-  size: 'xl',
+  size: 'xl'
 }, {
   icon: 'i-lucide-star',
   label: $t('view.index.hero.highlights'),
@@ -28,65 +28,64 @@ const heroLinks = computed(() => [{
 }])
 
 const heroCode = `
-@Vital.Info(
+@VitalPlugin.Info(
   name = "myplugin",
   description = "My awesome Vital plugin",
   version = "1.0.0",
-  apiVersion = "1.21",
-  environment = "Vital.PluginEnvironment.PAPER"
+  apiVersion = "1.21"
 )
-public class MyPlugin {
+public class MyPlugin extends VitalPlugin.Spigot {
 }
 `
 
 const whyFeatures = computed(() => [
   {
     title: $t('view.index.why.features.plugin-yml.title'),
-    description: $t('view.index.why.features.plugin-yml.description'),
+    description: $t('view.index.why.features.plugin-yml.description')
   },
   {
     title: $t('view.index.why.features.command-executors.title'),
-    description: $t('view.index.why.features.command-executors.description'),
+    description: $t('view.index.why.features.command-executors.description')
   },
   {
     title: $t('view.index.why.features.config-loading.title'),
-    description: $t('view.index.why.features.config-loading.description'),
+    description: $t('view.index.why.features.config-loading.description')
   },
   {
     title: $t('view.index.why.features.inventory-boilerplate.title'),
-    description: $t('view.index.why.features.inventory-boilerplate.description'),
+    description: $t('view.index.why.features.inventory-boilerplate.description')
   },
   {
     title: $t('view.index.why.features.hologram-boilerplate.title'),
-    description: $t('view.index.why.features.hologram-boilerplate.description'),
+    description: $t('view.index.why.features.hologram-boilerplate.description')
   },
   {
     title: $t('view.index.why.features.scoreboard-management.title'),
-    description: $t('view.index.why.features.scoreboard-management.description'),
+    description: $t('view.index.why.features.scoreboard-management.description')
   },
   {
     title: $t('view.index.why.features.item-interactions.title'),
-    description: $t('view.index.why.features.item-interactions.description'),
+    description: $t('view.index.why.features.item-interactions.description')
   },
   {
     title: $t('view.index.why.features.player-objects.title'),
-    description: $t('view.index.why.features.player-objects.description'),
+    description: $t('view.index.why.features.player-objects.description')
   },
   {
     title: $t('view.index.why.features.task-organization.title'),
-    description: $t('view.index.why.features.task-organization.description'),
+    description: $t('view.index.why.features.task-organization.description')
   },
   {
     title: $t('view.index.why.features.localization.title'),
-    description: $t('view.index.why.features.localization.description'),
+    description: $t('view.index.why.features.localization.description')
   },
   {
     title: $t('view.index.why.features.minigame-events.title'),
-    description: $t('view.index.why.features.minigame-events.description'),
+    description: $t('view.index.why.features.minigame-events.description')
   },
   {
     title: $t('view.index.why.features.utility-code.title'),
-    description: $t('view.index.why.features.utility-code.description'),
+    description: $t('view.index.why.features.utility-code.description')
   },
   {
     title: $t('view.index.why.features.etc.title'),
@@ -169,7 +168,12 @@ const plannedFeatures = computed(() => [
       :title="$t('view.index.why.title')"
     >
       <UPageGrid>
-        <UPageCard v-for="(feature, i) of whyFeatures" :key="i" :title="feature.title" :description="feature.description" />
+        <UPageCard
+          v-for="(feature, i) of whyFeatures"
+          :key="i"
+          :title="feature.title"
+          :description="feature.description"
+        />
       </UPageGrid>
     </UPageSection>
 
