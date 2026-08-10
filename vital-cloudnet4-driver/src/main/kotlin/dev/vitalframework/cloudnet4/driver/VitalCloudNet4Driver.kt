@@ -7,6 +7,7 @@ import eu.cloudnetservice.driver.provider.ServiceTaskProvider
 import eu.cloudnetservice.driver.service.ServiceConfiguration
 import eu.cloudnetservice.driver.service.ServiceInfoSnapshot
 import eu.cloudnetservice.driver.service.ServiceTask
+import java.util.function.Predicate
 
 /**
  * If you are running a CloudNET server, this will be the class to use when you want to communicate with it.
@@ -55,10 +56,10 @@ object VitalCloudNet4Driver {
      */
     @JvmStatic
     @JvmOverloads
-    inline fun getCloudServers(predicate: (ServiceInfoSnapshot) -> Boolean = { true }) =
+    fun getCloudServers(predicate: Predicate<ServiceInfoSnapshot> = Predicate { true }) =
         cloudServiceProvider
             .runningServices()
-            .filter(predicate)
+            .filter(predicate::test)
 
     /**
      * Gets the [ServiceTask] by calling [getServerTask] with the given [taskName] and attempts to start a new server from it.

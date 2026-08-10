@@ -1,12 +1,13 @@
 package dev.vitalframework
 
 import dev.vitalframework.VitalCoreModule.Companion.logger
+import java.util.function.Predicate
 
 /**
  * A volatile in-memory repository to store temporary data in a Spring-like repository implementation.
  * It can store implementations of [VitalEntity] and the means to get, save and delete them.
  *
- * Useful for temporary data, that should be wiped when the server restarts.
+ * Useful for temporary data that should be wiped when the server restarts.
  *
  * ```java
  * @Component
@@ -81,15 +82,30 @@ abstract class VitalRepository<T : VitalEntity<ID>, ID> {
     fun <T : VitalEntity<ID>> findAll(type: Class<T>) = _entities.values.filterIsInstance(type)
 
     /**
+     * Gets the first [VitalEntity] that matches the given [predicate].
+     */
+    @JvmOverloads
+    inline fun <reified T : VitalEntity<ID>> find(predicate: Predicate<T> = Predicate { true }) = find(T::class.java, predicate)
+
+    /**
+     * Gets the first [VitalEntity] that matches the given [type] and [predicate].
+     */
+    @JvmOverloads
+    fun <T : VitalEntity<ID>> find(
+        type: Class<T>,
+        predicate: Predicate<T> = Predicate { true },
+    ) = _entities.values.filterIsInstance(type).find(predicate::test)
+
+    /**
      * Gets a random entity from this repository that matches the given [predicate].
      * If no entity was found, this function returns `null`.
      */
     @JvmOverloads
-    fun getRandom(predicate: (T) -> Boolean = { true }) = _entities.values.filter(predicate).randomOrNull()
+    fun findRandom(predicate: Predicate<T> = Predicate { true }) = _entities.values.filter(predicate::test).randomOrNull()
 
     /**
      * Deletes the given [entity] from this repository and calls the [onDelete] lifecycle.
-     * If the given entity does not exists in this repository, this function does nothing.
+     * If the given entity does not exist in this repository, this function does nothing.
      */
     fun delete(entity: T) {
         if (!_entities.containsKey(entity.id)) {

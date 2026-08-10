@@ -81,13 +81,13 @@ abstract class VitalScheduler(
         scheduler.shutdownNow()
     }
 
-    abstract fun schedule(method: () -> Unit)
+    abstract fun schedule(method: Runnable)
 
     class Spigot(
         environment: Environment,
         private val plugin: SpigotPlugin,
     ) : VitalScheduler(environment) {
-        override fun schedule(method: () -> Unit) {
+        override fun schedule(method: Runnable) {
             Bukkit.getScheduler().runTaskLater(plugin, method, 0L)
         }
     }
@@ -96,7 +96,7 @@ abstract class VitalScheduler(
         environment: Environment,
         private val plugin: BungeePlugin,
     ) : VitalScheduler(environment) {
-        override fun schedule(method: () -> Unit) {
+        override fun schedule(method: Runnable) {
             ProxyServer.getInstance().scheduler.schedule(plugin, method, 0L, TimeUnit.NANOSECONDS)
         }
     }

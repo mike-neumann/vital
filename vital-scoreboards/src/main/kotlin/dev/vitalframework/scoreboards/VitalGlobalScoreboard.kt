@@ -1,5 +1,7 @@
 package dev.vitalframework.scoreboards
 
+import java.util.function.Supplier
+
 /**
  * Defines a global scoreboard implementation within the Vital-Framework.
  * Global scoreboards should be used when displaying data, that is not tied to a specific player.
@@ -17,18 +19,18 @@ package dev.vitalframework.scoreboards
  * ```
  */
 class VitalGlobalScoreboard(
-    title: () -> String,
-    vararg lines: () -> String,
+    title: Supplier<String>,
+    vararg lines: Supplier<String>,
 ) : VitalScoreboard() {
     var title = title
         set(value) {
             field = value
-            update(value) { lines.map { it() } }
+            update(value::get) { lines.map { it.get() } }
         }
 
     var lines = lines
         set(value) {
             field = value
-            update(title) { value.map { it() } }
+            update(title::get) { value.map { it.get() } }
         }
 }

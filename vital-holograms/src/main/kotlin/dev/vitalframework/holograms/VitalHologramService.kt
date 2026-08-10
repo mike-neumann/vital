@@ -12,6 +12,8 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.Item
 import org.bukkit.inventory.ItemStack
 import java.util.UUID
+import java.util.function.Function
+import java.util.function.Supplier
 import kotlin.collections.reversed
 
 /**
@@ -69,7 +71,7 @@ class VitalHologramService(
      * If the hologram doesn't exist, this function will throw [IllegalStateException].
      */
     fun updateHologram(hologram: VitalHologram) {
-        val lines = hologram.lines.map { it() }
+        val lines = hologram.lines.map { it.get() }
         val loggingContext = "Context: location '${hologram.location}', lines '$lines'."
         val baseArmorStand =
             Bukkit.getEntity(hologram.armorStandUniqueId)
@@ -85,12 +87,16 @@ class VitalHologramService(
                         )
                 }
 
-        val lineArmorStands = baseArmorStand.passengers.filterIsInstance<ArmorStand>().toMutableList()
+        val lineArmorStands =
+            hologram.lineArmorStandUniqueIds
+                .map {
+                    Bukkit.getEntity(it) as? ArmorStand?
+                        ?: throw VitalHologramException.InvalidEntity(hologram.id, it)
+                }.toMutableList()
         if (lineArmorStands.size != lines.size) {
             logger.debug("Line size has changed, will recreate all line holograms. $loggingContext")
 
             for (lineArmorStand in lineArmorStands) {
-                baseArmorStand.removePassenger(lineArmorStand)
                 lineArmorStand.remove()
             }
 
@@ -146,9 +152,9 @@ class VitalHologramService(
      */
     fun createGlobalHologram(
         location: Location,
-        vararg linesFunctions: () -> VitalHologram.Line,
+        vararg linesFunctions: Supplier<VitalHologram.Line>,
     ): VitalHologram {
-        val lines = linesFunctions.map { it() }
+        val lines = linesFunctions.map { it.get() }
         val loggingContext = "Context: lines '$lines', location: '$location'."
         logger.debug("Creating global hologram. $loggingContext")
 
@@ -176,9 +182,9 @@ class VitalHologramService(
     fun createPlayerHologram(
         player: SpigotPlayer,
         location: Location,
-        vararg linesFunctions: (SpigotPlayer) -> VitalHologram.Line,
+        vararg linesFunctions: Function<SpigotPlayer, VitalHologram.Line>,
     ): VitalPlayerHologram {
-        val lines = linesFunctions.map { it(player) }
+        val lines = linesFunctions.map { it.apply(player) }
         val loggingContext = "Context: player '$player', lines '$lines', location: '$location'."
 
         logger.debug("Creating per player hologram. $loggingContext")

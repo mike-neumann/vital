@@ -5,7 +5,6 @@ import dev.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
 import dev.vitalframework.VitalCoreModule.Companion.logger
 import dev.vitalframework.VitalHasInfo
 import dev.vitalframework.VitalPlugin
-import dev.vitalframework.items.VitalItemStackBuilder.Companion.itemBuilder
 import dev.vitalframework.localization.VitalLocalizationModule.Spigot.t
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
@@ -72,45 +71,49 @@ open class VitalItem : VitalHasInfo {
     /**
      * Gets the [ItemStack] for the given [player].
      */
-    fun getItemStack(player: SpigotPlayer) =
-        itemBuilder(uniqueId) {
-            // first set default values, then try to localize them
-            val info = getInfo(Info::class.java)
-            type = info.type
-            name = info.name
-            amount = info.amount
-            lore = info.lore
-            itemFlags = info.itemFlags
-            unbreakable = info.unbreakable
+    fun getItemStack(player: SpigotPlayer): ItemStack {
+        // first set default values, then try to localize them
+        val info = getInfo(Info::class.java)
+        val builder =
+            VitalItemStack
+                .builder(uniqueId)
+                .type(info.type)
+                .name(info.name)
+                .amount(info.amount)
+                .lore(info.lore)
+                .itemFlags(info.itemFlags)
+                .unbreakable(info.unbreakable)
 
-            if (info.enchanted) {
-                enchantments[Enchantment.FORTUNE] = 1
+        if (info.enchanted) {
+            builder.enchantment(Enchantment.FORTUNE, 1)
+        }
+
+        if (VitalPlugin.instance.isVitalModuleEnabled("vital-localization")) {
+            builder.name(player.t(info.name))
+            builder.lore(info.lore.flatMap { player.t(it).lines() }.toTypedArray())
+            builder.afterInit {
+                it.itemMeta =
+                    it.itemMeta.apply {
+                        persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] =
+                            true
+                        persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZATION_KEY, PersistentDataType.STRING] =
+                            info.name
+                        persistentDataContainer[VitalNamespacedKey.ITEM_LORE_LOCALIZATION_KEYS, PersistentDataType.LIST.strings()] =
+                            info.lore.toList()
+                    }
             }
-
-            if (VitalPlugin.instance.isVitalModuleEnabled("vital-localization")) {
-                name = player.t(info.name)
-                lore = info.lore.flatMap { player.t(it).lines() }.toTypedArray()
-                afterInit = {
-                    it.itemMeta =
-                        it.itemMeta.apply {
-                            persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] =
-                                true
-                            persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZATION_KEY, PersistentDataType.STRING] =
-                                info.name
-                            persistentDataContainer[VitalNamespacedKey.ITEM_LORE_LOCALIZATION_KEYS, PersistentDataType.LIST.strings()] =
-                                info.lore.toList()
-                        }
-                }
-            } else {
-                afterInit = {
-                    it.itemMeta =
-                        it.itemMeta.apply {
-                            persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] =
-                                false
-                        }
-                }
+        } else {
+            builder.afterInit {
+                it.itemMeta =
+                    it.itemMeta.apply {
+                        persistentDataContainer[VitalNamespacedKey.ITEM_LOCALIZED, PersistentDataType.BOOLEAN] =
+                            false
+                    }
             }
         }
+
+        return builder.build()
+    }
 
     /**
      * Internal function to handle the given [PlayerInteractEvent] for this item.

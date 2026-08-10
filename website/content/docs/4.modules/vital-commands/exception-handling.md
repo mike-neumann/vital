@@ -79,10 +79,10 @@ If it fails, Vital will try to find a global exception handler that can handle t
 
 Also, global exception handlers are **not bound to a specific argument**, they only handle a specific exception and are called for **all of your arguments**.  
 
-Global command exceptions handlers are defined in their own class that must be annotated with `@VitalCommand.Advice(CommandSender)`.  
+Global command exceptions handlers are defined in their own class that must be annotated with `@VitalCommand.Advice`.  
 
 ```java [MyGlobalCommandExceptionHandler.java]
-@VitalCommand.Advice(CommandSender.class)
+@VitalCommand.Advice(commandSenderClass = CommandSender.class)
 public class MyGlobalCommandExceptionHandler {
   @VitalCommand.GlobalExceptionHandler(type = Exception.class)
   public void onException(CommandSender sender, Exception e) {

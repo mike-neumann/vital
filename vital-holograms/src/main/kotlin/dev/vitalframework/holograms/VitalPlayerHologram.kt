@@ -4,6 +4,8 @@ import dev.vitalframework.SpigotPlayer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import java.util.UUID
+import java.util.function.Function
+import java.util.function.Supplier
 
 /**
  * Global hologram used to display player-specific data on a hologram for the given player.
@@ -16,15 +18,15 @@ import java.util.UUID
  */
 class VitalPlayerHologram(
     id: UUID,
-    lines: List<(SpigotPlayer) -> Line>,
+    lines: List<Function<SpigotPlayer, Line>>,
     location: Location,
     armorStandUniqueId: UUID,
     lineArmorStandUniqueIds: List<UUID>,
     var playerUniqueId: UUID,
 ) : VitalHologram(
         id,
-        lines.map {
-            { Bukkit.getPlayer(playerUniqueId)?.let { it(it) } ?: Line() }
+        lines.map { line ->
+            Supplier { Bukkit.getPlayer(playerUniqueId)?.let { line.apply(it) } ?: Line() }
         },
         location,
         armorStandUniqueId,

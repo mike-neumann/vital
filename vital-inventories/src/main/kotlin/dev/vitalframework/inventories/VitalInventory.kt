@@ -5,7 +5,7 @@ import dev.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
 import dev.vitalframework.VitalCoreModule.Companion.logger
 import dev.vitalframework.VitalHasInfo
 import dev.vitalframework.VitalPlugin
-import dev.vitalframework.items.VitalItemStackBuilder.Companion.itemBuilder
+import dev.vitalframework.items.VitalItemStack
 import dev.vitalframework.localization.VitalLocalizationModule.Spigot.t
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
@@ -17,8 +17,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.springframework.stereotype.Component
 import java.util.UUID
-
-typealias InventoryItemClickAction = (InventoryClickEvent) -> Unit
+import java.util.function.Consumer
 
 /**
  * Defines an inventory menu within the Vital-Framework.
@@ -57,12 +56,15 @@ open class VitalInventory : VitalHasInfo {
     val items = mutableMapOf<UUID, MutableMap<Int, ItemStack?>>()
     val previousInventories = mutableMapOf<UUID, VitalInventory>()
     val playerInventories = mutableMapOf<UUID, InventoryView>()
-    val actions = mutableMapOf<UUID, MutableMap<Int, InventoryItemClickAction>>()
+    val actions = mutableMapOf<UUID, MutableMap<Int, Consumer<InventoryClickEvent>>>()
 
     val background =
-        itemBuilder {
+        let {
             val info = getInfo(Info::class.java)
-            type = info.background
+            VitalItemStack
+                .builder()
+                .type(info.background)
+                .build()
         }
 
     /**
@@ -98,7 +100,7 @@ open class VitalInventory : VitalHasInfo {
         player: SpigotPlayer,
         slot: Int,
         item: ItemStack?,
-        action: InventoryItemClickAction = {},
+        action: Consumer<InventoryClickEvent> = Consumer {},
     ) {
         val items = getItems(player.uniqueId).toMutableMap()
         items[slot] = item
@@ -170,8 +172,8 @@ open class VitalInventory : VitalHasInfo {
      * Opens this inventory for the given [player] and updates it via [update].
      * If a [previousInventory] was given, clicking outside of this inventory view will open the previous inventory.
      */
-    @JvmOverloads
     @Suppress("UnstableApiUsage")
+    @JvmOverloads
     open fun open(
         player: SpigotPlayer,
         previousInventory: VitalInventory? = null,
@@ -212,7 +214,7 @@ open class VitalInventory : VitalHasInfo {
     open fun click(e: InventoryClickEvent) {
         val loggingContext = "Context: event '$e', Vital inventory '$this'."
         logger.debug("Handling internal click event, invoking any registered item (if any). $loggingContext")
-        actions[e.whoClicked.uniqueId]?.get(e.slot)?.invoke(e)
+        actions[e.whoClicked.uniqueId]?.get(e.slot)?.accept(e)
 
         logger.debug("Calling 'onClick(InventoryClickEvent)' lifecycle. $loggingContext")
         onClick(e)

@@ -234,7 +234,7 @@ abstract class VitalConfig : VitalHasInfo {
      */
     interface Processor<S, out T> {
         /**
-         * The data object this serialize will use to serialize the content.
+         * The data object this processor will use to serialize the content.
          * E.g., [java.util.Properties] for a processor that can write and load `.properties` configs.
          */
         val data: S

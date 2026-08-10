@@ -82,6 +82,7 @@ abstract class VitalPagedInventory : VitalInventory() {
      *
      * Finally, the [onPageChange] lifecycle function is called for the given [player].
      */
+    @JvmOverloads
     fun setPage(
         page: Int,
         player: SpigotPlayer,

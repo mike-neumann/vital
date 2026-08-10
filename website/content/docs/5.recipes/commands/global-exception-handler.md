@@ -14,7 +14,7 @@ Global exception handlers are also used to handle exceptions that might have bee
 If you want to test this, simply throw any kind of exception in any arg exception handler.
 
 ```java [MyGlobalCommandExceptionHandler.java]
-@VitalCommand.Advice(commandSender = CommandSender.class)
+@VitalCommand.Advice(commandSenderClass = CommandSender.class)
 public class MyGlobalCommandExceptionHandler {
 	@VitalCommand.GlobalExceptionHandler(type = Exception.class)
 	public void onException(CommandSender sender, String executedArg, Exception e) {

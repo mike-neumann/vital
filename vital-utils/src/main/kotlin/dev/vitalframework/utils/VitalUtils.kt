@@ -33,6 +33,8 @@ import org.jetbrains.annotations.Range
 import java.util.Timer
 import java.util.TimerTask
 import java.util.UUID
+import java.util.function.Consumer
+import java.util.function.Predicate
 import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.math.abs
 import kotlin.math.max
@@ -237,8 +239,8 @@ interface VitalUtils<CS, P : CS> {
      *               meeting the predicate's condition.
      */
     fun broadcastAction(
-        predicate: (P) -> Boolean = { true },
-        action: (P) -> Unit,
+        predicate: Predicate<P> = Predicate { true },
+        action: Consumer<P>,
     )
 
     /**
@@ -256,7 +258,7 @@ interface VitalUtils<CS, P : CS> {
      */
     fun broadcastFormattedMessage(
         message: String,
-        predicate: (P) -> Boolean = { true },
+        predicate: Predicate<P> = Predicate { true },
     ) {
         broadcastAction(predicate) { it.sendFormattedMessage(message) }
     }
@@ -311,7 +313,7 @@ interface VitalUtils<CS, P : CS> {
     fun broadcastFormattedTitle(
         title: String = "",
         subtitle: String = "",
-        predicate: (P) -> Boolean,
+        predicate: Predicate<P>,
     ) = broadcastAction(predicate) { it.sendFormattedTitle(title, subtitle) }
 
     /**
@@ -333,7 +335,7 @@ interface VitalUtils<CS, P : CS> {
         fadeOut:
             @Range(from = 0, to = 72_000)
             Int,
-        predicate: (P) -> Boolean = { true },
+        predicate: Predicate<P> = Predicate { true },
     ) = broadcastAction(predicate) { it.sendFormattedTitle(title, subtitle, fadeIn, stay, fadeOut) }
 
     /**
@@ -370,7 +372,7 @@ interface VitalUtils<CS, P : CS> {
         fadeIn:
             @Range(from = 0, to = 72_000)
             Int,
-        predicate: (P) -> Boolean = { true },
+        predicate: Predicate<P> = Predicate { true },
     ) = broadcastAction(predicate) { it.sendFormattedPersistentTitle(title, subtitle, fadeIn) }
 
     /**
@@ -395,7 +397,7 @@ interface VitalUtils<CS, P : CS> {
      */
     fun broadcastFormattedActionBar(
         message: String,
-        predicate: (P) -> Boolean = { true },
+        predicate: Predicate<P> = Predicate { true },
     ) = broadcastAction(predicate) { it.sendFormattedActionBar(message) }
 
     /**
@@ -410,18 +412,18 @@ interface VitalUtils<CS, P : CS> {
         private val customNametagIdentifier = UUID.randomUUID().toString()
 
         override fun broadcastAction(
-            predicate: (SpigotPlayer) -> Boolean,
-            action: (SpigotPlayer) -> Unit,
+            predicate: Predicate<SpigotPlayer>,
+            action: Consumer<SpigotPlayer>,
         ) = Bukkit
             .getOnlinePlayers()
-            .filter(predicate)
+            .filter(predicate::test)
             .forEach(action)
 
         override fun SpigotCommandSender.sendFormattedMessage(message: String) = sendMessage(message.toMiniMessageComponent())
 
         override fun broadcastFormattedMessage(
             message: String,
-            predicate: (SpigotPlayer) -> Boolean,
+            predicate: Predicate<SpigotPlayer>,
         ) = broadcastAction(predicate) { it.sendMessage(message.toMiniMessageComponent()) }
 
         private val loopedSounds = mutableMapOf<UUID, MutableMap<String, TimerTask>>()
@@ -490,7 +492,7 @@ interface VitalUtils<CS, P : CS> {
             sound: Sound,
             volume: Float,
             pitch: Float,
-            predicate: (SpigotPlayer) -> Boolean = { true },
+            predicate: Predicate<SpigotPlayer> = Predicate { true },
         ) = broadcastAction(predicate) { it.playSound(it, sound, volume, pitch) }
 
         /**
@@ -506,7 +508,7 @@ interface VitalUtils<CS, P : CS> {
         @JvmOverloads
         fun broadcastSound(
             sound: Sound,
-            predicate: (SpigotPlayer) -> Boolean = { true },
+            predicate: Predicate<SpigotPlayer> = Predicate { true },
         ) = broadcastSound(sound, 1f, 1f, predicate)
 
         override fun SpigotPlayer.sendFormattedTitle(
@@ -540,7 +542,7 @@ interface VitalUtils<CS, P : CS> {
         override fun broadcastFormattedTitle(
             title: String,
             subtitle: String,
-            predicate: (SpigotPlayer) -> Boolean,
+            predicate: Predicate<SpigotPlayer>,
         ) = broadcastAction { it.sendFormattedTitle(title, subtitle) }
 
         override fun SpigotPlayer.sendFormattedPersistentTitle(
@@ -563,7 +565,7 @@ interface VitalUtils<CS, P : CS> {
             fadeIn:
                 @Range(from = 0, to = 72_000)
                 Int,
-            predicate: (SpigotPlayer) -> Boolean,
+            predicate: Predicate<SpigotPlayer>,
         ) = broadcastAction { it.sendFormattedPersistentTitle(title, subtitle, fadeIn) }
 
         /**
@@ -584,7 +586,7 @@ interface VitalUtils<CS, P : CS> {
             potionEffectType: PotionEffectType,
             duration: Int,
             amplifier: Int,
-            playerPredicate: (SpigotPlayer) -> Boolean = { true },
+            playerPredicate: Predicate<SpigotPlayer> = Predicate { true },
         ) = broadcastAction(playerPredicate) { it.addPotionEffect(PotionEffect(potionEffectType, duration, amplifier)) }
 
         /**
@@ -600,7 +602,7 @@ interface VitalUtils<CS, P : CS> {
         @JvmOverloads
         fun broadcastClearPotionEffect(
             potionEffectType: PotionEffectType,
-            playerPredicate: (SpigotPlayer) -> Boolean = { true },
+            playerPredicate: Predicate<SpigotPlayer> = Predicate { true },
         ) = broadcastAction(playerPredicate) { it.removePotionEffect(potionEffectType) }
 
         /**
@@ -613,7 +615,7 @@ interface VitalUtils<CS, P : CS> {
          *                        effects removed. Defaults to a predicate that accepts all players.
          */
         @JvmOverloads
-        fun broadcastClearPotionEffects(playerPredicate: (SpigotPlayer) -> Boolean = { true }) =
+        fun broadcastClearPotionEffects(playerPredicate: Predicate<SpigotPlayer> = Predicate { true }) =
             broadcastAction(playerPredicate) {
                 it.activePotionEffects.map { it.type }.forEach { type: PotionEffectType -> it.removePotionEffect(type) }
             }
@@ -622,7 +624,7 @@ interface VitalUtils<CS, P : CS> {
 
         override fun broadcastFormattedActionBar(
             message: String,
-            predicate: (SpigotPlayer) -> Boolean,
+            predicate: Predicate<SpigotPlayer>,
         ) = broadcastAction(predicate) { it.sendFormattedActionBar(message) }
 
         /**
@@ -1343,12 +1345,12 @@ interface VitalUtils<CS, P : CS> {
      */
     object Bungee : VitalUtils<BungeeCommandSender, BungeePlayer> {
         override fun broadcastAction(
-            predicate: (BungeePlayer) -> Boolean,
-            action: (BungeePlayer) -> Unit,
+            predicate: Predicate<BungeePlayer>,
+            action: Consumer<BungeePlayer>,
         ) = ProxyServer
             .getInstance()
             .players
-            .filter(predicate)
+            .filter(predicate::test)
             .forEach(action)
 
         override fun BungeeCommandSender.sendFormattedMessage(message: String) =
@@ -1405,7 +1407,7 @@ interface VitalUtils<CS, P : CS> {
         override fun broadcastFormattedTitle(
             title: String,
             subtitle: String,
-            predicate: (BungeePlayer) -> Boolean,
+            predicate: Predicate<BungeePlayer>,
         ) = broadcastAction(predicate) { it.sendFormattedTitle(title, subtitle) }
     }
 }

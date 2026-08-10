@@ -16,6 +16,7 @@ import org.bukkit.entity.Player
 import org.springframework.stereotype.Component
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import java.util.function.Consumer
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
 
@@ -281,11 +282,11 @@ abstract class VitalCommand<CS : Any> protected constructor(
         sender: CS,
         args: Array<String>,
     ): List<String> {
-        val logginContext = "Context: Command '${javaClass.simpleName}', sender '$sender', args '${args.contentToString()}'."
-        logger.debug("Requested tab complete. $logginContext")
+        val loggingContext = "Context: Command '${javaClass.simpleName}', sender '$sender', args '${args.contentToString()}'."
+        logger.debug("Requested tab complete. $loggingContext")
         val tabCompleted = mutableListOf<String>()
         for ((_, commandArg) in this.args) {
-            logger.debug("Stepping args for tab completion. Current arg '${commandArg.name}'. $logginContext")
+            logger.debug("Stepping args for tab completion. Current arg '${commandArg.name}'. $loggingContext")
             val splitCommandArg = commandArg.name.split(" ")
             // the player has entered more arguments than the command arg supports, we can never have a hit here
             if (args.size > splitCommandArg.size) continue
@@ -326,12 +327,12 @@ abstract class VitalCommand<CS : Any> protected constructor(
 
             if (commandArgMatches) {
                 logger.debug(
-                    "Arg '${commandArg.name}' matches for tab completion. Also adding all tab completions from onCommandTabComplete. $logginContext",
+                    "Arg '${commandArg.name}' matches for tab completion. Also adding all tab completions from onCommandTabComplete. $loggingContext",
                 )
                 tabCompleted.add(splitCommandArg.subList(args.size - 1, splitCommandArg.size).joinToString(" "))
                 // only the last element should be converted to argument type check to avoid confusing tab completions
                 val argType = Arg.Type.getTypeByPlaceholder(splitCommandArg[args.size - 1])
-                argType?.action?.invoke(TabCompletionContext(tabCompleted, getAllPlayerNames()))
+                argType?.action?.accept(TabCompletionContext(tabCompleted, getAllPlayerNames()))
                 tabCompleted.addAll(
                     onCommandTabComplete(
                         sender,
@@ -353,37 +354,37 @@ abstract class VitalCommand<CS : Any> protected constructor(
         sender: CS,
         args: Array<String>,
     ) {
-        val logginContext = "Context: Command '${javaClass.simpleName}', sender '$sender', args '${args.contentToString()}'."
-        logger.debug("Attempting to execute command. $logginContext")
+        val loggingContext = "Context: Command '${javaClass.simpleName}', sender '$sender', args '${args.contentToString()}'."
+        logger.debug("Attempting to execute command. $loggingContext")
         val info = getInfo(Info::class.java)
         val joinedPlayerArgs = args.joinToString(" ")
         if (info.playerOnly && !isPlayer(sender)) {
             logger.debug(
-                "Sender is not a player, but this command can only be executed by a player. Will call onCommandRequiresPlayer. $logginContext",
+                "Sender is not a player, but this command can only be executed by a player. Will call onCommandRequiresPlayer. $loggingContext",
             )
             return onCommandRequiresPlayer(sender, joinedPlayerArgs, null)
         }
 
         val matchedArg = getArg(joinedPlayerArgs)
-        logger.debug("Command arg found '$matchedArg'. $logginContext")
+        logger.debug("Command arg found '$matchedArg'. $loggingContext")
         val returnState =
             when {
                 info.permission.isNotBlank() && !hasPermission(sender, info.permission) -> {
-                    logger.debug("Sender does not have the required permissions '${info.permission}' for this command. $logginContext")
+                    logger.debug("Sender does not have the required permissions '${info.permission}' for this command. $loggingContext")
                     ReturnState.NO_PERMISSION
                 }
 
                 matchedArg != null -> {
                     if (matchedArg.permission.isNotBlank() && !hasPermission(sender, matchedArg.permission)) {
                         logger.debug(
-                            "Sender does not have the required permissions '${matchedArg.permission}' for this arg '$matchedArg'. $logginContext",
+                            "Sender does not have the required permissions '${matchedArg.permission}' for this arg '$matchedArg'. $loggingContext",
                         )
                         ReturnState.NO_PERMISSION
                     } else if (matchedArg.playerOnly && !isPlayer(sender)) {
-                        logger.debug("Sender is not a player but this arg '$matchedArg' requires a player. $logginContext")
+                        logger.debug("Sender is not a player but this arg '$matchedArg' requires a player. $loggingContext")
                         ReturnState.ONLY_PLAYER
                     } else {
-                        logger.debug("Sender is permitted to execute this command and arg '$matchedArg'. $logginContext")
+                        logger.debug("Sender is permitted to execute this command and arg '$matchedArg'. $loggingContext")
                         val values = mutableListOf<String>()
                         val commandArgs =
                             matchedArg.name
@@ -407,14 +408,14 @@ abstract class VitalCommand<CS : Any> protected constructor(
                             }.forEach(values::add)
 
                         logger.debug(
-                            "Values extracted from sender input '${args.contentToString()}' for arg '$matchedArg'. Will try to execute a mapped arg handler. $logginContext",
+                            "Values extracted from sender input '${args.contentToString()}' for arg '$matchedArg'. Will try to execute a mapped arg handler. $loggingContext",
                         )
                         executeArgHandlerMethod(sender, joinedPlayerArgs, matchedArg, values.toTypedArray())
                     }
                 }
 
                 else -> {
-                    logger.debug("Sender input is not valid for this command and arg '$matchedArg'. $logginContext")
+                    logger.debug("Sender input is not valid for this command and arg '$matchedArg'. $loggingContext")
                     ReturnState.INVALID_ARGS
                 }
             }
@@ -422,26 +423,26 @@ abstract class VitalCommand<CS : Any> protected constructor(
         try {
             when (returnState) {
                 ReturnState.SUCCESS -> {
-                    logger.debug("Command execution successful. $logginContext")
+                    logger.debug("Command execution successful. $loggingContext")
                 }
                 ReturnState.INVALID_ARGS -> {
-                    logger.debug("Sender has provided invalid args. Will call onCommandInvalidArg. $logginContext")
+                    logger.debug("Sender has provided invalid args. Will call onCommandInvalidArg. $loggingContext")
                     onCommandInvalidArgs(sender, joinedPlayerArgs)
                 }
                 ReturnState.NO_PERMISSION -> {
-                    logger.debug("Sender does not have the required permission. Will call onCommandRequiresPermission. $logginContext")
+                    logger.debug("Sender does not have the required permission. Will call onCommandRequiresPermission. $loggingContext")
                     onCommandRequiresPermission(sender, joinedPlayerArgs, matchedArg)
                 }
                 ReturnState.ONLY_PLAYER -> {
                     logger.debug(
-                        "Command or arg requires a player while the sender is not a player. Will call onCommandRequiresPlayer. $logginContext",
+                        "Command or arg requires a player while the sender is not a player. Will call onCommandRequiresPlayer. $loggingContext",
                     )
                     onCommandRequiresPlayer(sender, joinedPlayerArgs, matchedArg)
                 }
             }
         } catch (e: Exception) {
             logger.debug(
-                "Error while processing command execution. Will try to find and execute an arg exception handler for exception '$e'. $logginContext",
+                "Error while processing command execution. Will try to find and execute an arg exception handler for exception '$e'. $loggingContext",
             )
             executeArgExceptionHandlerMethod(sender, e, joinedPlayerArgs, matchedArg)
         }
@@ -553,7 +554,7 @@ abstract class VitalCommand<CS : Any> protected constructor(
     ) {
         enum class Type(
             val placeholders: List<String>,
-            val action: (TabCompletionContext) -> Unit,
+            val action: Consumer<TabCompletionContext>,
         ) {
             // TODO: later remove any %...% placeholder
             // TODO: future placeholders should always be <...>

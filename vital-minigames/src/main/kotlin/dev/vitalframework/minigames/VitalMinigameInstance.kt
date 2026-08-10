@@ -19,6 +19,7 @@ import org.bukkit.event.weather.WeatherEvent
 import org.bukkit.event.world.WorldEvent
 import org.springframework.core.annotation.AnnotationUtils
 import java.util.UUID
+import java.util.function.BiPredicate
 
 /**
  * Defines a single game instance that can be hosted on the server.
@@ -117,7 +118,7 @@ open class VitalMinigameInstance(
      */
     private fun <T : SpigotListener> registerEventHandlers(
         instance: T,
-        predicate: (T, Event) -> Boolean,
+        predicate: BiPredicate<T, Event>,
     ) {
         try {
             logger.debug("Registering event handlers for VitalMinigameInstance with id '{}'.", instance)
@@ -174,7 +175,7 @@ open class VitalMinigameInstance(
                         )
 
                         // Filter out any event that does not pass for our defined predicate.
-                        if (!predicate(listener as T, event)) {
+                        if (!predicate.test(listener as T, event)) {
                             logger.debug(
                                 "Predicate for event '{}' for listener '{}' for VitalMinigameInstance with id '{}' did not pass. This event will be ignored.",
                                 event.javaClass,

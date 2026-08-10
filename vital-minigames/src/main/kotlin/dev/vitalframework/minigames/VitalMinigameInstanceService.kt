@@ -7,6 +7,7 @@ import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.WorldCreator
 import java.util.UUID
+import java.util.function.Consumer
 
 /**
  * The global minigame instance manager to use when creating multiple minigames on the same game server.
@@ -32,7 +33,7 @@ open class VitalMinigameInstanceService(
     @JvmOverloads
     fun loadTemplateWorld(
         templateWorldName: String,
-        action: (World?) -> Unit = {},
+        action: Consumer<World?> = Consumer {},
     ) {
         if (!plugin.isEnabled) {
             throw VitalMinigameInstanceException.LoadTemplateWorldPluginDisabled(templateWorldName, plugin.name)
@@ -52,7 +53,7 @@ open class VitalMinigameInstanceService(
                 val templateWorld = Bukkit.getWorld(templateWorldName)!!
                 val task = {
                     try {
-                        action(
+                        action.accept(
                             Bukkit.createWorld(
                                 WorldCreator(instanceWorldFile.name)
                                     .copy(templateWorld)
@@ -104,7 +105,7 @@ open class VitalMinigameInstanceService(
     @JvmOverloads
     fun <T : VitalMinigameInstance> registerInstance(
         instance: T,
-        afterRegisterAction: (T) -> Unit = {},
+        afterRegisterAction: Consumer<T> = Consumer {},
     ) {
         if (vitalMinigameInstanceRepository.existsById(instance.id)) {
             throw IllegalStateException()
@@ -126,7 +127,7 @@ open class VitalMinigameInstanceService(
         vitalMinigameInstanceRepository.save(instance)
 
         try {
-            afterRegisterAction(instance)
+            afterRegisterAction.accept(instance)
         } catch (e: Exception) {
             throw VitalMinigameInstanceException.ExecuteAfterRegisterAction(instance.world.name, instance.id, e)
         }
@@ -143,8 +144,8 @@ open class VitalMinigameInstanceService(
     @JvmOverloads
     inline fun <reified T : VitalMinigameInstance> unregisterInstance(
         id: UUID,
-        noinline beforeDeleteAction: (T) -> Unit = {},
-        noinline afterDeleteAction: (T) -> Unit = {},
+        beforeDeleteAction: Consumer<T> = Consumer {},
+        afterDeleteAction: Consumer<T> = Consumer {},
     ) {
         unregisterInstance(T::class.java, id, beforeDeleteAction, afterDeleteAction)
     }
@@ -155,12 +156,13 @@ open class VitalMinigameInstanceService(
      * Additionally, an [beforeDeleteAction] function can be provided to perform an action right after instance unregistration, but before [VitalMinigameInstance.onUnregister] is called and before the world is deleted.
      * An [afterDeleteAction] function can also be provided to perform an action right after the world unloaded and deleted from the file system.
      */
+    @JvmOverloads
     @PublishedApi
     internal fun <T : VitalMinigameInstance> unregisterInstance(
         type: Class<T>,
         id: UUID,
-        beforeDeleteAction: (T) -> Unit = {},
-        afterDeleteAction: (T) -> Unit = {},
+        beforeDeleteAction: Consumer<T> = Consumer {},
+        afterDeleteAction: Consumer<T> = Consumer {},
     ) {
         if (!vitalMinigameInstanceRepository.existsById(id)) {
             throw IllegalArgumentException()
@@ -179,13 +181,13 @@ open class VitalMinigameInstanceService(
     @JvmOverloads
     fun <T : VitalMinigameInstance> unregisterInstance(
         instance: T,
-        beforeDeleteAction: (T) -> Unit = {},
-        afterDeleteAction: (T) -> Unit = {},
+        beforeDeleteAction: Consumer<T> = Consumer {},
+        afterDeleteAction: Consumer<T> = Consumer {},
     ) {
         vitalMinigameInstanceRepository.delete(instance)
 
         try {
-            beforeDeleteAction(instance)
+            beforeDeleteAction.accept(instance)
         } catch (e: Exception) {
             throw VitalMinigameInstanceException.ExecuteBeforeDeleteAction(instance.world.name, instance.id, e)
         }
@@ -203,7 +205,7 @@ open class VitalMinigameInstanceService(
         }
 
         try {
-            afterDeleteAction(instance)
+            afterDeleteAction.accept(instance)
         } catch (e: Exception) {
             throw VitalMinigameInstanceException.ExecuteAfterDeleteAction(instance.world.name, instance.id, e)
         }
@@ -214,8 +216,8 @@ open class VitalMinigameInstanceService(
      */
     @JvmOverloads
     fun unregisterAllInstances(
-        beforeDeleteAction: (VitalMinigameInstance) -> Unit = {},
-        afterDeleteAction: (VitalMinigameInstance) -> Unit = {},
+        beforeDeleteAction: Consumer<VitalMinigameInstance> = Consumer {},
+        afterDeleteAction: Consumer<VitalMinigameInstance> = Consumer {},
     ) {
         for (instance in vitalMinigameInstanceRepository.findAll<VitalMinigameInstance>()) {
             unregisterInstance(instance, beforeDeleteAction, afterDeleteAction)

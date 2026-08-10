@@ -3,6 +3,7 @@ package dev.vitalframework.scoreboards
 import dev.vitalframework.SpigotPlayer
 import org.bukkit.Bukkit
 import java.util.UUID
+import java.util.function.Function
 
 /**
  * Defines a per-player based scoreboard implementation within the Vital-Framework.
@@ -21,8 +22,8 @@ import java.util.UUID
  * ```
  */
 class VitalPlayerScoreboard(
-    title: (SpigotPlayer) -> String,
-    vararg lines: (SpigotPlayer) -> String,
+    title: Function<SpigotPlayer, String>,
+    vararg lines: Function<SpigotPlayer, String>,
 ) {
     /**
      * The [VitalScoreboard] instance for each player added to this scoreboard.
@@ -65,8 +66,8 @@ class VitalPlayerScoreboard(
             VitalScoreboard().apply {
                 this.addPlayer(
                     player,
-                    if (update) ({ title(player) }) else null,
-                    if (update) ({ lines.map { it(player) } }) else null,
+                    if (update) ({ title.apply(player) }) else null,
+                    if (update) ({ lines.map { it.apply(player) } }) else null,
                 )
             }
     }
@@ -83,8 +84,8 @@ class VitalPlayerScoreboard(
         val scoreboard = _scoreboards[player.uniqueId] ?: return
         scoreboard.removePlayer(
             player,
-            if (update) ({ title(player) }) else null,
-            if (update) ({ lines.map { it(player) } }) else null,
+            if (update) ({ title.apply(player) }) else null,
+            if (update) ({ lines.map { it.apply(player) } }) else null,
         )
     }
 
@@ -105,6 +106,6 @@ class VitalPlayerScoreboard(
      */
     fun update(player: SpigotPlayer) {
         val scoreboard = _scoreboards[player.uniqueId] ?: return
-        scoreboard.update({ title(player) }) { lines.map { it(player) } }
+        scoreboard.update({ title.apply(player) }) { lines.map { it.apply(player) } }
     }
 }

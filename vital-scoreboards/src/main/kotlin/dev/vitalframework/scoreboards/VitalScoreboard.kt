@@ -11,6 +11,8 @@ import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Objective
 import org.bukkit.scoreboard.Team
 import java.util.UUID
+import java.util.function.Consumer
+import java.util.function.Supplier
 
 /**
  * Internal base class for all scoreboards.
@@ -20,15 +22,15 @@ open class VitalScoreboard : VitalEntity<UUID> {
     val bukkitScoreboard = Bukkit.getScoreboardManager().newScoreboard
 
     /**
-     * Updates this scoreboard with the given [title] and [lines].
+     * Updates this scoreboard with the given [_title] and [_lines].
      */
     fun update(
-        _title: () -> String,
-        _lines: () -> List<String>,
+        _title: Supplier<String>,
+        _lines: Supplier<List<String>>,
     ): Objective {
         try {
-            val title = _title()
-            val lines = _lines()
+            val title = _title.get()
+            val lines = _lines.get()
 
             for (objective in bukkitScoreboard.objectives) {
                 objective.unregister()
@@ -83,16 +85,16 @@ open class VitalScoreboard : VitalEntity<UUID> {
     @JvmOverloads
     fun addTeam(
         name: String,
-        title: (() -> String)? = null,
-        lines: (() -> List<String>)? = null,
-        init: Team.() -> Unit,
+        title: Supplier<String>? = null,
+        lines: Supplier<List<String>>? = null,
+        init: Consumer<Team>,
     ) {
         if (bukkitScoreboard.getTeam(name) != null) {
             return
         }
 
         val team = bukkitScoreboard.registerNewTeam(name)
-        init(team)
+        init.accept(team)
 
         if (title != null && lines != null) {
             update(title, lines)
@@ -107,8 +109,8 @@ open class VitalScoreboard : VitalEntity<UUID> {
     @JvmOverloads
     fun removeTeam(
         name: String,
-        title: (() -> String)? = null,
-        lines: (() -> List<String>)? = null,
+        title: Supplier<String>? = null,
+        lines: Supplier<List<String>>? = null,
     ) {
         val team = bukkitScoreboard.getTeam(name) ?: return
         team.unregister()
@@ -126,8 +128,8 @@ open class VitalScoreboard : VitalEntity<UUID> {
     @JvmOverloads
     fun addPlayer(
         player: SpigotPlayer,
-        title: (() -> String)? = null,
-        lines: (() -> List<String>)? = null,
+        title: Supplier<String>? = null,
+        lines: Supplier<List<String>>? = null,
     ) {
         if (player.scoreboard == bukkitScoreboard) {
             return
@@ -147,8 +149,8 @@ open class VitalScoreboard : VitalEntity<UUID> {
     @JvmOverloads
     fun removePlayer(
         player: SpigotPlayer,
-        title: (() -> String)? = null,
-        lines: (() -> List<String>)? = null,
+        title: Supplier<String>? = null,
+        lines: Supplier<List<String>>? = null,
     ) {
         if (player.scoreboard != bukkitScoreboard) {
             return
