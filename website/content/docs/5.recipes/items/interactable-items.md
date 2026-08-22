@@ -1,14 +1,14 @@
 ---
 title: Recipe for interactive items
-description: This page defines a recipe (pre-written code snippet) for an item, that can be copied by a developer instead of manually writing it.
+description: This page defines a recipe (pre-written code snippet) for an interactable item, that can be copied by a developer instead of manually writing it.
 navigation:
-  title: Items
+  title: Interactable items
 ---
 
-# Items
+# Interactable items
 
 Below is an example of an item that your players can interact with.  
-The item will have a cooldown of 1 second and thus can only be used every 1 second.
+The item will have a cooldown of 1 second.  
 
 ```java [MyItem.java]
 @VitalItem.Info(type = Material.STICK, name = "My item", cooldown = 1_000)
