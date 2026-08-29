@@ -1,6 +1,6 @@
 # vital-items
 
-This submodule can be used to include Vital's advanced item system into your plugin.  
+This module can be used to add Vital's advanced item system to your plugin.  
 It provides the means of defining items, that can be interacted with.  
 
 Items are classes, that define the general structure and content of the item.  

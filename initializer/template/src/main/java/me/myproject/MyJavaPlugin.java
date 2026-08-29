@@ -1,32 +1,28 @@
 package me.myproject;
 
-import me.vitalframework.Vital;
-import me.vitalframework.VitalCoreSubModule;
+import dev.vitalframework.VitalPlugin;
+import dev.vitalframework.VitalCoreModule;
 import org.slf4j.Logger;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.EventListener;
 
-@Vital.Info(
+@VitalPlugin.Info(
         name = "${name}",
         description = "${description}",
         apiVersion = "${apiVersion}",
         version = "${version}",
-        author = {${authors?map(it -> "\"" + it +  "\"")?join(", ")}},
-        environment = Vital.PluginEnvironment.${pluginEnvironment}
+        author = {${authors?map(it -> "\"" + it +  "\"")?join(", ")}}
 )
-public class MyJavaPlugin {
-    private final Logger logger = VitalCoreSubModule.logger(this);
+public class MyJavaPlugin extends VitalPlugin.<#if pluginEnvironment == "SPIGOT">Spigot</#if><#if pluginEnvironment == "PAPER">Paper</#if><#if pluginEnvironment == "BUNGEE">Bungee</#if> {
+    private final Logger logger = VitalCoreModule.logger(this);
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void onApplicationReady() {
-        final var info = VitalCoreSubModule.getVitalInfo(MyJavaPlugin.class);
+    @Override
+    public void onEnable() {
+        final var info = VitalCoreModule.getRequiredAnnotation(MyJavaPlugin.class, VitalPlugin.Info.class);
         logger.info("Java Vital plugin '{}' version '{}' successfully loaded!", info.name(), info.version());
     }
 
-    @EventListener(ContextClosedEvent.class)
-    public void onContextClosed() {
-        final var info = VitalCoreSubModule.getVitalInfo(MyJavaPlugin.class);
+    @Override
+    public void onDisable() {
+        final var info = VitalCoreModule.getRequiredAnnotation(MyJavaPlugin.class, VitalPlugin.Info.class);
         logger.info("Java Vital plugin '{}' version '{}' successfully unloaded!", info.name(), info.version());
     }
 }

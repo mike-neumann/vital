@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 
-group = "me.vitalframework"
+group = "dev.vitalframework"
 version = getGitTag()
 
 fun getGitTag(): String {
@@ -37,7 +37,7 @@ kotlin {
 }
 
 application {
-    mainClass = "me.vitalframework.initializer.VitalInitializerKt"
+    mainClass = "dev.vitalframework.initializer.VitalInitializerKt"
 }
 
 tasks.run {

@@ -1,32 +1,27 @@
 package me.myproject
 
-import me.vitalframework.Vital
-import me.vitalframework.VitalCoreSubModule.Companion.getVitalInfo
-import me.vitalframework.VitalCoreSubModule.Companion.logger
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.ContextClosedEvent
-import org.springframework.context.event.EventListener
+import dev.vitalframework.VitalPlugin
+import dev.vitalframework.VitalCoreModule.Companion.getVitalInfo
+import dev.vitalframework.VitalCoreModule.Companion.logger
+import dev.vitalframework.VitalCoreModule.Companion.getRequiredAnnotation
 
-@Vital.Info(
+@VitalPlugin.Info(
     "${name}",
     "${description}",
     "${apiVersion}",
     "${version}",
-    [${authors?map(it -> "\"" + it +  "\"")?join(", ")}],
-    Vital.PluginEnvironment.${pluginEnvironment}
+    [${authors?map(it -> "\"" + it +  "\"")?join(", ")}]
 )
-class MyKotlinPlugin {
+class MyKotlinPlugin : VitalPlugin.<#if pluginEnvironment == "SPIGOT">Spigot()</#if><#if pluginEnvironment == "PAPER">Paper()</#if><#if pluginEnvironment == "BUNGEE">Bungee()</#if> {
     private val logger = logger()
 
-    @EventListener(ApplicationReadyEvent::class)
-    fun onApplicationReady() {
-        val info = MyKotlinPlugin::class.getVitalInfo()
+    override fun onEnable() {
+        val info = MyKotlinPlugin::class.getRequiredAnnotation<VitalPlugin.Info>()
         logger.info("Kotlin Vital plugin '${r"${info.name}"}' version '${r"${info.version}"}' successfully loaded!")
     }
 
-    @EventListener(ContextClosedEvent::class)
-    fun onContextClosed() {
-        val info = MyKotlinPlugin::class.getVitalInfo()
+    override fun onDisable() {
+        val info = MyKotlinPlugin::class.getRequiredAnnotation<VitalPlugin.Info>()
         logger.info("Kotlin Vital plugin '${r"${info.name}"}' version '${r"${info.version}"}' successfully unloaded!")
     }
 }

@@ -25,6 +25,8 @@ plugins {
     alias(libs.plugins.javaLibrary)
     alias(libs.plugins.mavenPublish)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.dokka.javadoc)
 }
 
 repositories {
@@ -32,12 +34,48 @@ repositories {
     mavenCentral()
 }
 
+dokka {
+    pluginsConfiguration.html {
+        separateInheritedMembers.set(false)
+        mergeImplicitExpectActualDeclarations.set(true)
+    }
+}
+
+dependencies {
+    dokka(project(":vital-cloudnet4-bridge"))
+    dokka(project(":vital-cloudnet4-driver"))
+    dokka(project(":vital-commands"))
+    dokka(project(":vital-commands-processor"))
+    dokka(project(":vital-configs"))
+    dokka(project(":vital-core"))
+    dokka(project(":vital-gradle-plugin"))
+    dokka(project(":vital-core-processor"))
+    dokka(project(":vital-holograms"))
+    dokka(project(":vital-inventories"))
+    dokka(project(":vital-items"))
+    dokka(project(":vital-loader"))
+    dokka(project(":vital-localization"))
+    dokka(project(":vital-minigames"))
+    dokka(project(":vital-players"))
+    dokka(project(":vital-scoreboards"))
+    dokka(project(":vital-statistics"))
+    dokka(project(":vital-tasks"))
+    dokka(project(":vital-tests"))
+    dokka(project(":vital-utils"))
+}
+
+allprojects {
+    tasks.findByName("bootJar")?.enabled = false
+}
+
 subprojects {
-    group = "me.vitalframework"
+    group = "dev.vitalframework"
     version = getGitTag()
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.kapt")
+    apply(plugin = "org.jetbrains.dokka")
+    apply(plugin = "org.jetbrains.dokka-javadoc")
     apply(plugin = "org.jetbrains.kotlin.plugin.spring")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "java-library")
@@ -81,13 +119,9 @@ subprojects {
             // TODO: this solution is temporary, so i can pull Vital for my own projects
             // TODO: release Vital to maven central once i have a stable version
             if (version.toString().endsWith("-SNAPSHOT")) {
-                maven("http://10.8.0.1:8082/repository/maven-snapshots/") {
-                    isAllowInsecureProtocol = true
-                }
+                maven("https://repo.rainymc.de/nexus/content/repositories/snapshots/")
             } else {
-                maven("http://10.8.0.1:8082/repository/maven-releases/") {
-                    isAllowInsecureProtocol = true
-                }
+                maven("https://repo.rainymc.de/nexus/content/repositories/releases/")
             }
         }
     }
@@ -115,5 +149,17 @@ subprojects {
 
     tasks.test {
         useJUnitPlatform()
+    }
+
+    tasks.findByName("bootJar")?.enabled = false
+
+    tasks.register("lintCheck") {
+        description = "Pattern-matching task to check for any linting violations."
+        dependsOn(tasks.ktlintCheck)
+    }
+
+    tasks.register("lintFormat") {
+        description = "Pattern-matching task to format any linting violations."
+        dependsOn(tasks.ktlintFormat)
     }
 }

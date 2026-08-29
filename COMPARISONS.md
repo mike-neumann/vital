@@ -44,25 +44,21 @@ main: me.myplugin.MyPlugin
 <td>
 
 ```java
-@Vital.Info(
+@VitalPlugin.Info(
         name = "MyPlugin",
         version = "1.0.0",
         description = "MyPlugin description",
         apiVersion = "1.21",
-        author = {"MyName"},
-        // For Spigot
-        environment = Vital.Info.PluginEnvironment.SPIGOT,
-        // Or for Paper
-        environment = Vital.Info.PluginEnvironment.PAPER
+        author = {"MyName"}
 )
-public class MyPlugin {
-    @EventListener(ApplicationReadyEvent.class)
-    public void onApplicationReady(ApplicationReadyEvent e) {
+public class MyPlugin extends VitalPlugin.Spigot {
+    @Override
+    public void onEnable() {
         // Do something here...
     }
 
-    @EventListener(ContextClosedEvent.class)
-    public void onContextClosed(ContextClosedEvent e) {
+    @Override
+    public void onDisable() {
         // Do something here...
     }
 }
@@ -301,7 +297,7 @@ public void setGlobalScoreboard(Player player) {
     // Not very developer-friendly...
 }
 
-public void setPerPlayerScoreboard(Player player) {
+public void setPlayerScoreboard(Player player) {
     final var scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
     final var objective = scoreboard.registerNewObjective(
             "myObjective", 
@@ -336,7 +332,7 @@ Global scoreboards (Should be used when you want to display the same scoreboard 
 ```java
 public void setGlobalScoreboard(Player player) {
     final var scoreboard = new VitalGlobalScoreboard(
-            "title",
+            () -> "Title",
             () -> "Line 1",
             () -> "Line 2",
             () -> "Line 3"
@@ -358,11 +354,11 @@ Per-player scoreboards (Should be used when you want to display a scoreboard for
 
 ```java
 public void setScoreboard(Player player) {
-    final var scoreboard = new VitalPerPlayerScoreboard(
-            "title",
-            player -> "Line 1",
-            player -> "Line 2",
-            player -> "Line 3"
+    final var scoreboard = new VitalPlayerScoreboard(
+            player -> "Title for player " + player.getName(),
+            player -> "Line 1 for player " + player.getName(),
+            player -> "Line 2 for player " + player.getName(),
+            player -> "Line 3 for player " + player.getName()
     );
     
     scoreboard.addPlayer(player);

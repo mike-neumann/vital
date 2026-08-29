@@ -1,31 +1,27 @@
 package me.myproject
 
-import me.vitalframework.Vital
-import me.vitalframework.VitalCoreSubModule
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.ContextClosedEvent
-import org.springframework.context.event.EventListener
+import dev.vitalframework.VitalPlugin
+import dev.vitalframework.VitalCoreModule
 
-@Vital.Info(
+@VitalPlugin.Info(
     name = "${name}",
     description = "${description}",
     apiVersion = "${apiVersion}",
     version = "${version}",
-    author = [${authors?map(it -> "\"" + it +  "\"")?join(", ")}],
-    environment = Vital.PluginEnvironment.${pluginEnvironment}
+    author = [${authors?map(it -> "\"" + it +  "\"")?join(", ")}]
 )
-class MyGroovyPlugin {
-    private final def logger = VitalCoreSubModule.logger(this)
+class MyGroovyPlugin extends VitalPlugin.<#if pluginEnvironment == "SPIGOT">Spigot</#if><#if pluginEnvironment == "PAPER">Paper</#if><#if pluginEnvironment == "BUNGEE">Bungee</#if> {
+    private final def logger = VitalCoreModule.logger(this)
 
-    @EventListener(ApplicationReadyEvent)
-    final def onApplicationReady() {
-        final def info = VitalCoreSubModule.getVitalInfo(MyGroovyPlugin)
+    @Override
+    void onEnable() {
+        final def info = VitalCoreModule.getRequiredAnnotation(MyGroovyPlugin, VitalPlugin.Info)
         logger.info("Groovy Vital plugin '${r"${info.name()}"}' version '${r"${info.version()}"}' successfully loaded!")
     }
 
-    @EventListener(ContextClosedEvent)
-    final def onContextClosed() {
-        final def info = VitalCoreSubModule.getVitalInfo(MyGroovyPlugin)
+    @Override
+    void onDisable() {
+        final def info = VitalCoreModule.getRequiredAnnotation(MyGroovyPlugin, VitalPlugin.Info)
         logger.info("Groovy Vital plugin '${r"${info.name()}"}' version '${r"${info.version()}"}' successfully unloaded!")
     }
 }

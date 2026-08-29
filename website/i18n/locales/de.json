@@ -1,0 +1,243 @@
+{
+  "layout": {
+    "default": {
+      "title": "Vital - Das ultimative Plugin-Framework"
+    },
+    "docs": {
+      "title": "Vital-Framework Doku",
+      "language-warning": "Die Doku gibt es momentan nur auf Englisch!",
+      "estimated-read-time": "{estimatedReadTime} Minute geschätze Lesezeit | {estimatedReadTime} Minuten geschätze Lesezeit",
+      "create-issue": {
+        "title": "Fehler gefunden?",
+        "description": "Hels uns dabei die Dokumentation zu verbessern, indem du fehlende Informationen oder sonstiges Schwierigkeiten meldest.",
+        "sub-description": "Keine Sorge, wir füllen alle nervigen Felder automatisch aus.",
+        "button": "GitHub Issue erstellen"
+      },
+      "not-found": {
+        "title": "Doku-Seite nicht gefunden",
+        "description": "Diese Doku-Seite gibt es nicht, du wurdest auf die About-Seite weitergeleitet."
+      }
+    },
+    "item": {
+      "home": "Home",
+      "all-features": "Alle Features",
+      "docs": "Doku",
+      "dokka": "Code Doku"
+    },
+    "error": {
+      "home": "Zurück"
+    },
+    "language": {
+      "de": "Deutsch",
+      "en": "Englisch"
+    },
+    "view": {
+      "index": {
+        "title": "Home",
+        "description": "Ein modulares Framework um moderne Minecraft plugins mit klarer Architektur, weniger Boilerplate und leistungsstarken Tools zu bauen."
+      },
+      "docs-slug": {
+        "title": "Doku",
+        "description": "Die Doku für Vital, das ultimative Minecraft plugin framework, ein modulares Framework um moderne Minecraft plugins mit klarer Architektur, weniger Boilerplate und leistungsstarken Tools zu bauen."
+      },
+      "all-features": {
+        "title": "Alle Features",
+        "description": "Die Seite listet alle Feature auf, die Vital derzeit zu bieten hat."
+      }
+    },
+    "footer": "Diese Seite und das Vital-Framework wurden mit ❤️ entwickelt von Mike Neumann"
+  },
+  "view": {
+    "index": {
+      "hero": {
+        "title": "Vital-Framework",
+        "get-started": "Get started",
+        "why": "Warum sollte ich Vital benutzen?",
+        "highlights": "Feature Highlights",
+        "all-features": "Alle Features",
+        "code": {
+          "title": "Minimales Vital plugin (plugin.yml wird automatisch generiert)"
+        }
+      },
+      "why": {
+        "title": "Warum sollte ich Vital benutzen?",
+        "features": {
+          "plugin-yml": {
+            "title": "plugin.yml",
+            "description": "Erinnerst du dich noch daran als du einen Command geschrieben hast, ihn testen wolltest aber er irgendwie nicht funktioniert hat? Ach ja, ich hab vergessen meine plugin.yml anzupassen... Vital guckt sich dein Projekt an und generiert automatisch eine plugin.yml."
+          },
+          "command-executors": {
+            "title": "Command Hölle",
+            "description": "Commands schreiben ist einfach haben sie gesagt. Lass uns mal einen neuen Subcommand hier erstellen und ein bisschen Permission Checks hier einbauen, und auf einmal ist dein Command 100 Lines lang und macht nicht einmal was... Vital stellt dir ein vernünftiges Command-System bereit."
+          },
+          "config-loading": {
+            "title": "Configs sind nur Strings...",
+            "description": "Wer mag denn keine loosely-typed Configs, oder? Niemand... Vital stellt dir ein System bereit, wo eine Konfig eine Klasse ist, die deine Daten direkt verwaltet."
+          },
+          "inventory-boilerplate": {
+            "title": "Inventar Boilerplate",
+            "description": "Mit jedem Inventar läuft es darauf hinaus das es einen großen Listener mit anderen teilt, um ungewünschte Klicks rauszufiltern. Mit Vital ist jedes Inventar eine eigene Klasse du auch nur die Events erhält die von diesem Inventar kommen."
+          },
+          "hologram-boilerplate": {
+            "title": "Simple Hologramme sind eigentliche gar nicht simpel",
+            "description": "Ein paar fliegende Texte anzuzeigen sollte nicht beinhalten ein eigenes Entity-Management-System zu bauen... Mit Vital kannst du ganz einfach Hologramme erstellen, ohne den ganzen Boilerplate."
+          },
+          "scoreboard-management": {
+            "title": "Scoreboard Wahnsinn",
+            "description": "Also das ist wirklich ein spezieller Fall von Boilerplate... 50 Zeilen für ein statisches Scoreboard was sich nicht einmal ändert... Vital übernimmt all die nervige Update-Logik für dich, ach ja und du kannst sogar Scoreboard nur mit einer einzigen Zeile Code erstellen."
+          },
+          "item-interactions": {
+            "title": "Item Interaktion Boilerplate",
+            "description": "Jedes custom Item teilt sich irgendwann einen riesigen PlayerInteractEvent-Listener. Vital kümmert sich um die ganze Event-Logik sodass deine Items nur die Events erhalten, die für sie bestimmt sind."
+          },
+          "player-objects": {
+            "title": "Spieler-Daten ohne 1 Millionen Hashmaps",
+            "description": "Coins in einer Map. Levels in einer anderen. Settings in einer dritten. Vital gibt dir ein vernüftiges Spieler-Objekt für jeden Spieler."
+          },
+          "task-organization": {
+            "title": "Scheduled tasks überall",
+            "description": "Ein paar Monate später suchst du nach runTaskLater() weil du dich nicht mehr daran erinnern kannst wo diese eine Task im Code gescheduled wird. Mit Vital ist jede Task eine eigene Klasse mit klarem Lifecycle und einer klaren Struktur."
+          },
+          "localization": {
+            "title": "Übersetzungen hinzufügen",
+            "description": "Du fängst dein Plugin mit Deutsch an. Dann willst du Englisch hinzufügen. und auf einmal musst du dein gesamten Plugin umschreiben... Vital gibt dir ein vernüftiges lokalisierungs System."
+          },
+          "minigame-events": {
+            "title": "Game States in jedem Listener prüfen",
+            "description": "Die meisten Events fangen mit bestimmten Checks an: Läuft das Spiel gerade? Gehört dieser Spieler derzeit zum Spiel? In welcher Phase sind wir gerade? Vital kümmert sich automatisch um das ganze Event geraffel, deine Game States erhalten immer die korrekten Events, schluss mit Boilerplate."
+          },
+          "utility-code": {
+            "title": "Die heilige Utils.java",
+            "description": "Jedes Projekt braucht immer wieder Utils, z. B. für das Teleportieren von Spielern, Broadcasts, Adventure helpers und sonstiges Methoden. Vital stellt dir bereits viele dieser Utils bereit. Du kannst sie sogar benutzen selbst wenn du kein Vital plugin schreibst."
+          },
+          "etc": {
+            "title": "Die Liste geht weiter...",
+            "description": "..."
+          }
+        }
+      },
+      "highlights": {
+        "title": "Feature highlights",
+        "description": "Vital stellt dir alle Features bereit, die du brauchst, um das Plugin zu erstellen, was du schon immer erstellen wolltest. Baue alles, von kleinen Plugins, bis hin zu riesigen Projekten.",
+        "features": {
+          "multiplatform-ready": {
+            "title": "Ein Framework, mehrere Plattformen",
+            "description": "Mit Vital kannst du Plugins für mehrere Plattformen erstellen: Spigot, Paper und BungeeCord. Keine zusätzliche Konfiguration benötigt, alles von der plugin.yml bis hin zur Command-Interaktion wird von Vital übernommen."
+          },
+          "readable": {
+            "title": "Strukturierter Code",
+            "description": "Endlich kannst du Minecraft Plugins mit einer klaren Struktur und Architektur bauen, sodass auch große Teams daran arbeiten können. Kein Spaghetti-Code mehr oder Code der so gerade eben funktioniert."
+          },
+          "autoconfigured": {
+            "title": "0 plugin.yml",
+            "description": "Vital kümmert sich automatisch um deine plugin.yml so dass du dir keine Sorgen mehr machen musst, sie selber zu ändern."
+          },
+          "minigames": {
+            "title": "Minigames",
+            "description": "Vital stellt dir ein komplettes Minigame-Framework bereit, womit du Spiele mit richtigen Spieleentwickler-Patterns erstellen kannst, wie: State-Machines und Scoping. State-Management, automatisches Event-Routing und sogar das hosten von mehreren isolierten Spielen auf dem gleichen Server sind möglich und einfach zu maintainen."
+          },
+          "powerful": {
+            "title": "Spring-powered",
+            "description": "Vital wurde mit Spring-Boot gebaut, sodass du Plugins mit allen möglichen anerkannten Java-Tools vom Spring-Ökosystem erstellen kannst. Keine Sorge, deine Plugins bleiben lightweight."
+          },
+          "modular": {
+            "title": "Wähle dein Modul",
+            "description": "Jedes Modul bringt seine eigenen Funktionalitäten mit sich, wie z. B. Ein Command-System, ein Minigame-System, dynamische Scoreboards, Lokalisierung, Inventar-Menüs, Interaktive Items, Configs, etc."
+          },
+          "lightweight": {
+            "title": "Nur das was du auch brauchst",
+            "description": "Durch das Modul-System von Vital enthält dein Plugin nur das, was es tatsächlich braucht. Kein Grund das gesamte Framework einzubinden, wenn du nur das Command-System brauchst oder? Dadurch wird dein Plugin kleiner und einfacher zu maintainen."
+          }
+        }
+      },
+      "cta": {
+        "title": "Und noch viel mehr...",
+        "description": "Vital ist nicht nur eine kleine Library, es ist ein gesamte Ökosystem, was genau dafür gebaut wurde, um Minecraft Plugin-Entwicklung einfacher und strukturierter zu machen. Es ist das Framework was du schon immer brauchtest, sobald du es benutzt willst du nie wieder zurück!",
+        "cards": {
+          "documentation": {
+            "title": "Dokumentation",
+            "description": "Schaue dir die Dokumentation an um schnell mit deinem eigenen Vital plugin zu starten, oder wenn die Hilfe brauchst. Keine Sorge, die Doku ist NICHT OVERSIZED und ist einfach zu verstehen."
+          }
+        }
+      },
+      "planned-features": {
+        "title": "Geplante Features",
+        "description": "Diese Features sind für zukünftige Versionen von Vital geplant. Wenn du noch weitere Ideen hast, erstelle gerne ein Issue auf GitHub.",
+        "features": {
+          "lite-mode": {
+            "title": "Lite-Mode",
+            "description": "Du kannst Vital auch ohne Spring-Boot starten und trotzdem alle Features verwenden."
+          },
+          "more-platforms": {
+            "title": "Mehr Plattformen",
+            "description": "Zusätzlich zu Spigot, Paper, und BungeeCord, unterstützr Vital noch andere Plattformen, wie z. B. Velocity und mehr."
+          },
+          "web-initializer": {
+            "title": "Web-Initializer",
+            "description": "Der Initializer kann auch im Web benutzt werden um ein custom Plugin zu generieren."
+          },
+          "npcs": {
+            "title": "NPCs",
+            "description": "Du kannst ebenfalls NPCs erstellen, die eigene Aktionen durchführen können, wie z. B. eine Route Patroullieren, auf Spieler-Interaktion reagieren, etc."
+          }
+        }
+      }
+    },
+    "all-features": {
+      "cta": {
+        "title": "Alle Features",
+        "description": "Hier ist eine komplette Liste aller Features, die Vital derzeit zu bieten hat. Alle Features sind eigene Module, die du zu deinem Plugin hinzufügen kannst, um die Funktionalität zu erhalten die du für dein Plugin brauchst. Dadurch enthält dein Plugin nur das was es tatsächlich braucht und wieder kleiner und leichter zu maintainen!",
+        "card": {
+          "vital-commands": {
+            "title": "vital-commands",
+            "description": "Erstelle eigene Commands mit einem Annotation-Driven Design. Jeder Command ist eine Klasse, jeder Subcommand '/mycommand arg' ist eine Methode die automatisch von Vital aufgerufen wird, wenn jemand deinen Command ausführt. Das Command-System enthält automatische Tab-Completions und ein System um Exceptions zu behandeln. Dieses System wird deine Sicht auf Command-Erstellung komplett ändern!"
+          },
+          "vital-configs": {
+            "title": "vital-configs",
+            "description": "Jede Config ist eine eigene Klasse, jedes Class-Field wird automatisch zur Config-Property mit richtiger Type-Safety. Schreibe einfach in deine Class-Fields anstatt mit irgendwelchen Strings rum zu jonglieren. Das Config-System unterstützt auch custom Types."
+          },
+          "vital-holograms": {
+            "title": "vital-holograms",
+            "description": "Erstelle globale Hologramme die von allen Spielern gesehen werden, oder Spieler-Hologramme die nur von bestimmten Spielern gesehen werden können. Zeige Spielerstatistiken und mehr an."
+          },
+          "vital-inventories": {
+            "title": "vital-inventories",
+            "description": "Erstelle Inventar-Menüs mit denen deine Spieler interagieren können. Events werden automatisch nur dann ausgeführt, wenn sie von deinem Inventar kommen.."
+          },
+          "vital-items": {
+            "title": "vital-items",
+            "description": "Erstelle Items, mit denen deine Spieler interagieren können. Events werden automatisch nur dann ausgeführt, wenn sie von deinem Item kommen."
+          },
+          "vital-localization": {
+            "title": "vital-localization",
+            "description": "Ein komplettes Lokalisierungssystem für dein Plugin. Benutze Resource-Bundles um Spieler-Spezifische Texte anzuzeigen. Kombiniere dieses Modul mit anderen Modulen, wie z. B. 'vital-items' oder 'vital-inventories' um dein Plugin noch mehr zu erweitern."
+          },
+          "vital-minigames": {
+            "title": "vital-minigames",
+            "description": "Das ultimative Minecraft Game-Framework um Spiele mit echten Spieleentwickler-Pattern zu erstellen, wie z. B. State-Machines, Scoping, etc. Erstelle Spiele, die entweder auf dem gesamten Server laufen oder hoste sogar mehrere Spiele gleichzeitig auf dem selben Server. Jedes Spiel wird automatisch isoliert und erhält nur die Events die es erhalten darf. Dieses System wird deine Spieleentwicklung komplett verändern!"
+          },
+          "vital-players": {
+            "title": "vital-players",
+            "description": "Eine custom Spieler-Management Lösung. Jeder Spieler erhält ein eigene Objekt, auf dem du Spieler-Spezifische Daten speichern kannst, die wieder gelöscht werden, wenn der Server neugestartet wird."
+          },
+          "vital-scoreboards": {
+            "title": "vital-scoreboards",
+            "description": "Erstelle dynamische Scoreboard die automatisch aktualisiert werden wenn du z. B. den Titel oder die Zeilen änderst. Erstelle globale Scoreboard für alle Spieler oder Spieler-Scoreboard um Spieler-Spezifische Daten anzuzeigen."
+          },
+          "vital-statistics": {
+            "title": "vital-statistics",
+            "description": "Integrierter Server-TPS-Health-Checker der dich warnt, wenn deine Server-Performance sinkt."
+          },
+          "vital-tasks": {
+            "title": "vital-tasks",
+            "description": "Erstelle scheduled Tasks mit einer vernünftigen Struktur. Jede Task ist eine Klasse, die strukturierte Lifecycles hat, sodass du immer weißt, was deine Tasks tatsächlich tun."
+          },
+          "vital-utils": {
+            "title": "vital-utils",
+            "description": "Nützliche Utilities die auch benutzt werden können, wenn du kein Vital plugin schreibst. Aktionen broadcasten, Potion-Effekte broadcasten, Spieler mit effekten teleportieren, Wörter zensieren, Strings zu Adventure-Components konvertieren, und noch viel mehr."
+          }
+        }
+      }
+    }
+  }
+}

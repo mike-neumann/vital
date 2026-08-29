@@ -1,4 +1,4 @@
-package me.vitalframework.initializer
+package dev.vitalframework.initializer
 
 data class DataModel(
     val name: String,
