@@ -16,11 +16,9 @@ class VitalHeadItemStack(
     var owningPlayer: OfflinePlayer? = null
 
     override fun build(): ItemStack {
-        val itemStack =
-            VitalItemStack
-                .builder()
-                .type(Material.PLAYER_HEAD)
-                .build()
+        type(Material.PLAYER_HEAD)
+
+        val itemStack = super.build()
         val itemMeta = itemStack.itemMeta as SkullMeta
         itemMeta.owningPlayer = owningPlayer
         itemStack.itemMeta = itemMeta

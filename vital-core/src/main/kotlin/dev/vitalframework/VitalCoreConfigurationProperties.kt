@@ -9,7 +9,7 @@ class VitalCoreConfigurationProperties(
     val bstats: BStats = BStats(),
 ) {
     data class BStats(
-        val enabled: Boolean = true,
-        val pluginId: Int? = null,
+        var enabled: Boolean = true,
+        var pluginId: Int? = null,
     )
 }

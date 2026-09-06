@@ -28,6 +28,7 @@ open class VitalItemStack(
     private var itemFlags = arrayOf<ItemFlag>()
     private var enchantments = mutableMapOf<Enchantment, Int>()
     private var afterInit: Consumer<ItemStack> = Consumer {}
+    private var glint: Boolean? = null
 
     fun itemUuid(itemUuid: UUID) = apply { this.itemUuid = itemUuid }
 
@@ -49,6 +50,8 @@ open class VitalItemStack(
         enchantment: Enchantment,
         level: Int,
     ) = apply { this.enchantments[enchantment] = level }
+
+    fun glint(glint: Boolean?) = apply { this.glint = glint }
 
     fun afterInit(afterInit: Consumer<ItemStack>) = apply { this.afterInit = afterInit }
 
@@ -73,7 +76,7 @@ open class VitalItemStack(
             )
         }
 
-        for ((enchantment, level) in this@VitalItemStack.enchantments) {
+        for ((enchantment, level) in enchantments) {
             itemMeta.addEnchant(enchantment, level, true)
         }
 
@@ -90,6 +93,10 @@ open class VitalItemStack(
                     ).decoration(TextDecoration.ITALIC, false)
             },
         )
+
+        if (glint != null) {
+            itemMeta.setEnchantmentGlintOverride(glint)
+        }
 
         itemMeta.isUnbreakable = unbreakable
         itemStack.itemMeta = itemMeta

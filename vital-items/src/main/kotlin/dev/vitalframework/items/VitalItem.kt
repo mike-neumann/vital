@@ -7,7 +7,6 @@ import dev.vitalframework.VitalHasInfo
 import dev.vitalframework.VitalPlugin
 import dev.vitalframework.localization.VitalLocalizationModule.Spigot.t
 import org.bukkit.Material
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemFlag
@@ -83,10 +82,7 @@ open class VitalItem : VitalHasInfo {
                 .lore(info.lore)
                 .itemFlags(info.itemFlags)
                 .unbreakable(info.unbreakable)
-
-        if (info.enchanted) {
-            builder.enchantment(Enchantment.FORTUNE, 1)
-        }
+                .glint(if (info.glint) true else null)
 
         if (VitalPlugin.instance.isVitalModuleEnabled("vital-localization")) {
             builder.name(player.t(info.name))
@@ -224,7 +220,7 @@ open class VitalItem : VitalHasInfo {
         val cooldown: Int = 0,
         val itemFlags: Array<ItemFlag> = [],
         val amount: Int = 1,
-        val enchanted: Boolean = false,
+        val glint: Boolean = false,
         val unbreakable: Boolean = true,
     )
 }
