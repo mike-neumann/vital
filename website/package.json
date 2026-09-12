@@ -21,10 +21,15 @@
     "@nuxtjs/seo": "5.3.2",
     "@nuxtjs/sitemap": "8.3.0",
     "@takumi-rs/core": "2.0.0-rc.16",
+    "@tiptap/core": "^3.31.3",
     "better-sqlite3": "^12.11.1",
-    "nuxt": "^4.4.8",
+    "brace-expansion": "^5.0.9",
+    "js-yaml": "^5.4.1",
+    "nuxt": "^4.5.2",
+    "sharp": "^0.35.4",
     "shiki": "^4.3.1",
     "tailwindcss": "^4.3.2",
+    "tar": "7.5.22",
     "zod": "^4.4.3"
   },
   "devDependencies": {

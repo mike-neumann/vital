@@ -4,6 +4,8 @@ import type { NuxtError } from '#app'
 defineProps<{
   error: NuxtError
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -23,7 +25,7 @@ defineProps<{
           to="/"
           @click="clearError({ redirect: '/' })"
         >
-          {{ $t("layout.error.home") }}
+          {{ t("layout.error.home") }}
         </UButton>
       </div>
     </UContainer>

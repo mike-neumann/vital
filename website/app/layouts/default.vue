@@ -1,8 +1,9 @@
 <script setup lang="ts">
 const route = useRoute()
+const { t } = useI18n()
 
-const title = computed(() => $t(`layout.view.${String(route.name)}.title`))
-const description = computed(() => $t(`layout.view.${String(route.name)}.description`))
+const title = computed<string>(() => t(`layout.view.${String(route.name)}.title`))
+const description = computed<string>(() => t(`layout.view.${String(route.name)}.description`))
 
 useSeoMeta({
   title,

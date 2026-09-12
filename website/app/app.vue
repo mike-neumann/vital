@@ -1,19 +1,24 @@
 <script setup lang="ts">
-import type { NavigationMenuItem } from '@nuxt/ui'
+import type { DropdownMenuItem, NavigationMenuItem, ToasterProps } from '@nuxt/ui'
 
-const toaster = { position: 'top-right' }
+const toaster: ToasterProps = { position: 'top-right' }
 
-const { availableLocales, setLocale, locale } = useI18n()
+const { t, availableLocales, setLocale, locale } = useI18n()
 const config = useRuntimeConfig()
+const colorMode = useColorMode()
 
 useSeoMeta({
   ogImage: 'ogImage.png',
-  twitterCard: 'summary_large_image'
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
+  ogType: 'website',
+  ogDescription: t('layout.view.index.description'),
+  ogTitle: t('layout.default.title')
 })
 
 useHead({
   titleTemplate: (title) => {
-    const siteName = $t('layout.default.title')
+    const siteName = t('layout.default.title')
 
     return title
       ? `${title} · ${siteName}`
@@ -33,32 +38,34 @@ useHead({
 const navItems = computed<NavigationMenuItem[]>(() => ([
   {
     icon: 'i-lucide-home',
-    label: $t('layout.item.home'),
+    label: t('layout.item.home'),
     to: '/'
   },
   {
     icon: 'i-lucide-list',
-    label: $t('layout.item.all-features'),
+    label: t('layout.item.all-features'),
     to: '/all-features'
   },
   {
     icon: 'i-lucide-book-open',
-    label: $t('layout.item.docs'),
+    label: t('layout.item.docs'),
     to: '/docs/about'
   },
   {
     icon: 'i-lucide-code',
-    label: $t('layout.item.dokka'),
+    label: t('layout.item.dokka'),
     href: '/dokka',
     target: '_blank',
     external: true
   }
 ]))
 
-const languageDropdownMenuItems = computed<NavigationMenuItem[]>(() => availableLocales.map(it => ({
-  label: $t(`layout.language.${it}`),
+const languageDropdownMenuItems = computed<DropdownMenuItem[]>(() => availableLocales.map(it => ({
+  label: t(`layout.language.${it}`),
   onSelect: () => setLocale(it)
 })))
+
+const logoSrc = computed<string>(() => colorMode.value === 'light' ? '/logo_text--light.png' : '/logo_text--dark.png')
 </script>
 
 <template>
@@ -67,7 +74,12 @@ const languageDropdownMenuItems = computed<NavigationMenuItem[]>(() => available
       <UHeader>
         <template #left>
           <NuxtLink to="/">
-            <AppLogo class="w-auto h-12 shrink-0" />
+            <ClientOnly>
+              <img
+                :src="logoSrc"
+                class="w-auto h-12 shrink-0"
+              >
+            </ClientOnly>
           </NuxtLink>
         </template>
 
@@ -88,7 +100,7 @@ const languageDropdownMenuItems = computed<NavigationMenuItem[]>(() => available
               color="neutral"
               trailing-icon="i-lucide-chevron-down"
             >
-              {{ $t(`layout.language.${locale}`) }}
+              {{ t(`layout.language.${locale}`) }}
             </UButton>
           </UDropdownMenu>
 
@@ -116,7 +128,7 @@ const languageDropdownMenuItems = computed<NavigationMenuItem[]>(() => available
       <UFooter>
         <template #left>
           <p class="text-sm text-muted">
-            {{ $t('layout.footer') }}
+            {{ t('layout.footer') }}
           </p>
         </template>
 

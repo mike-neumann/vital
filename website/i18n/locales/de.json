@@ -9,7 +9,7 @@
       "estimated-read-time": "{estimatedReadTime} Minute geschätze Lesezeit | {estimatedReadTime} Minuten geschätze Lesezeit",
       "create-issue": {
         "title": "Fehler gefunden?",
-        "description": "Hels uns dabei die Dokumentation zu verbessern, indem du fehlende Informationen oder sonstiges Schwierigkeiten meldest.",
+        "description": "Helf uns dabei die Dokumentation zu verbessern, indem du fehlende Informationen oder sonstiges Schwierigkeiten meldest.",
         "sub-description": "Keine Sorge, wir füllen alle nervigen Felder automatisch aus.",
         "button": "GitHub Issue erstellen"
       },

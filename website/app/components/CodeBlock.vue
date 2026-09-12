@@ -23,28 +23,30 @@ const { data: html, status } = useAsyncData('code-block', () => codeToHtml(props
 </script>
 
 <template>
-  <UCard>
-    <div class="flex items-center justify-between mb-2">
-      <span class="text-sm font-medium">{{ title }}</span>
+  <div>
+    <UCard>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-medium">{{ title }}</span>
 
-      <UButton
-        icon="i-lucide-copy"
-        variant="ghost"
-        @click="navigator.clipboard.writeText(code)"
-      />
-    </div>
+        <UButton
+          icon="i-lucide-copy"
+          variant="ghost"
+          @click="navigator.clipboard.writeText(code)"
+        />
+      </div>
 
-    <div v-if="status === 'pending'">
-      <USkeleton
-        v-for="line of code.split('\n')"
-        :key="line"
-        class="h-4 mb-1"
-        :style="{ width: `${line.length}ch` }"
+      <div v-if="status === 'pending'">
+        <USkeleton
+          v-for="line of code.split('\n')"
+          :key="line"
+          class="h-4 mb-1"
+          :style="{ width: `${line.length}ch` }"
+        />
+      </div>
+      <pre
+        class="overflow-x-auto rounded text-sm text-white"
+        v-html="html"
       />
-    </div>
-    <pre
-      class="overflow-x-auto rounded text-sm text-white"
-      v-html="html"
-    />
-  </UCard>
+    </UCard>
+  </div>
 </template>

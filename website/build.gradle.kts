@@ -57,6 +57,16 @@ val lintFormatTask =
     }
   }
 
+tasks.clean {
+  delete(
+    layout.projectDirectory.dir(".data"),
+    layout.projectDirectory.dir(".nuxt"),
+    layout.projectDirectory.dir(".output"),
+    layout.projectDirectory.dir("node_modules"),
+    layout.projectDirectory.dir("pnpm-lock.yaml"),
+  )
+}
+
 tasks.named("lintCheck") {
   dependsOn(lintCheckTask)
 }

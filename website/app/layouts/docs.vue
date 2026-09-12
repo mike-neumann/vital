@@ -3,7 +3,7 @@ import type { BreadcrumbItem } from '#ui/components/Breadcrumb.vue'
 import type { ContentNavigationItem } from '@nuxt/content'
 
 const route = useRoute()
-const { locale, defaultLocale } = useI18n()
+const { t, locale, defaultLocale } = useI18n()
 const siteConfig = useSiteConfig()
 const config = useRuntimeConfig()
 const search = useSearchCollection('docs')
@@ -21,8 +21,8 @@ const { data: estimatedReadTime } = await useAsyncData(() => `docs-page-estimate
   return Math.max(1, Math.ceil(words / config.public.estimatedWordsPerMinute))
 })
 
-const breadcrumb = computed<BreadcrumbItem>(() => findBreadcrumb(navigation.value ?? [], route.path).map(it => ({ label: it.title, to: it.path })))
-const createIssueUrl = computed(() => {
+const breadcrumbs = computed<BreadcrumbItem[]>(() => findBreadcrumb(navigation.value ?? [], route.path).map(it => ({ label: it.title, to: it.path })))
+const createIssueUrl = computed<string>(() => {
   const pageUrl = encodeURIComponent(`${siteConfig.url}${route.path}`)
   return `${config.public.githubCreateWebdocIssueUrl}&page=${pageUrl}`
 })
@@ -52,7 +52,7 @@ function findBreadcrumb(items: ContentNavigationItem[], path: string, parents: C
       class="sticky"
     >
       <UBanner
-        :title="$t('layout.docs.language-warning')"
+        :title="t('layout.docs.language-warning')"
         color="warning"
       />
     </div>
@@ -62,8 +62,9 @@ function findBreadcrumb(items: ContentNavigationItem[], path: string, parents: C
         <UPageAside>
           <div class="pl-5">
             <DocsNavigation
-              :search="search"
-              :navigation="navigation"
+              :search="search.search"
+              :search-status="search.status.value"
+              :navigation="navigation ?? []"
               show-content-search
             />
           </div>
@@ -73,8 +74,9 @@ function findBreadcrumb(items: ContentNavigationItem[], path: string, parents: C
       <div class="pl-5 pr-5">
         <div class="lg:hidden">
           <DocsNavigation
-            :search="search"
-            :navigation="navigation"
+            :search="search.search"
+            :search-status="search.status.value"
+            :navigation="navigation ?? []"
             :show-content-search="false"
           />
 
@@ -85,11 +87,11 @@ function findBreadcrumb(items: ContentNavigationItem[], path: string, parents: C
 
         <div class="pl-2">
           <div>
-            <UBreadcrumb :items="breadcrumb" />
+            <UBreadcrumb :items="breadcrumbs" />
             <UBadge
               class="mt-2"
               icon="i-lucide-glasses"
-              :label="$t('layout.docs.estimated-read-time', { estimatedReadTime }, estimatedReadTime)"
+              :label="t('layout.docs.estimated-read-time', { estimatedReadTime }, estimatedReadTime ?? 0)"
               variant="outline"
               color="info"
             />
@@ -108,7 +110,7 @@ function findBreadcrumb(items: ContentNavigationItem[], path: string, parents: C
           <p class="font-medium flex items-center justify-between gap-3">
             <UIcon name="i-lucide-info" />
 
-            {{ $t('layout.docs.create-issue.title') }}
+            {{ t('layout.docs.create-issue.title') }}
           </p>
         </div>
 
@@ -125,13 +127,13 @@ function findBreadcrumb(items: ContentNavigationItem[], path: string, parents: C
         <template #content>
           <div class="mt-3 space-y-3">
             <p class="text-sm text-muted">
-              {{ $t('layout.docs.create-issue.description') }}
+              {{ t('layout.docs.create-issue.description') }}
             </p>
 
             <USeparator />
 
             <p class="text-sm text-muted font-extrabold">
-              {{ $t('layout.docs.create-issue.sub-description') }}
+              {{ t('layout.docs.create-issue.sub-description') }}
             </p>
 
             <UButton
@@ -141,7 +143,7 @@ function findBreadcrumb(items: ContentNavigationItem[], path: string, parents: C
               trailing-icon="i-lucide-external-link"
               block
             >
-              {{ $t('layout.docs.create-issue.button') }}
+              {{ t('layout.docs.create-issue.button') }}
             </UButton>
           </div>
         </template>
