@@ -11,7 +11,7 @@ const search = useSearchCollection('docs')
 const open = ref(true)
 const cleanPath = computed(() => route.path.replace(/\/+$/, '') || '/')
 
-const { data: navigation } = await useAsyncData('docs-navigation', async () => (await queryCollectionNavigation('docs'))?.[0]?.children ?? [])
+const { data: navigation } = await useAsyncData(() => `docs-navigation:${cleanPath.value}`, async () => (await queryCollectionNavigation('docs'))?.[0]?.children ?? [])
 const { data: estimatedReadTime } = await useAsyncData(() => `docs-page-estimated-read-time:${cleanPath.value}`, async () => {
   const page = await queryCollection('docs').path(cleanPath.value).first()
   if (!page?.body) {

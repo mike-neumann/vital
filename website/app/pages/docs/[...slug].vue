@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { DocsCollectionItem } from '@nuxt/content'
+import type { AsyncDataRequestStatus } from '#app'
 
 definePageMeta({
   layout: 'docs'
@@ -20,8 +21,8 @@ const { data: page, status } = await useAsyncData(
 const title = computed<string | undefined>(() => page.value?.title)
 const description = computed<string | undefined>(() => page.value?.description)
 
-function checkPage(docs: DocsCollectionItem | null | undefined) {
-  if (status.value !== 'pending' && !docs) {
+function checkPage(status: AsyncDataRequestStatus, docs: DocsCollectionItem | null | undefined) {
+  if (status !== 'pending' && !docs) {
     toast.add({
       id: 'docs-page-not-found-toast',
       title: t('layout.docs.not-found.title'),
@@ -48,8 +49,9 @@ useSeoMeta({
   ogDescription: description
 })
 
-watch([page, status], () => checkPage(page.value))
-onMounted(() => checkPage(page.value))
+watch(page, value => checkPage(status.value, value))
+watch(status, value => checkPage(value, page.value))
+onMounted(() => checkPage(status.value, page.value))
 </script>
 
 <template>

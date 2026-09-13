@@ -9,7 +9,7 @@ const props = defineProps<{
 
 const colorMode = useColorMode()
 
-const { data: html, status } = useAsyncData('code-block', () => codeToHtml(props.code.trim(), {
+const { data: html, status } = useAsyncData(() => `code-block:${props.code}`, () => codeToHtml(props.code.trim(), {
   lang: 'java',
   theme: colorMode.value === 'dark'
     ? 'github-dark'

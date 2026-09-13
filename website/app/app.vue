@@ -6,6 +6,7 @@ const toaster: ToasterProps = { position: 'top-right' }
 const { t, availableLocales, setLocale, locale } = useI18n()
 const config = useRuntimeConfig()
 const colorMode = useColorMode()
+const route = useRoute()
 
 useSeoMeta({
   ogImage: 'ogImage.png',
@@ -49,7 +50,8 @@ const navItems = computed<NavigationMenuItem[]>(() => ([
   {
     icon: 'i-lucide-book-open',
     label: t('layout.item.docs'),
-    to: '/docs/about'
+    to: '/docs/about',
+    active: route.fullPath.includes('/docs/')
   },
   {
     icon: 'i-lucide-code',

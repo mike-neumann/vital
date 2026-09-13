@@ -14,18 +14,16 @@ const route = useRoute()
 
 <template>
   <div>
-    <ClientOnly>
-      <UContentSearchButton
-        class="mb-5 w-full"
-        :collapsed="false"
-      />
-      <UContentSearch
-        v-if="showContentSearch"
-        :navigation="navigation"
-        :search="search"
-        :search-status="searchStatus"
-      />
-    </ClientOnly>
+    <UContentSearchButton
+      class="mb-5 w-full"
+      :collapsed="false"
+    />
+    <UContentSearch
+      v-if="showContentSearch"
+      :navigation="navigation"
+      :search="search"
+      :search-status="searchStatus"
+    />
 
     <UContentNavigation
       :key="route.fullPath"

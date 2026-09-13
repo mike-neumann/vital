@@ -1,3 +1,30 @@
+import fs from 'node:fs'
+import path from 'node:path'
+
+function getDocRoutes(dir = 'content/docs', base = '/docs'): string[] {
+  if (!fs.existsSync(dir)) {
+    return []
+  }
+
+  const entries = fs.readdirSync(dir, { withFileTypes: true })
+  const routes: string[] = []
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name)
+    const cleanName = entry.name.replace(/^\d+\./, '')
+    if (entry.isDirectory()) {
+      routes.push(...getDocRoutes(fullPath, `${base}/${cleanName}`))
+    } else if (entry.isFile() && entry.name.endsWith('.md')) {
+      if (cleanName === 'index.md') {
+        routes.push(base)
+      } else {
+        const pageName = cleanName.replace(/\.md$/, '')
+        routes.push(`${base}/${pageName}`)
+      }
+    }
+  }
+  return routes
+}
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
@@ -69,10 +96,18 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/': { prerender: true },
-    '/docs': { redirect: '/docs/about' }
+    '/docs/**': { prerender: true }
   },
 
   compatibilityDate: '2026-06-30',
+
+  nitro: {
+    prerender: {
+      crawlLinks: true,
+      routes: ['/', ...getDocRoutes()],
+      ignore: ['/dokka', '/dokka/**']
+    }
+  },
 
   eslint: {
     config: {
