@@ -9,10 +9,11 @@ const config = useRuntimeConfig()
 const search = useSearchCollection('docs')
 
 const open = ref(true)
+const cleanPath = computed(() => route.path.replace(/\/+$/, '') || '/')
 
 const { data: navigation } = await useAsyncData('docs-navigation', async () => (await queryCollectionNavigation('docs'))?.[0]?.children ?? [])
-const { data: estimatedReadTime } = await useAsyncData(() => `docs-page-estimated-read-time:${route.fullPath}`, async () => {
-  const page = await queryCollection('docs').path(route.path).first()
+const { data: estimatedReadTime } = await useAsyncData(() => `docs-page-estimated-read-time:${cleanPath.value}`, async () => {
+  const page = await queryCollection('docs').path(cleanPath.value).first()
   if (!page?.body) {
     return undefined
   }
@@ -21,7 +22,7 @@ const { data: estimatedReadTime } = await useAsyncData(() => `docs-page-estimate
   return Math.max(1, Math.ceil(words / config.public.estimatedWordsPerMinute))
 })
 
-const breadcrumbs = computed<BreadcrumbItem[]>(() => findBreadcrumb(navigation.value ?? [], route.path).map(it => ({ label: it.title, to: it.path })))
+const breadcrumbs = computed<BreadcrumbItem[]>(() => findBreadcrumb(navigation.value ?? [], cleanPath.value).map(it => ({ label: it.title, to: it.path })))
 const createIssueUrl = computed<string>(() => {
   const pageUrl = encodeURIComponent(`${siteConfig.url}${route.path}`)
   return `${config.public.githubCreateWebdocIssueUrl}&page=${pageUrl}`

@@ -10,13 +10,18 @@ const route = useRoute()
 const toast = useToast()
 const { t } = useI18n()
 
+const cleanPath = computed(() => route.path.replace(/\/+$/, '') || '/')
+
+const { data: page, status } = await useAsyncData(
+  () => `docs-page:${cleanPath.value}`,
+  () => queryCollection('docs').path(cleanPath.value).first()
+)
+
 const title = computed<string | undefined>(() => page.value?.title)
 const description = computed<string | undefined>(() => page.value?.description)
 
-const { data: page } = await useAsyncData(`docs-page:${route.fullPath}`, () => queryCollection('docs').path(route.path).first())
-
 function checkPage(docs: DocsCollectionItem | null | undefined) {
-  if (!docs) {
+  if (status.value !== 'pending' && !docs) {
     toast.add({
       id: 'docs-page-not-found-toast',
       title: t('layout.docs.not-found.title'),
@@ -43,7 +48,7 @@ useSeoMeta({
   ogDescription: description
 })
 
-watch(page, checkPage)
+watch([page, status], () => checkPage(page.value))
 onMounted(() => checkPage(page.value))
 </script>
 

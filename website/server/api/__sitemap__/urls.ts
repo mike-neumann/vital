@@ -1,11 +1,12 @@
 import path from 'node:path'
 import { promises as fs } from 'node:fs'
+import { queryCollection } from '@nuxt/content/server'
 
 export default defineSitemapEventHandler(async (event) => {
   const urls: { loc: string }[] = []
   const docs = await queryCollection(event, 'docs').all()
 
-  urls.push(...docs.map(doc => ({
+  urls.push(...docs.filter(doc => !doc.path.endsWith('/.navigation')).map(doc => ({
     loc: doc.path
   })))
 

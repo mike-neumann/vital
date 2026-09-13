@@ -20,6 +20,12 @@ const { data: html, status } = useAsyncData('code-block', () => codeToHtml(props
     }
   }]
 }))
+
+function copyCode() {
+  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    navigator.clipboard.writeText(props.code)
+  }
+}
 </script>
 
 <template>
@@ -31,7 +37,7 @@ const { data: html, status } = useAsyncData('code-block', () => codeToHtml(props
         <UButton
           icon="i-lucide-copy"
           variant="ghost"
-          @click="navigator.clipboard.writeText(code)"
+          @click="copyCode"
         />
       </div>
 
